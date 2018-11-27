@@ -38,14 +38,14 @@ export function convertDeploymentsForComponent(deployments: K8sTypes.V1Deploymen
     });
 }
 
-export function convertReplicasetsForComponent(replicasets: K8sTypes.V1ReplicaSetList): IReplicaset[] {
-    return (replicasets && replicasets.items || []).map((replicaset) => {
+export function convertReplicaSetsForComponent(replicaSets: K8sTypes.V1ReplicaSetList): IReplicaset[] {
+    return (replicaSets && replicaSets.items || []).map((replicaSet) => {
         return {
-            name: replicaset.metadata && replicaset.metadata.name || "",
-            namespace: replicaset.metadata && replicaset.metadata.namespace || "",
-            replicas: replicaset.spec && replicaset.spec.replicas || "",
-            readyReplicas: replicaset.status && replicaset.status.readyReplicas || "",
-            appName: replicaset.metadata && replicaset.metadata.ownerReferences && replicaset.metadata.ownerReferences.length > 0 && replicaset.metadata.ownerReferences[0].name || ""
+            name: replicaSet.metadata && replicaSet.metadata.name || "",
+            namespace: replicaSet.metadata && replicaSet.metadata.namespace || "",
+            replicas: replicaSet.spec && replicaSet.spec.replicas || "",
+            readyReplicas: replicaSet.status && replicaSet.status.readyReplicas || "",
+            appName: replicaSet.metadata && replicaSet.metadata.ownerReferences && replicaSet.metadata.ownerReferences.length > 0 && replicaSet.metadata.ownerReferences[0].name || ""
         } as IReplicaset;
     });
 }
