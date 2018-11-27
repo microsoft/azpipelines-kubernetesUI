@@ -12,13 +12,13 @@ export class AzureDevOpsKubeService extends KubeServiceBase {
     }
 
     async fetch(resourceType: KubeResourceType): Promise<any> {
-        const projectService = await SDK.getService<IProjectPageService>(CommonServiceIds.ProjectPageService);
+        const projectService: IProjectPageService = await SDK.getService<IProjectPageService>(CommonServiceIds.ProjectPageService);
         const project: IProjectInfo = await projectService.getProject() as IProjectInfo;
 
         const params: { [key: string]: string } = {};
         params["KubernetesNamespace"] = this._namespace;
 
-        let dataSourceName = "";
+        let dataSourceName: string = "";
         switch(resourceType) {
             case KubeResourceType.Pods:
                 dataSourceName = "KubernetesPodsInNamespace";
@@ -29,19 +29,19 @@ export class AzureDevOpsKubeService extends KubeServiceBase {
             case KubeResourceType.Services:
                 dataSourceName = "KubernetesServicesInNamespace";
                 break;
-            case KubeResourceType.Replicasets:
+            case KubeResourceType.ReplicaSets:
                 dataSourceName = "KubernetesReplicasetsInNamespace";
                 break;
         }
 
-        let resourceRequest = {
+        const resourceRequest: ServiceEndpointRequest = {
             dataSourceDetails: {
                 dataSourceName: dataSourceName,
                 parameters: params,
             } as DataSourceDetails
         } as ServiceEndpointRequest;
-        
-        let requestResult = await getClient(ServiceEndpointRestClient).executeServiceEndpointRequest(resourceRequest, project.id, this._serviceEndpointId);
+
+        const requestResult = await getClient(ServiceEndpointRestClient).executeServiceEndpointRequest(resourceRequest, project.id, this._serviceEndpointId);
         return JSON.parse(requestResult.result);
     }
 }

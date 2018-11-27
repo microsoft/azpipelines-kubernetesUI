@@ -1,10 +1,6 @@
 import { IBaseProps } from "office-ui-fabric-react/lib/Utilities";
 import { IObservable } from "azure-devops-ui/Core/Observable";
-
-export interface IQueryData {
-    resourceId: string;
-    namespace: string;
-}
+import { V1PodList, V1DeploymentList, V1ServiceList, V1ReplicaSetList } from "@kubernetes/client-node";
 
 export interface INameReference {
     name: string;
@@ -37,12 +33,11 @@ export interface IReplicaset extends INameReference {
 }
 
 export interface IKubernetesSummary {
-    queryData?: IQueryData;
-    pods?: IPod[];
-    deployments?: IDeployment[];
-    services?: IService[];
-    replicasets?: IReplicaset[];
-    serviceGroup?: any;
+    namespace?: string;
+    podList?: V1PodList;
+    deploymentList?: V1DeploymentList;
+    serviceList?: V1ServiceList;
+    replicaSetList?: V1ReplicaSetList;
 }
 
 export interface IVssComponentProperties extends IBaseProps {

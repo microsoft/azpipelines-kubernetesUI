@@ -12,7 +12,7 @@ export interface IReplicasetListComponentProperties extends IVssComponentPropert
     replicasets: IReplicaset[];
 }
 
-export class ReplicasetListComponent extends BaseComponent<IReplicasetListComponentProperties>{
+export class ReplicasetListComponent extends BaseComponent<IReplicasetListComponentProperties> {
     public render(): React.ReactNode {
         return (
             <ListComponent
