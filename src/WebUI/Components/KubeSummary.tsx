@@ -69,7 +69,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
 
         kubeService.getDeployments().then(deploymentList => {
             let deploymentNamespace: string = "";
-            if (this.state.namespace) {
+            if (!this.state.namespace) {
                 for (const deployment of (deploymentList && deploymentList.items || [])) {
                     if (deployment && deployment.metadata.namespace) {
                         deploymentNamespace = deployment.metadata.namespace;
