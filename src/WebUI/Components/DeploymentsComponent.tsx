@@ -6,7 +6,7 @@ import { ListComponent } from "./ListComponent";
 import * as Resources from "../Resources";
 import { ColumnActionsMode } from "office-ui-fabric-react/lib/DetailsList";
 import { IColumn } from "azure-devops-ui/Components/VssDetailsList/VssDetailsList.Props";
-import { BaseComponent, format } from "@uifabric/utilities";
+import { BaseComponent, format, css } from "@uifabric/utilities";
 import { V1DeploymentList, V1ReplicaSetList, V1Deployment, V1ReplicaSet } from "@kubernetes/client-node";
 import { StatusSize, Statuses, Status, IStatusProps } from "azure-devops-ui/Status";
 
@@ -23,6 +23,7 @@ interface IDeploymentItem {
     pipeline?: string;
     pods?: string;
     statusProps?: IStatusProps;
+    showRowBorder?: boolean;
 }
 
 export interface IDeploymentsComponentProperties extends IVssComponentProperties {
@@ -34,7 +35,7 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
     public render(): React.ReactNode {
         return (
             <ListComponent
-                className={"dc-content"}
+                className={css("dc-content", "depth-16")}
                 headingText={Resources.DeploymentsDetailsText}
                 items={DeploymentsComponent._getDeploymentItems(this.props.deploymentList, this.props.replicaSetList)}
                 columns={DeploymentsComponent._getColumns()}
@@ -66,6 +67,7 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
                     // todo :: how to find error in replicaSet
                     pods: DeploymentsComponent._getPodsText(replica.status.availableReplicas, replica.status.replicas),
                     statusProps: DeploymentsComponent._getPodsStatusProps(replica.status.availableReplicas, replica.status.replicas),
+                    showRowBorder: (filteredReplicas.length === (index + 1))
                 });
             });
         });
