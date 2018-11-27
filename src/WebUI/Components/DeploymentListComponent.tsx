@@ -8,7 +8,6 @@ import * as Resources from "../Resources";
 import { ListComponent } from "./ListComponent";
 import { IVssComponentProperties, IDeployment } from "../Types";
 
-
 export interface IDeploymentListComponentProperties extends IVssComponentProperties {
     deployments: IDeployment[];
 }
