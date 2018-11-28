@@ -1,0 +1,18 @@
+.kube-list-content {
+    border-radius: 4px;
+    /* todo :: use std colors */
+    background-color: white;
+    min-width: 750px;
+    /* todo :: use std colors */
+    border: 1px solid lightgray;
+}
+
+.kube-list {
+    .first-col-header {
+        padding-left: 10px;
+    }
+}
+
+.kube-list-heading.heading {
+    padding: 0px 10px;
+}

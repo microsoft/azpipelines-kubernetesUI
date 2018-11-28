@@ -16,3 +16,6 @@ export declare const AppNameText: string;
 export declare const ReplicaSetText: string;
 export declare const PipelineText: string;
 export declare const PodsText: string;
+export declare const NamespaceHeadingText: string;
+export declare const PivotServiceText: string;
+export declare const PivotWorkloadsText: string;
