@@ -4,6 +4,7 @@ import * as React from "react";
 import { BaseComponent, format } from "@uifabric/utilities";
 import { IKubeService } from "../../Contracts/Contracts";
 import { IKubernetesSummary, IVssComponentProperties, IService } from "../Types";
+import { IReplicaSetListComponentProperties, ReplicaSetListComponent } from "./ReplicaSetListComponent";
 import { DeploymentsComponent } from "./DeploymentsComponent";
 import { V1DeploymentList, V1ReplicaSetList, V1ServiceList } from "@kubernetes/client-node";
 import * as Resources from "../Resources";
@@ -71,6 +72,17 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
                 </div >
             </div >
         );
+    }
+	
+	private _getReplicaSetPodListComponent(): JSX.Element {
+        var replicaSetList: IReplicaSetListComponentProperties = {
+            replicaSetList: this.state.replicaSetList,
+            podsList: this.state.podList,
+            deploymentName: "test",
+            deploymentAnnotations: ["v1.1", "prod"]
+       }
+
+      return (<ReplicaSetListComponent {...replicaSetList} />);
     }
 
     private _populateStateData(): void {
