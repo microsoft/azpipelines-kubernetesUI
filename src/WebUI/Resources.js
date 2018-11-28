@@ -25,5 +25,5 @@ define("Environments/Providers/Kubernetes/Resources", ["require", "exports"], fu
     exports.PodAge = "Age";
     exports.PodIP = "IP";
     exports.Created = "Created";
-    exports.AgoBy = "ago by";
+    exports.AgoBy = " ago by {0}. Image: {1}";
 });

@@ -6,7 +6,7 @@ import { IKubeService } from "../../Contracts/Contracts";
 import { IKubernetesSummary, IVssComponentProperties, IService } from "../Types";
 import { IReplicaSetListComponentProperties, ReplicaSetListComponent } from "./ReplicaSetListComponent";
 import { DeploymentsComponent } from "./DeploymentsComponent";
-import { V1DeploymentList, V1ReplicaSetList, V1ServiceList } from "@kubernetes/client-node";
+import { V1DeploymentList, V1ReplicaSetList, V1ServiceList, V1Pod, V1ReplicaSet } from "@kubernetes/client-node";
 import * as Resources from "../Resources";
 import { Pivot, PivotItem } from "office-ui-fabric-react/lib/Pivot";
 import { ServiceListComponent } from "./ServiceListComponent";
@@ -54,7 +54,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
                 }
                 {
                     !!this.state.showDeployment &&
-                    <div>Show deployment</div>
+                    this._getReplicaSetPodListComponent()
                 }
                 {
                     !!this.state.showService &&
@@ -63,16 +63,40 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
             </div >
         );
     }
-	
-	private _getReplicaSetPodListComponent(): JSX.Element {
-        var replicaSetList: IReplicaSetListComponentProperties = {
-            replicaSetList: this.state.replicaSetList,
-            podsList: this.state.podList,
-            deploymentName: "test",
-            deploymentAnnotations: ["v1.1", "prod"]
-       }
 
-      return (<ReplicaSetListComponent {...replicaSetList} />);
+    private _getReplicaSetPodListComponent(): JSX.Element | null {
+        if (this.state.selectedItem) {
+            const replicaSets = (this.state.replicaSetList && this.state.replicaSetList.items || []).filter(replica => {
+                return replica.metadata.ownerReferences
+                    && replica.metadata.ownerReferences.length > 0
+                    && replica.metadata.ownerReferences[0].uid.toLowerCase() === this.state.selectedItem.uid.toLowerCase()
+            });
+
+            if (replicaSets) {
+                let replicaDict: { [uid: string]: { replicaSet: V1ReplicaSet, pods: V1Pod[] } } = {};
+                replicaSets.forEach(replica => {
+                    const replicaUId = replica.metadata.uid.toLowerCase();
+                    const filteredPods = (this.state.podList && this.state.podList.items || []).filter(pod => {
+                        return pod.metadata.ownerReferences
+                            && pod.metadata.ownerReferences.length > 0
+                            && pod.metadata.ownerReferences[0].uid.toLowerCase() === replicaUId
+                    });
+
+                    replicaDict[replicaUId] = { replicaSet: replica, pods: filteredPods };
+                });
+
+
+                var replicaSetList: IReplicaSetListComponentProperties = {
+                    replicaPodSets: replicaDict,
+                    deployment: this.state.selectedItem.deployment
+                }
+
+                console.log(replicaSetList);
+                return (<ReplicaSetListComponent {...replicaSetList} />);
+            }
+        }
+
+        return null;
     }
 
     private _populateStateData(): void {
@@ -153,7 +177,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
                     replicaSetList={this.state.replicaSetList || {} as V1ReplicaSetList}
                     key={format("dc-{0}", this.state.namespace || "")}
                     onItemInvoked={this._onItemInvoked}
-            />
+                />
             </PivotItem>
         );
     }

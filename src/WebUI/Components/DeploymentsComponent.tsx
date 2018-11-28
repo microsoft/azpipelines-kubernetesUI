@@ -1,7 +1,7 @@
 import "./DeploymentsComponent.scss";
 
 import * as React from "react";
-import { IVssComponentProperties } from "../Types";
+import { IVssComponentProperties, IDeploymentItem } from "../Types";
 import { ListComponent } from "./ListComponent";
 import * as Resources from "../Resources";
 import { ColumnActionsMode } from "office-ui-fabric-react/lib/DetailsList";
@@ -16,17 +16,6 @@ const pipelineNameKey: string = "pipeline-col";
 const podsKey: string = "pods-col";
 const azurePipelineNameAnnotationKey: string = "azurepipelinename";
 const azurePipelineIdAnnotationKey: string = "azurepipelineid";
-
-interface IDeploymentItem {
-    name?: string;
-    replicaSetName?: string;
-    uid?: string;
-    replicaSetUId?: string;
-    pipeline?: string;
-    pods?: string;
-    statusProps?: IStatusProps;
-    showRowBorder?: boolean;
-}
 
 export interface IDeploymentsComponentProperties extends IVssComponentProperties {
     deploymentList: V1DeploymentList;
@@ -72,12 +61,12 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
                     name: index > 0 ? "" : deployment.metadata.name,
                     uid: deployment.metadata.uid,
                     replicaSetName: replica.metadata.name,
-                    replicaSetUId: replica.metadata.uid,
                     pipeline: DeploymentsComponent._getPipelineText(annotations),
                     // todo :: how to find error in replicaSet
                     pods: DeploymentsComponent._getPodsText(replica.status.availableReplicas, replica.status.replicas),
                     statusProps: DeploymentsComponent._getPodsStatusProps(replica.status.availableReplicas, replica.status.replicas),
-                    showRowBorder: (filteredReplicas.length === (index + 1))
+                    showRowBorder: (filteredReplicas.length === (index + 1)),
+                    deployment: deployment
                 });
             });
         });
