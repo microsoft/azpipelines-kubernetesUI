@@ -1,95 +1,73 @@
 import React = require("react");
+import { BaseComponent, format } from "@uifabric/utilities";
+import { IVssComponentProperties } from "../Types";
+import { V1Pod, V1ReplicaSet, V1Deployment } from "@kubernetes/client-node";
+import { PodListComponent, IPodListComponentProperties } from "./PodListComponent";
+import { ILabelModel, LabelGroup, WrappingBehavior } from "azure-devops-ui/Label";
+import { ObservableArray } from "azure-devops-ui/Core/Observable";
+import { css } from "azure-devops-ui/Util";
 
-import { BaseComponent, autobind, format } from "@uifabric/utilities";
-import { ColumnActionsMode } from "office-ui-fabric-react/lib/DetailsList";
-import { IColumn } from "azure-devops-ui/Components/VssDetailsList/VssDetailsList.Props";
-
-import * as Resources from "../Resources";
-import { ListComponent } from "./ListComponent";
-import { IVssComponentProperties, IReplicaset } from "../Types";
-
-export interface IReplicasetListComponentProperties extends IVssComponentProperties {
-    replicasets: IReplicaset[];
+export interface IReplicaSetListComponentProperties extends IVssComponentProperties {
+    replicaPodSets: { [uid: string]: { replicaSet: V1ReplicaSet, pods: V1Pod[] } };
+    deployment: V1Deployment;
 }
 
-export class ReplicasetListComponent extends BaseComponent<IReplicasetListComponentProperties> {
-    public render(): React.ReactNode {
+export class ReplicaSetListComponent extends BaseComponent<IReplicaSetListComponentProperties> {
+    public render(): JSX.Element {
         return (
-            <ListComponent
-                className={"rdl-content"}
-                headingText={Resources.ReplicasetsDetailsText}
-                items={this.props.replicasets}
-                columns={this._getColumns()}
-                onRenderItemColumn={this._onRenderItemColumn}
-            />
+            <div>
+                {this._getMainHeading()}
+                {this._getReplicaSetListView()}
+            </div>
         );
     }
 
-    private _getColumns(): IColumn[] {
-        let columns: IColumn[] = [];
-        const headerColumnClassName = "rdl-col-header";
+    private _getReplicaSetListView(): JSX.Element[] {
+        let replicaSetListView: JSX.Element[] = [];
+        if (this.props.replicaPodSets) {
+            Object.keys(this.props.replicaPodSets).forEach((r: string) => {
+                var replicaSetPods = this.props.replicaPodSets[r];
+                let podListComponentProperties: IPodListComponentProperties = {
+                    replicaSet: replicaSetPods.replicaSet,
+                    pods: replicaSetPods.pods
+                };
 
-        columns.push({
-            key: setNameKey,
-            name: Resources.NameText,
-            fieldName: setNameKey,
-            minWidth: 200,
-            maxWidth: 200,
-            headerClassName: headerColumnClassName,
-            columnActionsMode: ColumnActionsMode.disabled
-        });
+                replicaSetListView.push(
+                    <div className={css("dc-content", "depth-16", "pod-list")}>
+                        <PodListComponent {...podListComponentProperties} />
+                    </div>
+                );
+            });
+        }
 
-        columns.push({
-            key: setPodsKey,
-            name: Resources.ReplicasCountText,
-            fieldName: setPodsKey,
-            minWidth: 110,
-            maxWidth: 110,
-            headerClassName: headerColumnClassName,
-            columnActionsMode: ColumnActionsMode.disabled
-        });
-
-        columns.push({
-            key: setAppNameKey,
-            name: Resources.AppNameText,
-            fieldName: setAppNameKey,
-            minWidth: 150,
-            maxWidth: 150,
-            headerClassName: headerColumnClassName,
-            columnActionsMode: ColumnActionsMode.disabled
-        });
-
-        return columns;
+        return replicaSetListView;
     }
 
-    @autobind
-    private _onRenderItemColumn(replicaset?: IReplicaset, index?: number, column?: IColumn): React.ReactNode {
-        if (!replicaset || !column) {
-            return null;
+    private _getMainHeading(): JSX.Element | null {
+        if (this.props.deployment && this.props.deployment.metadata) {
+            return (
+                <div className="content-main-heading">
+                    <h2 className="heading">{this.props.deployment.metadata.name}</h2>
+                    {this._getDeploymentLabels()}
+                </div>
+            );
+        }
+        return null;
+    }
+
+    private _getDeploymentLabels(): React.ReactNode | null {
+        if (this.props.deployment
+            && this.props.deployment.metadata
+            && this.props.deployment.metadata.labels) {
+            var deploymentLabels = this.props.deployment.metadata.labels;
+            var labels = new ObservableArray<ILabelModel>();
+            Object.keys(deploymentLabels).forEach((key: string) => {
+                labels.push({ content: format("{0}:{1}", key, deploymentLabels[key]) });
+            });
+
+            return (<LabelGroup labelProps={labels} wrappingBehavior={WrappingBehavior.FreeFlow} fadeOutOverflow />);
         }
 
-        let textToRender: string = "";
-        switch (column.key) {
-            case setNameKey:
-                textToRender = replicaset.name;
-                break;
-
-            case setPodsKey:
-                if (replicaset.replicas && replicaset.readyReplicas) {
-                    textToRender = format("{0} / {1}", replicaset.readyReplicas, replicaset.replicas);
-                }
-
-                break;
-
-            case setAppNameKey:
-                textToRender = replicaset.appName;
-                break;
-        }
-
-        return ListComponent.renderColumn(textToRender, ListComponent.defaultColumnRenderer, "rdl-col-data");
+        return null;
     }
 }
-
-const setNameKey = "sets-list-name-col";
-const setPodsKey = "sets-list-pods-col";
-const setAppNameKey = "sets-list-appname-col";

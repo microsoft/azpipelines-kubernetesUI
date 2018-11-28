@@ -4,8 +4,9 @@ import * as React from "react";
 import { BaseComponent, format } from "@uifabric/utilities";
 import { IKubeService } from "../../Contracts/Contracts";
 import { IKubernetesSummary, IVssComponentProperties, IService } from "../Types";
+import { IReplicaSetListComponentProperties, ReplicaSetListComponent } from "./ReplicaSetListComponent";
 import { DeploymentsComponent } from "./DeploymentsComponent";
-import { V1DeploymentList, V1ReplicaSetList, V1ServiceList } from "@kubernetes/client-node";
+import { V1DeploymentList, V1ReplicaSetList, V1ServiceList, V1Pod, V1ReplicaSet } from "@kubernetes/client-node";
 import * as Resources from "../Resources";
 import { Pivot, PivotItem } from "office-ui-fabric-react/lib/Pivot";
 import { ServiceListComponent } from "./ServiceListComponent";
@@ -16,6 +17,10 @@ const servicesPivotItemKey: string = "services";
 
 export interface IKubernetesContainerState extends IKubernetesSummary {
     selectedKey?: string;
+    showSummary?: boolean;
+    showDeployment?: boolean;
+    showService?: boolean;
+    selectedItem?: any;
 }
 
 export interface IKubeSummaryProps extends IVssComponentProperties {
@@ -27,7 +32,13 @@ export interface IKubeSummaryProps extends IVssComponentProperties {
 export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesContainerState> {
     constructor(props: IKubeSummaryProps) {
         super(props, {});
-        this.state = { namespace: this.props.namespace || "", selectedKey: workloadsPivotItemKey };
+        this.state = {
+            namespace: this.props.namespace || "",
+            selectedKey: workloadsPivotItemKey,
+            showSummary: true,
+            showDeployment: false,
+            showService: false
+        };
     }
 
     public componentDidMount(): void {
@@ -37,40 +48,54 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
     public render(): React.ReactNode {
         return (
             <div className={"kubernetes-container"}>
-                <div className="content-main-heading">
-                    <h2 className="heading">{this.props.title}</h2>
-                    <div className={"sub-heading"}>{format(Resources.NamespaceHeadingText, this.state.namespace || "")}</div>
-                </div>
-                <div className="content-with-pivot">
-                    <Pivot
-                        selectedKey={this.state.selectedKey}
-                        onLinkClick={(item) => this.setState({ selectedKey: item && item.props.itemKey })}
-                        className="pivot-main"
-                    >
-                        <PivotItem
-                            headerText={Resources.PivotWorkloadsText}
-                            itemKey={workloadsPivotItemKey}
-                            className="item-padding"
-                        >
-                            <DeploymentsComponent
-                                deploymentList={this.state.deploymentList || {} as V1DeploymentList}
-                                replicaSetList={this.state.replicaSetList || {} as V1ReplicaSetList}
-                                key={format("dc-{0}", this.state.namespace || "")}
-                            />
-                        </PivotItem>
-                        <PivotItem
-                            headerText={Resources.PivotServiceText}
-                            itemKey={servicesPivotItemKey}
-                            className="item-padding"
-                        >
-                            {/* todo :: delete these entries in future -- begin -- */}
-                            <ServiceListComponent services={this._getServices()} />
-                            {/* -- end -- */}
-                        </PivotItem>
-                    </Pivot>
-                </div >
+                {
+                    !!this.state.showSummary &&
+                    this._getMainContent()
+                }
+                {
+                    !!this.state.showDeployment &&
+                    this._getReplicaSetPodListComponent()
+                }
+                {
+                    !!this.state.showService &&
+                    <div>Show service</div>
+                }
             </div >
         );
+    }
+
+    private _getReplicaSetPodListComponent(): JSX.Element | null {
+        if (this.state.selectedItem) {
+            const replicaSets = (this.state.replicaSetList && this.state.replicaSetList.items || []).filter(replica => {
+                return replica.metadata.ownerReferences
+                    && replica.metadata.ownerReferences.length > 0
+                    && replica.metadata.ownerReferences[0].uid.toLowerCase() === this.state.selectedItem.uid.toLowerCase()
+            });
+
+            if (replicaSets) {
+                let replicaDict: { [uid: string]: { replicaSet: V1ReplicaSet, pods: V1Pod[] } } = {};
+                replicaSets.forEach(replica => {
+                    const replicaUId = replica.metadata.uid.toLowerCase();
+                    const filteredPods = (this.state.podList && this.state.podList.items || []).filter(pod => {
+                        return pod.metadata.ownerReferences
+                            && pod.metadata.ownerReferences.length > 0
+                            && pod.metadata.ownerReferences[0].uid.toLowerCase() === replicaUId
+                    });
+
+                    replicaDict[replicaUId] = { replicaSet: replica, pods: filteredPods };
+                });
+
+
+                var replicaSetList: IReplicaSetListComponentProperties = {
+                    replicaPodSets: replicaDict,
+                    deployment: this.state.selectedItem.deployment
+                }
+
+                return (<ReplicaSetListComponent {...replicaSetList} />);
+            }
+        }
+
+        return null;
     }
 
     private _populateStateData(): void {
@@ -104,6 +129,79 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         kubeService.getServices().then(serviceList => {
             this.setState({ serviceList: serviceList });
         });
+    }
+
+    private _getMainContent(): JSX.Element {
+        return (
+            <div className="main-content">
+                {this._getMainHeading()}
+                {this._getMainPivot()}
+            </div>
+        );
+    }
+
+    private _getMainHeading(): JSX.Element {
+        return (
+            <div className="content-main-heading">
+                <h2 className="heading">{this.props.title}</h2>
+                <div className={"sub-heading"}>{format(Resources.NamespaceHeadingText, this.state.namespace || "")}</div>
+            </div>
+        );
+    }
+
+    private _getMainPivot(): JSX.Element {
+        return (
+            <div className="content-with-pivot">
+                <Pivot
+                    selectedKey={this.state.selectedKey}
+                    onLinkClick={(item) => this.setState({ selectedKey: item && item.props.itemKey })}
+                    className="pivot-main"
+                >
+                    {this._getDeploymentPivot()}
+                    {this._getServicesPivot()}
+                </Pivot>
+            </div>
+        );
+    }
+
+    private _getDeploymentPivot(): JSX.Element {
+        return (
+            <PivotItem
+                headerText={Resources.PivotWorkloadsText}
+                itemKey={workloadsPivotItemKey}
+                className="item-padding"
+            >
+                <DeploymentsComponent
+                    deploymentList={this.state.deploymentList || {} as V1DeploymentList}
+                    replicaSetList={this.state.replicaSetList || {} as V1ReplicaSetList}
+                    key={format("dc-{0}", this.state.namespace || "")}
+                    onItemInvoked={this._onItemInvoked}
+                />
+            </PivotItem>
+        );
+    }
+
+    private _onItemInvoked = (item?: any, index?: number, ev?: Event) => {
+        this.setState({
+            showDeployment: true,
+            showService: false,
+            showSummary: false,
+            selectedItem: item
+        });
+    }
+
+    private _getServicesPivot(): JSX.Element {
+        return (
+            <PivotItem
+                headerText={Resources.PivotServiceText}
+                itemKey={servicesPivotItemKey}
+                className="item-padding"
+            >
+                {/* todo :: delete these entries in future -- begin -- */}
+                <ServiceListComponent services={this._getServices()} />
+                {/* -- end -- */}
+            </PivotItem>
+        );
     }
 
     // todo :: should remove in future

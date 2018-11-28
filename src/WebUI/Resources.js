@@ -22,4 +22,8 @@ define("Environments/Providers/Kubernetes/Resources", ["require", "exports"], fu
     exports.NamespaceHeadingText = "Namespace: {0}";
     exports.PivotServiceText = "Discover and load balancing";
     exports.PivotWorkloadsText = "Workloads";
+    exports.PodAge = "Age";
+    exports.PodIP = "IP";
+    exports.Created = "Created";
+    exports.AgoBy = " ago by {0}. Image: {1}";
 });

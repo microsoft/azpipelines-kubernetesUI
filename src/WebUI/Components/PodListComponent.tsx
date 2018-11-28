@@ -1,27 +1,46 @@
-import React = require("react");
+import "azure-devops-ui/Label.scss";
+import "./PodListComponent.scss";
 
-import { autobind, BaseComponent } from "@uifabric/utilities";
-import { ColumnActionsMode } from "office-ui-fabric-react/lib/DetailsList";
-import { IColumn } from "azure-devops-ui/Components/VssDetailsList/VssDetailsList.Props";
-
+import { IVssComponentProperties } from "../Types";
 import * as Resources from "../Resources";
 import { ListComponent } from "./ListComponent";
-import { IVssComponentProperties, IPod } from "../Types";
+import React = require("react");
+import { ColumnActionsMode } from "office-ui-fabric-react/lib/DetailsList";
+import { IColumn } from "azure-devops-ui/Components/VssDetailsList/VssDetailsList.Props";
+import { autobind, BaseComponent, format } from "@uifabric/utilities";
+import { ObservableArray } from "azure-devops-ui/Core/Observable";
+import { V1Pod, V1ReplicaSet } from "@kubernetes/client-node";
+import { Duration } from "azure-devops-ui/Duration";
+import { ILabelModel, LabelGroup, WrappingBehavior } from "azure-devops-ui/Label";
+import { Status, Statuses, StatusSize, IStatusProps } from "azure-devops-ui/Status";
 
 export interface IPodListComponentProperties extends IVssComponentProperties {
-    pods: IPod[];
+    replicaSet: V1ReplicaSet;
+    pods: V1Pod[];
 }
 
 export class PodListComponent extends BaseComponent<IPodListComponentProperties>{
-    public render(): React.ReactNode {
+    public render(): JSX.Element {
         return (
-            <ListComponent
-                className={"pdl-content"}
-                headingText={Resources.PodsDetailsText}
-                items={this.props.pods}
-                columns={this._getColumns()}
-                onRenderItemColumn={this._onRenderItemColumn}
-            />
+            <div>
+                <ListComponent
+                    className={"pdl-content"}
+                    headingContent={this._getReplicaSetHeadingContent()}
+                    items={this.props.pods}
+                    columns={this._getColumns()}
+                    onRenderItemColumn={this._onRenderItemColumn}
+                />
+            </div>
+        );
+    }
+
+    private _getReplicaSetHeadingContent(): JSX.Element {
+        return (
+            <div className={"replica-heading"}>
+                <div className="replicaset-name-section">{this.props.replicaSet.metadata.name}</div>
+                {this._getReplicaSetDescription()}
+                {this._getReplicaSetLabels()}
+            </div>
         );
     }
 
@@ -30,29 +49,9 @@ export class PodListComponent extends BaseComponent<IPodListComponentProperties>
         const headerColumnClassName = "pdl-col-header";
 
         columns.push({
-            key: podNameKey,
-            name: Resources.NameText,
-            fieldName: podNameKey,
-            minWidth: 250,
-            maxWidth: 250,
-            headerClassName: headerColumnClassName,
-            columnActionsMode: ColumnActionsMode.disabled
-        });
-
-        columns.push({
             key: podStatusKey,
-            name: Resources.StatusText,
+            name: Resources.PodsDetailsText,
             fieldName: podStatusKey,
-            minWidth: 110,
-            maxWidth: 110,
-            headerClassName: headerColumnClassName,
-            columnActionsMode: ColumnActionsMode.disabled
-        });
-
-        columns.push({
-            key: podImageKey,
-            name: Resources.ImageText,
-            fieldName: podImageKey,
             minWidth: 250,
             maxWidth: 250,
             headerClassName: headerColumnClassName,
@@ -60,9 +59,19 @@ export class PodListComponent extends BaseComponent<IPodListComponentProperties>
         });
 
         columns.push({
-            key: podNodeNameKey,
-            name: Resources.NodeNameText,
-            fieldName: podNodeNameKey,
+            key: podIPKey,
+            name: Resources.PodIP,
+            fieldName: podIPKey,
+            minWidth: 250,
+            maxWidth: 250,
+            headerClassName: headerColumnClassName,
+            columnActionsMode: ColumnActionsMode.disabled
+        });
+
+        columns.push({
+            key: podAgeKey,
+            name: Resources.PodAge,
+            fieldName: podAgeKey,
             minWidth: 200,
             maxWidth: 200,
             headerClassName: headerColumnClassName,
@@ -73,35 +82,92 @@ export class PodListComponent extends BaseComponent<IPodListComponentProperties>
     }
 
     @autobind
-    private _onRenderItemColumn(pod?: IPod, index?: number, column?: IColumn): React.ReactNode {
+    private _onRenderItemColumn(pod?: V1Pod, index?: number, column?: IColumn): React.ReactNode {
         if (!pod || !column) {
             return null;
         }
 
         let textToRender: string = "";
         switch (column.key) {
-            case podNameKey:
-                textToRender = pod.name;
-                break;
-
             case podStatusKey:
-                textToRender = pod.status;
+                return (
+                    <div>
+                        {
+                            <Status {...podStatusDic[pod.status.phase]} animated={false} size={StatusSize.s} />
+                        }
+                        <span className="pod-name"> {pod.metadata.name}</span>
+                    </div>
+                );
+            case podIPKey:
+                textToRender = pod.status.podIP;
                 break;
 
-            case podImageKey:
-                textToRender = pod.image;
-                break;
-
-            case podNodeNameKey:
-                textToRender = pod.nodeName;
-                break;
+            case podAgeKey:
+                return (
+                    <Duration startDate={new Date(pod.metadata.creationTimestamp)} endDate={new Date()} />
+                );
         }
 
         return ListComponent.renderColumn(textToRender, ListComponent.defaultColumnRenderer, "pdl-col-data");
     }
+
+    private _getReplicaSetLabels(): React.ReactNode | null {
+        var podLabels = this.props.replicaSet.metadata.labels;
+        var labels = new ObservableArray<ILabelModel>();
+        if (podLabels) {
+            Object.keys(podLabels).forEach((key: string) => {
+                labels.push({ content: format("{0}:{1}", key, podLabels[key]) });
+            });
+
+            return <LabelGroup labelProps={labels} wrappingBehavior={WrappingBehavior.OneLine} fadeOutOverflow />;
+        }
+
+        return null;
+    }
+
+    private _getReplicaSetDescription(): JSX.Element | null {
+        if (this.props.replicaSet.metadata
+            && this.props.replicaSet.metadata.creationTimestamp) {
+            var des = "";
+            var imageName = this._getImageName();
+            if (this.props.replicaSet.metadata.ownerReferences
+                && this.props.replicaSet.metadata.ownerReferences.length > 0
+                && this.props.replicaSet.metadata.ownerReferences[0].name
+                && imageName) {
+                des = format(Resources.AgoBy, this.props.replicaSet.metadata.ownerReferences[0].name, this.props.replicaSet.spec.template.spec.containers[0].image)
+            }
+
+            return (
+                <div className="replicaset-description-section sub-heading">
+                    <span>{Resources.Created} </span>
+                    <Duration startDate={new Date(this.props.replicaSet.metadata.creationTimestamp)} endDate={new Date()} />
+                    <span>{des}</span>
+                </div>
+            );
+        }
+
+        return null;
+    }
+
+    private _getImageName(): string | null {
+        if (this.props.replicaSet.spec
+            && this.props.replicaSet.spec.template
+            && this.props.replicaSet.spec.template.spec
+            && this.props.replicaSet.spec.template.spec.containers
+            && this.props.replicaSet.spec.template.spec.containers.length > 0) {
+            return this.props.replicaSet.spec.template.spec.containers[0].image
+        }
+
+        return null;
+    }
 }
 
-const podNameKey = "pods-list-name-col";
+const podStatusDic: { [index: string]: IStatusProps } = {
+    "Running": Statuses.Running,
+    "Pending": Statuses.Waiting,
+    "Succeeded": Statuses.Success,
+    "Failed": Statuses.Failed,
+};
 const podStatusKey = "pods-list-status-col";
-const podImageKey = "pods-list-image-col";
-const podNodeNameKey = "pods-list-node-name-col";
+const podIPKey = "pods-list-ip-col";
+const podAgeKey = "pods-list-age-col";

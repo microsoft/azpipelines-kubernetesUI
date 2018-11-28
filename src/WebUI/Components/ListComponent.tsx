@@ -9,17 +9,25 @@ import { IColumn } from "azure-devops-ui/Components/VssDetailsList/VssDetailsLis
 import { IVssComponentProperties } from "../Types";
 
 export interface IListComponentProperties<T> extends IVssComponentProperties {
-    headingText: string;
+    headingText?: string;
+    headingContent?: JSX.Element;
     items: T[];
     columns: IColumn[];
     onRenderItemColumn: (item?: T, index?: number, column?: IColumn) => React.ReactNode;
+    onItemInvoked?: (item?: any, index?: number, ev?: Event) => void;
 }
 
 export class ListComponent<T> extends BaseComponent<IListComponentProperties<T>> {
     public render(): React.ReactNode {
         return (
             <div className={css("kube-list-content", this.props.className)}>
-                <h3 className={"kube-list-heading heading"}>{this.props.headingText}</h3>
+                <div className={"kube-list-heading heading"}>
+                    {
+                        this.props.headingText
+                            ? <h3 className={"heading-title"}>{this.props.headingText}</h3>
+                            : this.props.headingContent && this.props.headingContent
+                    }
+                </div>
                 <VssDetailsList
                     className={"kube-list"}
                     items={this.props.items}
@@ -28,6 +36,11 @@ export class ListComponent<T> extends BaseComponent<IListComponentProperties<T>>
                     isHeaderVisible={true}
                     selectionMode={SelectionMode.single}
                     constrainMode={ConstrainMode.unconstrained}
+                    onItemInvoked={(item?: any, index?: number, ev?: Event) => {
+                        if (this.props.onItemInvoked) {
+                            this.props.onItemInvoked(item, index, ev);
+                        }
+                    }}
                 />
             </div>
         );

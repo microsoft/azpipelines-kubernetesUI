@@ -1,7 +1,7 @@
 import "./DeploymentsComponent.scss";
 
 import * as React from "react";
-import { IVssComponentProperties } from "../Types";
+import { IVssComponentProperties, IDeploymentItem } from "../Types";
 import { ListComponent } from "./ListComponent";
 import * as Resources from "../Resources";
 import { ColumnActionsMode } from "office-ui-fabric-react/lib/DetailsList";
@@ -17,18 +17,10 @@ const podsKey: string = "pods-col";
 const azurePipelineNameAnnotationKey: string = "azurepipelinename";
 const azurePipelineIdAnnotationKey: string = "azurepipelineid";
 
-interface IDeploymentItem {
-    name?: string;
-    replicaSetName?: string;
-    pipeline?: string;
-    pods?: string;
-    statusProps?: IStatusProps;
-    showRowBorder?: boolean;
-}
-
 export interface IDeploymentsComponentProperties extends IVssComponentProperties {
     deploymentList: V1DeploymentList;
     replicaSetList: V1ReplicaSetList;
+    onItemInvoked?: (item?: any, index?: number, ev?: Event) => void;
 }
 
 export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentProperties, {}> {
@@ -40,6 +32,11 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
                 items={DeploymentsComponent._getDeploymentItems(this.props.deploymentList, this.props.replicaSetList)}
                 columns={DeploymentsComponent._getColumns()}
                 onRenderItemColumn={DeploymentsComponent._onRenderItemColumn}
+                onItemInvoked={(item?: any, index?: number, ev?: Event) => {
+                    if (this.props.onItemInvoked) {
+                        this.props.onItemInvoked(item, index, ev);
+                    }
+                }}
             />
         );
     }
@@ -62,12 +59,14 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
                 const annotations: { [key: string]: string } = index === 0 ? deployment.metadata.annotations : replica.metadata.annotations;
                 items.push({
                     name: index > 0 ? "" : deployment.metadata.name,
+                    uid: deployment.metadata.uid,
                     replicaSetName: replica.metadata.name,
                     pipeline: DeploymentsComponent._getPipelineText(annotations),
                     // todo :: how to find error in replicaSet
                     pods: DeploymentsComponent._getPodsText(replica.status.availableReplicas, replica.status.replicas),
                     statusProps: DeploymentsComponent._getPodsStatusProps(replica.status.availableReplicas, replica.status.replicas),
-                    showRowBorder: (filteredReplicas.length === (index + 1))
+                    showRowBorder: (filteredReplicas.length === (index + 1)),
+                    deployment: deployment
                 });
             });
         });

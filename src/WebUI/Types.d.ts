@@ -1,6 +1,7 @@
 import { IBaseProps } from "office-ui-fabric-react/lib/Utilities";
 import { IObservable } from "azure-devops-ui/Core/Observable";
-import { V1PodList, V1DeploymentList, V1ServiceList, V1ReplicaSetList } from "@kubernetes/client-node";
+import { V1PodList, V1DeploymentList, V1ServiceList, V1ReplicaSetList, V1Deployment, V1ReplicaSet } from "@kubernetes/client-node";
+import { IStatusProps } from "azure-devops-ui/Status";
 
 export interface INameReference {
     name: string;
@@ -38,6 +39,17 @@ export interface IKubernetesSummary {
     deploymentList?: V1DeploymentList;
     serviceList?: V1ServiceList;
     replicaSetList?: V1ReplicaSetList;
+}
+
+export interface IDeploymentItem {
+    name?: string;
+    replicaSetName?: string;
+    uid?: string;
+    pipeline?: string;
+    pods?: string;
+    statusProps?: IStatusProps;
+    showRowBorder?: boolean;
+    deployment?: V1Deployment;
 }
 
 export interface IVssComponentProperties extends IBaseProps {
