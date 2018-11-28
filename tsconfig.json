@@ -12,7 +12,7 @@
           ],
         "module": "amd",
         "moduleResolution": "node",
-        "noImplicitAny": true,
+        "noImplicitAny": false,
         "noImplicitThis": true,
         "outDir": "dist/",
         "rootDir": "src/",
