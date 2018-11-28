@@ -16,4 +16,7 @@ define("Environments/Providers/Kubernetes/Resources", ["require", "exports"], fu
     exports.ExternalIPText = "External IP";
     exports.TypeText = "Type";
     exports.AppNameText = "App Name";
+    exports.ReplicaSetText = "Replica set";
+    exports.PipelineText = "Pipeline";
+    exports.PodsText = "Pods";
 });

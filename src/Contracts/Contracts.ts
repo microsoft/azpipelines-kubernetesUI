@@ -8,14 +8,14 @@ export interface IKubeService {
 
     getServices(): Promise<K8sTypes.V1ServiceList>;
 
-    getReplicasets(): Promise<K8sTypes.V1ReplicaSetList>;
+    getReplicaSets(): Promise<K8sTypes.V1ReplicaSetList>;
 }
 
 export enum KubeResourceType {
     Pods = 1,
     Deployments = 2,
     Services = 4,
-    Replicasets = 8,
+    ReplicaSets = 8,
 }
 
 export abstract class KubeServiceBase implements IKubeService {
@@ -29,8 +29,8 @@ export abstract class KubeServiceBase implements IKubeService {
     getServices(): Promise<K8sTypes.V1ServiceList> {
         return this.fetch(KubeResourceType.Services);
     }
-    getReplicasets(): Promise<K8sTypes.V1ReplicaSetList> {
-        return this.fetch(KubeResourceType.Replicasets);
+    getReplicaSets(): Promise<K8sTypes.V1ReplicaSetList> {
+        return this.fetch(KubeResourceType.ReplicaSets);
     }
 
     abstract fetch(resourceType: KubeResourceType): Promise<any>;

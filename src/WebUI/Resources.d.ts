@@ -13,3 +13,6 @@ export declare const ClusterIPText: string;
 export declare const ExternalIPText: string;
 export declare const TypeText: string;
 export declare const AppNameText: string;
+export declare const ReplicaSetText: string;
+export declare const PipelineText: string;
+export declare const PodsText: string;

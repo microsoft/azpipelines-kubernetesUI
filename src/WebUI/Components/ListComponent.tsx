@@ -5,7 +5,6 @@ import { css, BaseComponent } from "office-ui-fabric-react/lib/Utilities";
 import { TooltipHost, TooltipOverflowMode } from "azure-devops-ui/Tooltip";
 import { ConstrainMode, SelectionMode } from "office-ui-fabric-react/lib/DetailsList";
 import { IColumn } from "azure-devops-ui/Components/VssDetailsList/VssDetailsList.Props";
-
 import { IVssComponentProperties } from "../Types";
 
 export interface IListComponentProperties<T> extends IVssComponentProperties {
@@ -15,11 +14,11 @@ export interface IListComponentProperties<T> extends IVssComponentProperties {
     onRenderItemColumn: (item?: T, index?: number, column?: IColumn) => React.ReactNode;
 }
 
-export class ListComponent<T> extends BaseComponent<IListComponentProperties<T>>{
+export class ListComponent<T> extends BaseComponent<IListComponentProperties<T>> {
     public render(): React.ReactNode {
         return (
             <div className={css("kube-list-content", this.props.className)}>
-                <h2 className={"kube-list-heading heading"}>{this.props.headingText}</h2>
+                <h3 className={"kube-list-heading heading"}>{this.props.headingText}</h3>
                 <VssDetailsList
                     className={"kube-list"}
                     items={this.props.items}
