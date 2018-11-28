@@ -9,8 +9,7 @@ import { DeploymentsComponent } from "./DeploymentsComponent";
 import { V1DeploymentList, V1ReplicaSetList, V1ServiceList, V1Pod, V1ReplicaSet } from "@kubernetes/client-node";
 import * as Resources from "../Resources";
 import { Pivot, PivotItem } from "office-ui-fabric-react/lib/Pivot";
-import { ServiceListComponent } from "./ServiceListComponent";
-import { convertServicesForComponent } from "../Utilities";
+import { ServicesComponent } from "./ServicesComponent";
 
 const workloadsPivotItemKey: string = "workloads";
 const servicesPivotItemKey: string = "services";
@@ -197,17 +196,8 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
                 itemKey={servicesPivotItemKey}
                 className="item-padding"
             >
-                {/* todo :: delete these entries in future -- begin -- */}
-                <ServiceListComponent services={this._getServices()} />
-                {/* -- end -- */}
+                <ServicesComponent servicesList={this.state.serviceList || {} as V1ServiceList} />
             </PivotItem>
         );
-    }
-
-    // todo :: should remove in future
-    private _getServices(): IService[] {
-        return this.state.serviceList && this.state.serviceList.items
-            ? convertServicesForComponent(this.state.serviceList || {} as V1ServiceList)
-            : [];
     }
 }

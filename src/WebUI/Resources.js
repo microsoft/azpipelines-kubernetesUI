@@ -2,6 +2,7 @@
 define("Environments/Providers/Kubernetes/Resources", ["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    exports.AgeText = "Age";
     exports.NodeNameText = "Node Name";
     exports.NameText = "Name";
     exports.StatusText = "Status";
@@ -17,8 +18,10 @@ define("Environments/Providers/Kubernetes/Resources", ["require", "exports"], fu
     exports.TypeText = "Type";
     exports.AppNameText = "App Name";
     exports.ReplicaSetText = "Replica set";
+    exports.PackageText = "Package";
     exports.PipelineText = "Pipeline";
     exports.PodsText = "Pods";
+    exports.PortText = "Port";
     exports.NamespaceHeadingText = "Namespace: {0}";
     exports.PivotServiceText = "Discover and load balancing";
     exports.PivotWorkloadsText = "Workloads";
