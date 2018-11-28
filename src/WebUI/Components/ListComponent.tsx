@@ -13,6 +13,7 @@ export interface IListComponentProperties<T> extends IVssComponentProperties {
     items: T[];
     columns: IColumn[];
     onRenderItemColumn: (item?: T, index?: number, column?: IColumn) => React.ReactNode;
+    onItemInvoked?: (item?: any, index?: number, ev?: Event) => void;
 }
 
 export class ListComponent<T> extends BaseComponent<IListComponentProperties<T>> {
@@ -28,6 +29,11 @@ export class ListComponent<T> extends BaseComponent<IListComponentProperties<T>>
                     isHeaderVisible={true}
                     selectionMode={SelectionMode.single}
                     constrainMode={ConstrainMode.unconstrained}
+                    onItemInvoked={(item?: any, index?: number, ev?: Event) => {
+                        if (this.props.onItemInvoked) {
+                            this.props.onItemInvoked(item, index, ev);
+                        }
+                    }}
                 />
             </div>
         );
