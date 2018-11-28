@@ -1,7 +1,6 @@
 import React = require("react");
 import { BaseComponent, format } from "@uifabric/utilities";
 import { IVssComponentProperties } from "../Types";
-import * as Resources from "../Resources";
 import { V1Pod, V1ReplicaSet, V1Deployment } from "@kubernetes/client-node";
 import { PodListComponent, IPodListComponentProperties } from "./PodListComponent";
 import { ILabelModel, LabelGroup, WrappingBehavior } from "azure-devops-ui/Label";
@@ -45,14 +44,14 @@ export class ReplicaSetListComponent extends BaseComponent<IReplicaSetListCompon
             return (
                 <div className="content-main-heading">
                     <h2 className="heading">{this.props.deployment.metadata.name}</h2>
-                    {this._getReplicaSetAnnotations()}
+                    {this._getDeploymentLabels()}
                 </div>
             );
         }
         return null;
     }
 
-    private _getReplicaSetAnnotations(): React.ReactNode | null {
+    private _getDeploymentLabels(): React.ReactNode | null {
         if (this.props.deployment
             && this.props.deployment.metadata
             && this.props.deployment.metadata.labels) {

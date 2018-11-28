@@ -1,10 +1,10 @@
 {
-  "name": "rubix-kube-vithati",
-  "version": "1.0.32",
+  "name": "azdevops-kube-summary",
+  "version": "1.0.12",
   "description": "Azure DevOps Kubernetes Summary",
   "repository": {
     "type": "git",
-    "url": "https://github.com/savenkat123/rubix-kube.git"
+    "url": "https://github.com/Microsoft/azpipelines-kubernetesUI.git"
   },
   "scripts": {
     "clean": "rimraf ./dist",

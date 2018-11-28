@@ -1,3 +1,6 @@
+import "azure-devops-ui/Label.scss";
+import "./PodListComponent.scss";
+
 import { IVssComponentProperties } from "../Types";
 import * as Resources from "../Resources";
 import { ListComponent } from "./ListComponent";
@@ -8,10 +11,8 @@ import { autobind, BaseComponent, format } from "@uifabric/utilities";
 import { ObservableArray } from "azure-devops-ui/Core/Observable";
 import { V1Pod, V1ReplicaSet } from "@kubernetes/client-node";
 import { Duration } from "azure-devops-ui/Duration";
-import { ILabelModel, LabelGroup, WrappingBehavior, Label } from "azure-devops-ui/Label";
+import { ILabelModel, LabelGroup, WrappingBehavior } from "azure-devops-ui/Label";
 import { Status, Statuses, StatusSize, IStatusProps } from "azure-devops-ui/Status";
-import { css } from "azure-devops-ui/Util";
-import "azure-devops-ui/Label.scss";
 
 export interface IPodListComponentProperties extends IVssComponentProperties {
     replicaSet: V1ReplicaSet;
@@ -23,16 +24,23 @@ export class PodListComponent extends BaseComponent<IPodListComponentProperties>
         console.log(this.props)
         return (
             <div>
-                <div className="replicaset-name-section">{this.props.replicaSet.metadata.name}</div>
-                {this._getReplicaSetDescription()}
-                {this._getReplicaSetAnnotations()}
                 <ListComponent
                     className={"pdl-content"}
-                    headingText=""
+                    headingContent={this._getReplicaSetHeadingContent()}
                     items={this.props.pods}
                     columns={this._getColumns()}
                     onRenderItemColumn={this._onRenderItemColumn}
                 />
+            </div>
+        );
+    }
+
+    private _getReplicaSetHeadingContent(): JSX.Element {
+        return (
+            <div className={"replica-heading"}>
+                <div className="replicaset-name-section">{this.props.replicaSet.metadata.name}</div>
+                {this._getReplicaSetDescription()}
+                {this._getReplicaSetLabels()}
             </div>
         );
     }
@@ -106,7 +114,7 @@ export class PodListComponent extends BaseComponent<IPodListComponentProperties>
         return ListComponent.renderColumn(textToRender, ListComponent.defaultColumnRenderer, "pdl-col-data");
     }
 
-    private _getReplicaSetAnnotations(): React.ReactNode | null {
+    private _getReplicaSetLabels(): React.ReactNode | null {
         var podLabels = this.props.replicaSet.metadata.labels;
         var labels = new ObservableArray<ILabelModel>();
         if (podLabels) {
@@ -133,7 +141,7 @@ export class PodListComponent extends BaseComponent<IPodListComponentProperties>
             }
 
             return (
-                <div className="replicaset-description-section">
+                <div className="replicaset-description-section sub-heading">
                     <span>{Resources.Created} </span>
                     <Duration startDate={new Date(this.props.replicaSet.metadata.creationTimestamp)} endDate={new Date()} />
                     <span>{des}</span>
