@@ -35,7 +35,7 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
     public render(): React.ReactNode {
         return (
             <ListComponent
-                className={css("dc-content", "depth-16")}
+                className={css("dc-list-content", "depth-16")}
                 headingText={Resources.DeploymentsDetailsText}
                 items={DeploymentsComponent._getDeploymentItems(this.props.deploymentList, this.props.replicaSetList)}
                 columns={DeploymentsComponent._getColumns()}
@@ -129,7 +129,7 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
             fieldName: nameKey,
             minWidth: 140,
             maxWidth: 140,
-            headerClassName: headerColumnClassName,
+            headerClassName: css(headerColumnClassName, "first-col-header"),
             columnActionsMode: ColumnActionsMode.disabled
         });
 
@@ -172,9 +172,11 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
         }
 
         let textToRender: string | undefined;
+        let colDataClassName: string = "dc-col-data";
         switch (column.key) {
             case nameKey:
                 textToRender = deployment.name;
+                colDataClassName = css(colDataClassName, "first-col-data");
                 break;
 
             case replicaSetNameKey:
@@ -187,7 +189,7 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
 
             case podsKey:
                 return (
-                    <div>
+                    <div className={colDataClassName}>
                         {
                             !!deployment.statusProps &&
                             /* todo :: change props if needed like size etc */
@@ -198,6 +200,6 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
                 );
         }
 
-        return ListComponent.renderColumn(textToRender || "", ListComponent.defaultColumnRenderer, "dc-col-data");
+        return ListComponent.renderColumn(textToRender || "", ListComponent.defaultColumnRenderer, colDataClassName);
     }
 }

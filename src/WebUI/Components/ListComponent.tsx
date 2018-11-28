@@ -1,3 +1,4 @@
+import "./ListComponent.scss";
 import * as React from "react";
 
 import { VssDetailsList } from "azure-devops-ui/VssDetailsList";
