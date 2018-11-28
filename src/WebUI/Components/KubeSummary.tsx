@@ -91,7 +91,6 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
                     deployment: this.state.selectedItem.deployment
                 }
 
-                console.log(replicaSetList);
                 return (<ReplicaSetListComponent {...replicaSetList} />);
             }
         }

@@ -21,7 +21,6 @@ export interface IPodListComponentProperties extends IVssComponentProperties {
 
 export class PodListComponent extends BaseComponent<IPodListComponentProperties>{
     public render(): JSX.Element {
-        console.log(this.props)
         return (
             <div>
                 <ListComponent
@@ -105,9 +104,7 @@ export class PodListComponent extends BaseComponent<IPodListComponentProperties>
 
             case podAgeKey:
                 return (
-                    <div>
-                        <Duration startDate={new Date(pod.metadata.creationTimestamp)} endDate={new Date()} />
-                    </div>
+                    <Duration startDate={new Date(pod.metadata.creationTimestamp)} endDate={new Date()} />
                 );
         }
 

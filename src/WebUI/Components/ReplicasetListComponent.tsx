@@ -31,8 +31,12 @@ export class ReplicaSetListComponent extends BaseComponent<IReplicaSetListCompon
                     replicaSet: replicaSetPods.replicaSet,
                     pods: replicaSetPods.pods
                 };
-                console.log(podListComponentProperties);
-                replicaSetListView.push(<div className={css("dc-content", "depth-16", "pod-list")}><PodListComponent {...podListComponentProperties} /></div>);
+
+                replicaSetListView.push(
+                    <div className={css("dc-content", "depth-16", "pod-list")}>
+                        <PodListComponent {...podListComponentProperties} />
+                    </div>
+                );
             });
         }
 
