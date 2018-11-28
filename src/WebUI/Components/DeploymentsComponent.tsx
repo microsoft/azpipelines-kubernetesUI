@@ -20,6 +20,8 @@ const azurePipelineIdAnnotationKey: string = "azurepipelineid";
 interface IDeploymentItem {
     name?: string;
     replicaSetName?: string;
+    uid?: string;
+    replicaSetUId?: string;
     pipeline?: string;
     pods?: string;
     statusProps?: IStatusProps;
@@ -29,6 +31,7 @@ interface IDeploymentItem {
 export interface IDeploymentsComponentProperties extends IVssComponentProperties {
     deploymentList: V1DeploymentList;
     replicaSetList: V1ReplicaSetList;
+    onItemInvoked?: (item?: any, index?: number, ev?: Event) => void;
 }
 
 export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentProperties, {}> {
@@ -40,6 +43,11 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
                 items={DeploymentsComponent._getDeploymentItems(this.props.deploymentList, this.props.replicaSetList)}
                 columns={DeploymentsComponent._getColumns()}
                 onRenderItemColumn={DeploymentsComponent._onRenderItemColumn}
+                onItemInvoked={(item?: any, index?: number, ev?: Event) => {
+                    if (this.props.onItemInvoked) {
+                        this.props.onItemInvoked(item, index, ev);
+                    }
+                }}
             />
         );
     }
@@ -62,7 +70,9 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
                 const annotations: { [key: string]: string } = index === 0 ? deployment.metadata.annotations : replica.metadata.annotations;
                 items.push({
                     name: index > 0 ? "" : deployment.metadata.name,
+                    uid: deployment.metadata.uid,
                     replicaSetName: replica.metadata.name,
+                    replicaSetUId: replica.metadata.uid,
                     pipeline: DeploymentsComponent._getPipelineText(annotations),
                     // todo :: how to find error in replicaSet
                     pods: DeploymentsComponent._getPodsText(replica.status.availableReplicas, replica.status.replicas),
