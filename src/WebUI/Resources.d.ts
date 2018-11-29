@@ -26,3 +26,5 @@ export declare const PodAge: string;
 export declare const PodIP: string;
 export declare const Created: string;
 export declare const AgoBy: string;
+export declare const Deployment: string;
+export declare const ReplicaSet: string;
