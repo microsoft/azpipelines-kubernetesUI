@@ -1,9 +1,8 @@
 
+import { CommonServiceIds, getClient, IProjectInfo, IProjectPageService } from "azure-devops-extension-api";
+import { DataSourceDetails, ServiceEndpointRequest, ServiceEndpointRestClient } from "azure-devops-extension-api/ServiceEndpoint";
 import * as SDK from "azure-devops-extension-sdk";
-import { getClient, IProjectPageService, CommonServiceIds, IProjectInfo } from "azure-devops-extension-api";
-import { ServiceEndpointRestClient, DataSourceDetails, ServiceEndpointRequest } from "azure-devops-extension-api/ServiceEndpoint";
-
-import { KubeServiceBase, KubeResourceType } from "../Contracts/Contracts";
+import { KubeResourceType, KubeServiceBase } from "../Contracts/Contracts";
 
 export class AzureDevOpsKubeService extends KubeServiceBase {
     constructor(private _serviceEndpointId: string, private _namespace: string) {
@@ -19,7 +18,7 @@ export class AzureDevOpsKubeService extends KubeServiceBase {
         params["KubernetesNamespace"] = this._namespace;
 
         let dataSourceName: string = "";
-        switch(resourceType) {
+        switch (resourceType) {
             case KubeResourceType.Pods:
                 dataSourceName = "KubernetesPodsInNamespace";
                 break;
@@ -41,7 +40,8 @@ export class AzureDevOpsKubeService extends KubeServiceBase {
             } as DataSourceDetails
         } as ServiceEndpointRequest;
 
-        const requestResult = await getClient(ServiceEndpointRestClient).executeServiceEndpointRequest(resourceRequest, project.id, this._serviceEndpointId);
+        const requestResult = await getClient(ServiceEndpointRestClient)
+            .executeServiceEndpointRequest(resourceRequest, project.id, this._serviceEndpointId);
         return JSON.parse(requestResult.result);
     }
 }

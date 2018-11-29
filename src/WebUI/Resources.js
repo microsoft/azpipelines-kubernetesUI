@@ -7,11 +7,10 @@ define("Environments/Providers/Kubernetes/Resources", ["require", "exports"], fu
     exports.NameText = "Name";
     exports.StatusText = "Status";
     exports.ImageText = "Image";
-    exports.PodsDetailsText = "Pods";
+    exports.PodsDetailsText = "Pod";
     exports.StrategyText = "Strategy";
     exports.ReplicasCountText = "Pods #";
     exports.DeploymentsDetailsText = "Deployments";
-    exports.ReplicasetsDetailsText = "Replicasets";
     exports.ServicesDetailsText = "Services";
     exports.ClusterIPText = "Cluster IP";
     exports.ExternalIPText = "External IP";

@@ -14,11 +14,20 @@
 
     .content-main-heading {
         padding: 10px 10px;
+
+        .title-heading {
+            margin-bottom: 10px;
+        }
     }
 
     .sub-heading {
         color: $secondary-text;
         font-size: $fontSizeM;
+    }
+
+    .sub-heading2 {
+        color: $secondary-text;
+        font-size: $fontSizeMS;
     }
 
     .content-with-pivot .item-padding {
