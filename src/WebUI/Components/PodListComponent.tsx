@@ -93,7 +93,11 @@ export class PodListComponent extends BaseComponent<IPodListComponentProperties>
                 labels.push({ content: format("{0}:{1}", key, podLabels[key]) });
             });
 
-            return <LabelGroup labelProps={labels} wrappingBehavior={WrappingBehavior.OneLine} fadeOutOverflow />;
+            return (
+                <div className="pl-label-group">
+                    <LabelGroup labelProps={labels} wrappingBehavior={WrappingBehavior.OneLine} fadeOutOverflow />
+                </div>
+            );
         }
 
         return null;
@@ -109,7 +113,7 @@ export class PodListComponent extends BaseComponent<IPodListComponentProperties>
             }
 
             return (
-                <div className="replicaset-description-section sub-heading">
+                <div className="replicaset-description-section sub-heading2">
                     {/* todo :: not good for localization */}
                     <span>{Resources.Created} </span>
                     <Duration startDate={new Date(this.props.replicaSet.metadata.creationTimestamp)} endDate={new Date()} />
