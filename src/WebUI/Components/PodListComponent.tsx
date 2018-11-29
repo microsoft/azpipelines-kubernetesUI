@@ -35,9 +35,11 @@ export class PodListComponent extends BaseComponent<IPodListComponentProperties>
     }
 
     private _getReplicaSetHeadingContent(): JSX.Element {
+        let replicaSetHeading = format(Resources.ReplicaSet, this.props.replicaSet.metadata.name);
+
         return (
             <div className={"replica-heading"}>
-                <div className="replicaset-name-section">{this.props.replicaSet.metadata.name}</div>
+                <div className="replicaset-name-section">{replicaSetHeading}</div>
                 {this._getReplicaSetDescription()}
                 {this._getReplicaSetLabels()}
             </div>
@@ -130,11 +132,8 @@ export class PodListComponent extends BaseComponent<IPodListComponentProperties>
             && this.props.replicaSet.metadata.creationTimestamp) {
             var des = "";
             var imageName = this._getImageName();
-            if (this.props.replicaSet.metadata.ownerReferences
-                && this.props.replicaSet.metadata.ownerReferences.length > 0
-                && this.props.replicaSet.metadata.ownerReferences[0].name
-                && imageName) {
-                des = format(Resources.AgoBy, this.props.replicaSet.metadata.ownerReferences[0].name, this.props.replicaSet.spec.template.spec.containers[0].image)
+            if (imageName) {
+                des = format(Resources.AgoBy, imageName)
             }
 
             return (
@@ -163,7 +162,7 @@ export class PodListComponent extends BaseComponent<IPodListComponentProperties>
 }
 
 const podStatusDic: { [index: string]: IStatusProps } = {
-    "Running": Statuses.Running,
+    "Running": Statuses.Success,
     "Pending": Statuses.Waiting,
     "Succeeded": Statuses.Success,
     "Failed": Statuses.Failed,

@@ -6,6 +6,7 @@ import { PodListComponent, IPodListComponentProperties } from "./PodListComponen
 import { ILabelModel, LabelGroup, WrappingBehavior } from "azure-devops-ui/Label";
 import { ObservableArray } from "azure-devops-ui/Core/Observable";
 import { css } from "azure-devops-ui/Util";
+import * as Resources from "../Resources";
 
 export interface IReplicaSetListComponentProperties extends IVssComponentProperties {
     replicaPodSets: { [uid: string]: { replicaSet: V1ReplicaSet, pods: V1Pod[] } };
@@ -45,9 +46,10 @@ export class ReplicaSetListComponent extends BaseComponent<IReplicaSetListCompon
 
     private _getMainHeading(): JSX.Element | null {
         if (this.props.deployment && this.props.deployment.metadata) {
+            let deploymentHeading = format(Resources.Deployment, this.props.deployment.metadata.name);
             return (
                 <div className="content-main-heading">
-                    <h2 className="heading">{this.props.deployment.metadata.name}</h2>
+                    <h2 className="heading">{deploymentHeading}</h2>
                     {this._getDeploymentLabels()}
                 </div>
             );
