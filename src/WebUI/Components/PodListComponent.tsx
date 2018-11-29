@@ -14,7 +14,7 @@ import "./PodListComponent.scss";
 import React = require("react");
 
 const podStatusDic: { [index: string]: IStatusProps } = {
-    "Running": Statuses.Running,
+    "Running": Statuses.Success,
     "Pending": Statuses.Waiting,
     "Succeeded": Statuses.Success,
     "Failed": Statuses.Failed,
