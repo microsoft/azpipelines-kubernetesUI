@@ -1,3 +1,8 @@
+/*
+    Copyright (c) Microsoft Corporation. All rights reserved.
+    Licensed under the MIT license.
+*/
+
 import { V1Service, V1ServiceList, V1ServicePort } from "@kubernetes/client-node";
 import { BaseComponent, css, format } from "@uifabric/utilities";
 import { IColumn } from "azure-devops-ui/Components/VssDetailsList/VssDetailsList.Props";

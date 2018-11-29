@@ -1,4 +1,9 @@
-import { V1Deployment, V1DeploymentList, V1PodList, V1ReplicaSetList, V1ServiceList, V1ReplicaSet, V1Pod } from "@kubernetes/client-node";
+/*
+    Copyright (c) Microsoft Corporation. All rights reserved.
+    Licensed under the MIT license.
+*/
+
+import { V1Deployment, V1DeploymentList, V1Pod, V1PodList, V1ReplicaSet, V1ReplicaSetList, V1ServiceList } from "@kubernetes/client-node";
 import { IObservable } from "azure-devops-ui/Core/Observable";
 import { IStatusProps } from "azure-devops-ui/Status";
 import { IBaseProps } from "office-ui-fabric-react/lib/Utilities";

@@ -1,4 +1,8 @@
-import { autobind } from "@uifabric/utilities";
+/*
+    Copyright (c) Microsoft Corporation. All rights reserved.
+    Licensed under the MIT license.
+*/
+
 import { IColumn } from "azure-devops-ui/Components/VssDetailsList/VssDetailsList.Props";
 import { TooltipHost, TooltipOverflowMode } from "azure-devops-ui/Tooltip";
 import { VssDetailsList } from "azure-devops-ui/VssDetailsList";

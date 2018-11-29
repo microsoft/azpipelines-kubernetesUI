@@ -1,12 +1,17 @@
+/*
+    Copyright (c) Microsoft Corporation. All rights reserved.
+    Licensed under the MIT license.
+*/
+
 import React = require("react");
+import { V1Deployment } from "@kubernetes/client-node";
 import { BaseComponent, format } from "@uifabric/utilities";
-import { IVssComponentProperties, IReplicaSetPodItems } from "../Types";
-import { V1Pod, V1ReplicaSet, V1Deployment } from "@kubernetes/client-node";
-import { PodListComponent, IPodListComponentProperties } from "./PodListComponent";
-import { ILabelModel, LabelGroup, WrappingBehavior } from "azure-devops-ui/Label";
 import { ObservableArray } from "azure-devops-ui/Core/Observable";
+import { ILabelModel, LabelGroup, WrappingBehavior } from "azure-devops-ui/Label";
 import { css } from "azure-devops-ui/Util";
 import * as Resources from "../Resources";
+import { IReplicaSetPodItems, IVssComponentProperties } from "../Types";
+import { IPodListComponentProperties, PodListComponent } from "./PodListComponent";
 
 export interface IReplicaSetListComponentProperties extends IVssComponentProperties {
     replicaPodSets: { [uid: string]: IReplicaSetPodItems };
