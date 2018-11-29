@@ -1,4 +1,7 @@
-
+/*
+    Copyright (c) Microsoft Corporation. All rights reserved.
+    Licensed under the MIT license.
+*/
 export declare const NodeNameText: string;
 export declare const NameText: string;
 export declare const StatusText: string;

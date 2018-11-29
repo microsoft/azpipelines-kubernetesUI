@@ -1,10 +1,15 @@
-import { V1DeploymentList, V1Pod, V1ReplicaSet, V1ReplicaSetList, V1ServiceList } from "@kubernetes/client-node";
+/*
+    Copyright (c) Microsoft Corporation. All rights reserved.
+    Licensed under the MIT license.
+*/
+
+import { V1DeploymentList, V1ReplicaSetList, V1ServiceList } from "@kubernetes/client-node";
 import { BaseComponent, format } from "@uifabric/utilities";
 import { Pivot, PivotItem } from "office-ui-fabric-react/lib/Pivot";
 import * as React from "react";
 import { IKubeService } from "../../Contracts/Contracts";
 import * as Resources from "../Resources";
-import { IKubernetesSummary, IVssComponentProperties, IReplicaSetPodItems } from "../Types";
+import { IKubernetesSummary, IReplicaSetPodItems, IVssComponentProperties } from "../Types";
 import { DeploymentsComponent } from "./DeploymentsComponent";
 import "./KubeSummary.scss";
 import { IReplicaSetListComponentProperties, ReplicaSetListComponent } from "./ReplicaSetListComponent";

@@ -1,3 +1,7 @@
+/*
+    Copyright (c) Microsoft Corporation. All rights reserved.
+    Licensed under the MIT license.
+*/
 
 import { CommonServiceIds, getClient, IProjectInfo, IProjectPageService } from "azure-devops-extension-api";
 import { DataSourceDetails, ServiceEndpointRequest, ServiceEndpointRestClient } from "azure-devops-extension-api/ServiceEndpoint";
