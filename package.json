@@ -1,6 +1,6 @@
 {
   "name": "azdevops-kube-summary",
-  "version": "1.0.12",
+  "version": "0.0.2",
   "description": "Azure DevOps Kubernetes Summary",
   "repository": {
     "type": "git",
