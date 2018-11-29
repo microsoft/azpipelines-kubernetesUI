@@ -12,7 +12,7 @@ This repo consists of
 
 ## Host the Kubernetes UI within your Web Application
 
-You can refer to the [azpipelines-kubernetesUI-WebApp](https://github.com/Microsoft/azure-devops-extension-sample) repository as a working reference on how to host the Kubernetes UI in a stand-alone web app. It also has a custom implementation of `IKubeService` to fetch the required Kubernets objects.
+You can refer to the [azpipelines-kubernetesUI-WebApp](https://github.com/Microsoft/azpipelines-kubernetesUI-WebApp) repository as a working reference on how to host the Kubernetes UI in a stand-alone web app. It also has a custom implementation of `IKubeService` to fetch the required Kubernets objects.
 
 ## Contributing
 
