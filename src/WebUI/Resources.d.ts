@@ -7,7 +7,6 @@ export declare const PodsDetailsText: string;
 export declare const StrategyText: string;
 export declare const ReplicasCountText: string;
 export declare const DeploymentsDetailsText: string;
-export declare const ReplicasetsDetailsText: string;
 export declare const ServicesDetailsText: string;
 export declare const ClusterIPText: string;
 export declare const ExternalIPText: string;

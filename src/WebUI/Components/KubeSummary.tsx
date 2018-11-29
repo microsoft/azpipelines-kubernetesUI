@@ -1,14 +1,13 @@
-import "./KubeSummary.scss";
-
-import * as React from "react";
+import { V1DeploymentList, V1Pod, V1ReplicaSet, V1ReplicaSetList, V1ServiceList } from "@kubernetes/client-node";
 import { BaseComponent, format } from "@uifabric/utilities";
-import { IKubeService } from "../../Contracts/Contracts";
-import { IKubernetesSummary, IVssComponentProperties, IService } from "../Types";
-import { IReplicaSetListComponentProperties, ReplicaSetListComponent } from "./ReplicaSetListComponent";
-import { DeploymentsComponent } from "./DeploymentsComponent";
-import { V1DeploymentList, V1ReplicaSetList, V1ServiceList, V1Pod, V1ReplicaSet } from "@kubernetes/client-node";
-import * as Resources from "../Resources";
 import { Pivot, PivotItem } from "office-ui-fabric-react/lib/Pivot";
+import * as React from "react";
+import { IKubeService } from "../../Contracts/Contracts";
+import * as Resources from "../Resources";
+import { IKubernetesSummary, IVssComponentProperties, IReplicaSetPodItems } from "../Types";
+import { DeploymentsComponent } from "./DeploymentsComponent";
+import "./KubeSummary.scss";
+import { IReplicaSetListComponentProperties, ReplicaSetListComponent } from "./ReplicaSetListComponent";
 import { ServicesComponent } from "./ServicesComponent";
 
 const workloadsPivotItemKey: string = "workloads";
@@ -68,11 +67,11 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
             const replicaSets = (this.state.replicaSetList && this.state.replicaSetList.items || []).filter(replica => {
                 return replica.metadata.ownerReferences
                     && replica.metadata.ownerReferences.length > 0
-                    && replica.metadata.ownerReferences[0].uid.toLowerCase() === this.state.selectedItem.uid.toLowerCase()
+                    && replica.metadata.ownerReferences[0].uid.toLowerCase() === this.state.selectedItem.uid.toLowerCase();
             });
 
             if (replicaSets) {
-                let replicaDict: { [uid: string]: { replicaSet: V1ReplicaSet, pods: V1Pod[] } } = {};
+                let replicaDict: { [uid: string]: IReplicaSetPodItems } = {};
                 replicaSets.forEach(replica => {
                     const replicaUId = replica.metadata.uid.toLowerCase();
                     const filteredPods = (this.state.podList && this.state.podList.items || []).filter(pod => {
@@ -85,10 +84,10 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
                 });
 
 
-                var replicaSetList: IReplicaSetListComponentProperties = {
+                const replicaSetList: IReplicaSetListComponentProperties = {
                     replicaPodSets: replicaDict,
                     deployment: this.state.selectedItem.deployment
-                }
+                };
 
                 return (<ReplicaSetListComponent {...replicaSetList} />);
             }
@@ -142,7 +141,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
     private _getMainHeading(): JSX.Element {
         return (
             <div className="content-main-heading">
-                <h2 className="heading">{this.props.title}</h2>
+                <h2 className="title-heading">{this.props.title}</h2>
                 <div className={"sub-heading"}>{format(Resources.NamespaceHeadingText, this.state.namespace || "")}</div>
             </div>
         );

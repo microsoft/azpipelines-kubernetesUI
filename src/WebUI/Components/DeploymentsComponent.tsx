@@ -1,14 +1,13 @@
-import "./DeploymentsComponent.scss";
-
-import * as React from "react";
-import { IVssComponentProperties, IDeploymentItem } from "../Types";
-import { ListComponent } from "./ListComponent";
-import * as Resources from "../Resources";
-import { ColumnActionsMode } from "office-ui-fabric-react/lib/DetailsList";
+import { V1Deployment, V1DeploymentList, V1ObjectMeta, V1ReplicaSet, V1ReplicaSetList } from "@kubernetes/client-node";
+import { BaseComponent, css, format } from "@uifabric/utilities";
 import { IColumn } from "azure-devops-ui/Components/VssDetailsList/VssDetailsList.Props";
-import { BaseComponent, format, css } from "@uifabric/utilities";
-import { V1DeploymentList, V1ReplicaSetList, V1Deployment, V1ReplicaSet } from "@kubernetes/client-node";
-import { StatusSize, Statuses, Status, IStatusProps } from "azure-devops-ui/Status";
+import { IStatusProps, Status, Statuses, StatusSize } from "azure-devops-ui/Status";
+import { ColumnActionsMode } from "office-ui-fabric-react/lib/DetailsList";
+import * as React from "react";
+import * as Resources from "../Resources";
+import { IDeploymentItem, IVssComponentProperties } from "../Types";
+import "./DeploymentsComponent.scss";
+import { ListComponent } from "./ListComponent";
 
 const nameKey: string = "name-col";
 const replicaSetNameKey: string = "replicaSet-col";
@@ -32,13 +31,15 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
                 items={DeploymentsComponent._getDeploymentItems(this.props.deploymentList, this.props.replicaSetList)}
                 columns={DeploymentsComponent._getColumns()}
                 onRenderItemColumn={DeploymentsComponent._onRenderItemColumn}
-                onItemInvoked={(item?: any, index?: number, ev?: Event) => {
-                    if (this.props.onItemInvoked) {
-                        this.props.onItemInvoked(item, index, ev);
-                    }
-                }}
+                onItemInvoked={this._openDeploymentItem}
             />
         );
+    }
+
+    private _openDeploymentItem = (item?: any, index?: number, ev?: Event) => {
+        if (this.props.onItemInvoked) {
+            this.props.onItemInvoked(item, index, ev);
+        }
     }
 
     private static _getDeploymentItems(deploymentList: V1DeploymentList, replicaSetList: V1ReplicaSetList):
@@ -47,31 +48,44 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
         (deploymentList && deploymentList.items || []).forEach(deployment => {
             const filteredReplicas: V1ReplicaSet[] = (replicaSetList && replicaSetList.items || [])
                 .filter(replica => DeploymentsComponent._isReplicaSetForDeployment(deployment, replica)) || [];
-            filteredReplicas.sort((one, two) => {
-                const first: number = (!!one.metadata.creationTimestamp ? new Date(one.metadata.creationTimestamp) : new Date()).getTime();
-                const second: number = (!!two.metadata.creationTimestamp ? new Date(two.metadata.creationTimestamp) : new Date()).getTime();
+            filteredReplicas.sort((a, b) => {
                 // descending order
-                return second - first;
+                return DeploymentsComponent._getCreationTime(b.metadata) - DeploymentsComponent._getCreationTime(a.metadata);
             });
 
             filteredReplicas.forEach((replica, index) => {
-                // todo :: annotations are taken from deployment for the first replica, rest of the replicas from respective replicas
-                const annotations: { [key: string]: string } = index === 0 ? deployment.metadata.annotations : replica.metadata.annotations;
-                items.push({
-                    name: index > 0 ? "" : deployment.metadata.name,
-                    uid: deployment.metadata.uid,
-                    replicaSetName: replica.metadata.name,
-                    pipeline: DeploymentsComponent._getPipelineText(annotations),
-                    // todo :: how to find error in replicaSet
-                    pods: DeploymentsComponent._getPodsText(replica.status.availableReplicas, replica.status.replicas),
-                    statusProps: DeploymentsComponent._getPodsStatusProps(replica.status.availableReplicas, replica.status.replicas),
-                    showRowBorder: (filteredReplicas.length === (index + 1)),
-                    deployment: deployment
-                });
+                items.push(DeploymentsComponent._getDeploymentItem(deployment, replica, index, filteredReplicas.length));
             });
         });
 
         return items;
+    }
+
+    private static _getDeploymentItem(
+        deployment: V1Deployment,
+        replica: V1ReplicaSet,
+        index: number,
+        replicaSetLength: number): IDeploymentItem {
+        // todo :: annotations are taken from deployment for the first replica, rest of the replicas from respective replicas
+        const annotations: {
+            [key: string]: string;
+        } = index === 0 ? deployment.metadata.annotations : replica.metadata.annotations;
+
+        return {
+            name: index > 0 ? "" : deployment.metadata.name,
+            uid: deployment.metadata.uid,
+            replicaSetName: replica.metadata.name,
+            pipeline: DeploymentsComponent._getPipelineText(annotations),
+            // todo :: how to find error in replicaSet
+            pods: DeploymentsComponent._getPodsText(replica.status.availableReplicas, replica.status.replicas),
+            statusProps: DeploymentsComponent._getPodsStatusProps(replica.status.availableReplicas, replica.status.replicas),
+            showRowBorder: (replicaSetLength === (index + 1)),
+            deployment: deployment
+        };
+    }
+
+    private static _getCreationTime(metadata: V1ObjectMeta): number {
+        return (!!metadata.creationTimestamp ? new Date(metadata.creationTimestamp) : new Date()).getTime();
     }
 
     private static _isReplicaSetForDeployment(deployment: V1Deployment, replica: V1ReplicaSet): boolean {
@@ -91,12 +105,7 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
 
     private static _getPodsStatusProps(availableReplicas: number, replicas: number): IStatusProps | undefined {
         if (replicas != null && availableReplicas != null && replicas > 0) {
-            if (availableReplicas < replicas) {
-                return Statuses.Running;
-            }
-            else {
-                return Statuses.Success;
-            }
+            return availableReplicas < replicas ? Statuses.Running : Statuses.Success;
         }
 
         return undefined;

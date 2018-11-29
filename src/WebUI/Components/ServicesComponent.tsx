@@ -1,16 +1,12 @@
-import "./DeploymentsComponent.scss";
-
+import { V1Service, V1ServiceList, V1ServicePort } from "@kubernetes/client-node";
+import { BaseComponent, css, format } from "@uifabric/utilities";
+import { IColumn } from "azure-devops-ui/Components/VssDetailsList/VssDetailsList.Props";
+import { Duration } from "azure-devops-ui/Duration";
+import { ColumnActionsMode } from "office-ui-fabric-react/lib/DetailsList";
 import * as React from "react";
+import * as Resources from "../Resources";
 import { IVssComponentProperties } from "../Types";
 import { ListComponent } from "./ListComponent";
-import * as Resources from "../Resources";
-import { Duration } from "azure-devops-ui/Duration";
-import { Ago } from "azure-devops-ui/Ago";
-import { ColumnActionsMode } from "office-ui-fabric-react/lib/DetailsList";
-import { IColumn } from "azure-devops-ui/Components/VssDetailsList/VssDetailsList.Props";
-import { BaseComponent, format, css } from "@uifabric/utilities";
-import { V1ServiceList, V1Service, V1ServicePort } from "@kubernetes/client-node";
-import { AgoFormat } from "azure-devops-ui/Utilities/Date";
 
 const packageKey: string = "package-col";
 const typeKey: string = "type-col";
@@ -64,23 +60,23 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
     }
 
     private static getExternalIP(service: V1Service): string {
-        return service.status 
-        && service.status.loadBalancer 
-        && service.status.loadBalancer.ingress 
-        && service.status.loadBalancer.ingress.length > 0 
-        && service.status.loadBalancer.ingress[0].ip 
-        || "";
+        return service.status
+            && service.status.loadBalancer
+            && service.status.loadBalancer.ingress
+            && service.status.loadBalancer.ingress.length > 0
+            && service.status.loadBalancer.ingress[0].ip
+            || "";
     }
 
     private static getPort(service: V1Service): string {
-        return service.spec 
-        && service.spec.ports 
-        && service.spec.ports.length > 0
-        && ServicesComponent.formatPortString(service.spec.ports[0])
-        || "";
+        return service.spec
+            && service.spec.ports
+            && service.spec.ports.length > 0
+            && ServicesComponent.formatPortString(service.spec.ports[0])
+            || "";
     }
 
-    private static formatPortString(servicePort: V1ServicePort) {
+    private static formatPortString(servicePort: V1ServicePort): string {
         return format("{0}:{1}:{2}/{3}", servicePort.port, servicePort.targetPort, servicePort.nodePort, servicePort.protocol);
     }
 
@@ -156,7 +152,7 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
             return null;
         }
 
-        const colDataClassName: string = "dc-col-data";
+        const colDataClassName: string = "sc-col-data";
         let textToRender: string = "";
         switch (column.key) {
             case packageKey:
@@ -183,7 +179,7 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
                 return (
                     // <Ago date={service.creationTimestamp} format={AgoFormat.Compact} />
                     <Duration startDate={new Date(service.creationTimestamp)} endDate={new Date()} />
-                )
+                );
         }
 
         return ListComponent.renderColumn(textToRender || "", ListComponent.defaultColumnRenderer, colDataClassName);

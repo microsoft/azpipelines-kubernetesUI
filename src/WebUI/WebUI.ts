@@ -1,9 +1,8 @@
 import * as React from "react";
-
 import { showRootComponent } from "../Common";
 import { IKubeService } from "../Contracts/Contracts";
 import { AzureDevOpsKubeService } from "../Service/Service";
-import { KubeSummary, IKubeSummaryProps } from "./Components/KubeSummary";
+import { IKubeSummaryProps, KubeSummary } from "./Components/KubeSummary";
 
 const service: IKubeService = new AzureDevOpsKubeService("<service-endpoint-id>", "default");
 const props: IKubeSummaryProps = {
