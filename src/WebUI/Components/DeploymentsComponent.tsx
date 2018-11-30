@@ -18,8 +18,8 @@ const nameKey: string = "name-col";
 const replicaSetNameKey: string = "replicaSet-col";
 const pipelineNameKey: string = "pipeline-col";
 const podsKey: string = "pods-col";
-const azurePipelineNameAnnotationKey: string = "azurepipelinename";
-const azurePipelineIdAnnotationKey: string = "azurepipelineid";
+const pipelineNameAnnotationKey: string = "pipeline-name";
+const pipelineIdAnnotationKey: string = "pipeline-id";
 
 export interface IDeploymentsComponentProperties extends IVssComponentProperties {
     deploymentList: V1DeploymentList;
@@ -119,10 +119,10 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
     private static _getPipelineText(annotations: { [key: string]: string }): string {
         let pipelineName: string = "", pipelineId: string = "";
         Object.keys(annotations).find(key => {
-            if (!pipelineName && key.toLowerCase() === azurePipelineNameAnnotationKey) {
+            if (!pipelineName && key.toLowerCase() === pipelineNameAnnotationKey) {
                 pipelineName = annotations[key];
             }
-            else if (!pipelineId && key.toLowerCase() === azurePipelineIdAnnotationKey) {
+            else if (!pipelineId && key.toLowerCase() === pipelineIdAnnotationKey) {
                 pipelineId = annotations[key];
             }
 
