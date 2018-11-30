@@ -7,20 +7,28 @@ This repo contains React based UI view of a kubernetes cluster and will be used 
 
 This repo consists of
 1. Contracts: The `IKubeService` provides the interface that needs to be implemented inorder to fetch data needed for the UI
-2. Service: It contains `AzureDevOpsKubeService` - the ServiceEndpoint based implementation of `IKubeService` that is used in Azure Pipelines
-3. WebUI: It contains the components that make up the UI
+2. WebUI: It contains the components that make up the UI
+
+## Usage of Kubernetes UI within Azure DevOps
+
+This Web UI will be integrated into Azure DevOps as an extension and will be available by default in your Azure DevOps accounts going forward. The repo for the extension is at [azPipeline-KubernetesUI-devopsExtension](https://github.com/Microsoft/azPipeline-KubernetesUI-devopsExtension).
 
 ## Host the Kubernetes UI within your Web Application
 
-You can refer to the [azpipelines-kubernetesUI-WebApp](https://github.com/Microsoft/azpipelines-kubernetesUI-WebApp) repository as a working reference on how to host the Kubernetes UI in a stand-alone web app. It also has a custom implementation of `IKubeService` to fetch the required Kubernets objects.
+You can also host the UI outside of Azure DevOps. Refer to the [azpipelines-kubernetesUI-WebApp](https://github.com/Microsoft/azpipelines-kubernetesUI-WebApp) repository as a working reference on how to host the Kubernetes UI in a stand-alone web app. It also has a custom implementation of `IKubeService` to fetch the required Kubernets objects.
+
+## Build
+
+    npm install
+    npm run build
 
 ## Dependencies
 
 This repository depends on the following packages:
 
-- [azure-devops-extension-sdk](https://github.com/Microsoft/azure-devops-extension-sdk): Required module for Azure DevOps extensions which allows communication between the host page and the extension iframe.
-- [azure-devops-extension-api](https://github.com/Microsoft/azure-devops-extension-api): Contains REST client libraries for the various Azure DevOps feature areas.
 - [azure-devops-ui](https://www.npmjs.com/package/azure-devops-ui): UI library containing the React components used in the Azure DevOps web UI.
+- [@kubernetes/client-node](https://github.com/kubernetes-client/javascript): The Javascript clients for Kubernetes implemented in typescript.
+- [office-ui-fabric-react](https://github.com/OfficeDev/office-ui-fabric-react): React components for building experiences for Office and Office 365
 
 Some external dependencies:
 - `React` - Is used to render the UI in the samples, and is a dependency of `azure-devops-ui`.

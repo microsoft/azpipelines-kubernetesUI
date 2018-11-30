@@ -1,6 +1,6 @@
 {
   "name": "azdevops-kube-summary",
-  "version": "0.0.2",
+  "version": "1.0.4",
   "description": "Azure DevOps Kubernetes Summary",
   "repository": {
     "type": "git",
@@ -12,20 +12,12 @@
     "compile:dev": "npm run clean && webpack --mode development",
     "build": "npm run compile",
     "build:dev": "npm run compile:dev && npm run postbuild",
-    "postbuild": "npm run package-extension -- --rev-version",
-    "compile-vsix": "npm run clean",
-    "bvsix": "npm run compile-vsix && webpack --mode development",
-    "postbvsix": "npm run package-extension -- --rev-version",
-    "package-extension": "tfx extension create --manifest-globs azure-devops-extension.json src/WebUI/**/*.json",
-    "publish-extension": "tfx extension publish --manifest-globs azure-devops-extension.json src/WebUI/**/*.json",
-    "copy-all": "npm run copy-html && npm run copy-resources",
-    "copy-html": "copyfiles -u 1 src/**/*.html src/**/*.scss dist",
+    "copy-all": "npm run copy-scss && npm run copy-resources",
+    "copy-scss": "copyfiles -u 1 src/**/*.scss dist",
     "copy-resources": "copyfiles -u 1 src/**/Resources.js src/**/Types.d.ts dist"
   },
   "keywords": [
-    "extensions",
-    "Azure DevOps",
-    "Visual Studio Team Services"
+    "Kubernetes-UI"
   ],
   "license": "MIT",
   "main": "dist/WebUI/Components/KubeSummary.js",
@@ -34,12 +26,11 @@
   ],
   "dependencies": {
     "@kubernetes/client-node": "^0.7.1",
-    "azure-devops-extension-api": "^1.143.0",
-    "azure-devops-extension-sdk": "~2.0.3",
     "azure-devops-ui": "~1.143.0",
     "office-ui-fabric-react": "5.131.5",
     "react": "~16.3.2",
-    "react-dom": "~16.3.2"
+    "react-dom": "~16.3.2",
+    "webpack": "^4.26.0"
   },
   "devDependencies": {
     "@types/react": "^16.7.6",
@@ -54,11 +45,7 @@
     "rimraf": "~2.6.2",
     "sass-loader": "~7.1.0",
     "style-loader": "~0.23.1",
-    "tfx-cli": "^0.6.3",
     "ts-loader": "~5.2.2",
-    "typescript": "^2.9.2",
-    "uglify-es": "~3.1.3",
-    "webpack": "^4.26.0",
-    "webpack-cli": "^3.1.2"
+    "typescript": "^2.9.2"
   }
 }
