@@ -3,7 +3,7 @@
     Licensed under the MIT license.
 */
 
-import { V1DeploymentList, V1ReplicaSetList, V1ServiceList } from "@kubernetes/client-node";
+import { V1DeploymentList, V1ObjectMeta, V1ReplicaSetList, V1ServiceList } from "@kubernetes/client-node";
 import { BaseComponent, format } from "@uifabric/utilities";
 import { Pivot, PivotItem } from "office-ui-fabric-react/lib/Pivot";
 import * as React from "react";
@@ -67,31 +67,36 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         );
     }
 
+    private static _isOwnerMatched(objectMeta: V1ObjectMeta, ownerUIdLowerCase: string): boolean {
+        return objectMeta.ownerReferences
+            && objectMeta.ownerReferences.length > 0
+            && objectMeta.ownerReferences[0].uid.toLowerCase() === ownerUIdLowerCase;
+    }
+
     private _getReplicaSetPodListComponent(): JSX.Element | null {
-        if (this.state.selectedItem) {
-            const replicaSets = (this.state.replicaSetList && this.state.replicaSetList.items || []).filter(replica => {
-                return replica.metadata.ownerReferences
-                    && replica.metadata.ownerReferences.length > 0
-                    && replica.metadata.ownerReferences[0].uid.toLowerCase() === this.state.selectedItem.uid.toLowerCase();
+        const selectedItem = this.state.selectedItem;
+        if (selectedItem) {
+            const selectedItemUId: string = selectedItem.uid.toLowerCase();
+            const replicas = this.state.replicaSetList;
+            const replicaSets = (replicas && replicas.items || []).filter(replica => {
+                return KubeSummary._isOwnerMatched(replica.metadata, selectedItemUId);
             });
 
             if (replicaSets) {
                 let replicaDict: { [uid: string]: IReplicaSetPodItems } = {};
                 replicaSets.forEach(replica => {
                     const replicaUId = replica.metadata.uid.toLowerCase();
-                    const filteredPods = (this.state.podList && this.state.podList.items || []).filter(pod => {
-                        return pod.metadata.ownerReferences
-                            && pod.metadata.ownerReferences.length > 0
-                            && pod.metadata.ownerReferences[0].uid.toLowerCase() === replicaUId
+                    const podList = this.state.podList;
+                    const filteredPods = (podList && podList.items || []).filter(pod => {
+                        return KubeSummary._isOwnerMatched(pod.metadata, replicaUId);
                     });
 
                     replicaDict[replicaUId] = { replicaSet: replica, pods: filteredPods };
                 });
 
-
                 const replicaSetList: IReplicaSetListComponentProperties = {
                     replicaPodSets: replicaDict,
-                    deployment: this.state.selectedItem.deployment
+                    deployment: selectedItem.deployment
                 };
 
                 return (<ReplicaSetListComponent {...replicaSetList} />);
