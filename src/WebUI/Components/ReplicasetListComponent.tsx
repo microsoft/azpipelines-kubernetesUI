@@ -3,22 +3,35 @@
     Licensed under the MIT license.
 */
 
-import React = require("react");
-import { V1Deployment } from "@kubernetes/client-node";
+import { V1Deployment, V1Pod, V1PodList, V1ReplicaSet } from "@kubernetes/client-node";
 import { BaseComponent, format } from "@uifabric/utilities";
 import { ObservableArray } from "azure-devops-ui/Core/Observable";
 import { ILabelModel, LabelGroup, WrappingBehavior } from "azure-devops-ui/Label";
 import { css } from "azure-devops-ui/Util";
+import * as React from "react";
 import * as Resources from "../Resources";
-import { IReplicaSetPodItems, IVssComponentProperties } from "../Types";
+import { IVssComponentProperties } from "../Types";
 import { IPodListComponentProperties, PodListComponent } from "./PodListComponent";
+import { Utils } from "../Utils";
 
 export interface IReplicaSetListComponentProperties extends IVssComponentProperties {
-    replicaPodSets: { [uid: string]: IReplicaSetPodItems };
+    replicas: { [uid: string]: V1ReplicaSet };
     deployment: V1Deployment;
+    podsPromise: Promise<V1PodList>;
 }
 
-export class ReplicaSetListComponent extends BaseComponent<IReplicaSetListComponentProperties> {
+export interface IReplicaSetListComponentState {
+    replicaPods: { [uid: string]: V1Pod[] };
+}
+
+export class ReplicaSetListComponent extends BaseComponent<IReplicaSetListComponentProperties, IReplicaSetListComponentState> {
+    constructor(props: IReplicaSetListComponentProperties) {
+        super(props, {});
+        this.state = {
+            replicaPods: {}
+        };
+    }
+
     public render(): JSX.Element {
         return (
             <div className="rl-main-content">
@@ -28,14 +41,34 @@ export class ReplicaSetListComponent extends BaseComponent<IReplicaSetListCompon
         );
     }
 
+    public componentDidMount(): void {
+        this._updatePodsIfNeeded();
+    }
+
+    private _updatePodsIfNeeded(): void {
+        if (this.props.replicas && this.props.podsPromise && !this._havePodsUpdated) {
+            this._havePodsUpdated = true;
+            this.props.podsPromise.then((podList: V1PodList) => {
+                let replicaPods: { [uid: string]: V1Pod[] } = {};
+                Object.keys(this.props.replicas).forEach((r: string, index: number) => {
+                    // todo :: build a dict and then use it or should we get filtered list?
+                    replicaPods[r] = (podList && podList.items || []).filter(pod => {
+                        return Utils.isOwnerMatched(pod.metadata, r);
+                    });
+                });
+
+                this.setState({ replicaPods: replicaPods });
+            });
+        }
+    }
+
     private _getReplicaSetListView(): JSX.Element[] {
         let replicaSetListView: JSX.Element[] = [];
-        if (this.props.replicaPodSets) {
-            Object.keys(this.props.replicaPodSets).forEach((r: string, index: number) => {
-                const replicaSetPods = this.props.replicaPodSets[r];
+        if (this.props.replicas) {
+            Object.keys(this.props.replicas).forEach((r: string, index: number) => {
                 let podListComponentProperties: IPodListComponentProperties = {
-                    replicaSet: replicaSetPods.replicaSet,
-                    pods: replicaSetPods.pods
+                    replicaSet: this.props.replicas[r],
+                    pods: this.state.replicaPods[r] || []
                 };
 
                 replicaSetListView.push(
@@ -78,4 +111,6 @@ export class ReplicaSetListComponent extends BaseComponent<IReplicaSetListCompon
 
         return null;
     }
+
+    private _havePodsUpdated: boolean = false;
 }

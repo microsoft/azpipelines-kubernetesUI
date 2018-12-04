@@ -22,9 +22,11 @@ export abstract class KubeServiceBase implements IKubeService {
     getDeployments(): Promise<K8sTypes.V1DeploymentList> {
         return this.fetch(KubeResourceType.Deployments);
     }
+
     getServices(): Promise<K8sTypes.V1ServiceList> {
         return this.fetch(KubeResourceType.Services);
     }
+
     getReplicaSets(): Promise<K8sTypes.V1ReplicaSetList> {
         return this.fetch(KubeResourceType.ReplicaSets);
     }

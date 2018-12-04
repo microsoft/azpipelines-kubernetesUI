@@ -3,17 +3,18 @@
     Licensed under the MIT license.
 */
 
-import { V1DeploymentList, V1ObjectMeta, V1ReplicaSetList, V1ServiceList } from "@kubernetes/client-node";
+import { V1DeploymentList, V1ObjectMeta, V1ReplicaSet, V1ReplicaSetList, V1ServiceList } from "@kubernetes/client-node";
 import { BaseComponent, format } from "@uifabric/utilities";
 import { Pivot, PivotItem } from "office-ui-fabric-react/lib/Pivot";
 import * as React from "react";
 import { IKubeService } from "../../Contracts/Contracts";
 import * as Resources from "../Resources";
-import { IKubernetesSummary, IReplicaSetPodItems, IVssComponentProperties } from "../Types";
+import { IKubernetesSummary, IVssComponentProperties } from "../Types";
 import { DeploymentsComponent } from "./DeploymentsComponent";
 import "./KubeSummary.scss";
 import { IReplicaSetListComponentProperties, ReplicaSetListComponent } from "./ReplicaSetListComponent";
 import { ServicesComponent } from "./ServicesComponent";
+import { Utils } from "../Utils";
 
 const workloadsPivotItemKey: string = "workloads";
 const servicesPivotItemKey: string = "services";
@@ -67,36 +68,26 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         );
     }
 
-    private static _isOwnerMatched(objectMeta: V1ObjectMeta, ownerUIdLowerCase: string): boolean {
-        return objectMeta.ownerReferences
-            && objectMeta.ownerReferences.length > 0
-            && objectMeta.ownerReferences[0].uid.toLowerCase() === ownerUIdLowerCase;
-    }
-
     private _getReplicaSetPodListComponent(): JSX.Element | null {
         const selectedItem = this.state.selectedItem;
         if (selectedItem) {
             const selectedItemUId: string = selectedItem.uid.toLowerCase();
             const replicas = this.state.replicaSetList;
-            const replicaSets = (replicas && replicas.items || []).filter(replica => {
-                return KubeSummary._isOwnerMatched(replica.metadata, selectedItemUId);
+            const filteredReplicas = (replicas && replicas.items || []).filter(replica => {
+                return Utils.isOwnerMatched(replica.metadata, selectedItemUId);
             });
 
-            if (replicaSets) {
-                let replicaDict: { [uid: string]: IReplicaSetPodItems } = {};
-                replicaSets.forEach(replica => {
+            if (filteredReplicas) {
+                let replicaDict: { [uid: string]: V1ReplicaSet } = {};
+                filteredReplicas.forEach(replica => {
                     const replicaUId = replica.metadata.uid.toLowerCase();
-                    const podList = this.state.podList;
-                    const filteredPods = (podList && podList.items || []).filter(pod => {
-                        return KubeSummary._isOwnerMatched(pod.metadata, replicaUId);
-                    });
-
-                    replicaDict[replicaUId] = { replicaSet: replica, pods: filteredPods };
+                    replicaDict[replicaUId] = replica;
                 });
 
                 const replicaSetList: IReplicaSetListComponentProperties = {
-                    replicaPodSets: replicaDict,
-                    deployment: selectedItem.deployment
+                    replicas: replicaDict,
+                    deployment: selectedItem.deployment,
+                    podsPromise: this.props.kubeService && this.props.kubeService.getPods() || Promise.resolve({})
                 };
 
                 return (<ReplicaSetListComponent {...replicaSetList} />);
@@ -111,10 +102,6 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         if (!kubeService) {
             return;
         }
-
-        kubeService.getPods().then(podList => {
-            this.setState({ podList: podList });
-        });
 
         kubeService.getDeployments().then(deploymentList => {
             let deploymentNamespace: string = "";
