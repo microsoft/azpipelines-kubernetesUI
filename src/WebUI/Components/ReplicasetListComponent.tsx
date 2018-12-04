@@ -31,7 +31,7 @@ export class ReplicaSetListComponent extends BaseComponent<IReplicaSetListCompon
     private _getReplicaSetListView(): JSX.Element[] {
         let replicaSetListView: JSX.Element[] = [];
         if (this.props.replicaPodSets) {
-            Object.keys(this.props.replicaPodSets).forEach((r: string) => {
+            Object.keys(this.props.replicaPodSets).forEach((r: string, index: number) => {
                 const replicaSetPods = this.props.replicaPodSets[r];
                 let podListComponentProperties: IPodListComponentProperties = {
                     replicaSet: replicaSetPods.replicaSet,
@@ -39,7 +39,7 @@ export class ReplicaSetListComponent extends BaseComponent<IReplicaSetListCompon
                 };
 
                 replicaSetListView.push(
-                    <div className={css("dc-content", "depth-16", "pod-list")}>
+                    <div className={css("dc-content", "replica-with-pod-list", index === 0 ? "first-replica" : "")}>
                         <PodListComponent {...podListComponentProperties} />
                     </div>
                 );

@@ -4,7 +4,7 @@
 */
 
 import { V1Pod, V1ReplicaSet } from "@kubernetes/client-node";
-import { autobind, BaseComponent, format } from "@uifabric/utilities";
+import { autobind, BaseComponent, css, format } from "@uifabric/utilities";
 import { IColumn } from "azure-devops-ui/Components/VssDetailsList/VssDetailsList.Props";
 import { ObservableArray } from "azure-devops-ui/Core/Observable";
 import { Duration } from "azure-devops-ui/Duration";
@@ -12,11 +12,11 @@ import { ILabelModel, LabelGroup, WrappingBehavior } from "azure-devops-ui/Label
 import "azure-devops-ui/Label.scss";
 import { IStatusProps, Status, Statuses, StatusSize } from "azure-devops-ui/Status";
 import { ColumnActionsMode } from "office-ui-fabric-react/lib/DetailsList";
+import * as React from "react";
 import * as Resources from "../Resources";
 import { IVssComponentProperties } from "../Types";
 import { ListComponent } from "./ListComponent";
 import "./PodListComponent.scss";
-import React = require("react");
 
 const podStatusDic: { [index: string]: IStatusProps } = {
     "Running": Statuses.Success,
@@ -34,12 +34,12 @@ export interface IPodListComponentProperties extends IVssComponentProperties {
     pods: V1Pod[];
 }
 
-export class PodListComponent extends BaseComponent<IPodListComponentProperties>{
+export class PodListComponent extends BaseComponent<IPodListComponentProperties> {
     public render(): JSX.Element {
         return (
             <div className="pod-list-content">
                 <ListComponent
-                    className={"pdl-content"}
+                    className={css("pdl-content", "depth-16")}
                     headingContent={this._getReplicaSetHeadingContent()}
                     items={this.props.pods}
                     columns={PodListComponent._getColumns()}
@@ -72,12 +72,11 @@ export class PodListComponent extends BaseComponent<IPodListComponentProperties>
             case podStatusKey:
                 return (
                     <div className="pod-status">
-                        {
-                            <Status {...podStatusDic[pod.status.phase]} animated={false} size={StatusSize.s} />
-                        }
+                        <Status {...podStatusDic[pod.status.phase]} animated={false} size={StatusSize.s} />
                         <span className="pod-name"> {pod.metadata.name}</span>
                     </div>
                 );
+
             case podIPKey:
                 textToRender = pod.status.podIP;
                 break;
