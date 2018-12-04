@@ -27,11 +27,6 @@ export interface IDeploymentItem {
     deployment?: V1Deployment;
 }
 
-export interface IReplicaSetPodItems {
-    replicaSet: V1ReplicaSet;
-    pods: V1Pod[];
-}
-
 export interface IVssComponentProperties extends IBaseProps {
     /**
      * Components may specify a css classe list that should be applied to the primary
