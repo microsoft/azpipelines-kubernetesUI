@@ -1,14 +1,14 @@
 {
-  "name": "azdevops-kube-summary",
+  "name": "@azurepipelines/azdevops-kube-summary",
   "version": "1.0.5",
   "description": "Azure DevOps Kubernetes Summary",
-  "engines" : { 
-    "node" : ">=8.4.0",
-    "npm" :  ">=5.3.0"
+  "engines": {
+    "node": ">=8.4.0",
+    "npm": ">=5.3.0"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Microsoft/azpipelines-kubernetesUI.git"
+    "url": "git+https://github.com/Microsoft/azpipelines-kubernetesUI.git"
   },
   "scripts": {
     "clean": "rimraf ./dist",
@@ -51,5 +51,10 @@
     "ts-loader": "~5.2.2",
     "typescript": "^2.9.2",
     "webpack": "^4.27.0"
-  }
+  },
+  "bugs": {
+    "url": "https://github.com/Microsoft/azpipelines-kubernetesUI/issues"
+  },
+  "homepage": "https://github.com/Microsoft/azpipelines-kubernetesUI#readme",
+  "author": "Azure Pipelines"
 }
