@@ -6,15 +6,15 @@
 import { V1Pod, V1ReplicaSet } from "@kubernetes/client-node";
 import { autobind, BaseComponent, css, format } from "@uifabric/utilities";
 import { IColumn } from "azure-devops-ui/Components/VssDetailsList/VssDetailsList.Props";
-import { ObservableArray } from "azure-devops-ui/Core/Observable";
 import { Duration } from "azure-devops-ui/Duration";
-import { ILabelModel, LabelGroup, WrappingBehavior } from "azure-devops-ui/Label";
+import { LabelGroup, WrappingBehavior } from "azure-devops-ui/Label";
 import "azure-devops-ui/Label.scss";
 import { IStatusProps, Status, Statuses, StatusSize } from "azure-devops-ui/Status";
 import { ColumnActionsMode } from "office-ui-fabric-react/lib/DetailsList";
 import * as React from "react";
 import * as Resources from "../Resources";
 import { IVssComponentProperties } from "../Types";
+import { Utils } from "../Utils";
 import { ListComponent } from "./ListComponent";
 import "./PodListComponent.scss";
 
@@ -88,18 +88,16 @@ export class PodListComponent extends BaseComponent<IPodListComponentProperties>
         return ListComponent.renderColumn(textToRender, ListComponent.defaultColumnRenderer, "pdl-col-data");
     }
 
-    // todo :: make a util function to use for deployment and replicaset
     private _getReplicaSetLabels(): React.ReactNode | null {
         const podLabels = this.props.replicaSet.metadata.labels;
-        let labels = new ObservableArray<ILabelModel>();
         if (podLabels) {
-            Object.keys(podLabels).forEach((key: string) => {
-                labels.push({ content: format("{0}:{1}", key, podLabels[key]) });
-            });
-
             return (
                 <div className="pl-label-group">
-                    <LabelGroup labelProps={labels} wrappingBehavior={WrappingBehavior.OneLine} fadeOutOverflow />
+                    <LabelGroup
+                        labelProps={Utils.getUILabelModelArray(podLabels)}
+                        wrappingBehavior={WrappingBehavior.OneLine}
+                        fadeOutOverflow={true}
+                    />
                 </div>
             );
         }

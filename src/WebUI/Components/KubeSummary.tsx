@@ -3,18 +3,19 @@
     Licensed under the MIT license.
 */
 
-import { V1DeploymentList, V1ObjectMeta, V1ReplicaSet, V1ReplicaSetList, V1ServiceList } from "@kubernetes/client-node";
+import { V1DeploymentList, V1ReplicaSet, V1ReplicaSetList, V1ServiceList } from "@kubernetes/client-node";
 import { BaseComponent, format } from "@uifabric/utilities";
 import { Pivot, PivotItem } from "office-ui-fabric-react/lib/Pivot";
 import * as React from "react";
 import { IKubeService } from "../../Contracts/Contracts";
 import * as Resources from "../Resources";
 import { IKubernetesSummary, IVssComponentProperties } from "../Types";
+import { Utils } from "../Utils";
 import { DeploymentsComponent } from "./DeploymentsComponent";
 import "./KubeSummary.scss";
 import { IReplicaSetListComponentProperties, ReplicaSetListComponent } from "./ReplicaSetListComponent";
+import { ServiceComponent } from "./ServiceComponent";
 import { ServicesComponent } from "./ServicesComponent";
-import { Utils } from "../Utils";
 
 const workloadsPivotItemKey: string = "workloads";
 const servicesPivotItemKey: string = "services";
@@ -62,7 +63,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
                 }
                 {
                     !!this.state.showService &&
-                    <div>Show service</div>
+                    this._getServiceComponent()
                 }
             </div >
         );
@@ -170,18 +171,18 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
                     deploymentList={this.state.deploymentList || {} as V1DeploymentList}
                     replicaSetList={this.state.replicaSetList || {} as V1ReplicaSetList}
                     key={format("dc-{0}", this.state.namespace || "")}
-                    onItemInvoked={this._onItemInvoked}
+                    onItemInvoked={this._onDeploymentItemInvoked}
                 />
             </PivotItem>
         );
     }
 
-    private _onItemInvoked = (item?: any, index?: number, ev?: Event) => {
+    private _onDeploymentItemInvoked = (item?: any, index?: number, ev?: Event) => {
         this.setState({
             showDeployment: true,
+            selectedItem: item,
             showService: false,
-            showSummary: false,
-            selectedItem: item
+            showSummary: false
         });
     }
 
@@ -192,8 +193,24 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
                 itemKey={servicesPivotItemKey}
                 className="item-padding"
             >
-                <ServicesComponent servicesList={this.state.serviceList || {} as V1ServiceList} />
+                <ServicesComponent
+                    servicesList={this.state.serviceList || {} as V1ServiceList}
+                    onItemInvoked={this._onServiceItemInvoked}
+                />
             </PivotItem>
         );
+    }
+
+    private _onServiceItemInvoked = (item?: any, index?: number, ev?: Event) => {
+        this.setState({
+            showService: true,
+            selectedItem: item,
+            showDeployment: false,
+            showSummary: false
+        });
+    }
+
+    private _getServiceComponent(): JSX.Element {
+        return <ServiceComponent service={this.state.selectedItem} />;
     }
 }

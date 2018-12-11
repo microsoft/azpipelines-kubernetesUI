@@ -30,3 +30,8 @@ export declare const Created: string;
 export declare const AgoBy: string;
 export declare const Deployment: string;
 export declare const ReplicaSet: string;
+export declare const ServiceCreatedText: string;
+export declare const DetailsText: string;
+export declare const LabelsText: string;
+export declare const SelectorText: string;
+export declare const SessionAffinityText: string;

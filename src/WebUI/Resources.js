@@ -31,4 +31,9 @@ define("Environments/Providers/Kubernetes/Resources", ["require", "exports"], fu
     exports.AgoBy = " ago. Image: {0}";
     exports.Deployment = "Deployment: {0}";
     exports.ReplicaSet = "ReplicaSet: {0}";
+    exports.ServiceCreatedText = "Service created {0}"
+    exports.DetailsText = "Details";
+    exports.LabelsText = "Labels";
+    exports.SelectorText = "Selector";
+    exports.SessionAffinityText = "Session affinity";
 });
