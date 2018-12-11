@@ -16,6 +16,8 @@ import "./KubeSummary.scss";
 import { IReplicaSetListComponentProperties, ReplicaSetListComponent } from "./ReplicaSetListComponent";
 import { ServiceComponent } from "./ServiceComponent";
 import { ServicesComponent } from "./ServicesComponent";
+// todo :: work around till this issue is fixed in devops ui
+import "azure-devops-ui/Label.scss";
 
 const workloadsPivotItemKey: string = "workloads";
 const servicesPivotItemKey: string = "services";

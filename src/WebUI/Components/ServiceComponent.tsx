@@ -6,9 +6,7 @@
 import { BaseComponent, format } from "@uifabric/utilities";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { LabelGroup, WrappingBehavior } from "azure-devops-ui/Label";
-import "azure-devops-ui/Label.scss";
-import { ColumnFill, ITableColumn, renderSimpleCell, Table } from "azure-devops-ui/Table";
-import { css } from "azure-devops-ui/Util";
+import { ColumnFill, ITableColumn, renderSimpleCell, SimpleTableCell as renderTableCell, Table } from "azure-devops-ui/Table";
 import * as Date_Utils from "azure-devops-ui/Utilities/Date";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
@@ -120,26 +118,10 @@ export class ServiceComponent extends BaseComponent<IServiceComponentProperties>
                     tableColumn: tableColumn
                 };
 
-                return ServiceComponent._simpleTableCell(props);
+                return renderTableCell(props);
 
             default:
                 return renderSimpleCell(rowIndex, columnIndex, tableColumn, tableItem);
         }
-    }
-
-    // todo :: remove this function once azure-devops-ui expose this function
-    private static _simpleTableCell(
-        props: { columnIndex: number; children: React.ReactNode; tableColumn: ITableColumn<any>; className?: string }): JSX.Element {
-        const { className, columnIndex } = props;
-        return (
-            <td
-                key={"col-" + columnIndex}
-                aria-colindex={columnIndex}
-                className={css(className, props.tableColumn.className, "bolt-table-cell bolt-list-cell")}
-                data-column-index={columnIndex}
-            >
-                {props.children}
-            </td>
-        );
     }
 }

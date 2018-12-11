@@ -5,14 +5,13 @@
 
 import { V1Deployment, V1Pod, V1PodList, V1ReplicaSet } from "@kubernetes/client-node";
 import { BaseComponent, format } from "@uifabric/utilities";
-import { ObservableArray } from "azure-devops-ui/Core/Observable";
-import { ILabelModel, LabelGroup, WrappingBehavior } from "azure-devops-ui/Label";
+import { LabelGroup, WrappingBehavior } from "azure-devops-ui/Label";
 import { css } from "azure-devops-ui/Util";
 import * as React from "react";
 import * as Resources from "../Resources";
 import { IVssComponentProperties } from "../Types";
-import { IPodListComponentProperties, PodListComponent } from "./PodListComponent";
 import { Utils } from "../Utils";
+import { IPodListComponentProperties, PodListComponent } from "./PodListComponent";
 
 export interface IReplicaSetListComponentProperties extends IVssComponentProperties {
     replicas: { [uid: string]: V1ReplicaSet };
