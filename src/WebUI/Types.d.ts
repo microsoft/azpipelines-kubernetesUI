@@ -3,7 +3,7 @@
     Licensed under the MIT license.
 */
 
-import { V1Deployment, V1DeploymentList, V1Pod, V1PodList, V1ReplicaSet, V1ReplicaSetList, V1ServiceList } from "@kubernetes/client-node";
+import { V1Deployment, V1DeploymentList, V1PodList, V1ReplicaSetList, V1Service, V1ServiceList } from "@kubernetes/client-node";
 import { IObservable } from "azure-devops-ui/Core/Observable";
 import { IStatusProps } from "azure-devops-ui/Status";
 import { IBaseProps } from "office-ui-fabric-react/lib/Utilities";
@@ -25,6 +25,17 @@ export interface IDeploymentItem {
     statusProps?: IStatusProps;
     showRowBorder?: boolean;
     deployment?: V1Deployment;
+}
+
+export interface IServiceItem {
+    package: string;
+    type: string;
+    clusterIP: string;
+    externalIP: string;
+    port: string;
+    creationTimestamp: Date;
+    uid: string;
+    service?: V1Service;
 }
 
 export interface IVssComponentProperties extends IBaseProps {

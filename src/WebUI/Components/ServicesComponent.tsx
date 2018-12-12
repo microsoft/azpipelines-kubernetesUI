@@ -10,7 +10,7 @@ import { Duration } from "azure-devops-ui/Duration";
 import { ColumnActionsMode } from "office-ui-fabric-react/lib/DetailsList";
 import * as React from "react";
 import * as Resources from "../Resources";
-import { IVssComponentProperties } from "../Types";
+import { IServiceItem, IVssComponentProperties } from "../Types";
 import { ListComponent } from "./ListComponent";
 
 const packageKey: string = "package-col";
@@ -20,17 +20,9 @@ const externalIPKey: string = "external-ip-col";
 const portKey: string = "port-col";
 const ageKey: string = "age-col";
 
-interface IServiceItem {
-    package: string;
-    type: string;
-    clusterIP: string;
-    externalIP: string;
-    port: string;
-    creationTimestamp: Date;
-}
-
 export interface IServicesComponentProperties extends IVssComponentProperties {
     servicesList: V1ServiceList;
+    onItemInvoked?: (item?: any, index?: number, ev?: Event) => void;
 }
 
 export class ServicesComponent extends BaseComponent<IServicesComponentProperties, {}> {
@@ -43,8 +35,15 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
                 items={ServicesComponent._getServiceItems(this.props.servicesList)}
                 columns={ServicesComponent._getColumns()}
                 onRenderItemColumn={ServicesComponent._onRenderItemColumn}
+                onItemInvoked={this._openServiceItem}
             />
         );
+    }
+
+    private _openServiceItem = (item?: any, index?: number, ev?: Event) => {
+        if (this.props.onItemInvoked) {
+            this.props.onItemInvoked(item, index, ev);
+        }
     }
 
     private static _getServiceItems(servicesList: V1ServiceList): IServiceItem[] {
@@ -57,7 +56,9 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
                 clusterIP: service.spec.clusterIP,
                 externalIP: ServicesComponent.getExternalIP(service),
                 port: ServicesComponent.getPort(service),
-                creationTimestamp: service.metadata.creationTimestamp
+                creationTimestamp: service.metadata.creationTimestamp,
+                uid: service.metadata.uid.toLowerCase(),
+                service: service
             });
         });
 

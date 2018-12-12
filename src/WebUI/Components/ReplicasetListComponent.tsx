@@ -5,14 +5,13 @@
 
 import { V1Deployment, V1Pod, V1PodList, V1ReplicaSet } from "@kubernetes/client-node";
 import { BaseComponent, format } from "@uifabric/utilities";
-import { ObservableArray } from "azure-devops-ui/Core/Observable";
-import { ILabelModel, LabelGroup, WrappingBehavior } from "azure-devops-ui/Label";
+import { LabelGroup, WrappingBehavior } from "azure-devops-ui/Label";
 import { css } from "azure-devops-ui/Util";
 import * as React from "react";
 import * as Resources from "../Resources";
 import { IVssComponentProperties } from "../Types";
-import { IPodListComponentProperties, PodListComponent } from "./PodListComponent";
 import { Utils } from "../Utils";
+import { IPodListComponentProperties, PodListComponent } from "./PodListComponent";
 
 export interface IReplicaSetListComponentProperties extends IVssComponentProperties {
     replicas: { [uid: string]: V1ReplicaSet };
@@ -95,18 +94,18 @@ export class ReplicaSetListComponent extends BaseComponent<IReplicaSetListCompon
         return null;
     }
 
-    // todo :: refactor as util function to use in deployment and replicaset
     private _getDeploymentLabels(): React.ReactNode | null {
         if (this.props.deployment
             && this.props.deployment.metadata
             && this.props.deployment.metadata.labels) {
             const deploymentLabels = this.props.deployment.metadata.labels;
-            let labels = new ObservableArray<ILabelModel>();
-            Object.keys(deploymentLabels).forEach((key: string) => {
-                labels.push({ content: format("{0}:{1}", key, deploymentLabels[key]) });
-            });
-
-            return <LabelGroup labelProps={labels} wrappingBehavior={WrappingBehavior.FreeFlow} fadeOutOverflow />;
+            return (
+                <LabelGroup
+                    labelProps={Utils.getUILabelModelArray(deploymentLabels)}
+                    wrappingBehavior={WrappingBehavior.FreeFlow}
+                    fadeOutOverflow={true}
+                />
+            );
         }
 
         return null;
