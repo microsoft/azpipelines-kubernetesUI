@@ -54,8 +54,8 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
                 package: service.metadata.name,
                 type: service.spec.type,
                 clusterIP: service.spec.clusterIP,
-                externalIP: ServicesComponent.getExternalIP(service),
-                port: ServicesComponent.getPort(service),
+                externalIP: this._getExternalIP(service),
+                port: this._getPort(service),
                 creationTimestamp: service.metadata.creationTimestamp,
                 uid: service.metadata.uid.toLowerCase(),
                 service: service
@@ -65,7 +65,7 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
         return items;
     }
 
-    private static getExternalIP(service: V1Service): string {
+    private static _getExternalIP(service: V1Service): string {
         return service.status
             && service.status.loadBalancer
             && service.status.loadBalancer.ingress
@@ -74,16 +74,21 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
             || "";
     }
 
-    private static getPort(service: V1Service): string {
-        return service.spec
+    private static _getPort(service: V1Service): string {
+        if (service.spec
             && service.spec.ports
-            && service.spec.ports.length > 0
-            && ServicesComponent.formatPortString(service.spec.ports[0])
-            || "";
+            && service.spec.ports.length > 0) {
+            const ports = service.spec.ports.map(port => this._formatPortString(port));
+            return ports.join(", ");
+        }
+
+        return "";
     }
 
-    private static formatPortString(servicePort: V1ServicePort): string {
-        return format("{0}:{1}:{2}/{3}", servicePort.port, servicePort.targetPort, servicePort.nodePort, servicePort.protocol);
+    private static _formatPortString(servicePort: V1ServicePort): string {
+        const nodePort = servicePort.nodePort ? ":" + servicePort.nodePort : "";
+        // example: 80:2080/TCP, if nodeport. 80/TCP, if no nodeport
+        return format("{0}{1}/{2}", servicePort.port, nodePort, servicePort.protocol);
     }
 
     private static _getColumns(): IColumn[] {
