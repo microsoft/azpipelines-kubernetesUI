@@ -1,6 +1,6 @@
 @import "azure-devops-ui/Core/_platformCommon.scss";
 
-.sc-list-content{
+.sc-list-content {
     display: flex;
     flex-direction: column;
     flex-wrap: nowrap;
@@ -10,16 +10,14 @@
 .sc-col-header {
     color: $secondary-text;
     font-size: $fontSizeM;
+    min-width: 140px;
 }
 
 .sc-col-content {
     display: inline-flex;
     align-items: center;
     font-size: 16px;
-}
-
-.sc-wide-col {
-    width: 140px;
+    min-width: 140px;
 }
 
 .sc-col-primary-text {

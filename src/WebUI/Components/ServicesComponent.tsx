@@ -137,7 +137,7 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
             maxWidth: 110,
             headerClassName: headerColumnClassName,
             columnActionsMode: ColumnActionsMode.disabled,
-            className: css(columnContentClassName, "sc-wide-col")
+            className: columnContentClassName
         });
 
         columns.push({
@@ -183,7 +183,6 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
             case ageKey:
                 return (
                     <Ago date={new Date(service.creationTimestamp)} />
-                    // <Duration startDate={new Date(service.creationTimestamp)} endDate={new Date()} />
                 );
         }
 
