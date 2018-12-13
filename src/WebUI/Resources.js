@@ -12,7 +12,6 @@ define("Environments/Providers/Kubernetes/Resources", ["require", "exports"], fu
     exports.StrategyText = "Strategy";
     exports.ReplicasCountText = "Pods #";
     exports.DeploymentsDetailsText = "Deployments";
-    exports.ServicesDetailsText = "Services";
     exports.ClusterIPText = "Cluster IP";
     exports.ExternalIPText = "External IP";
     exports.TypeText = "Type";
@@ -23,7 +22,7 @@ define("Environments/Providers/Kubernetes/Resources", ["require", "exports"], fu
     exports.PodsText = "Pods";
     exports.PortText = "Port";
     exports.NamespaceHeadingText = "Namespace: {0}";
-    exports.PivotServiceText = "Discover and load balancing";
+    exports.PivotServiceText = "Services";
     exports.PivotWorkloadsText = "Workloads";
     exports.PodAge = "Age";
     exports.PodIP = "IP";
@@ -36,4 +35,5 @@ define("Environments/Providers/Kubernetes/Resources", ["require", "exports"], fu
     exports.LabelsText = "Labels";
     exports.SelectorText = "Selector";
     exports.SessionAffinityText = "Session affinity";
+    exports.NoneText = "None";
 });

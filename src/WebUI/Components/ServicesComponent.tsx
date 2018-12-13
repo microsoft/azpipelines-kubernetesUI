@@ -6,12 +6,13 @@
 import { V1Service, V1ServiceList, V1ServicePort } from "@kubernetes/client-node";
 import { BaseComponent, css, format } from "@uifabric/utilities";
 import { IColumn } from "azure-devops-ui/Components/VssDetailsList/VssDetailsList.Props";
-import { Duration } from "azure-devops-ui/Duration";
+import { Ago } from "azure-devops-ui/Ago";
 import { ColumnActionsMode } from "office-ui-fabric-react/lib/DetailsList";
 import * as React from "react";
 import * as Resources from "../Resources";
 import { IServiceItem, IVssComponentProperties } from "../Types";
 import { ListComponent } from "./ListComponent";
+import "./ServicesComponent.scss";
 
 const packageKey: string = "package-col";
 const typeKey: string = "type-col";
@@ -31,7 +32,6 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
         return (
             <ListComponent
                 className={css("sc-list-content", "depth-16")}
-                headingText={Resources.ServicesDetailsText}
                 items={ServicesComponent._getServiceItems(this.props.servicesList)}
                 columns={ServicesComponent._getColumns()}
                 onRenderItemColumn={ServicesComponent._onRenderItemColumn}
@@ -94,25 +94,17 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
     private static _getColumns(): IColumn[] {
         let columns: IColumn[] = [];
         const headerColumnClassName: string = "sc-col-header";
+        const columnContentClassName: string = "sc-col-content";
 
         columns.push({
             key: packageKey,
-            name: Resources.PackageText,
+            name: Resources.NameText,
             fieldName: packageKey,
             minWidth: 140,
             maxWidth: 140,
             headerClassName: css(headerColumnClassName, "first-col-header"),
-            columnActionsMode: ColumnActionsMode.disabled
-        });
-
-        columns.push({
-            key: typeKey,
-            name: Resources.TypeText,
-            fieldName: typeKey,
-            minWidth: 110,
-            maxWidth: 110,
-            headerClassName: headerColumnClassName,
-            columnActionsMode: ColumnActionsMode.disabled
+            columnActionsMode: ColumnActionsMode.disabled,
+            className: columnContentClassName
         });
 
         columns.push({
@@ -122,7 +114,8 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
             minWidth: 110,
             maxWidth: 110,
             headerClassName: headerColumnClassName,
-            columnActionsMode: ColumnActionsMode.disabled
+            columnActionsMode: ColumnActionsMode.disabled,
+            className: columnContentClassName
         });
 
         columns.push({
@@ -132,17 +125,19 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
             minWidth: 110,
             maxWidth: 110,
             headerClassName: headerColumnClassName,
-            columnActionsMode: ColumnActionsMode.disabled
+            columnActionsMode: ColumnActionsMode.disabled,
+            className: columnContentClassName
         });
 
         columns.push({
             key: portKey,
             name: Resources.PortText,
             fieldName: portKey,
-            minWidth: 110,
-            maxWidth: 110,
+            minWidth: 140,
+            maxWidth: 140,
             headerClassName: headerColumnClassName,
-            columnActionsMode: ColumnActionsMode.disabled
+            columnActionsMode: ColumnActionsMode.disabled,
+            className: columnContentClassName
         });
 
         columns.push({
@@ -152,7 +147,8 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
             minWidth: 80,
             maxWidth: 80,
             headerClassName: headerColumnClassName,
-            columnActionsMode: ColumnActionsMode.disabled
+            columnActionsMode: ColumnActionsMode.disabled,
+            className: columnContentClassName
         });
 
         return columns;
@@ -167,19 +163,17 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
         let textToRender: string = "";
         switch (column.key) {
             case packageKey:
-                textToRender = service.package;
-                break;
-
+                return  ListComponent.renderTwoLineColumn(service.package, service.type,colDataClassName,"sc-col-primary-text","sc-col-secondary-text");
             case typeKey:
                 textToRender = service.type;
                 break;
 
             case clusterIPKey:
-                textToRender = service.clusterIP;
+                textToRender = service.clusterIP || Resources.NoneText;
                 break;
 
             case externalIPKey:
-                textToRender = service.externalIP;
+                textToRender = service.externalIP || Resources.NoneText;
                 break;
 
             case portKey:
@@ -188,8 +182,7 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
 
             case ageKey:
                 return (
-                    // <Ago date={service.creationTimestamp} format={AgoFormat.Compact} />
-                    <Duration startDate={new Date(service.creationTimestamp)} endDate={new Date()} />
+                    <Ago date={new Date(service.creationTimestamp)} />
                 );
         }
 
