@@ -133,8 +133,8 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
             key: portKey,
             name: Resources.PortText,
             fieldName: portKey,
-            minWidth: 110,
-            maxWidth: 110,
+            minWidth: 140,
+            maxWidth: 140,
             headerClassName: headerColumnClassName,
             columnActionsMode: ColumnActionsMode.disabled,
             className: columnContentClassName
