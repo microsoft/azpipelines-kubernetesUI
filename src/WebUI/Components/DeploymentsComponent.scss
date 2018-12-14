@@ -21,14 +21,11 @@
 .dc-col-content {
     display: inline-flex;
     align-items: center;
-    font-size: 16px;
 }
 
 .dc-col-primary-text {
     font-weight: $fontWeightSemiBold;
-    font-size: $fontSizeL;
 }
 .dc-col-secondary-text {
     color: $secondary-text;
-    font-size: $fontSizeM;
 }
