@@ -10,14 +10,17 @@ import { IStatusProps, Status, Statuses, StatusSize } from "azure-devops-ui/Stat
 import { ColumnActionsMode } from "office-ui-fabric-react/lib/DetailsList";
 import * as React from "react";
 import * as Resources from "../Resources";
-import { IDeploymentItem, IVssComponentProperties } from "../Types";
+import { IDeploymentItem, IVssComponentProperties, IDeploymentReplicaSetMap } from "../Types";
 import "./DeploymentsComponent.scss";
 import { ListComponent } from "./ListComponent";
+import { ILabelModel, LabelGroup, WrappingBehavior, Label } from "azure-devops-ui/Label";
+import { Ago } from "azure-devops-ui/Ago";
 
-const nameKey: string = "name-col";
 const replicaSetNameKey: string = "replicaSet-col";
 const pipelineNameKey: string = "pipeline-col";
 const podsKey: string = "pods-col";
+const imageKey: string = "image-col";
+const ageKey: string = "age-key";
 const pipelineNameAnnotationKey: string = "pipeline-name";
 const pipelineIdAnnotationKey: string = "pipeline-id";
 
@@ -30,14 +33,7 @@ export interface IDeploymentsComponentProperties extends IVssComponentProperties
 export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentProperties, {}> {
     public render(): React.ReactNode {
         return (
-            <ListComponent
-                className={css("dc-list-content", "depth-16")}
-                headingText={Resources.DeploymentsDetailsText}
-                items={DeploymentsComponent._getDeploymentItems(this.props.deploymentList, this.props.replicaSetList)}
-                columns={DeploymentsComponent._getColumns()}
-                onRenderItemColumn={DeploymentsComponent._onRenderItemColumn}
-                onItemInvoked={this._openDeploymentItem}
-            />
+            <div>{this._getDeploymentListView()}</div>
         );
     }
 
@@ -47,9 +43,23 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
         }
     }
 
-    private static _getDeploymentItems(deploymentList: V1DeploymentList, replicaSetList: V1ReplicaSetList):
-        IDeploymentItem[] {
-        let items: IDeploymentItem[] = [];
+    private _getDeploymentListView() {
+        let renderList:JSX.Element[] =[];
+        DeploymentsComponent._generateDeploymentReplicaSetMap(this.props.deploymentList, this.props.replicaSetList).forEach(entry => {
+           renderList.push( <ListComponent
+                className={css("dc-list-content", "depth-16")}
+                headingContent={DeploymentsComponent._getHeadingContent(entry.deployment)}
+                items={DeploymentsComponent._getDeploymentItems(entry.deployment, entry.replicaSets)}
+                columns={DeploymentsComponent._getColumns()}
+                onRenderItemColumn={DeploymentsComponent._onRenderItemColumn}
+                onItemInvoked={this._openDeploymentItem}
+            />);
+        }); 
+        return renderList;
+    }
+
+    private static _generateDeploymentReplicaSetMap(deploymentList: V1DeploymentList, replicaSetList:V1ReplicaSetList):IDeploymentReplicaSetMap[] {
+        let deploymentReplicaSetMap:IDeploymentReplicaSetMap[] = [];
         (deploymentList && deploymentList.items || []).forEach(deployment => {
             const filteredReplicas: V1ReplicaSet[] = (replicaSetList && replicaSetList.items || [])
                 .filter(replica => DeploymentsComponent._isReplicaSetForDeployment(deployment, replica)) || [];
@@ -57,11 +67,20 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
                 // descending order
                 return DeploymentsComponent._getCreationTime(b.metadata) - DeploymentsComponent._getCreationTime(a.metadata);
             });
-
-            filteredReplicas.forEach((replica, index) => {
-                items.push(DeploymentsComponent._getDeploymentItem(deployment, replica, index, filteredReplicas.length));
+            deploymentReplicaSetMap.push({
+                deployment: deployment,
+                replicaSets: filteredReplicas
             });
         });
+        return deploymentReplicaSetMap;
+    }
+
+    private static _getDeploymentItems(deployment: V1Deployment, replicaSets: V1ReplicaSet[]):
+        IDeploymentItem[] {
+        let items: IDeploymentItem[] = [];
+        replicaSets.forEach((replicaSet, index) => {
+                items.push(DeploymentsComponent._getDeploymentItem(deployment, replicaSet, index, replicaSets.length));
+            });
 
         return items;
     }
@@ -85,7 +104,10 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
             pods: DeploymentsComponent._getPodsText(replica.status.availableReplicas, replica.status.replicas),
             statusProps: DeploymentsComponent._getPodsStatusProps(replica.status.availableReplicas, replica.status.replicas),
             showRowBorder: (replicaSetLength === (index + 1)),
-            deployment: deployment
+            deployment: deployment,
+            //todo :: how to display images of all containers in a replica pod
+            image: replica.spec.template.spec.containers[0].image,
+            creationTimeStamp: replica.metadata.creationTimestamp
         };
     }
 
@@ -135,35 +157,26 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
     private static _getColumns(): IColumn[] {
         let columns: IColumn[] = [];
         const headerColumnClassName: string = "dc-col-header";
-
-        columns.push({
-            key: nameKey,
-            name: Resources.NameText,
-            fieldName: nameKey,
-            minWidth: 140,
-            maxWidth: 140,
-            headerClassName: css(headerColumnClassName, "first-col-header"),
-            columnActionsMode: ColumnActionsMode.disabled
-        });
-
+        const columnContentClassname: string = "dc-col-content";
         columns.push({
             key: replicaSetNameKey,
             name: Resources.ReplicaSetText,
             fieldName: replicaSetNameKey,
-            minWidth: 200,
-            maxWidth: 200,
+            minWidth: 250,
+            maxWidth: 250,
             headerClassName: headerColumnClassName,
-            columnActionsMode: ColumnActionsMode.disabled
+            columnActionsMode: ColumnActionsMode.disabled,
+            className: columnContentClassname
         });
-
         columns.push({
-            key: pipelineNameKey,
-            name: Resources.PipelineText,
-            fieldName: pipelineNameKey,
-            minWidth: 220,
-            maxWidth: 220,
+            key: imageKey,
+            name: Resources.ImageText,
+            fieldName: imageKey,
+            minWidth: 250,
+            maxWidth: 250,
             headerClassName: headerColumnClassName,
-            columnActionsMode: ColumnActionsMode.disabled
+            columnActionsMode: ColumnActionsMode.disabled,
+            className: columnContentClassname
         });
 
         columns.push({
@@ -173,7 +186,19 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
             minWidth: 80,
             maxWidth: 80,
             headerClassName: headerColumnClassName,
-            columnActionsMode: ColumnActionsMode.disabled
+            columnActionsMode: ColumnActionsMode.disabled,
+            className: columnContentClassname
+        });
+
+        columns.push({
+            key: ageKey,
+            name: Resources.AgeText,
+            fieldName: ageKey,
+            minWidth: 80,
+            maxWidth: 80,
+            headerClassName: headerColumnClassName,
+            columnActionsMode: ColumnActionsMode.disabled,
+            className: columnContentClassname
         });
 
         return columns;
@@ -187,18 +212,9 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
         let textToRender: string | undefined;
         let colDataClassName: string = "dc-col-data";
         switch (column.key) {
-            case nameKey:
-                textToRender = deployment.name;
-                colDataClassName = css(colDataClassName, "first-col-data");
-                break;
-
             case replicaSetNameKey:
                 textToRender = deployment.replicaSetName;
-                break;
-
-            case pipelineNameKey:
-                textToRender = deployment.pipeline;
-                break;
+                return ListComponent.renderTwoLineColumn(deployment.replicaSetName||"", deployment.pipeline||"",colDataClassName,"dc-col-primary-text", "dc-col-secondary-text");
 
             case podsKey:
                 return (
@@ -211,8 +227,35 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
                         <span className="deployment-status">{deployment.pods}</span>
                     </div>
                 );
+            case imageKey:
+                textToRender = deployment.image;
+                break;
+            case ageKey:
+            return (
+                <Ago date={new Date(deployment.creationTimeStamp)} />
+            );
         }
 
         return ListComponent.renderColumn(textToRender || "", ListComponent.defaultColumnRenderer, colDataClassName);
+    }
+
+    private static _generateLabels(labels:{[key:string]:string}): ILabelModel[]{
+        let labelModels:ILabelModel[] = [];
+        Object.keys(labels).forEach(key => {
+            labelModels.push({
+                content: format("{0}={1}",key,labels[key])
+            });
+        });
+        return labelModels;
+    }
+    private static _getHeadingContent( deployment:V1Deployment ): JSX.Element {
+        return (
+            <div>
+                <h3>{deployment.metadata.name}</h3>
+                <LabelGroup labelProps={DeploymentsComponent._generateLabels(deployment.metadata.labels)}
+                    wrappingBehavior={WrappingBehavior.OneLine}>
+                </LabelGroup>
+            </div>
+        );
     }
 }

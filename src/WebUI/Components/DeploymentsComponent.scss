@@ -1,4 +1,10 @@
+@import "azure-devops-ui/Core/_platformCommon.scss";
+
 .dc-list-content {
+    display: flex;
+    flex-wrap: nowrap;
+    flex-direction: column;
+    justify-content: space-around;
     .deployment-status {
         padding-left: 5px;
     }
@@ -10,4 +16,19 @@
     &.first-replica {
         margin-top: 5px;
     }
+}
+
+.dc-col-content {
+    display: inline-flex;
+    align-items: center;
+    font-size: 16px;
+}
+
+.dc-col-primary-text {
+    font-weight: $fontWeightSemiBold;
+    font-size: $fontSizeL;
+}
+.dc-col-secondary-text {
+    color: $secondary-text;
+    font-size: $fontSizeM;
 }
