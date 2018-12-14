@@ -11,14 +11,15 @@
     "url": "git+https://github.com/Microsoft/azpipelines-kubernetesUI.git"
   },
   "scripts": {
-    "clean": "rimraf ./dist",
-    "compile": "npm run clean && tsc --skipLibCheck && npm run copy-all",
-    "compile:dev": "npm run clean && webpack --mode development",
+    "clean": "rimraf ./dist && rimraf ./dist_tests",
+    "compile": "npm run clean && npm run compilesrc && npm run compiletest && npm run copy-all",
     "build": "npm run compile",
-    "build:dev": "npm run compile:dev && npm run postbuild",
     "copy-all": "npm run copy-scss && npm run copy-resources",
     "copy-scss": "copyfiles -u 1 src/**/*.scss dist",
-    "copy-resources": "copyfiles -u 1 src/**/Resources.js src/**/Types.d.ts dist"
+    "copy-resources": "copyfiles -u 1 src/**/Resources.js src/**/Types.d.ts dist",
+    "test": "npm run compiletest && jest ./dist_tests",
+    "compiletest": "tsc -p ./tests --outDir ./dist_tests",
+    "compilesrc": "tsc -p ./src --outDir dist"
   },
   "keywords": [
     "Kubernetes-UI"
@@ -36,6 +37,7 @@
     "react-dom": "~16.3.2"
   },
   "devDependencies": {
+    "@types/jest": "^23.3.10",
     "@types/react": "^16.7.13",
     "@types/react-dom": "^16.0.11",
     "base64-inline-loader": "^1.1.1",
@@ -43,6 +45,7 @@
     "copyfiles": "^2.1.0",
     "css-loader": "^1.0.1",
     "file-loader": "~2.0.0",
+    "jest": "^23.6.0",
     "node-sass": "~4.9.4",
     "recursive-copy": "~2.0.7",
     "rimraf": "~2.6.2",
