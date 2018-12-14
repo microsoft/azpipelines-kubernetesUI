@@ -1,0 +1,23 @@
+@import "azure-devops-ui/Core/_platformCommon.scss";
+
+.stful-set-secondary-text {
+    color: $secondary-text;
+}
+
+.stful-set-list-view {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: space-around;  
+}
+
+.stful-set-primary-text {
+    font-weight: $fontWeightSemiBold;
+}
+
+.stful-set-list-col-content {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}

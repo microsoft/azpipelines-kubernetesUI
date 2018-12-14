@@ -13,4 +13,8 @@ export interface IKubeService {
     getServices(): Promise<K8sTypes.V1ServiceList>;
 
     getReplicaSets(): Promise<K8sTypes.V1ReplicaSetList>;
+
+    getDaemonSets(): Promise<K8sTypes.V1DaemonSetList>;
+
+    getStatefulSets(): Promise<K8sTypes.V1StatefulSetList>;
 }

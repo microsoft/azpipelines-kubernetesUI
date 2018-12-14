@@ -3,7 +3,7 @@
     Licensed under the MIT license.
 */
 
-import { V1DeploymentList, V1ReplicaSet, V1ReplicaSetList, V1ServiceList } from "@kubernetes/client-node";
+import { V1DeploymentList, V1ReplicaSet, V1ReplicaSetList, V1ServiceList, V1DaemonSetList, V1StatefulSetList } from "@kubernetes/client-node";
 import { BaseComponent, format } from "@uifabric/utilities";
 import { Pivot, PivotItem } from "office-ui-fabric-react/lib/Pivot";
 import * as React from "react";
@@ -18,6 +18,8 @@ import { ServiceComponent } from "./ServiceComponent";
 import { ServicesComponent } from "./ServicesComponent";
 // todo :: work around till this issue is fixed in devops ui
 import "azure-devops-ui/Label.scss";
+import { DaemonSetListingComponent } from "./DaemonSetListingComponent";
+import { StatefulSetListingComponent } from "./StatefulSetListingComponent";
 
 const workloadsPivotItemKey: string = "workloads";
 const servicesPivotItemKey: string = "services";
@@ -127,6 +129,15 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         kubeService.getServices().then(serviceList => {
             this.setState({ serviceList: serviceList });
         });
+
+        kubeService.getDaemonSets().then(dameonList => {
+            this.setState({ daemonSetList: dameonList});
+        });
+
+        kubeService.getStatefulSets().then(statefulSets => {
+            this.setState({ statefulSetList: statefulSets});
+        })
+
     }
 
     private _getMainContent(): JSX.Element {
@@ -163,6 +174,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
     }
 
     private _getDeploymentPivot(): JSX.Element {
+        //todo: adding top margin between each listing components
         return (
             <PivotItem
                 headerText={Resources.PivotWorkloadsText}
@@ -175,6 +187,15 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
                     key={format("dc-{0}", this.state.namespace || "")}
                     onItemInvoked={this._onDeploymentItemInvoked}
                 />
+                <DaemonSetListingComponent
+                    daemonSetList={this.state.daemonSetList || {} as V1DaemonSetList}
+                    key={format("daemonset-list-{0}", this.state.namespace||"all")}
+                />
+                <StatefulSetListingComponent 
+                    statefulSetList={this.state.statefulSetList || {} as V1StatefulSetList}
+                    key={format("statefulset-list-{0}", this.state.namespace||"all")}
+                />
+
             </PivotItem>
         );
     }

@@ -1,0 +1,23 @@
+@import "azure-devops-ui/Core/_platformCommon.scss";
+
+.ds-secondary-text {
+    color: $secondary-text;
+}
+
+.ds-list-view {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: space-around;  
+}
+
+.ds-primary-text {
+    font-weight: $fontWeightSemiBold;
+}
+
+.ds-list-col-content {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}

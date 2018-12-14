@@ -13,13 +13,12 @@ import * as Resources from "../Resources";
 import { IDeploymentItem, IVssComponentProperties } from "../Types";
 import "./DeploymentsComponent.scss";
 import { ListComponent } from "./ListComponent";
+import { Utils } from "../Utils";
 
 const nameKey: string = "name-col";
 const replicaSetNameKey: string = "replicaSet-col";
 const pipelineNameKey: string = "pipeline-col";
 const podsKey: string = "pods-col";
-const pipelineNameAnnotationKey: string = "pipeline-name";
-const pipelineIdAnnotationKey: string = "pipeline-id";
 
 export interface IDeploymentsComponentProperties extends IVssComponentProperties {
     deploymentList: V1DeploymentList;
@@ -80,7 +79,7 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
             name: index > 0 ? "" : deployment.metadata.name,
             uid: deployment.metadata.uid,
             replicaSetName: replica.metadata.name,
-            pipeline: DeploymentsComponent._getPipelineText(annotations),
+            pipeline: Utils.getPipelineText(annotations),
             // todo :: how to find error in replicaSet
             pods: DeploymentsComponent._getPodsText(replica.status.availableReplicas, replica.status.replicas),
             statusProps: DeploymentsComponent._getPodsStatusProps(replica.status.availableReplicas, replica.status.replicas),
@@ -116,21 +115,6 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
         return undefined;
     }
 
-    private static _getPipelineText(annotations: { [key: string]: string }): string {
-        let pipelineName: string = "", pipelineId: string = "";
-        Object.keys(annotations).find(key => {
-            if (!pipelineName && key.toLowerCase() === pipelineNameAnnotationKey) {
-                pipelineName = annotations[key];
-            }
-            else if (!pipelineId && key.toLowerCase() === pipelineIdAnnotationKey) {
-                pipelineId = annotations[key];
-            }
-
-            return !!pipelineName && !!pipelineId;
-        });
-
-        return pipelineName && pipelineId ? format("{0} / {1}", pipelineName, pipelineId) : "";
-    }
 
     private static _getColumns(): IColumn[] {
         let columns: IColumn[] = [];
