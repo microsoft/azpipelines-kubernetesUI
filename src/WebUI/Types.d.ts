@@ -7,7 +7,6 @@ import { V1Deployment, V1DeploymentList, V1PodList, V1ReplicaSetList, V1Service,
 import { IObservable } from "azure-devops-ui/Core/Observable";
 import { IStatusProps } from "azure-devops-ui/Status";
 import { IBaseProps } from "office-ui-fabric-react/lib/Utilities";
-import { ILabelModel } from "azure-devops-ui/Label";
 
 export interface IKubernetesSummary {
     namespace?: string;

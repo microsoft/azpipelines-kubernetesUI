@@ -93,7 +93,7 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
 
     private static _getColumns(): IColumn[] {
         let columns: IColumn[] = [];
-        const headerColumnClassName: string = "sc-col-header";
+        const headerColumnClassName: string = "sc-col-secondary-text";
         const columnContentClassName: string = "sc-col-content";
 
         columns.push({

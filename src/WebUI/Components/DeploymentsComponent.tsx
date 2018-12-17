@@ -13,8 +13,9 @@ import * as Resources from "../Resources";
 import { IDeploymentItem, IVssComponentProperties, IDeploymentReplicaSetMap } from "../Types";
 import "./DeploymentsComponent.scss";
 import { ListComponent } from "./ListComponent";
-import { ILabelModel, LabelGroup, WrappingBehavior, Label } from "azure-devops-ui/Label";
+import { ILabelModel, LabelGroup, WrappingBehavior } from "azure-devops-ui/Label";
 import { Ago } from "azure-devops-ui/Ago";
+import { Utils } from "../Utils";
 
 const replicaSetNameKey: string = "replicaSet-col";
 const pipelineNameKey: string = "pipeline-col";
@@ -45,11 +46,15 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
 
     private _getDeploymentListView() {
         let renderList:JSX.Element[] =[];
-        DeploymentsComponent._generateDeploymentReplicaSetMap(this.props.deploymentList, this.props.replicaSetList).forEach(entry => {
-           renderList.push( <ListComponent
-                className={css("dc-list-content", "depth-16")}
+        DeploymentsComponent._generateDeploymentReplicaSetMap(this.props.deploymentList, this.props.replicaSetList).forEach((entry, index) => {
+            let columnClassName = css("dc-list-content", "depth-16");
+            if(index > 0) {
+                columnClassName = css(columnClassName, "replica-with-pod-list");
+            }
+            renderList.push( <ListComponent
+                className={columnClassName}
                 headingContent={DeploymentsComponent._getHeadingContent(entry.deployment)}
-                items={DeploymentsComponent._getDeploymentItems(entry.deployment, entry.replicaSets)}
+                items={DeploymentsComponent._getDeploymentReplicaSetItems(entry.deployment, entry.replicaSets)}
                 columns={DeploymentsComponent._getColumns()}
                 onRenderItemColumn={DeploymentsComponent._onRenderItemColumn}
                 onItemInvoked={this._openDeploymentItem}
@@ -75,12 +80,12 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
         return deploymentReplicaSetMap;
     }
 
-    private static _getDeploymentItems(deployment: V1Deployment, replicaSets: V1ReplicaSet[]):
+    private static _getDeploymentReplicaSetItems(deployment: V1Deployment, replicaSets: V1ReplicaSet[]):
         IDeploymentItem[] {
         let items: IDeploymentItem[] = [];
         replicaSets.forEach((replicaSet, index) => {
                 items.push(DeploymentsComponent._getDeploymentItem(deployment, replicaSet, index, replicaSets.length));
-            });
+        });
 
         return items;
     }
@@ -105,7 +110,7 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
             statusProps: DeploymentsComponent._getPodsStatusProps(replica.status.availableReplicas, replica.status.replicas),
             showRowBorder: (replicaSetLength === (index + 1)),
             deployment: deployment,
-            //todo :: how to display images of all containers in a replica pod
+            //todo :: should we show all images of all containers in a replica set?
             image: replica.spec.template.spec.containers[0].image,
             creationTimeStamp: replica.metadata.creationTimestamp
         };
@@ -239,21 +244,13 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
         return ListComponent.renderColumn(textToRender || "", ListComponent.defaultColumnRenderer, colDataClassName);
     }
 
-    private static _generateLabels(labels:{[key:string]:string}): ILabelModel[]{
-        let labelModels:ILabelModel[] = [];
-        Object.keys(labels).forEach(key => {
-            labelModels.push({
-                content: format("{0}={1}",key,labels[key])
-            });
-        });
-        return labelModels;
-    }
     private static _getHeadingContent( deployment:V1Deployment ): JSX.Element {
         return (
             <div>
                 <h3>{deployment.metadata.name}</h3>
-                <LabelGroup labelProps={DeploymentsComponent._generateLabels(deployment.metadata.labels)}
-                    wrappingBehavior={WrappingBehavior.OneLine}>
+                <LabelGroup labelProps={Utils.getUILabelModelArray(deployment.metadata.labels)}
+                    wrappingBehavior={WrappingBehavior.OneLine}
+                    fadeOutOverflow={true}>
                 </LabelGroup>
             </div>
         );
