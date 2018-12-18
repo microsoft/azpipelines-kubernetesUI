@@ -3,7 +3,7 @@
     Licensed under the MIT license.
 */
 
-import { BaseComponent, format } from "@uifabric/utilities";
+import { BaseComponent, format, css } from "@uifabric/utilities";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { LabelGroup, WrappingBehavior } from "azure-devops-ui/Label";
 import { ColumnFill, ITableColumn, renderSimpleCell, SimpleTableCell as renderTableCell, Table } from "azure-devops-ui/Table";
@@ -14,17 +14,44 @@ import * as Resources from "../Resources";
 import { IServiceItem, IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
 import "./ServiceComponent.scss";
+import { V1PodList, V1Pod } from "@kubernetes/client-node";
+import { ListComponent } from "./ListComponent";
+import { IColumn } from "azure-devops-ui/Components/VssDetailsList/VssDetailsList.Props";
+import { Ago } from "azure-devops-ui/Ago";
+import { ColumnActionsMode } from "office-ui-fabric-react/lib/DetailsList";
+import { Statuses, StatusSize, Status } from "azure-devops-ui/Status";
+import { Tooltip } from "azure-devops-ui/TooltipEx";
 
 export interface IServiceComponentProperties extends IVssComponentProperties {
     service: IServiceItem;
+    podListingPromise: Promise<V1PodList>;
 }
 
-export class ServiceComponent extends BaseComponent<IServiceComponentProperties> {
+export interface IServiceComponentState {
+    showAssociatedPods:boolean;
+    pods:Array<V1Pod>;
+}
+
+const podNameKey: string = "svc-pod-name-key";
+const podImageKey: string = "svc-pod-image-key";
+const podStatusKey: string = "svc-pod-status-key";
+const podCreatedTimeKey:string = "svc-pod-age-key";
+
+export class ServiceComponent extends BaseComponent<IServiceComponentProperties, IServiceComponentState> {
+    constructor(props: IServiceComponentProperties) {
+        super(props, {});
+        this.state = {
+            showAssociatedPods:false,
+            pods: []
+        };
+    }
+
     public render(): JSX.Element {
         return (
             <div className="service-main-content">
                 {this._getMainHeading()}
                 {this._getServiceDetails()}
+                {!!this.state.showAssociatedPods && this._getAssociatedPods()}
             </div>
         );
     }
@@ -124,4 +151,117 @@ export class ServiceComponent extends BaseComponent<IServiceComponentProperties>
                 return renderSimpleCell(rowIndex, columnIndex, tableColumn, tableItem);
         }
     }
+
+    public componentDidMount(): void {
+        console.log("getting items");
+        this.props.podListingPromise.then(podList => {
+            podList.items &&
+                this.setState({
+                    showAssociatedPods: true,
+                    pods: podList.items
+                });
+        }).catch(error => {
+            console.log(error);
+        });
+    }
+
+    private _getAssociatedPods(): JSX.Element | null {
+        if(this.state.showAssociatedPods) {
+            return (
+                <ListComponent
+                    className={css("s-pod-list-content", "depth-16")}
+                    headingText={Resources.AssociatedPodsText}
+                    items={this.state.pods}
+                    columns={ServiceComponent._getPodListColumns()}
+                    onRenderItemColumn={ServiceComponent._onRenderPodItemColumn}
+                />
+            );
+        }
+        return null;
+    }
+    private static _getPodListColumns(): IColumn[] {
+        let columns: IColumn[] = [];
+        const headerColumnClassName: string = "s-pod-col-header";
+
+        columns.push({
+            key: podNameKey,
+            name: Resources.PodsText,
+            fieldName: podNameKey,
+            minWidth: 160,
+            maxWidth: 160,
+            headerClassName: headerColumnClassName,
+            columnActionsMode: ColumnActionsMode.disabled
+        });
+
+
+        columns.push({
+            key: podImageKey,
+            name: Resources.ImageText,
+            fieldName: podImageKey,
+            minWidth: 220,
+            maxWidth: 220,
+            headerClassName: headerColumnClassName,
+            columnActionsMode: ColumnActionsMode.disabled
+        });
+
+        columns.push({
+            key: podStatusKey,
+            name: Resources.StatusText,
+            fieldName: podStatusKey,
+            minWidth: 80,
+            maxWidth: 80,
+            headerClassName: headerColumnClassName,
+            columnActionsMode: ColumnActionsMode.disabled
+        });
+
+        columns.push({
+            key: podCreatedTimeKey,
+            name: Resources.AgeText,
+            fieldName: podCreatedTimeKey,
+            minWidth: 80,
+            maxWidth: 80,
+            headerClassName: headerColumnClassName,
+            columnActionsMode: ColumnActionsMode.disabled
+        });
+
+        return columns;
+    }
+
+    private static _onRenderPodItemColumn(pod?: V1Pod, index?: number, column?: IColumn): React.ReactNode {
+        if (!pod || !column) {
+            return null;
+        }
+
+        let textToRender: string | undefined;
+        let colDataClassName: string = "s-pod-col-content";
+        switch (column.key) {
+            case podNameKey:
+                textToRender = pod.metadata.name;
+                colDataClassName = css(colDataClassName, "s-pod-col-primary-text");
+                break;
+
+            case podImageKey:
+                textToRender = pod.spec.containers[0].image;
+                break;
+
+            case podStatusKey:
+                return (
+                    <div className={colDataClassName}>
+                        <Status className={colDataClassName} {...Utils.generatePodStatusProps(pod.status)} animated={false} size={StatusSize.m} />        
+                        {
+                            pod.status.message?
+                                <Tooltip showOnFocus={true} text={pod.status.message}>{pod.status.reason}</Tooltip>:
+                                <span className="s-pod-col-primary-text">{pod.status.phase}</span>
+                        }
+                    </div>
+                );
+            case podCreatedTimeKey:
+                return(
+                    <Ago date={new Date(pod.status.startTime)} />
+                );
+        }
+
+        return ListComponent.renderColumn(textToRender || "", ListComponent.defaultColumnRenderer, colDataClassName);
+    }
+
 }

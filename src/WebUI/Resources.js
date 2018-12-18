@@ -36,4 +36,5 @@ define("Environments/Providers/Kubernetes/Resources", ["require", "exports"], fu
     exports.SelectorText = "Selector";
     exports.SessionAffinityText = "Session affinity";
     exports.NoneText = "None";
+    exports.AssociatedPodsText = "Associated Pods";
 });

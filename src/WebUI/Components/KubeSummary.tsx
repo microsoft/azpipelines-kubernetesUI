@@ -3,7 +3,7 @@
     Licensed under the MIT license.
 */
 
-import { V1DeploymentList, V1ReplicaSet, V1ReplicaSetList, V1ServiceList } from "@kubernetes/client-node";
+import { V1DeploymentList, V1ReplicaSet, V1ReplicaSetList, V1ServiceList, V1Service, V1PodList } from "@kubernetes/client-node";
 import { BaseComponent, format } from "@uifabric/utilities";
 import { Pivot, PivotItem } from "office-ui-fabric-react/lib/Pivot";
 import * as React from "react";
@@ -213,6 +213,10 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
     }
 
     private _getServiceComponent(): JSX.Element {
-        return <ServiceComponent service={this.state.selectedItem} />;
+        const svc:V1Service = this.state.selectedItem.service;
+        //service currently only supports equals with "and" operator. The generator generates that condition.
+        const labelSelector:string = Utils.generateEqualsConditionLabelSelector(svc.spec.selector || {});
+        const podsListing:Promise<any> = labelSelector && this.props.kubeService && this.props.kubeService.getPods(labelSelector)|| Promise.resolve({});
+        return <ServiceComponent service={this.state.selectedItem} podListingPromise={podsListing}/>;
     }
 }

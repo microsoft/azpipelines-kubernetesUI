@@ -11,3 +11,23 @@
 .s-de-heading {
     padding-left: 20px;
 }
+
+.s-pod-list-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    margin-top: 10px; 
+}
+
+.s-pod-col-header {
+    color: $secondary-text;
+    font-size: $fontSizeM;
+}
+
+.s-pod-col-content {
+    align-items: center;
+}
+
+.s-pod-col-primary-text {
+    font-weight: $fontWeightSemiBold;
+}
