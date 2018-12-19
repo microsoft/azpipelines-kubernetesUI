@@ -1,0 +1,19 @@
+@import "azure-devops-ui/Core/_platformCommon.scss";
+
+.list-content {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: space-around;
+}
+
+.list-col-content {
+    align-items: center;
+}
+
+.primary-text {
+    font-weight: $fontWeightSemiBold;
+}
+.secondary-text {
+    color: $secondary-text;
+}

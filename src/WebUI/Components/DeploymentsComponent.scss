@@ -1,7 +1,7 @@
-.dc-list-content {
-    .deployment-status {
+@import "./Common.scss";
+
+.deployment-status {
         padding-left: 5px;
-    }
 }
 
 .replica-with-pod-list {

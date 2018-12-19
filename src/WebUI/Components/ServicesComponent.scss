@@ -1,28 +1,5 @@
-@import "azure-devops-ui/Core/_platformCommon.scss";
+@import "./Common.scss";
 
-.sc-list-content {
-    display: flex;
-    flex-direction: column;
-    flex-wrap: nowrap;
-    justify-content: space-around;
-}
-
-.sc-col-header {
-    color: $secondary-text;
-    font-size: $fontSizeM;
-}
-
-.sc-col-content {
+.sc-cell-layout {
     display: inline-flex;
-    align-items: center;
-    font-size: 16px;
-}
-
-.sc-col-primary-text {
-    font-weight: $fontWeightSemiBold;
-    font-size: $fontSizeL;
-}
-.sc-col-secondary-text {
-    color: $secondary-text;
-    font-size: $fontSizeM;
 }
