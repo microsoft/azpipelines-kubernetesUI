@@ -65,8 +65,16 @@ export class ListComponent<T> extends BaseComponent<IListComponentProperties<T>>
     public static renderTwoLineColumn(primaryText: string, subText: string, className?:string, primaryTextClassName?: string, secondaryTextClassName?:string ) : React.ReactNode {
         return (
             <div className={css("kube-list-col-data overflow-ellipsis", className)}>
-                <div className={css("kube-list-col-data", primaryTextClassName)}>{primaryText}</div>
-                <div className={css("list-secondary-text", secondaryTextClassName)}>{subText}</div>
+                <div className={css("kube-list-col-data overflow-ellipsis", primaryTextClassName)}>
+                    <TooltipHost content={primaryText} overflowMode={TooltipOverflowMode.Parent}>
+                        {primaryText}
+                    </TooltipHost>
+                </div>
+                <div className={css("list-secondary-text overflow-ellipsis", secondaryTextClassName)}>
+                    <TooltipHost content={subText} overflowMode={TooltipOverflowMode.Parent}>
+                        {subText}
+                    </TooltipHost>
+                </div>
             </div>
         );
     }

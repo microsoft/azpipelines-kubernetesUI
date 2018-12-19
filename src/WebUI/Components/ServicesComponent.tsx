@@ -31,7 +31,7 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
 
         return (
             <ListComponent
-                className={css("sc-list-content", "depth-16")}
+                className={css("list-content", "depth-16")}
                 items={ServicesComponent._getServiceItems(this.props.servicesList)}
                 columns={ServicesComponent._getColumns()}
                 onRenderItemColumn={ServicesComponent._onRenderItemColumn}
@@ -93,8 +93,8 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
 
     private static _getColumns(): IColumn[] {
         let columns: IColumn[] = [];
-        const headerColumnClassName: string = "sc-col-header";
-        const columnContentClassName: string = "sc-col-content";
+        const headerColumnClassName: string = "secondary-text";
+        const columnContentClassName: string = css("list-col-content","sc-cell-layout");;
 
         columns.push({
             key: packageKey,
@@ -163,7 +163,7 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
         let textToRender: string = "";
         switch (column.key) {
             case packageKey:
-                return  ListComponent.renderTwoLineColumn(service.package, service.type,colDataClassName,"sc-col-primary-text","sc-col-secondary-text");
+                return  ListComponent.renderTwoLineColumn(service.package, service.type,colDataClassName,"primary-text","secondary-text");
             case typeKey:
                 textToRender = service.type;
                 break;
