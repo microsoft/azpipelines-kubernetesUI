@@ -47,10 +47,7 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
     private _getDeploymentListView() {
         let renderList:JSX.Element[] =[];
         DeploymentsComponent._generateDeploymentReplicaSetMap(this.props.deploymentList, this.props.replicaSetList).forEach((entry, index) => {
-            let columnClassName = css("dc-list-content", "depth-16");
-            if(index > 0) {
-                columnClassName = css(columnClassName, "replica-with-pod-list");
-            }
+            let columnClassName = css("list-content", "depth-16", index>0?"replica-with-pod-list":"");
             renderList.push( <ListComponent
                 className={columnClassName}
                 headingContent={DeploymentsComponent._getHeadingContent(entry.deployment)}
@@ -162,7 +159,7 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
     private static _getColumns(): IColumn[] {
         let columns: IColumn[] = [];
         const headerColumnClassName: string = "dc-col-header";
-        const columnContentClassname: string = "dc-col-content";
+        const columnContentClassname: string = "list-col-content";
         columns.push({
             key: replicaSetNameKey,
             name: Resources.ReplicaSetText,
@@ -219,7 +216,7 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
         switch (column.key) {
             case replicaSetNameKey:
                 textToRender = deployment.replicaSetName;
-                return ListComponent.renderTwoLineColumn(deployment.replicaSetName||"", deployment.pipeline||"",colDataClassName,"dc-col-primary-text", "dc-col-secondary-text");
+                return ListComponent.renderTwoLineColumn(deployment.replicaSetName||"", deployment.pipeline||"",colDataClassName,"primary-text", "secondary-text");
 
             case podsKey:
                 return (
