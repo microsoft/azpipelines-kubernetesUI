@@ -9,6 +9,17 @@ import { ObservableArray } from "azure-devops-ui/Core/Observable";
 import { ILabelModel } from "azure-devops-ui/Label";
 import { Statuses, IStatusProps } from "azure-devops-ui/Status";
 
+/**
+ * https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-phase
+ */
+export enum PodPhase {
+    Pending = "Pending",
+    Running = "Running",
+    Succeeded = "Succeeded",
+    Failed = "Failed",
+    Unknown = "Unknown"
+}
+
 export class Utils {
     public static isOwnerMatched(objectMeta: V1ObjectMeta, ownerUIdLowerCase: string): boolean {
         return objectMeta.ownerReferences
@@ -31,7 +42,7 @@ export class Utils {
         console.log(labels);
         let labelSelector: string = "";
         if(labels) {
-            let keySet = Object.keys(labels);
+            const keySet = Object.keys(labels);
             keySet.forEach((key,index) => {
                 labelSelector = labelSelector.concat(format("{0}={1}", key, labels[key]))
                 if (index < keySet.length-1) labelSelector = labelSelector.concat(",");
@@ -41,7 +52,7 @@ export class Utils {
     }
 
     public static generatePodStatusProps(status:V1PodStatus): IStatusProps {
-        if(status.phase === "Running" || status.phase === "Scheduled"){
+        if(status.phase === PodPhase.Running|| status.phase === PodPhase.Succeeded){
                 return Statuses.Success;
         } 
         return Statuses.Failed;

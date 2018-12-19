@@ -19,7 +19,7 @@ import { ListComponent } from "./ListComponent";
 import { IColumn } from "azure-devops-ui/Components/VssDetailsList/VssDetailsList.Props";
 import { Ago } from "azure-devops-ui/Ago";
 import { ColumnActionsMode } from "office-ui-fabric-react/lib/DetailsList";
-import { Statuses, StatusSize, Status } from "azure-devops-ui/Status";
+import { StatusSize, Status } from "azure-devops-ui/Status";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
 
 export interface IServiceComponentProperties extends IVssComponentProperties {
@@ -28,7 +28,6 @@ export interface IServiceComponentProperties extends IVssComponentProperties {
 }
 
 export interface IServiceComponentState {
-    showAssociatedPods:boolean;
     pods:Array<V1Pod>;
 }
 
@@ -41,7 +40,6 @@ export class ServiceComponent extends BaseComponent<IServiceComponentProperties,
     constructor(props: IServiceComponentProperties) {
         super(props, {});
         this.state = {
-            showAssociatedPods:false,
             pods: []
         };
     }
@@ -51,7 +49,7 @@ export class ServiceComponent extends BaseComponent<IServiceComponentProperties,
             <div className="service-main-content">
                 {this._getMainHeading()}
                 {this._getServiceDetails()}
-                {!!this.state.showAssociatedPods && this._getAssociatedPods()}
+                {this._getAssociatedPods()}
             </div>
         );
     }
@@ -155,9 +153,9 @@ export class ServiceComponent extends BaseComponent<IServiceComponentProperties,
     public componentDidMount(): void {
         console.log("getting items");
         this.props.podListingPromise.then(podList => {
+            podList &&
             podList.items &&
                 this.setState({
-                    showAssociatedPods: true,
                     pods: podList.items
                 });
         }).catch(error => {
@@ -166,22 +164,20 @@ export class ServiceComponent extends BaseComponent<IServiceComponentProperties,
     }
 
     private _getAssociatedPods(): JSX.Element | null {
-        if(this.state.showAssociatedPods) {
-            return (
-                <ListComponent
-                    className={css("s-pod-list-content", "depth-16")}
-                    headingText={Resources.AssociatedPodsText}
-                    items={this.state.pods}
-                    columns={ServiceComponent._getPodListColumns()}
-                    onRenderItemColumn={ServiceComponent._onRenderPodItemColumn}
-                />
-            );
-        }
-        return null;
+        return (
+            <ListComponent
+                className={css("list-content", "s-details", "depth-16")}
+                headingText={Resources.AssociatedPodsText}
+                items={this.state.pods}
+                columns={ServiceComponent._getPodListColumns()}
+                onRenderItemColumn={ServiceComponent._onRenderPodItemColumn}
+            />
+        );
     }
+
     private static _getPodListColumns(): IColumn[] {
         let columns: IColumn[] = [];
-        const headerColumnClassName: string = "s-pod-col-header";
+        const headerColumnClassName: string = "secondary-text";
 
         columns.push({
             key: podNameKey,
@@ -233,11 +229,11 @@ export class ServiceComponent extends BaseComponent<IServiceComponentProperties,
         }
 
         let textToRender: string | undefined;
-        let colDataClassName: string = "s-pod-col-content";
+        let colDataClassName: string = "list-col-content";
         switch (column.key) {
             case podNameKey:
                 textToRender = pod.metadata.name;
-                colDataClassName = css(colDataClassName, "s-pod-col-primary-text");
+                colDataClassName = css(colDataClassName, "primary-text");
                 break;
 
             case podImageKey:
@@ -251,7 +247,7 @@ export class ServiceComponent extends BaseComponent<IServiceComponentProperties,
                         {
                             pod.status.message?
                                 <Tooltip showOnFocus={true} text={pod.status.message}>{pod.status.reason}</Tooltip>:
-                                <span className="s-pod-col-primary-text">{pod.status.phase}</span>
+                                <span className="primary-text">{pod.status.phase}</span>
                         }
                     </div>
                 );
