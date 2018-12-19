@@ -24,14 +24,12 @@ export interface IDaemonSetComponentProperties extends IVssComponentProperties {
 
 export class StatefulSetListingComponent extends BaseComponent<IDaemonSetComponentProperties, {}> {
     public render(): React.ReactNode {
-        console.log(this.props.statefulSetList && this.props.statefulSetList.items&& this.props.statefulSetList.items.length);
         return (
             <div>{
-                this.props.statefulSetList &&
-                this.props.statefulSetList.items &&
+
                 <ListComponent
-                    className={css("stful-set-list-view", "depth-16")}
-                    items={this.props.statefulSetList.items}
+                    className={css("list-content", "top-padding", "depth-16" )}
+                    items={ this.props.statefulSetList.items || [] }
                     columns={StatefulSetListingComponent._getColumns()}
                     onRenderItemColumn={StatefulSetListingComponent._onRenderItemColumn}
                 />
@@ -39,22 +37,16 @@ export class StatefulSetListingComponent extends BaseComponent<IDaemonSetCompone
         );
     }
 
-    // private _openDeploymentItem = (item?: any, index?: number, ev?: Event) => {
-    //     if (this.props.onItemInvoked) {
-    //         this.props.onItemInvoked(item, index, ev);
-    //     }
-    // }
-
     private static _getColumns(): IColumn[] {
         let columns: IColumn[] = [];
-        const headerColumnClassName: string = "stful-set-secondary-text";
+        const headerColumnClassName: string = "secondary-text";
 
         columns.push({
             key: setNameKey,
             name: Resources.StatefulSetText,
             fieldName: setNameKey,
-            minWidth: 140,
-            maxWidth: 140,
+            minWidth: 250,
+            maxWidth: 250,
             headerClassName: css(headerColumnClassName, "first-col-header"),
             columnActionsMode: ColumnActionsMode.disabled
         });
@@ -63,8 +55,8 @@ export class StatefulSetListingComponent extends BaseComponent<IDaemonSetCompone
             key: imageKey,
             name: Resources.ImageText,
             fieldName: imageKey,
-            minWidth: 160,
-            maxWidth: 160,
+            minWidth: 250,
+            maxWidth: 250,
             headerClassName: headerColumnClassName,
             columnActionsMode: ColumnActionsMode.disabled
         });
@@ -98,12 +90,12 @@ export class StatefulSetListingComponent extends BaseComponent<IDaemonSetCompone
         }
 
         let textToRender: string | undefined;
-        let colDataClassName: string = "stful-set-list-col-content";
+        let colDataClassName: string = "list-col-content";
         switch (column.key) {
             case setNameKey:
                 return ListComponent.renderTwoLineColumn(statefulSet.metadata.name,
                     Utils.getPipelineText(statefulSet.metadata.annotations),
-                    colDataClassName,"stful-set-primary-text", "stful-set-secondary-text");
+                    colDataClassName,"primary-text", "secondary-text");
             case imageKey:
                 textToRender = statefulSet.spec.template.spec.containers[0].image;
                 break;
@@ -111,7 +103,7 @@ export class StatefulSetListingComponent extends BaseComponent<IDaemonSetCompone
                 let statusProps: IStatusProps | undefined;
                 let podString: string = "";
                 if (statefulSet.status.replicas > 0) {
-                    statusProps = StatefulSetListingComponent._getPodsStatusProps(statefulSet.status.currentReplicas, statefulSet.status.replicas);
+                    statusProps = Utils._getPodsStatusProps(statefulSet.status.currentReplicas, statefulSet.status.replicas);
                     podString = format("{0}/{1}", statefulSet.status.currentReplicas, statefulSet.status.replicas);
                 }
                 return (
@@ -128,15 +120,6 @@ export class StatefulSetListingComponent extends BaseComponent<IDaemonSetCompone
             }
         }
         return ListComponent.renderColumn(textToRender||"",ListComponent.defaultColumnRenderer,colDataClassName);
-    }
-
-    private static _getPodsStatusProps(currentScheduledPods: number, desiredPods: number): IStatusProps | undefined {
-        //todo modify logic to base on pod events so that we can distinguish between pending/failed pods
-        if (desiredPods != null && currentScheduledPods != null && desiredPods > 0) {
-            return currentScheduledPods < desiredPods ? Statuses.Failed : Statuses.Success;
-        }
-
-        return undefined;
     }
 
 }

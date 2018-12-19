@@ -5,10 +5,19 @@
     flex-direction: column;
     flex-wrap: nowrap;
     justify-content: space-around;
+
+    &.top-padding {
+        margin-top: 10px;
+    }
 }
 
 .list-col-content {
     align-items: center;
+
+    &.two-lines {
+        display: inline-flex;
+    }
+    
 }
 
 .primary-text {

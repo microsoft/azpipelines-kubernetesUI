@@ -26,11 +26,9 @@ export class DaemonSetListingComponent extends BaseComponent<IDaemonSetComponent
     public render(): React.ReactNode {
         return (
             <div>{
-                this.props.daemonSetList &&
-                this.props.daemonSetList.items &&
                 <ListComponent
-                    className={css("ds-list-view", "depth-16")}
-                    items={this.props.daemonSetList.items}
+                    className={css("list-content", "top-padding", "depth-16" )}
+                    items={this.props.daemonSetList.items || [] }
                     columns={DaemonSetListingComponent._getColumns()}
                     onRenderItemColumn={DaemonSetListingComponent._onRenderItemColumn}
                 />
@@ -38,22 +36,16 @@ export class DaemonSetListingComponent extends BaseComponent<IDaemonSetComponent
         );
     }
 
-    // private _openDeploymentItem = (item?: any, index?: number, ev?: Event) => {
-    //     if (this.props.onItemInvoked) {
-    //         this.props.onItemInvoked(item, index, ev);
-    //     }
-    // }
-
     private static _getColumns(): IColumn[] {
         let columns: IColumn[] = [];
-        const headerColumnClassName: string = "ds-secondary-text";
+        const headerColumnClassName: string = "secondary-text";
 
         columns.push({
             key: setNameKey,
             name: Resources.DaemonSetText,
             fieldName: setNameKey,
-            minWidth: 140,
-            maxWidth: 140,
+            minWidth: 250,
+            maxWidth: 250,
             headerClassName: headerColumnClassName,
             columnActionsMode: ColumnActionsMode.disabled
         });
@@ -62,8 +54,8 @@ export class DaemonSetListingComponent extends BaseComponent<IDaemonSetComponent
             key: imageKey,
             name: Resources.ImageText,
             fieldName: imageKey,
-            minWidth: 160,
-            maxWidth: 160,
+            minWidth: 250,
+            maxWidth: 250,
             headerClassName: headerColumnClassName,
             columnActionsMode: ColumnActionsMode.disabled
         });
@@ -97,12 +89,12 @@ export class DaemonSetListingComponent extends BaseComponent<IDaemonSetComponent
         }
 
         let textToRender: string | undefined;
-        let colDataClassName: string = "ds-list-col-content";
+        let colDataClassName: string = "list-col-content";
         switch (column.key) {
             case setNameKey:
                 return ListComponent.renderTwoLineColumn(daemonSet.metadata.name,
                                                         Utils.getPipelineText(daemonSet.metadata.annotations),
-                                                        colDataClassName,"ds-primary-text", "ds-secondary-text");
+                                                        colDataClassName,"primary-text", "secondary-text");
             case imageKey:
                 textToRender = daemonSet.spec.template.spec.containers[0].image;
                 break;
@@ -110,7 +102,7 @@ export class DaemonSetListingComponent extends BaseComponent<IDaemonSetComponent
                 let statusProps: IStatusProps | undefined;
                 let podString: string = "";
                 if (daemonSet.status.desiredNumberScheduled > 0) {
-                    statusProps = DaemonSetListingComponent._getPodsStatusProps(daemonSet.status.currentNumberScheduled, daemonSet.status.desiredNumberScheduled);
+                    statusProps = Utils._getPodsStatusProps(daemonSet.status.currentNumberScheduled, daemonSet.status.desiredNumberScheduled);
                     podString = format("{0}/{1}", daemonSet.status.currentNumberScheduled, daemonSet.status.desiredNumberScheduled);
                 }
                 return (
@@ -128,14 +120,4 @@ export class DaemonSetListingComponent extends BaseComponent<IDaemonSetComponent
         }
         return ListComponent.renderColumn(textToRender||"",ListComponent.defaultColumnRenderer,colDataClassName);
     }
-
-    private static _getPodsStatusProps(currentScheduledPods: number, desiredPods: number): IStatusProps | undefined {
-        //todo modify logic to base on pod events so that we can distinguish between pending/failed pods
-        if (desiredPods != null && currentScheduledPods != null && desiredPods > 0) {
-            return currentScheduledPods < desiredPods ? Statuses.Failed : Statuses.Success;
-        }
-
-        return undefined;
-    }
-
 }

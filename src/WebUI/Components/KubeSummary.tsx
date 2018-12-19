@@ -189,11 +189,11 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
                 />
                 <DaemonSetListingComponent
                     daemonSetList={this.state.daemonSetList || {} as V1DaemonSetList}
-                    key={format("daemonset-list-{0}", this.state.namespace||"all")}
+                    key={format("ds-list-{0}", this.state.namespace||"")}
                 />
                 <StatefulSetListingComponent 
                     statefulSetList={this.state.statefulSetList || {} as V1StatefulSetList}
-                    key={format("statefulset-list-{0}", this.state.namespace||"all")}
+                    key={format("sts-list-{0}", this.state.namespace||"")}
                 />
 
             </PivotItem>
