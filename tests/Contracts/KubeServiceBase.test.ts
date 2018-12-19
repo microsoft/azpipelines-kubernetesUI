@@ -7,7 +7,7 @@ class MockKubeService extends KubeServiceBase {
 }
 
 describe("KubeServiceBase Tests", () => {
-    let service: MockKubeService;
+    let service: KubeServiceBase;
     beforeAll(() => {
         service = new MockKubeService();
     });

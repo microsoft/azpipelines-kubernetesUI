@@ -15,11 +15,11 @@
     "compile": "npm run clean && npm run compilesrc && npm run compiletest && npm run copy-all",
     "build": "npm run compile",
     "copy-all": "npm run copy-scss && npm run copy-resources",
-    "copy-scss": "copyfiles -u 1 src/**/*.scss dist",
-    "copy-resources": "copyfiles -u 1 src/**/Resources.js src/**/Types.d.ts dist",
+    "copy-scss": "copyfiles -u 1 src/**/*.scss ./dist",
+    "copy-resources": "copyfiles -u 1 src/**/Resources.js src/**/Types.d.ts ./dist",
     "test": "npm run compiletest && jest ./dist_tests",
     "compiletest": "tsc -p ./tests --outDir ./dist_tests",
-    "compilesrc": "tsc -p ./src --outDir dist"
+    "compilesrc": "tsc -p ./src --outDir ./dist"
   },
   "keywords": [
     "Kubernetes-UI"
