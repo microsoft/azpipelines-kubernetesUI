@@ -15,12 +15,7 @@ import { IServiceItem, IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
 import "./ServiceComponent.scss";
 import { V1PodList, V1Pod } from "@kubernetes/client-node";
-import { ListComponent } from "./ListComponent";
-import { IColumn } from "azure-devops-ui/Components/VssDetailsList/VssDetailsList.Props";
-import { Ago } from "azure-devops-ui/Ago";
-import { ColumnActionsMode } from "office-ui-fabric-react/lib/DetailsList";
-import { StatusSize, Status } from "azure-devops-ui/Status";
-import { Tooltip } from "azure-devops-ui/TooltipEx";
+import { PodsComponent } from "./PodsComponent";
 
 export interface IServiceComponentProperties extends IVssComponentProperties {
     service: IServiceItem;
@@ -165,99 +160,11 @@ export class ServiceComponent extends BaseComponent<IServiceComponentProperties,
 
     private _getAssociatedPods(): JSX.Element | null {
         return (
-            <ListComponent
-                className={css("list-content", "s-details", "depth-16")}
+            <PodsComponent 
+                podsToRender={this.state.pods}
                 headingText={Resources.AssociatedPodsText}
-                items={this.state.pods}
-                columns={ServiceComponent._getPodListColumns()}
-                onRenderItemColumn={ServiceComponent._onRenderPodItemColumn}
             />
         );
-    }
-
-    private static _getPodListColumns(): IColumn[] {
-        let columns: IColumn[] = [];
-        const headerColumnClassName: string = "secondary-text";
-
-        columns.push({
-            key: podNameKey,
-            name: Resources.PodsText,
-            fieldName: podNameKey,
-            minWidth: 160,
-            maxWidth: 160,
-            headerClassName: headerColumnClassName,
-            columnActionsMode: ColumnActionsMode.disabled
-        });
-
-
-        columns.push({
-            key: podImageKey,
-            name: Resources.ImageText,
-            fieldName: podImageKey,
-            minWidth: 220,
-            maxWidth: 220,
-            headerClassName: headerColumnClassName,
-            columnActionsMode: ColumnActionsMode.disabled
-        });
-
-        columns.push({
-            key: podStatusKey,
-            name: Resources.StatusText,
-            fieldName: podStatusKey,
-            minWidth: 80,
-            maxWidth: 80,
-            headerClassName: headerColumnClassName,
-            columnActionsMode: ColumnActionsMode.disabled
-        });
-
-        columns.push({
-            key: podCreatedTimeKey,
-            name: Resources.AgeText,
-            fieldName: podCreatedTimeKey,
-            minWidth: 80,
-            maxWidth: 80,
-            headerClassName: headerColumnClassName,
-            columnActionsMode: ColumnActionsMode.disabled
-        });
-
-        return columns;
-    }
-
-    private static _onRenderPodItemColumn(pod?: V1Pod, index?: number, column?: IColumn): React.ReactNode {
-        if (!pod || !column) {
-            return null;
-        }
-
-        let textToRender: string | undefined;
-        let colDataClassName: string = "list-col-content";
-        switch (column.key) {
-            case podNameKey:
-                textToRender = pod.metadata.name;
-                colDataClassName = css(colDataClassName, "primary-text");
-                break;
-
-            case podImageKey:
-                textToRender = pod.spec.containers[0].image;
-                break;
-
-            case podStatusKey:
-                return (
-                    <div className={colDataClassName}>
-                        <Status className={colDataClassName} {...Utils.generatePodStatusProps(pod.status)} animated={false} size={StatusSize.m} />        
-                        {
-                            pod.status.message?
-                                <Tooltip showOnFocus={true} text={pod.status.message}>{pod.status.reason}</Tooltip>:
-                                <span className="primary-text">{pod.status.phase}</span>
-                        }
-                    </div>
-                );
-            case podCreatedTimeKey:
-                return(
-                    <Ago date={new Date(pod.status.startTime)} />
-                );
-        }
-
-        return ListComponent.renderColumn(textToRender || "", ListComponent.defaultColumnRenderer, colDataClassName);
     }
 
 }
