@@ -238,6 +238,6 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
                 pods.push(pod);
             }
         });
-        return <PodsComponent podsToRender={pods} headingText={Resources.OrphanPodsText} />;
+        return <PodsComponent podsToRender={pods} />;
     }
 }

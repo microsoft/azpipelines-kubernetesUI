@@ -44,7 +44,7 @@ export class PodsComponent extends BaseComponent<IPodsComponentProperties> {
 
         columns.push({
             key: podNameKey,
-            name: Resources.PodsText,
+            name: Resources.PodsDetailsText,
             fieldName: podNameKey,
             minWidth: 250,
             maxWidth: 250,
