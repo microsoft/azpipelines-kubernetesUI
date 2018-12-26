@@ -12,7 +12,7 @@ import { Statuses, IStatusProps } from "azure-devops-ui/Status";
 /**
  * https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-phase
  */
-export enum PodPhase {
+enum PodPhase {
     Pending = "Pending",
     Running = "Running",
     Succeeded = "Succeeded",

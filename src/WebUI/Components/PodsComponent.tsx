@@ -1,4 +1,4 @@
-import { BaseComponent, css, format } from "@uifabric/utilities";
+import { BaseComponent, css } from "@uifabric/utilities";
 import { IColumn } from "azure-devops-ui/Components/VssDetailsList/VssDetailsList.Props";
 import { Ago } from "azure-devops-ui/Ago";
 import { ColumnActionsMode } from "office-ui-fabric-react/lib/DetailsList";

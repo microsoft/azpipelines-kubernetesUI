@@ -29,7 +29,6 @@ export interface IKubernetesContainerState extends IKubernetesSummary {
     showDeployment?: boolean;
     showService?: boolean;
     selectedItem?: any;
-    showOrphanPods?: boolean;
 }
 
 export interface IKubeSummaryProps extends IVssComponentProperties {
@@ -46,8 +45,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
             selectedKey: workloadsPivotItemKey,
             showSummary: true,
             showDeployment: false,
-            showService: false,
-            showOrphanPods: false
+            showService: false
         };
     }
 
@@ -133,8 +131,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
 
         kubeService.getPods().then(podList =>{
             this.setState({
-                podList: podList,
-                showOrphanPods: true
+                podList: podList
             })
         })
     }
@@ -185,7 +182,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
                     key={format("dc-{0}", this.state.namespace || "")}
                     onItemInvoked={this._onDeploymentItemInvoked}
                 />
-                {this.state.showOrphanPods && this.getOrphanPods()}
+                {this.state.podList && this.state.podList.items && this.state.podList.items.length > 0 && this.getOrphanPods()}
             </PivotItem>
         );
     }
