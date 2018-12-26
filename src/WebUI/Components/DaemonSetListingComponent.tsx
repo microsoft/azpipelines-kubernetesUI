@@ -5,7 +5,6 @@ import { IStatusProps, Status, Statuses, StatusSize } from "azure-devops-ui/Stat
 import { ColumnActionsMode } from "office-ui-fabric-react/lib/DetailsList";
 import * as React from "react";
 import * as Resources from "../Resources";
-import "./DaemonSetListingComponent.scss";
 import { ListComponent } from "./ListComponent";
 import { IVssComponentProperties } from "../Types";
 import { Ago } from "azure-devops-ui/Ago";

@@ -41,4 +41,18 @@ describe("KubeServiceBase Tests", () => {
             expect(output).toBe(KubeResourceType.Services);
         });
     });
+
+    it("getDaemonSets calls with right input", () => {
+        expect.assertions(1);
+        return service.getDaemonSets().then(output => {
+            expect(output).toBe(KubeResourceType.DaemonSets);
+        });
+    });
+
+    it("getStatefulSets calls with right input", () => {
+        expect.assertions(1);
+        return service.getStatefulSets().then(output => {
+            expect(output).toBe(KubeResourceType.StatefulSets);
+        });
+    });
 });

@@ -9,7 +9,6 @@ import { ListComponent } from "./ListComponent";
 import { IVssComponentProperties } from "../Types";
 import { Ago } from "azure-devops-ui/Ago";
 import { Utils } from "../Utils";
-import "./StatefulSetListingComponent.scss";
 
 const setNameKey = "statefulset-name-key";
 const imageKey = "statefulset-image-key";
