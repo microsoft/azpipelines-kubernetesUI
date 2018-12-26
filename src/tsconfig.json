@@ -12,10 +12,10 @@
           ],
         "module": "amd",
         "moduleResolution": "node",
+        "skipDefaultLibCheck": true,
+        "skipLibCheck": true,
         "noImplicitAny": false,
         "noImplicitThis": true,
-        "outDir": "dist/",
-        "rootDir": "src/",
         "strict": true,
         "target": "es5",
         "types": [
