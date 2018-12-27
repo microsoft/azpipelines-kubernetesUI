@@ -6,13 +6,18 @@
         "moduleResolution": "node",
         "skipLibCheck": true,
         "declaration": true,
-        "outDir": "../dist_tests"
+        "outDir": "../dist_tests",
+        "jsx": "react"
     },
     "typeRoots": [
         "@types/",
     ],
     "types": [
         "jest",
-        "node"
+        "node",
+        "enzyme"
+    ],
+    "exclude": [
+        "node_modules"
     ]
 }

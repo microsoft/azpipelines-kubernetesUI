@@ -13,13 +13,14 @@ const entries = {};
 const allFiles = globSync(__dirname + searchPattern);
 allFiles.forEach(f => {
     if (fs.statSync(f).isFile()) {
-        // find test file, use the relativepath + name as the key for webpack
         if (f.endsWith(".test.ts") || f.endsWith(".test.tsx") || f.endsWith(".test.js")) {
-            const testsPath = path.join(process.cwd(), testsFolderName);
-            const relativePath = path.relative(testsPath, f);
+            // find test file, use the relativepath + name as the key for webpack
+            //const testsPath = path.join(process.cwd(), testsFolderName);
+            const relativePath = path.relative(process.cwd(), f);
             const parsedPath = path.parse(path.normalize(relativePath));
             // replace all folder separators with _, and append the name of the file
-            const fName = parsedPath.dir.replace(/\\|\//gi, "_") + "_" + parsedPath.name;
+            // const fName = parsedPath.dir.replace(/\\|\//gi, "_") + "_" + parsedPath.name;
+            const fName = path.join(parsedPath.dir, parsedPath.name);
             entries[fName] = path.normalize(f);
         }
     }
