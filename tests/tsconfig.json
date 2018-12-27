@@ -3,7 +3,6 @@
         "target": "es6",
         "module": "commonjs",
         "moduleResolution": "node",
-        "skipDefaultLibCheck": true,
         "skipLibCheck": true,
         "declaration": true,
     },
