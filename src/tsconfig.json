@@ -23,6 +23,11 @@
         "baseUrl": "./",
         "types": [
             "react"
-        ]
+        ],
+        "paths": {
+            "@azurepipelines/azdevops-kube-summary/dist/*": [
+                "./*"
+            ]
+        }
     }
 }
