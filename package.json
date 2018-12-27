@@ -11,17 +11,17 @@
     "url": "git+https://github.com/Microsoft/azpipelines-kubernetesUI.git"
   },
   "scripts": {
-    "clean": "rimraf ./dist && rimraf ./dist_tests",
+    "clean": "rimraf ./dist && rimraf ./dist_tests && rimraf ./_bundles",
     "compile": "npm run clean && npm run compilesrc && npm run compiletest && npm run copy-all",
-    "build": "npm run compile",
+    "build": "npm run compile && webpack --mode production && npm pack",
     "copy-all": "npm run copy-scss && npm run copy-resources",
     "copy-scss": "copyfiles -u 1 src/**/*.scss ./dist",
-    "copy-resources": "copyfiles -u 1 src/**/Resources.js src/**/Types.d.ts ./dist",
+    "copy-resources": "copyfiles -u 1 src/**/Resources.js ./dist",
     "test": "npm run compiletest && npm run jesttests",
     "compiletest": "webpack --mode development --config ./tests/webpack.config.js",
     "jesttests": "jest ./dist_tests --verbose --reporters=default --reporters=jest-junit",
-    "cleanandtest": "npm run clean && npm run test",
-    "compilesrc": "tsc -p ./src --outDir ./dist"
+    "compilesrc": "tsc -p ./src",
+    "cleanandtest": "npm run clean && npm run test"
   },
   "keywords": [
     "Kubernetes-UI"
@@ -29,7 +29,8 @@
   "license": "MIT",
   "main": "dist/WebUI/Components/KubeSummary.js",
   "files": [
-    "dist/**/*"
+    "dist",
+    "_bundles"
   ],
   "dependencies": {
     "@kubernetes/client-node": "~0.7.1",
@@ -64,7 +65,8 @@
     "ts-loader": "~5.2.2",
     "typescript": "^2.9.2",
     "webpack": "^4.27.0",
-    "webpack-cli": "^3.1.2"
+    "webpack-cli": "^3.1.2",
+    "uglifyjs-webpack-plugin": "^2.1.0"
   },
   "bugs": {
     "url": "https://github.com/Microsoft/azpipelines-kubernetesUI/issues"
