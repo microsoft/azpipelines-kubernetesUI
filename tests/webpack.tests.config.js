@@ -2,22 +2,25 @@ const path = require("path");
 const fs = require("fs");
 const globSync = require("glob").sync
 
+const searchPattern = "/**/*";
+const outputPathRelativePath = "./../dist_tests";
+const testsFolderName = "tests";
+const outputPath = path.resolve(__dirname, outputPathRelativePath);
+
 // Webpack entry points. Mapping from resulting bundle name to the source file entry.
 const entries = {};
-const outputPath = path.resolve(__dirname, "./dist_tests");
-
 // Loop through subfolders for .test.ts/tsx/js files
-const allFiles = globSync(__dirname + "/tests/**/*");
-let fileCounter = 0;
+const allFiles = globSync(__dirname + searchPattern);
 allFiles.forEach(f => {
     if (fs.statSync(f).isFile()) {
-        // find all test files, find their relative path and the name of the file (without extension)
-        // use the filename as the key and relative path for creating the webpack
+        // find test file, use the relativepath + name as the key for webpack
         if (f.endsWith(".test.ts") || f.endsWith(".test.tsx") || f.endsWith(".test.js")) {
-            fileCounter++;
-            const relativePath = path.relative(process.cwd(), f);
-            const fName = fileCounter + "_" + path.parse(f).name;
-            entries[fName] = "./" + relativePath;
+            const testsPath = path.join(process.cwd(), testsFolderName);
+            const relativePath = path.relative(testsPath, f);
+            const parsedPath = path.parse(path.normalize(relativePath));
+            // replace all folder separators with _, and append the name of the file
+            const fName = parsedPath.dir.replace(/\\|\//gi, "_") + "_" + parsedPath.name;
+            entries[fName] = path.normalize(f);
         }
     }
 });

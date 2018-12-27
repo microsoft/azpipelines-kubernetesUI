@@ -18,7 +18,7 @@
     "copy-scss": "copyfiles -u 1 src/**/*.scss ./dist",
     "copy-resources": "copyfiles -u 1 src/**/Resources.js src/**/Types.d.ts ./dist",
     "test": "npm run clean && npm run compiletest && jest ./dist_tests --verbose",
-    "compiletest": "webpack --mode development --config ./webpack.tests.config.js",
+    "compiletest": "webpack --mode development --config ./tests/webpack.tests.config.js",
     "compilesrc": "tsc -p ./src --outDir ./dist"
   },
   "keywords": [
