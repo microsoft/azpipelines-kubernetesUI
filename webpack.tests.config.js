@@ -35,8 +35,7 @@ module.exports = {
         warnings: false
     },
     module: {
-        rules: [
-            {
+        rules: [{
                 test: /\.tsx?$/,
                 loader: "ts-loader"
             },
