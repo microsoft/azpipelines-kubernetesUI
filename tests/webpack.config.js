@@ -15,11 +15,8 @@ allFiles.forEach(f => {
     if (fs.statSync(f).isFile()) {
         if (f.endsWith(".test.ts") || f.endsWith(".test.tsx") || f.endsWith(".test.js")) {
             // find test file, use the relativepath + name as the key for webpack
-            //const testsPath = path.join(process.cwd(), testsFolderName);
             const relativePath = path.relative(process.cwd(), f);
             const parsedPath = path.parse(path.normalize(relativePath));
-            // replace all folder separators with _, and append the name of the file
-            // const fName = parsedPath.dir.replace(/\\|\//gi, "_") + "_" + parsedPath.name;
             const fName = path.join(parsedPath.dir, parsedPath.name);
             entries[fName] = path.normalize(f);
         }
