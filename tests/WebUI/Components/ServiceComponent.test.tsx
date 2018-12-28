@@ -1,15 +1,12 @@
 import { V1Service } from "@kubernetes/client-node";
 import * as String_Utils from "azure-devops-ui/Core/Util/String";
 import * as Date_Utils from "azure-devops-ui/Utilities/Date";
-import { shallow, mount } from "enzyme";
 import * as React from "react";
 
 import { ServiceComponent } from "../../../src/WebUI/Components/ServiceComponent";
 import * as Resources from "../../../src/WebUI/Resources";
 import { IServiceItem } from "../../../src/WebUI/Types";
-import { initializeAdapter } from "../../InitializeAdapter";
-
-beforeAll(() => initializeAdapter());
+import { mount, shallow } from "../../TestCore";
 
 describe("ServiceComponent component tests", () => {
 

@@ -1,10 +1,7 @@
-import { shallow } from "enzyme";
 import * as React from "react";
 
 import { IListComponentProperties, ListComponent } from "../../../src/WebUI/Components/ListComponent";
-import { initializeAdapter } from "../../InitializeAdapter";
-
-beforeAll(() => initializeAdapter());
+import { shallow } from "../../TestCore";
 
 describe("ListComponent component tests", () => {
     it("Check header of the component", () => {
