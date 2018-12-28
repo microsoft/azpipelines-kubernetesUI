@@ -22,7 +22,7 @@ describe("ServiceComponent component tests", () => {
             },
             "creationTimestamp": createdDate,
             "name": name,
-            "namespace": "madhuv-n1",
+            "namespace": "some-namespace",
             "uid": uid
         },
         "spec": {
@@ -37,7 +37,7 @@ describe("ServiceComponent component tests", () => {
                 }
             ],
             "selector": {
-                "app": "azure-vote-front"
+                "app": "test-app-one"
             },
             "sessionAffinity": "None",
             "type": "LoadBalancer"

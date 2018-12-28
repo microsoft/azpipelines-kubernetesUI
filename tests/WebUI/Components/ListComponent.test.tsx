@@ -11,6 +11,7 @@ describe("ListComponent component tests", () => {
             items: [],
             onRenderItemColumn: () => null
         };
+
         const wrapper = shallow(<ListComponent {...props} />);
         const headingClass = ".kube-list-content .kube-list-heading.heading";
         const heading = wrapper.find(headingClass);
