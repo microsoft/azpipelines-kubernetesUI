@@ -1,7 +1,3 @@
-# CI trigger
-trigger:
-- master
-
 # PR trigger
 pr:
 - master
