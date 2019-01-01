@@ -29,4 +29,3 @@ steps:
     testRunner: JUnit
     testResultsFiles: '**/jest-l0-uts.xml'
     testRunTitle: 'L0 UTs'
- 

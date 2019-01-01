@@ -1,0 +1,66 @@
+# CI trigger
+trigger:
+- master
+
+queue:
+  name: 'Hosted VS2017'
+  demands: npm
+  timeoutInMinutes: 15
+
+steps:
+- task: NodeTool@0
+  displayName: 'Use Node version'
+  inputs:
+    versionSpec: '8.4'
+
+- script: |
+    npm install
+    npm run build
+  displayName: 'npm install and build'
+
+- script: |
+    npm run test
+  displayName: 'Run UTs'
+
+- task: PublishTestResults@2
+  condition: succeededOrFailed()
+  displayName: 'Publish L0 UTs'
+  inputs:
+    testRunner: JUnit
+    testResultsFiles: '**/jest-l0-uts.xml'
+    testRunTitle: 'L0 UTs'
+
+- task: ArchiveFiles@2
+  displayName: 'Archive dist folder'
+  inputs:
+    rootFolderOrFile: '$(System.DefaultWorkingDirectory)/dist'
+    archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildNumber).zip'
+
+- task: ArchiveFiles@2
+  displayName: 'Archive License to dist folder'
+  inputs:
+    rootFolderOrFile: LICENSE.txt
+    includeRootFolder: false
+    archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildNumber).zip'
+    replaceExistingArchive: false
+
+- task: ArchiveFiles@2
+  displayName: 'Archive README to dist folder'
+  inputs:
+    rootFolderOrFile: README.md
+    includeRootFolder: false
+    archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildNumber).zip'
+    replaceExistingArchive: false
+
+- task: ArchiveFiles@2
+  displayName: 'Archive package to dist folder'
+  inputs:
+    rootFolderOrFile: package.json
+    includeRootFolder: false
+    archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildNumber).zip'
+    replaceExistingArchive: false
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact: dist'
+  inputs:
+    ArtifactName: dist
