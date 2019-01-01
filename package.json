@@ -59,5 +59,10 @@
     "url": "https://github.com/Microsoft/azpipelines-kubernetesUI/issues"
   },
   "homepage": "https://github.com/Microsoft/azpipelines-kubernetesUI#readme",
-  "author": "Azure Pipelines"
+  "author": "Azure Pipelines",
+  "jest-junit": {
+    "suiteName": "L0 Uts",
+    "outputDirectory": ".",
+    "outputName": "./jest-l0-uts.xml"
+  }
 }
