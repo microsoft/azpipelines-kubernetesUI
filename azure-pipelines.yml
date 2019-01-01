@@ -28,6 +28,9 @@ steps:
 
 - task: PublishTestResults@2
   condition: succeededOrFailed()
+  displayName: 'Publish L0 UTs'
   inputs:
     testRunner: JUnit
     testResultsFiles: '**/jest-l0-uts.xml'
+    testRunTitle: 'L0 UTs'
+ 
