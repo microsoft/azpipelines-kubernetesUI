@@ -5,7 +5,7 @@ pr:
 - master
 
 jobs:
-- job: 'PR Build'
+- job: 'PR_Build'
   timeoutInMinutes: 15
   cancelTimeoutInMinutes: 2
   pool:
