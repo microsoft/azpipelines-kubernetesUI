@@ -12,13 +12,15 @@
   },
   "scripts": {
     "clean": "rimraf ./dist && rimraf ./dist_tests",
-    "compile": "npm run clean && npm run compilesrc && npm run compiletest && npm run copy-all",
+    "compile": "npm run clean && npm run compilesrc && npm run copy-all",
     "build": "npm run compile",
     "copy-all": "npm run copy-scss && npm run copy-resources",
     "copy-scss": "copyfiles -u 1 src/**/*.scss ./dist",
     "copy-resources": "copyfiles -u 1 src/**/Resources.js src/**/Types.d.ts ./dist",
-    "test": "npm run compiletest && jest ./dist_tests",
+    "test": "npm run compiletest && npm run jesttests",
+    "cleanandtest": "npm run clean && npm run test",
     "compiletest": "tsc -p ./tests --outDir ./dist_tests",
+    "jesttests": "jest ./dist_tests --verbose --reporters=default --reporters=jest-junit",
     "compilesrc": "tsc -p ./src --outDir ./dist"
   },
   "keywords": [
@@ -46,6 +48,7 @@
     "css-loader": "^1.0.1",
     "file-loader": "~2.0.0",
     "jest": "^23.6.0",
+    "jest-junit": "^5.2.0",
     "node-sass": "~4.9.4",
     "recursive-copy": "~2.0.7",
     "rimraf": "~2.6.2",
@@ -59,5 +62,10 @@
     "url": "https://github.com/Microsoft/azpipelines-kubernetesUI/issues"
   },
   "homepage": "https://github.com/Microsoft/azpipelines-kubernetesUI#readme",
-  "author": "Azure Pipelines"
+  "author": "Azure Pipelines",
+  "jest-junit": {
+    "suiteName": "L0 Uts",
+    "outputDirectory": ".",
+    "outputName": "./jest-l0-uts.xml"
+  }
 }
