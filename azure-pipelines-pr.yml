@@ -4,14 +4,10 @@ name: k8sUI_$(SourceBranchName)_$(Date:MMMd)$(Rev:.r)
 pr:
 - master
 
-jobs:
-- job: 'PR Build'
-  timeoutInMinutes: 15
-  cancelTimeoutInMinutes: 2
-
 queue:
   name: 'Hosted VS2017'
   demands: npm
+  timeoutInMinutes: 15
 
 steps:
 - task: NodeTool@0
