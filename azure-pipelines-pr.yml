@@ -9,18 +9,26 @@ queue:
 
 steps:
 - task: NodeTool@0
+  displayName: 'Use Node version'
   inputs:
     versionSpec: '8.4'
-  displayName: 'Use Node version'
 
-- script: |
-    npm install
-    npm run build
-  displayName: 'npm install and build'
+- task: Npm@1
+  displayName: 'npm install'
+  inputs:
+    command: install
 
-- script: |
-    npm run test
+- task: Npm@1
+  displayName: 'Build source'
+  inputs:
+    command: custom
+    customCommand: 'run build'
+
+- task: Npm@1
   displayName: 'Run UTs'
+  inputs:
+    command: custom
+    customCommand: 'run test'
 
 - task: PublishTestResults@2
   condition: succeededOrFailed()
