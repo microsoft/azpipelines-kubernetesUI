@@ -4,38 +4,41 @@ name: k8sUI_$(SourceBranchName)_$(Date:MMMd)$(Rev:.r)
 pr:
 - master
 
-queue:
-  name: 'Hosted VS2017'
-  demands: npm
+jobs:
+- job: 'PR Build'
   timeoutInMinutes: 15
+  cancelTimeoutInMinutes: 2
+  pool:
+    name: 'Hosted VS2017'
+    demands: npm
 
-steps:
-- task: NodeTool@0
-  displayName: 'Use Node version'
-  inputs:
-    versionSpec: '8.4'
+  steps:
+    - task: NodeTool@0
+      displayName: 'Use Node version'
+      inputs:
+        versionSpec: '8.4'
 
-- task: Npm@1
-  displayName: 'npm install'
-  inputs:
-    command: install
+    - task: Npm@1
+      displayName: 'npm install'
+      inputs:
+        command: install
 
-- task: Npm@1
-  displayName: 'Build source'
-  inputs:
-    command: custom
-    customCommand: 'run build'
+    - task: Npm@1
+      displayName: 'Build source'
+      inputs:
+        command: custom
+        customCommand: 'run build'
 
-- task: Npm@1
-  displayName: 'Run UTs'
-  inputs:
-    command: custom
-    customCommand: 'run test'
+    - task: Npm@1
+      displayName: 'Run UTs'
+      inputs:
+        command: custom
+        customCommand: 'run test'
 
-- task: PublishTestResults@2
-  condition: succeededOrFailed()
-  displayName: 'Publish L0 UTs'
-  inputs:
-    testRunner: JUnit
-    testResultsFiles: '**/jest-l0-uts.xml'
-    testRunTitle: 'L0 UTs'
+    - task: PublishTestResults@2
+      condition: succeededOrFailed()
+      displayName: 'Publish L0 UTs'
+      inputs:
+        testRunner: JUnit
+        testResultsFiles: '**/jest-l0-uts.xml'
+        testRunTitle: 'L0 UTs'
