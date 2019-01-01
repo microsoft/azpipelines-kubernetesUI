@@ -17,9 +17,10 @@
     "copy-all": "npm run copy-scss && npm run copy-resources",
     "copy-scss": "copyfiles -u 1 src/**/*.scss ./dist",
     "copy-resources": "copyfiles -u 1 src/**/Resources.js src/**/Types.d.ts ./dist",
-    "test": "npm run compiletest && jest ./dist_tests --verbose --reporters=default --reporters=jest-junit",
-    "cleantest": "npm run clean && npm run compiletest && jest ./dist_tests --verbose --reporters=default --reporters=jest-junit",
+    "test": "npm run compiletest && npm run jesttests",
+    "cleanandtest": "npm run clean && npm run test",
     "compiletest": "tsc -p ./tests --outDir ./dist_tests",
+    "jesttests": "jest ./dist_tests --verbose --reporters=default --reporters=jest-junit",
     "compilesrc": "tsc -p ./src --outDir ./dist"
   },
   "keywords": [
