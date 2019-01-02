@@ -3,7 +3,8 @@
     Licensed under the MIT license.
 */
 
-import { BaseComponent, format } from "@uifabric/utilities";
+import { BaseComponent } from "@uifabric/utilities";
+import { localeFormat, format } from "azure-devops-ui/Core/Util/String";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { LabelGroup, WrappingBehavior } from "azure-devops-ui/Label";
 import { ColumnFill, ITableColumn, renderSimpleCell, SimpleTableCell as renderTableCell, Table } from "azure-devops-ui/Table";
@@ -37,7 +38,7 @@ export class ServiceComponent extends BaseComponent<IServiceComponentProperties>
                 <div className="content-main-heading">
                     <h2 className="title-heading">{item.package}</h2>
                     <div className="sub-heading">
-                        {format(Resources.ServiceCreatedText, agoTime)}
+                        {localeFormat(Resources.ServiceCreatedText, agoTime)}
                     </div>
                 </div>
             );
