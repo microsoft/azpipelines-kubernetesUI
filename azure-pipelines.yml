@@ -1,16 +1,58 @@
 name: k8sUI_$(SourceBranchName)_$(Date:MMMd)$(Rev:.r)
 
+# PR trigger
+pr:
+- master
+
 # CI trigger
 trigger:
 - master
 
 jobs:
-- job: 'Build_Publish'
+- job: Build_Test
   timeoutInMinutes: 20
   cancelTimeoutInMinutes: 2
   pool:
     name: 'Hosted VS2017'
-    demands: npm
+
+  steps:
+    - task: NodeTool@0
+      displayName: 'Use Node version'
+      inputs:
+        versionSpec: '8.4'
+
+    - task: Npm@1
+      displayName: 'npm install'
+      inputs:
+        command: install
+
+    - task: Npm@1
+      displayName: 'Build source'
+      inputs:
+        command: custom
+        customCommand: 'run build'
+
+    - task: Npm@1
+      displayName: 'Run UTs'
+      inputs:
+        command: custom
+        customCommand: 'run test'
+
+    - task: PublishTestResults@2
+      condition: succeededOrFailed()
+      displayName: 'Publish L0 UTs'
+      inputs:
+        testRunner: JUnit
+        testResultsFiles: '**/jest-l0-uts.xml'
+        testRunTitle: 'L0 UTs'
+
+- job: 'Publish'
+  timeoutInMinutes: 10
+  cancelTimeoutInMinutes: 2
+  dependsOn: Build_Test
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+  pool:
+    name: 'Hosted VS2017'
 
   steps:
     - task: NodeTool@0
@@ -63,35 +105,3 @@ jobs:
       displayName: 'Publish Artifact: dist'
       inputs:
         ArtifactName: dist
-
-- job: 'Run_Tests'
-  timeoutInMinutes: 10
-  cancelTimeoutInMinutes: 2
-  pool:
-    name: 'Hosted VS2017'
-    demands: npm
-
-  steps:
-    - task: NodeTool@0
-      displayName: 'Use Node version'
-      inputs:
-        versionSpec: '8.4'
-
-    - task: Npm@1
-      displayName: 'npm install'
-      inputs:
-        command: install
-
-    - task: Npm@1
-      displayName: 'Run UTs'
-      inputs:
-        command: custom
-        customCommand: 'run test'
-
-    - task: PublishTestResults@2
-      condition: succeededOrFailed()
-      displayName: 'Publish L0 UTs'
-      inputs:
-        testRunner: JUnit
-        testResultsFiles: '**/jest-l0-uts.xml'
-        testRunTitle: 'L0 UTs'
