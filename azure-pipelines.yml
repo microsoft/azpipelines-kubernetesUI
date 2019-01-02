@@ -1,11 +1,15 @@
 name: k8sUI_$(SourceBranchName)_$(Date:MMMd)$(Rev:.r)
 
+# PR trigger
+pr:
+- master
+
 # CI trigger
 trigger:
 - master
 
 jobs:
-- job: 'Build_Publish'
+- job: 'Build_Test_Publish'
   timeoutInMinutes: 20
   cancelTimeoutInMinutes: 2
   pool:
@@ -29,59 +33,6 @@ jobs:
         command: custom
         customCommand: 'run build'
 
-    - task: ArchiveFiles@2
-      displayName: 'Archive dist folder'
-      inputs:
-        rootFolderOrFile: '$(System.DefaultWorkingDirectory)/dist'
-        archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildNumber).zip'
-
-    - task: ArchiveFiles@2
-      displayName: 'Archive License to dist folder'
-      inputs:
-        rootFolderOrFile: LICENSE.txt
-        includeRootFolder: false
-        archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildNumber).zip'
-        replaceExistingArchive: false
-
-    - task: ArchiveFiles@2
-      displayName: 'Archive README to dist folder'
-      inputs:
-        rootFolderOrFile: README.md
-        includeRootFolder: false
-        archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildNumber).zip'
-        replaceExistingArchive: false
-
-    - task: ArchiveFiles@2
-      displayName: 'Archive package to dist folder'
-      inputs:
-        rootFolderOrFile: package.json
-        includeRootFolder: false
-        archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildNumber).zip'
-        replaceExistingArchive: false
-
-    - task: PublishBuildArtifacts@1
-      displayName: 'Publish Artifact: dist'
-      inputs:
-        ArtifactName: dist
-
-- job: 'Run_Tests'
-  timeoutInMinutes: 10
-  cancelTimeoutInMinutes: 2
-  pool:
-    name: 'Hosted VS2017'
-    demands: npm
-
-  steps:
-    - task: NodeTool@0
-      displayName: 'Use Node version'
-      inputs:
-        versionSpec: '8.4'
-
-    - task: Npm@1
-      displayName: 'npm install'
-      inputs:
-        command: install
-
     - task: Npm@1
       displayName: 'Run UTs'
       inputs:
@@ -95,3 +46,43 @@ jobs:
         testRunner: JUnit
         testResultsFiles: '**/jest-l0-uts.xml'
         testRunTitle: 'L0 UTs'
+
+    - task: ArchiveFiles@2
+      displayName: 'Archive dist folder'
+      condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+      inputs:
+        rootFolderOrFile: '$(System.DefaultWorkingDirectory)/dist'
+        archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildNumber).zip'
+
+    - task: ArchiveFiles@2
+      displayName: 'Archive License to dist folder'
+      condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+      inputs:
+        rootFolderOrFile: LICENSE.txt
+        includeRootFolder: false
+        archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildNumber).zip'
+        replaceExistingArchive: false
+
+    - task: ArchiveFiles@2
+      displayName: 'Archive README to dist folder'
+      condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+      inputs:
+        rootFolderOrFile: README.md
+        includeRootFolder: false
+        archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildNumber).zip'
+        replaceExistingArchive: false
+
+    - task: ArchiveFiles@2
+      displayName: 'Archive package to dist folder'
+      condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+      inputs:
+        rootFolderOrFile: package.json
+        includeRootFolder: false
+        archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildNumber).zip'
+        replaceExistingArchive: false
+
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Artifact: dist'
+      condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+      inputs:
+        ArtifactName: dist
