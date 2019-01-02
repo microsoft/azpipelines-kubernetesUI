@@ -17,8 +17,10 @@
     "copy-all": "npm run copy-scss && npm run copy-resources",
     "copy-scss": "copyfiles -u 1 src/**/*.scss ./dist",
     "copy-resources": "copyfiles -u 1 src/**/Resources.js src/**/Types.d.ts ./dist",
-    "test": "npm run clean && npm run compiletest && jest ./dist_tests --verbose",
+    "test": "npm run compiletest && npm run jesttests",
     "compiletest": "webpack --mode development --config ./tests/webpack.config.js",
+    "jesttests": "jest ./dist_tests --verbose --reporters=default --reporters=jest-junit",
+    "cleanandtest": "npm run clean && npm run test",
     "compilesrc": "tsc -p ./src --outDir ./dist"
   },
   "keywords": [
@@ -53,6 +55,7 @@
     "file-loader": "~2.0.0",
     "glob": "^7.1.3",
     "jest": "^23.6.0",
+    "jest-junit": "^5.2.0",
     "node-sass": "~4.9.4",
     "recursive-copy": "~2.0.7",
     "rimraf": "~2.6.2",
@@ -67,5 +70,10 @@
     "url": "https://github.com/Microsoft/azpipelines-kubernetesUI/issues"
   },
   "homepage": "https://github.com/Microsoft/azpipelines-kubernetesUI#readme",
-  "author": "Azure Pipelines"
+  "author": "Azure Pipelines",
+  "jest-junit": {
+    "suiteName": "L0 Uts",
+    "outputDirectory": ".",
+    "outputName": "./jest-l0-uts.xml"
+  }
 }
