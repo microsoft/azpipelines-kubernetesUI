@@ -20,7 +20,7 @@ import { PodsComponent } from "./PodsComponent";
 
 export interface IServiceComponentProperties extends IVssComponentProperties {
     service: IServiceItem;
-    podListingPromise: Promise<V1PodList>;
+    podListingPromise?: Promise<V1PodList>;
 }
 
 export interface IServiceComponentState {
@@ -148,7 +148,7 @@ export class ServiceComponent extends BaseComponent<IServiceComponentProperties,
 
     public componentDidMount(): void {
         console.log("getting items");
-        this.props.podListingPromise.then(podList => {
+        this.props.podListingPromise && this.props.podListingPromise.then(podList => {
             podList &&
             podList.items &&
                 this.setState({
