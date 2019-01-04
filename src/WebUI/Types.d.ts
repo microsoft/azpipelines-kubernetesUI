@@ -2,8 +2,7 @@
     Copyright (c) Microsoft Corporation. All rights reserved.
     Licensed under the MIT license.
 */
-
-import { V1Deployment, V1DeploymentList, V1PodList, V1ReplicaSetList, V1Service, V1ServiceList, V1ReplicaSet } from "@kubernetes/client-node";
+import { V1Deployment, V1DeploymentList, V1PodList, V1ReplicaSetList, V1Service, V1ServiceList, V1ReplicaSet,  V1DaemonSetList, V1StatefulSetList } from "@kubernetes/client-node";
 import { IObservable } from "azure-devops-ui/Core/Observable";
 import { IStatusProps } from "azure-devops-ui/Status";
 import { IBaseProps } from "office-ui-fabric-react/lib/Utilities";
@@ -14,6 +13,8 @@ export interface IKubernetesSummary {
     deploymentList?: V1DeploymentList;
     serviceList?: V1ServiceList;
     replicaSetList?: V1ReplicaSetList;
+    daemonSetList?: V1DaemonSetList;
+    statefulSetList?: V1StatefulSetList;
 }
 
 export interface IDeploymentItem {

@@ -94,7 +94,7 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
     private static _getColumns(): IColumn[] {
         let columns: IColumn[] = [];
         const headerColumnClassName: string = "secondary-text";
-        const columnContentClassName: string = css("list-col-content","sc-cell-layout");;
+        const columnContentClassName: string = css("list-col-content","two-lines");
 
         columns.push({
             key: packageKey,

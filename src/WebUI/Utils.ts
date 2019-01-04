@@ -7,7 +7,10 @@ import { V1ObjectMeta, V1PodStatus } from "@kubernetes/client-node";
 import { format } from "@uifabric/utilities/lib";
 import { ObservableArray } from "azure-devops-ui/Core/Observable";
 import { ILabelModel } from "azure-devops-ui/Label";
-import { Statuses, IStatusProps } from "azure-devops-ui/Status";
+import { IStatusProps, Statuses } from "azure-devops-ui/Status";
+
+const pipelineNameAnnotationKey: string = "pipeline-name";
+const pipelineIdAnnotationKey: string = "pipeline-id";
 
 /**
  * https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-phase
@@ -38,6 +41,32 @@ export class Utils {
         return labelArray;
     }
 
+    public static getPipelineText(annotations: { [key: string]: string }): string {
+        let pipelineName: string = "", pipelineId: string = "";
+        
+        annotations && Object.keys(annotations).find(key => {
+            const keyVal: string = key.toLowerCase();
+            if (!pipelineName && keyVal === pipelineNameAnnotationKey) {
+                pipelineName = annotations[key];
+            }
+            else if (!pipelineId && keyVal === pipelineIdAnnotationKey) {
+                pipelineId = annotations[key];
+            }
+
+            return !!pipelineName && !!pipelineId;
+        });
+
+        return pipelineName && pipelineId ? format("{0} / {1}", pipelineName, pipelineId) : "";
+    }
+
+    public static _getPodsStatusProps(currentScheduledPods: number, desiredPods: number): IStatusProps | undefined {
+        //todo modify logic to base on pod events so that we can distinguish between pending/failed pods
+        if (desiredPods != null && currentScheduledPods != null && desiredPods > 0) {
+            return currentScheduledPods < desiredPods ? Statuses.Failed : Statuses.Success;
+        }
+
+        return undefined;
+    }
     public static generateEqualsConditionLabelSelector(labels: { [key: string]: string }): string {
         console.log(labels);
         let labelSelector: string = "";

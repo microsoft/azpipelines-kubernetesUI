@@ -101,7 +101,7 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
             name: index > 0 ? "" : deployment.metadata.name,
             uid: deployment.metadata.uid,
             replicaSetName: replica.metadata.name,
-            pipeline: DeploymentsComponent._getPipelineText(annotations),
+            pipeline: Utils.getPipelineText(annotations),
             // todo :: how to find error in replicaSet
             pods: DeploymentsComponent._getPodsText(replica.status.availableReplicas, replica.status.replicas),
             statusProps: DeploymentsComponent._getPodsStatusProps(replica.status.availableReplicas, replica.status.replicas),
@@ -140,21 +140,6 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
         return undefined;
     }
 
-    private static _getPipelineText(annotations: { [key: string]: string }): string {
-        let pipelineName: string = "", pipelineId: string = "";
-        Object.keys(annotations).find(key => {
-            if (!pipelineName && key.toLowerCase() === pipelineNameAnnotationKey) {
-                pipelineName = annotations[key];
-            }
-            else if (!pipelineId && key.toLowerCase() === pipelineIdAnnotationKey) {
-                pipelineId = annotations[key];
-            }
-
-            return !!pipelineName && !!pipelineId;
-        });
-
-        return pipelineName && pipelineId ? format("{0} / {1}", pipelineName, pipelineId) : "";
-    }
 
     private static _getColumns(): IColumn[] {
         let columns: IColumn[] = [];

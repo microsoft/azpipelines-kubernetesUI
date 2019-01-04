@@ -42,6 +42,20 @@ describe("KubeServiceBase Tests", () => {
         });
     });
 
+    it("getDaemonSets calls with right input", () => {
+        expect.assertions(1);
+        return service.getDaemonSets().then(output => {
+            expect(output).toBe(KubeResourceType.DaemonSets);
+        });
+    });
+
+    it("getStatefulSets calls with right input", () => {
+        expect.assertions(1);
+        return service.getStatefulSets().then(output => {
+            expect(output).toBe(KubeResourceType.StatefulSets);
+        });
+    });
+
     it("getPods calls with labelSelector as input",() => {
         expect.assertions(1);
         const labelSelector:string = "app=app";
