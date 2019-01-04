@@ -3,7 +3,7 @@
     Licensed under the MIT license.
 */
 
-import { V1DeploymentList, V1ReplicaSet, V1ReplicaSetList, V1ServiceList } from "@kubernetes/client-node";
+import { V1DeploymentList, V1ReplicaSet, V1ReplicaSetList, V1ServiceList, V1Service, V1PodList, V1Pod } from "@kubernetes/client-node";
 import { BaseComponent, format } from "@uifabric/utilities";
 import { Pivot, PivotItem } from "office-ui-fabric-react/lib/Pivot";
 import * as React from "react";
@@ -18,6 +18,7 @@ import { ServiceComponent } from "./ServiceComponent";
 import { ServicesComponent } from "./ServicesComponent";
 // todo :: work around till this issue is fixed in devops ui
 import "azure-devops-ui/Label.scss";
+import { PodsComponent } from "./PodsComponent";
 
 const workloadsPivotItemKey: string = "workloads";
 const servicesPivotItemKey: string = "services";
@@ -127,6 +128,12 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         kubeService.getServices().then(serviceList => {
             this.setState({ serviceList: serviceList });
         });
+
+        kubeService.getPods().then(podList =>{
+            this.setState({
+                podList: podList
+            })
+        })
     }
 
     private _getMainContent(): JSX.Element {
@@ -175,6 +182,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
                     key={format("dc-{0}", this.state.namespace || "")}
                     onItemInvoked={this._onDeploymentItemInvoked}
                 />
+                {this.state.podList && this.state.podList.items && this.state.podList.items.length > 0 && this.getOrphanPods()}
             </PivotItem>
         );
     }
@@ -213,6 +221,20 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
     }
 
     private _getServiceComponent(): JSX.Element {
-        return <ServiceComponent service={this.state.selectedItem} />;
+        const svc:V1Service = this.state.selectedItem.service;
+        //service currently only supports equals with "and" operator. The generator generates that condition.
+        const labelSelector:string = Utils.generateEqualsConditionLabelSelector(svc.spec.selector || {});
+        const podsListing:Promise<any> = labelSelector && this.props.kubeService && this.props.kubeService.getPods(labelSelector)|| Promise.resolve({});
+        return <ServiceComponent service={this.state.selectedItem} podListingPromise={podsListing}/>;
+    }
+
+    private getOrphanPods(): JSX.Element {
+        let pods: V1Pod[] = [];
+        this.state.podList && this.state.podList.items && this.state.podList.items.forEach(pod => {
+            if (!pod.metadata.ownerReferences) {
+                pods.push(pod);
+            }
+        });
+        return <PodsComponent podsToRender={pods} />;
     }
 }

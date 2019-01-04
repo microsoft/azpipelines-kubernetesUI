@@ -15,17 +15,37 @@ import * as Resources from "../Resources";
 import { IServiceItem, IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
 import "./ServiceComponent.scss";
+import { V1PodList, V1Pod } from "@kubernetes/client-node";
+import { PodsComponent } from "./PodsComponent";
 
 export interface IServiceComponentProperties extends IVssComponentProperties {
     service: IServiceItem;
+    podListingPromise?: Promise<V1PodList>;
 }
 
-export class ServiceComponent extends BaseComponent<IServiceComponentProperties> {
+export interface IServiceComponentState {
+    pods:Array<V1Pod>;
+}
+
+const podNameKey: string = "svc-pod-name-key";
+const podImageKey: string = "svc-pod-image-key";
+const podStatusKey: string = "svc-pod-status-key";
+const podCreatedTimeKey:string = "svc-pod-age-key";
+
+export class ServiceComponent extends BaseComponent<IServiceComponentProperties, IServiceComponentState> {
+    constructor(props: IServiceComponentProperties) {
+        super(props, {});
+        this.state = {
+            pods: []
+        };
+    }
+
     public render(): JSX.Element {
         return (
             <div className="service-main-content">
                 {this._getMainHeading()}
                 {this._getServiceDetails()}
+                {this._getAssociatedPods()}
             </div>
         );
     }
@@ -125,4 +145,27 @@ export class ServiceComponent extends BaseComponent<IServiceComponentProperties>
                 return renderSimpleCell(rowIndex, columnIndex, tableColumn, tableItem);
         }
     }
+
+    public componentDidMount(): void {
+        console.log("getting items");
+        this.props.podListingPromise && this.props.podListingPromise.then(podList => {
+            podList &&
+            podList.items &&
+                this.setState({
+                    pods: podList.items
+                });
+        }).catch(error => {
+            console.log(error);
+        });
+    }
+
+    private _getAssociatedPods(): JSX.Element | null {
+        return (
+            <PodsComponent 
+                podsToRender={this.state.pods}
+                headingText={Resources.AssociatedPodsText}
+            />
+        );
+    }
+
 }
