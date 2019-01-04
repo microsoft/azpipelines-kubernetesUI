@@ -47,7 +47,7 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
     private _getDeploymentListView() {
         let renderList:JSX.Element[] =[];
         DeploymentsComponent._generateDeploymentReplicaSetMap(this.props.deploymentList, this.props.replicaSetList).forEach((entry, index) => {
-            let columnClassName = css("list-content", "depth-16", index>0?"replica-with-pod-list":"");
+            let columnClassName = css("list-content", "depth-16", index > 0 ? "replica-with-pod-list" : "");
             renderList.push( <ListComponent
                 className={columnClassName}
                 headingContent={DeploymentsComponent._getHeadingContent(entry.deployment)}

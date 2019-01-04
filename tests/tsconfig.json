@@ -1,17 +1,23 @@
 {
     "compilerOptions": {
+        "charset": "utf8",
         "target": "es6",
         "module": "commonjs",
         "moduleResolution": "node",
-        "skipDefaultLibCheck": true,
         "skipLibCheck": true,
         "declaration": true,
+        "outDir": "../dist_tests",
+        "jsx": "react"
     },
     "typeRoots": [
         "@types/",
     ],
     "types": [
         "jest",
-        "node"
+        "node",
+        "enzyme"
+    ],
+    "exclude": [
+        "node_modules"
     ]
 }

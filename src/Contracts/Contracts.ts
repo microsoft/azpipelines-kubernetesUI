@@ -6,7 +6,7 @@
 import * as K8sTypes from "@kubernetes/client-node";
 
 export interface IKubeService {
-    getPods(): Promise<K8sTypes.V1PodList>;
+    getPods(labelSelector?:string): Promise<K8sTypes.V1PodList>;
 
     getDeployments(): Promise<K8sTypes.V1DeploymentList>;
 

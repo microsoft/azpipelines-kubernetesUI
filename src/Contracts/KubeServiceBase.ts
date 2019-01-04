@@ -17,8 +17,8 @@ export enum KubeResourceType {
 }
 
 export abstract class KubeServiceBase implements IKubeService {
-    getPods(): Promise<K8sTypes.V1PodList> {
-        return this.fetch(KubeResourceType.Pods);
+    getPods(labelSelector?:string): Promise<K8sTypes.V1PodList> {
+        return this.fetch(KubeResourceType.Pods, labelSelector);
     }
 
     getDeployments(): Promise<K8sTypes.V1DeploymentList> {
@@ -41,5 +41,5 @@ export abstract class KubeServiceBase implements IKubeService {
         return this.fetch(KubeResourceType.StatefulSets)
     }
 
-    abstract fetch(resourceType: KubeResourceType): Promise<any>;
+    abstract fetch(resourceType: KubeResourceType, labelSelector?:string): Promise<any>;
 }

@@ -35,5 +35,6 @@ export declare const LabelsText: string;
 export declare const SelectorText: string;
 export declare const SessionAffinityText: string;
 export declare const NoneText: string;
+export declare const AssociatedPodsText: string;
 export declare const DaemonSetText: string;
 export declare const StatefulSetText: string;

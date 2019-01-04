@@ -1,0 +1,107 @@
+name: k8sUI_$(SourceBranchName)_$(Date:MMMd)$(Rev:.r)
+
+# PR trigger
+pr:
+- master
+
+# CI trigger
+trigger:
+- master
+
+jobs:
+- job: Build_Test
+  timeoutInMinutes: 20
+  cancelTimeoutInMinutes: 2
+  pool:
+    name: 'Hosted VS2017'
+
+  steps:
+    - task: NodeTool@0
+      displayName: 'Use Node version'
+      inputs:
+        versionSpec: '8.4'
+
+    - task: Npm@1
+      displayName: 'npm install'
+      inputs:
+        command: install
+
+    - task: Npm@1
+      displayName: 'Build source'
+      inputs:
+        command: custom
+        customCommand: 'run build'
+
+    - task: Npm@1
+      displayName: 'Run UTs'
+      inputs:
+        command: custom
+        customCommand: 'run test'
+
+    - task: PublishTestResults@2
+      condition: succeededOrFailed()
+      displayName: 'Publish L0 UTs'
+      inputs:
+        testRunner: JUnit
+        testResultsFiles: '**/jest-l0-uts.xml'
+        testRunTitle: 'L0 UTs'
+
+- job: 'Publish'
+  timeoutInMinutes: 10
+  cancelTimeoutInMinutes: 2
+  dependsOn: Build_Test
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+  pool:
+    name: 'Hosted VS2017'
+
+  steps:
+    - task: NodeTool@0
+      displayName: 'Use Node version'
+      inputs:
+        versionSpec: '8.4'
+
+    - task: Npm@1
+      displayName: 'npm install'
+      inputs:
+        command: install
+
+    - task: Npm@1
+      displayName: 'Build source'
+      inputs:
+        command: custom
+        customCommand: 'run build'
+
+    - task: ArchiveFiles@2
+      displayName: 'Archive dist folder'
+      inputs:
+        rootFolderOrFile: '$(System.DefaultWorkingDirectory)/dist'
+        archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildNumber).zip'
+
+    - task: ArchiveFiles@2
+      displayName: 'Archive License to dist folder'
+      inputs:
+        rootFolderOrFile: LICENSE.txt
+        includeRootFolder: false
+        archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildNumber).zip'
+        replaceExistingArchive: false
+
+    - task: ArchiveFiles@2
+      displayName: 'Archive README to dist folder'
+      inputs:
+        rootFolderOrFile: README.md
+        includeRootFolder: false
+        archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildNumber).zip'
+        replaceExistingArchive: false
+
+    - task: ArchiveFiles@2
+      displayName: 'Archive package to dist folder'
+      inputs:
+        rootFolderOrFile: package.json
+        includeRootFolder: false
+        archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildNumber).zip'
+        replaceExistingArchive: false
+
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Artifact: dist'
+      inputs:
+        ArtifactName: dist

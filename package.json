@@ -1,6 +1,6 @@
 {
   "name": "@azurepipelines/azdevops-kube-summary",
-  "version": "1.0.9",
+  "version": "2.0.0",
   "description": "Azure DevOps Kubernetes Summary",
   "engines": {
     "node": ">=8.4.0",
@@ -11,15 +11,17 @@
     "url": "git+https://github.com/Microsoft/azpipelines-kubernetesUI.git"
   },
   "scripts": {
-    "clean": "rimraf ./dist && rimraf ./dist_tests",
+    "clean": "rimraf ./dist && rimraf ./dist_tests && rimraf ./_bundles",
     "compile": "npm run clean && npm run compilesrc && npm run compiletest && npm run copy-all",
-    "build": "npm run compile",
+    "build": "npm run compile && webpack --mode production && npm pack",
     "copy-all": "npm run copy-scss && npm run copy-resources",
     "copy-scss": "copyfiles -u 1 src/**/*.scss ./dist",
-    "copy-resources": "copyfiles -u 1 src/**/Resources.js src/**/Types.d.ts ./dist",
-    "test": "npm run compiletest && jest ./dist_tests",
-    "compiletest": "tsc -p ./tests --outDir ./dist_tests",
-    "compilesrc": "tsc -p ./src --outDir ./dist"
+    "copy-resources": "copyfiles -u 1 src/**/Resources.js ./dist",
+    "test": "npm run compiletest && npm run jesttests",
+    "compiletest": "webpack --mode development --config ./tests/webpack.config.js",
+    "jesttests": "jest ./dist_tests --verbose --reporters=default --reporters=jest-junit",
+    "compilesrc": "tsc -p ./src",
+    "cleanandtest": "npm run clean && npm run test"
   },
   "keywords": [
     "Kubernetes-UI"
@@ -27,7 +29,8 @@
   "license": "MIT",
   "main": "dist/WebUI/Components/KubeSummary.js",
   "files": [
-    "dist/**/*"
+    "dist",
+    "_bundles"
   ],
   "dependencies": {
     "@kubernetes/client-node": "~0.7.1",
@@ -37,6 +40,9 @@
     "react-dom": "~16.3.2"
   },
   "devDependencies": {
+    "@types/enzyme": "^3.1.15",
+    "@types/enzyme-adapter-react-16": "^1.0.3",
+    "@types/enzyme-to-json": "^1.5.2",
     "@types/jest": "^23.3.10",
     "@types/react": "^16.7.13",
     "@types/react-dom": "^16.0.11",
@@ -44,8 +50,13 @@
     "copy-webpack-plugin": "^4.6.0",
     "copyfiles": "^2.1.0",
     "css-loader": "^1.0.1",
+    "enzyme": "^3.8.0",
+    "enzyme-adapter-react-16": "^1.7.1",
+    "enzyme-to-json": "^3.3.5",
     "file-loader": "~2.0.0",
+    "glob": "^7.1.3",
     "jest": "^23.6.0",
+    "jest-junit": "^5.2.0",
     "node-sass": "~4.9.4",
     "recursive-copy": "~2.0.7",
     "rimraf": "~2.6.2",
@@ -53,11 +64,18 @@
     "style-loader": "~0.23.1",
     "ts-loader": "~5.2.2",
     "typescript": "^2.9.2",
-    "webpack": "^4.27.0"
+    "webpack": "^4.27.0",
+    "webpack-cli": "^3.1.2",
+    "uglifyjs-webpack-plugin": "^2.1.0"
   },
   "bugs": {
     "url": "https://github.com/Microsoft/azpipelines-kubernetesUI/issues"
   },
   "homepage": "https://github.com/Microsoft/azpipelines-kubernetesUI#readme",
-  "author": "Azure Pipelines"
+  "author": "Azure Pipelines",
+  "jest-junit": {
+    "suiteName": "L0 Uts",
+    "outputDirectory": ".",
+    "outputName": "./jest-l0-uts.xml"
+  }
 }

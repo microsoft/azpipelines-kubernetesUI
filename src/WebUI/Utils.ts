@@ -3,7 +3,7 @@
     Licensed under the MIT license.
 */
 
-import { V1ObjectMeta } from "@kubernetes/client-node";
+import { V1ObjectMeta, V1PodStatus } from "@kubernetes/client-node";
 import { format } from "@uifabric/utilities/lib";
 import { ObservableArray } from "azure-devops-ui/Core/Observable";
 import { ILabelModel } from "azure-devops-ui/Label";
@@ -11,6 +11,17 @@ import { IStatusProps, Statuses } from "azure-devops-ui/Status";
 
 const pipelineNameAnnotationKey: string = "pipeline-name";
 const pipelineIdAnnotationKey: string = "pipeline-id";
+
+/**
+ * https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-phase
+ */
+enum PodPhase {
+    Pending = "Pending",
+    Running = "Running",
+    Succeeded = "Succeeded",
+    Failed = "Failed",
+    Unknown = "Unknown"
+}
 
 export class Utils {
     public static isOwnerMatched(objectMeta: V1ObjectMeta, ownerUIdLowerCase: string): boolean {
@@ -55,5 +66,24 @@ export class Utils {
         }
 
         return undefined;
+    }
+    public static generateEqualsConditionLabelSelector(labels: { [key: string]: string }): string {
+        console.log(labels);
+        let labelSelector: string = "";
+        if(labels) {
+            const keySet = Object.keys(labels);
+            keySet.forEach((key,index) => {
+                labelSelector = labelSelector.concat(format("{0}={1}", key, labels[key]))
+                if (index < keySet.length-1) labelSelector = labelSelector.concat(",");
+            });
+        }
+        return labelSelector;
+    }
+
+    public static generatePodStatusProps(status:V1PodStatus): IStatusProps {
+        if(status.phase === PodPhase.Running|| status.phase === PodPhase.Succeeded){
+                return Statuses.Success;
+        } 
+        return Statuses.Failed;
     }
 }

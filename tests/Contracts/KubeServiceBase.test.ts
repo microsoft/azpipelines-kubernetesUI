@@ -55,4 +55,12 @@ describe("KubeServiceBase Tests", () => {
             expect(output).toBe(KubeResourceType.StatefulSets);
         });
     });
+
+    it("getPods calls with labelSelector as input",() => {
+        expect.assertions(1);
+        const labelSelector:string = "app=app";
+        return service.getPods(labelSelector).then(output =>{
+            expect(output).toBe(KubeResourceType.Pods);
+        });
+    });
 });
