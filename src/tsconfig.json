@@ -9,17 +9,25 @@
             "es6",
             "dom",
             "es2015.promise"
-          ],
+        ],
         "module": "amd",
+        "target": "es5",
         "moduleResolution": "node",
-        "skipDefaultLibCheck": true,
-        "skipLibCheck": true,
         "noImplicitAny": false,
         "noImplicitThis": true,
+        "skipDefaultLibCheck": true,
+        "skipLibCheck": true,
         "strict": true,
-        "target": "es5",
+        "outDir": "../dist",
+        "rootDir": "./",
+        "baseUrl": "./",
         "types": [
             "react"
-        ]
+        ],
+        "paths": {
+            "@azurepipelines/azdevops-kube-summary/dist/*": [
+                "./*"
+            ]
+        }
     }
 }
