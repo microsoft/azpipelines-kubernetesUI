@@ -21,16 +21,13 @@ import { PodsComponent } from "./PodsComponent";
 export interface IServiceComponentProperties extends IVssComponentProperties {
     service: IServiceItem;
     podListingPromise?: Promise<V1PodList>;
+    onPodClicked?:( itemName:string ) => Promise<any>;
+    getPodSSHConfig?: () => Promise<string>;
 }
 
 export interface IServiceComponentState {
     pods:Array<V1Pod>;
 }
-
-const podNameKey: string = "svc-pod-name-key";
-const podImageKey: string = "svc-pod-image-key";
-const podStatusKey: string = "svc-pod-status-key";
-const podCreatedTimeKey:string = "svc-pod-age-key";
 
 export class ServiceComponent extends BaseComponent<IServiceComponentProperties, IServiceComponentState> {
     constructor(props: IServiceComponentProperties) {
@@ -164,6 +161,8 @@ export class ServiceComponent extends BaseComponent<IServiceComponentProperties,
             <PodsComponent 
                 podsToRender={this.state.pods}
                 headingText={Resources.AssociatedPodsText}
+                onClicked={this.props.onPodClicked}
+                podSSHConfig={this.props.getPodSSHConfig}
             />
         );
     }

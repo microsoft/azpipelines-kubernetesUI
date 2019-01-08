@@ -59,5 +59,11 @@ module.exports = {
                 loader: "file-loader"
             }
         ]
+    },
+    node: {
+        fs: "empty",
+        net: "mock",
+        tls: "mock",
+        child_process: "empty"
     }
 };

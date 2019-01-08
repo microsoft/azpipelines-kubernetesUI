@@ -11,6 +11,8 @@ import { V1Pod } from "@kubernetes/client-node";
 import { Utils } from "../Utils";
 import { StatusSize, Status } from "azure-devops-ui/Status";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
+import { TerminalHandler } from "../../Contracts/TerminalService";
+import './xterm.css';
 
 const podNameKey:string = "pl-name-key";
 const podImageKey:string = "pl-image-key";
@@ -20,21 +22,43 @@ const podAgeKey:string = "pl-age-key";
 export interface IPodsComponentProperties extends IVssComponentProperties {
     podsToRender:V1Pod[];
     headingText?:string;
+    onClicked?:(itemName:string) => Promise<any>;
+    podSSHConfig?:() => Promise<string>;
 }
 
+export interface IPodsComponentState {
+    showPodLogs: boolean;
+    termSvc?: TerminalHandler;
+}
 
-export class PodsComponent extends BaseComponent<IPodsComponentProperties> {
+export class PodsComponent extends BaseComponent<IPodsComponentProperties, IPodsComponentState> {
+    private podLogs: string = "";
+    private termElm: HTMLDivElement | null = null;
+    constructor(props: IPodsComponentProperties) {
+        super(props, {});
+        this.state = {
+            showPodLogs: false
+        };
+    }
     public render(): React.ReactNode {
 
         return (
-            <ListComponent
-                headingText={this.props.headingText}
-                className={css("list-content", "pl-details", "depth-16")}
-                items={this.props.podsToRender}
-                columns={PodsComponent._getColumns()}
-                onRenderItemColumn={PodsComponent._onRenderItemColumn}
-            />
+            <div>
+                <ListComponent
+                    headingText={this.props.headingText}
+                    className={css("list-content", "pl-details", "depth-16")}
+                    items={this.props.podsToRender}
+                    columns={PodsComponent._getColumns()}
+                    onRenderItemColumn={PodsComponent._onRenderItemColumn}
+                    onItemInvoked={this._onPodClicked}
+                />
+                <div ref={ref => this.termElm = ref} ></div>
+            </div>
         );
+    }
+
+    public componentWillUnmount() {
+        this.podLogs = "";
     }
 
     private static _getColumns(): IColumn[] {
@@ -124,5 +148,24 @@ export class PodsComponent extends BaseComponent<IPodsComponentProperties> {
         }
 
         return ListComponent.renderColumn(textToRender || "", ListComponent.defaultColumnRenderer, colDataClassName);
+    }
+
+    private _onPodClicked = (item?: V1Pod, index?: number, ev?: Event) => {
+        if (this.props.onClicked) {
+            this.props.onClicked(item ? item.metadata.name : "").then(logs => {
+                this.podLogs = logs;
+                this.setState({
+                    showPodLogs: true
+                });
+            });
+            this.props.podSSHConfig && this.props.podSSHConfig().then(config => {
+                this.setState({
+                    termSvc: new TerminalHandler(config, this.termElm)
+                });
+                if (item && item.metadata.name && this.state.termSvc) {
+                    this.state.termSvc.generateTTYForPod(item.metadata.name, item.spec.containers[0].name); // always sshing to first container
+                }
+            });
+        }
     }
 }

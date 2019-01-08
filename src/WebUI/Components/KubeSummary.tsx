@@ -245,7 +245,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         //service currently only supports equals with "and" operator. The generator generates that condition.
         const labelSelector:string = Utils.generateEqualsConditionLabelSelector(svc.spec.selector || {});
         const podsListing:Promise<any> = labelSelector && this.props.kubeService && this.props.kubeService.getPods(labelSelector)|| Promise.resolve({});
-        return <ServiceComponent service={this.state.selectedItem} podListingPromise={podsListing}/>;
+        return <ServiceComponent service={this.state.selectedItem} podListingPromise={podsListing} onPodClicked={this._onPodInvoked} getPodSSHConfig={this._podSSH} />;
     }
 
     private getOrphanPods(): JSX.Element {
@@ -255,6 +255,14 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
                 pods.push(pod);
             }
         });
-        return <PodsComponent podsToRender={pods} />;
+        return <PodsComponent podsToRender={pods} onClicked={this._onPodInvoked} getPodSSHConfig={this._podSSH} />;
     }
+    private _onPodInvoked = (podName:string ) => {
+        return this.props.kubeService.getPodLogs(podName);
+    };
+
+    private _podSSH = () => {
+        return this.props.kubeService.getK8sConfig();
+    }
+
 }

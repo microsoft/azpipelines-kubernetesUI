@@ -53,7 +53,10 @@ module.exports = {
     ]
   },
   node: {
-    fs: 'empty'
+    fs: "empty",
+    net: "mock",
+    tls: "mock",
+    child_process:"empty"
   },
   externals: {
     react: 'react',
