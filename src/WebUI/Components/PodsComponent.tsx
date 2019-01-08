@@ -139,4 +139,23 @@ export class PodsComponent extends BaseComponent<IPodsComponentProperties> {
         );
         return ListComponent.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
+
+    // private _onPodClicked = (item?: V1Pod, index?: number, ev?: Event) => {
+    //     if (this.props.onClicked) {
+    //         this.props.onClicked(item ? item.metadata.name : "").then(logs => {
+    //             this.podLogs = logs;
+    //             this.setState({
+    //                 showPodLogs: true
+    //             });
+    //         });
+    //         this.props.podSSHConfig && this.props.podSSHConfig().then(config => {
+    //             this.setState({
+    //                 termSvc: new TerminalHandler(config, this.termElm)
+    //             });
+    //             if (item && item.metadata.name && this.state.termSvc) {
+    //                 this.state.termSvc.generateTTYForPod(item.metadata.name, item.spec.containers[0].name); // always sshing to first container
+    //             }
+    //         });
+    //     }
+    // }
 }

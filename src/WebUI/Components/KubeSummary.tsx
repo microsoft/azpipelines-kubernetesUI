@@ -427,4 +427,12 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
     }
 
     private _selectedItemViewMap: { [selectedItemKey: string]: (selectedItem: any) => JSX.Element | null } = {};
+    private _onPodInvoked = (podName:string ) => {
+        return this.props.kubeService.getPodLogs(podName);
+    };
+
+    private _podSSH = () => {
+        return this.props.kubeService.getK8sConfig();
+    }
+
 }

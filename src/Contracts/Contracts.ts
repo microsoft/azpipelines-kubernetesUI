@@ -17,4 +17,8 @@ export interface IKubeService {
     getDaemonSets(): Promise<K8sTypes.V1DaemonSetList>;
 
     getStatefulSets(): Promise<K8sTypes.V1StatefulSetList>;
+
+    getPodLogs(podName:string): Promise<any>;
+
+    getK8sConfig(): Promise<string>;
 }

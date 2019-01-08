@@ -14,6 +14,8 @@ export enum KubeResourceType {
     ReplicaSets = 8,
     DaemonSets = 16,
     StatefulSets = 32,
+    Config = 64,
+    Logs = 128,
 }
 
 export abstract class KubeServiceBase implements IKubeService {
@@ -34,11 +36,19 @@ export abstract class KubeServiceBase implements IKubeService {
     }
 
     getDaemonSets() : Promise<K8sTypes.V1DaemonSetList> {
-        return this.fetch(KubeResourceType.DaemonSets)
+        return this.fetch(KubeResourceType.DaemonSets);
     }
 
     getStatefulSets() : Promise<K8sTypes.V1StatefulSetList> {
-        return this.fetch(KubeResourceType.StatefulSets)
+        return this.fetch(KubeResourceType.StatefulSets);
+    }
+
+    getPodLogs(podName:string): Promise<string> {
+        return this.fetch(KubeResourceType.Logs, podName);
+    }
+    
+    getK8sConfig(): Promise<any> {
+        return this.fetch(KubeResourceType.Config);
     }
 
     abstract fetch(resourceType: KubeResourceType, labelSelector?:string): Promise<any>;

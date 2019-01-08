@@ -14,11 +14,12 @@
     "clean": "rimraf ./dist && rimraf ./_bundles",
     "compile": "npm run clean && npm run compilesrc && npm run copy-all",
     "build": "npm run compile && webpack --mode production && npm pack",
-    "copy-all": "npm run copy-scss && npm run copy-resources && npm run copy-images",
+    "copy-all": "npm run copy-scss && npm run copy-resources && npm run copy-images && npm run copy-css",
     "copy-scss": "copyfiles -u 1 src/**/*.scss ./dist",
     "copy-resources": "copyfiles -u 1 src/**/Resources.js ./dist",
     "copy-images": "copyfiles -u 1 src/**/*.png ./dist",
     "compilesrc": "tsc -p ./src",
+    "copy-css": "copyfiles -u 1 src/**/*.css ./dist",
     "test": "npm run compiletest && npm run jesttests",
     "compiletest": "webpack --mode development --config ./tests/webpack.config.js",
     "jesttests": "jest ./dist_tests --verbose --reporters=default --reporters=jest-junit",
@@ -35,11 +36,14 @@
     "_bundles"
   ],
   "dependencies": {
-    "@kubernetes/client-node": "~0.7.1",
+    "@kubernetes/client-node": "~0.7.2",
+    "@types/node": "^10.12.18",
     "azure-devops-ui": "~1.144.1",
+    "isomorphic-ws": "^4.0.1",
     "office-ui-fabric-react": "5.131.5",
     "react": "~16.3.2",
-    "react-dom": "~16.3.2"
+    "react-dom": "~16.3.2",
+    "xterm": "^3.7.0"
   },
   "devDependencies": {
     "@types/enzyme": "^3.1.15",
