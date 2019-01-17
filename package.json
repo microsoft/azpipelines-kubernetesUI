@@ -11,17 +11,18 @@
     "url": "git+https://github.com/Microsoft/azpipelines-kubernetesUI.git"
   },
   "scripts": {
-    "clean": "rimraf ./dist && rimraf ./dist_tests && rimraf ./_bundles",
-    "compile": "npm run clean && npm run compilesrc && npm run compiletest && npm run copy-all",
+    "clean": "rimraf ./dist && rimraf ./_bundles",
+    "compile": "npm run clean && npm run compilesrc && npm run copy-all",
     "build": "npm run compile && webpack --mode production && npm pack",
     "copy-all": "npm run copy-scss && npm run copy-resources",
     "copy-scss": "copyfiles -u 1 src/**/*.scss ./dist",
     "copy-resources": "copyfiles -u 1 src/**/Resources.js ./dist",
+    "compilesrc": "tsc -p ./src",
     "test": "npm run compiletest && npm run jesttests",
     "compiletest": "webpack --mode development --config ./tests/webpack.config.js",
     "jesttests": "jest ./dist_tests --verbose --reporters=default --reporters=jest-junit",
-    "compilesrc": "tsc -p ./src",
-    "cleanandtest": "npm run clean && npm run test"
+    "cleantest": "rimraf ./dist_tests",
+    "ctest": "npm run cleantest && npm run test"
   },
   "keywords": [
     "Kubernetes-UI"
