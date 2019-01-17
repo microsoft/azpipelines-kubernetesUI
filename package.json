@@ -76,6 +76,6 @@
   "jest-junit": {
     "suiteName": "L0 Uts",
     "outputDirectory": ".",
-    "outputName": "./jest-l0-uts.xml"
+    "outputName": "./dist_tests/jest-l0-uts.xml"
   }
 }
