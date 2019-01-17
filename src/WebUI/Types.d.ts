@@ -38,6 +38,7 @@ export interface IServiceItem {
     port: string;
     creationTimestamp: Date;
     uid: string;
+    pipeline: string;
     service?: V1Service;
 }
 

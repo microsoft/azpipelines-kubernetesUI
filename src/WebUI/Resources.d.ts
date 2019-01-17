@@ -23,7 +23,6 @@ export declare const AgeText: string;
 export declare const NamespaceHeadingText: string;
 export declare const PivotServiceText: string;
 export declare const PivotWorkloadsText: string;
-export declare const PodAge: string;
 export declare const PodIP: string;
 export declare const Created: string;
 export declare const AgoBy: string;

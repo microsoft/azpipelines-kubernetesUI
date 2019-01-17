@@ -13,6 +13,7 @@ import * as Resources from "../Resources";
 import { IServiceItem, IVssComponentProperties } from "../Types";
 import { ListComponent } from "./ListComponent";
 import "./ServicesComponent.scss";
+import { Utils } from "../Utils";
 
 const packageKey: string = "package-col";
 const typeKey: string = "type-col";
@@ -58,6 +59,7 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
                 port: this._getPort(service),
                 creationTimestamp: service.metadata.creationTimestamp,
                 uid: service.metadata.uid.toLowerCase(),
+                pipeline: Utils.getPipelineText(service.metadata.annotations),
                 service: service
             });
         });
@@ -93,15 +95,26 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
 
     private static _getColumns(): IColumn[] {
         let columns: IColumn[] = [];
-        const headerColumnClassName: string = "secondary-text";
+        const headerColumnClassName: string = "kube-col-header";
         const columnContentClassName: string = css("list-col-content","two-lines");
 
         columns.push({
             key: packageKey,
             name: Resources.NameText,
             fieldName: packageKey,
-            minWidth: 140,
-            maxWidth: 140,
+            minWidth: 250,
+            maxWidth: 500,
+            headerClassName: css(headerColumnClassName, "first-col-header"),
+            columnActionsMode: ColumnActionsMode.disabled,
+            className: columnContentClassName
+        });
+
+        columns.push({
+            key: typeKey,
+            name: Resources.TypeText,
+            fieldName: typeKey,
+            minWidth: 120,
+            maxWidth: 240,
             headerClassName: css(headerColumnClassName, "first-col-header"),
             columnActionsMode: ColumnActionsMode.disabled,
             className: columnContentClassName
@@ -111,8 +124,8 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
             key: clusterIPKey,
             name: Resources.ClusterIPText,
             fieldName: clusterIPKey,
-            minWidth: 110,
-            maxWidth: 110,
+            minWidth: 150,
+            maxWidth: 150,
             headerClassName: headerColumnClassName,
             columnActionsMode: ColumnActionsMode.disabled,
             className: columnContentClassName
@@ -122,8 +135,8 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
             key: externalIPKey,
             name: Resources.ExternalIPText,
             fieldName: externalIPKey,
-            minWidth: 110,
-            maxWidth: 110,
+            minWidth: 150,
+            maxWidth: 150,
             headerClassName: headerColumnClassName,
             columnActionsMode: ColumnActionsMode.disabled,
             className: columnContentClassName
@@ -133,8 +146,8 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
             key: portKey,
             name: Resources.PortText,
             fieldName: portKey,
-            minWidth: 140,
-            maxWidth: 140,
+            minWidth: 150,
+            maxWidth: 150,
             headerClassName: headerColumnClassName,
             columnActionsMode: ColumnActionsMode.disabled,
             className: columnContentClassName
@@ -144,8 +157,8 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
             key: ageKey,
             name: Resources.AgeText,
             fieldName: ageKey,
-            minWidth: 80,
-            maxWidth: 80,
+            minWidth: 150,
+            maxWidth: 300,
             headerClassName: headerColumnClassName,
             columnActionsMode: ColumnActionsMode.disabled,
             className: columnContentClassName
@@ -163,7 +176,8 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
         let textToRender: string = "";
         switch (column.key) {
             case packageKey:
-                return  ListComponent.renderTwoLineColumn(service.package, service.type,colDataClassName,"primary-text","secondary-text");
+                return  ListComponent.renderTwoLineColumn(service.package, service.pipeline, colDataClassName, "primary-text", "secondary-text");
+
             case typeKey:
                 textToRender = service.type;
                 break;

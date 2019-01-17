@@ -11,6 +11,7 @@ import { V1Pod } from "@kubernetes/client-node";
 import { Utils } from "../Utils";
 import { StatusSize, Status } from "azure-devops-ui/Status";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
+import { PodStatusComponent } from "./Common";
 
 const podNameKey:string = "pl-name-key";
 const podImageKey:string = "pl-image-key";
@@ -39,7 +40,7 @@ export class PodsComponent extends BaseComponent<IPodsComponentProperties> {
 
     private static _getColumns(): IColumn[] {
         let columns: IColumn[] = [];
-        const headerColumnClassName: string = "secondary-text";
+        const headerColumnClassName: string = "kube-col-header";
         const columnContentClassName: string = css("list-col-content");
 
         columns.push({
@@ -47,7 +48,7 @@ export class PodsComponent extends BaseComponent<IPodsComponentProperties> {
             name: Resources.PodsDetailsText,
             fieldName: podNameKey,
             minWidth: 250,
-            maxWidth: 250,
+            maxWidth: 500,
             headerClassName: css(headerColumnClassName, "first-col-header"),
             columnActionsMode: ColumnActionsMode.disabled,
             className: columnContentClassName
@@ -58,7 +59,7 @@ export class PodsComponent extends BaseComponent<IPodsComponentProperties> {
             name: Resources.ImageText,
             fieldName: podImageKey,
             minWidth: 250,
-            maxWidth: 250,
+            maxWidth: 500,
             headerClassName: headerColumnClassName,
             columnActionsMode: ColumnActionsMode.disabled,
             className: columnContentClassName
@@ -69,7 +70,7 @@ export class PodsComponent extends BaseComponent<IPodsComponentProperties> {
             name: Resources.StatusText,
             fieldName: podStatusKey,
             minWidth: 80,
-            maxWidth: 80,
+            maxWidth: 160,
             headerClassName: headerColumnClassName,
             columnActionsMode: ColumnActionsMode.disabled,
             className: columnContentClassName
@@ -80,7 +81,7 @@ export class PodsComponent extends BaseComponent<IPodsComponentProperties> {
             name: Resources.AgeText,
             fieldName: podAgeKey,
             minWidth: 80,
-            maxWidth: 80,
+            maxWidth: 160,
             headerClassName: headerColumnClassName,
             columnActionsMode: ColumnActionsMode.disabled,
             className: columnContentClassName
@@ -107,16 +108,23 @@ export class PodsComponent extends BaseComponent<IPodsComponentProperties> {
                 break;
 
             case podStatusKey:
-                return (
-                    <div className={colDataClassName}>
-                        <Status className={colDataClassName} {...Utils.generatePodStatusProps(pod.status)} animated={false} size={StatusSize.m} />        
-                        {
-                            pod.status.message?
-                                <Tooltip showOnFocus={true} text={pod.status.message}>{pod.status.reason}</Tooltip>:
-                                <span className="primary-text">{pod.status.phase}</span>
-                        }
-                    </div>
-                );
+                    let statusDescription: string = "";
+                    let customDescription: React.ReactNode = null;
+
+                    if(pod.status.message) {
+                        customDescription = <Tooltip showOnFocus={true} text={pod.status.message}>{pod.status.reason}</Tooltip>;
+                    }
+                    else {
+                        statusDescription = pod.status.phase;
+                    }
+
+                    return (<PodStatusComponent 
+                        statusProps={Utils.generatePodStatusProps(pod.status)} 
+                        statusSize={StatusSize.m} 
+                        statusDescription={statusDescription} 
+                        customDescription={customDescription}
+                    />);
+
             case podAgeKey:
                 return(
                     <Ago date={new Date(pod.status.startTime)} />
