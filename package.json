@@ -1,6 +1,6 @@
 {
   "name": "@azurepipelines/azdevops-kube-summary",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "Azure DevOps Kubernetes Summary",
   "engines": {
     "node": ">=8.4.0",
