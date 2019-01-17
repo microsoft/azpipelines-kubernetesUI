@@ -1,23 +1,23 @@
-const path = require('path');
-const webpack = require('webpack');
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+const path = require("path");
+const webpack = require("webpack");
+const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
 
 module.exports = {
   entry: {
-    'azdevops-kube-summary': './src/index.ts',
-    'azdevops-kube-summary.min': './src/index.ts'
+    "azdevops-kube-summary": "./src/index.ts",
+    "azdevops-kube-summary.min": "./src/index.ts"
   },
   output: {
-    path: path.resolve(__dirname, '_bundles'),
-    filename: '[name].js',
-    libraryTarget: 'umd',
-    library: 'azdevops-kube-summary',
+    path: path.resolve(__dirname, "_bundles"),
+    filename: "[name].js",
+    libraryTarget: "umd",
+    library: "azdevops-kube-summary",
     umdNamedDefine: true
   },
   resolve: {
-    extensions: ['.ts', '.tsx', '.js']
+    extensions: [".ts", ".tsx", ".js"]
   },
-  devtool: 'source-map',
+  devtool: "source-map",
   optimization: {
     minimizer: [
       new UglifyJsPlugin({
@@ -27,8 +27,7 @@ module.exports = {
     ]
   },
   module: {
-    rules: [
-      {
+    rules: [{
         test: /\.tsx?$/,
         loader: "ts-loader"
       },
@@ -43,7 +42,7 @@ module.exports = {
       {
         test: /\.woff$/,
         use: [{
-          loader: 'base64-inline-loader'
+          loader: "base64-inline-loader"
         }]
       },
       {
@@ -53,10 +52,15 @@ module.exports = {
     ]
   },
   node: {
-    fs: 'empty'
+    fs: "empty"
   },
   externals: {
-    react: 'react',
-    "react-dom": 'react-dom'
+    "react": "react",
+    "react-dom": "react-dom",
+    /* monaco-editor related options and languages */
+    "monaco-editor/esm/vs/editor/editor.api": "monaco-editor/esm/vs/editor/editor.api",
+    "monaco-editor/esm/vs/editor/browser/controller/coreCommands": "monaco-editor/esm/vs/editor/browser/controller/coreCommands",
+    "monaco-editor/esm/vs/editor/contrib/find/findController": "monaco-editor/esm/vs/editor/contrib/find/findController",
+    "monaco-editor/esm/vs/basic-languages/yaml/yaml.contribution": "monaco-editor/esm/vs/basic-languages/yaml/yaml.contribution"
   }
 }
