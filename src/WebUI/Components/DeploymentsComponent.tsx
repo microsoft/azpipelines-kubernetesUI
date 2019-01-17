@@ -13,17 +13,15 @@ import * as Resources from "../Resources";
 import { IDeploymentItem, IVssComponentProperties, IDeploymentReplicaSetMap } from "../Types";
 import "./DeploymentsComponent.scss";
 import { ListComponent } from "./ListComponent";
-import { ILabelModel, LabelGroup, WrappingBehavior } from "azure-devops-ui/Label";
+import { LabelGroup, WrappingBehavior } from "azure-devops-ui/Label";
 import { Ago } from "azure-devops-ui/Ago";
 import { Utils } from "../Utils";
+import { PodStatusComponent } from "./Common";
 
 const replicaSetNameKey: string = "replicaSet-col";
-const pipelineNameKey: string = "pipeline-col";
 const podsKey: string = "pods-col";
 const imageKey: string = "image-col";
 const ageKey: string = "age-key";
-const pipelineNameAnnotationKey: string = "pipeline-name";
-const pipelineIdAnnotationKey: string = "pipeline-id";
 
 export interface IDeploymentsComponentProperties extends IVssComponentProperties {
     deploymentList: V1DeploymentList;
@@ -143,14 +141,14 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
 
     private static _getColumns(): IColumn[] {
         let columns: IColumn[] = [];
-        const headerColumnClassName: string = "dc-col-header";
+        const headerColumnClassName: string = "kube-col-header";
         const columnContentClassname: string = "list-col-content";
         columns.push({
             key: replicaSetNameKey,
             name: Resources.ReplicaSetText,
             fieldName: replicaSetNameKey,
             minWidth: 250,
-            maxWidth: 250,
+            maxWidth: 500,
             headerClassName: headerColumnClassName,
             columnActionsMode: ColumnActionsMode.disabled,
             className: columnContentClassname
@@ -160,7 +158,7 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
             name: Resources.ImageText,
             fieldName: imageKey,
             minWidth: 250,
-            maxWidth: 250,
+            maxWidth: 500,
             headerClassName: headerColumnClassName,
             columnActionsMode: ColumnActionsMode.disabled,
             className: columnContentClassname
@@ -171,7 +169,7 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
             name: Resources.PodsText,
             fieldName: podsKey,
             minWidth: 80,
-            maxWidth: 80,
+            maxWidth: 160,
             headerClassName: headerColumnClassName,
             columnActionsMode: ColumnActionsMode.disabled,
             className: columnContentClassname
@@ -182,7 +180,7 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
             name: Resources.AgeText,
             fieldName: ageKey,
             minWidth: 80,
-            maxWidth: 80,
+            maxWidth: 160,
             headerClassName: headerColumnClassName,
             columnActionsMode: ColumnActionsMode.disabled,
             className: columnContentClassname
@@ -205,15 +203,11 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
 
             case podsKey:
                 return (
-                    <div className={colDataClassName}>
-                        {
-                            !!deployment.statusProps &&
-                            /* todo :: change props if needed like size etc */
-                            <Status {...deployment.statusProps} animated={false} size={StatusSize.m} />
-                        }
-                        <span className="deployment-status">{deployment.pods}</span>
-                    </div>
-                );
+                    <PodStatusComponent 
+                        statusProps={deployment.statusProps}
+                        statusSize={StatusSize.m} 
+                        statusDescription={deployment.pods} 
+                    />);
             case imageKey:
                 textToRender = deployment.image;
                 break;
@@ -226,14 +220,17 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
         return ListComponent.renderColumn(textToRender || "", ListComponent.defaultColumnRenderer, colDataClassName);
     }
 
-    private static _getHeadingContent( deployment:V1Deployment ): JSX.Element {
+    private static _getHeadingContent(deployment: V1Deployment): JSX.Element {
         return (
             <div>
                 <h3>{deployment.metadata.name}</h3>
-                <LabelGroup labelProps={Utils.getUILabelModelArray(deployment.metadata.labels)}
-                    wrappingBehavior={WrappingBehavior.OneLine}
-                    fadeOutOverflow={true}>
-                </LabelGroup>
+                <div className="kube-flex-row">
+                    <span className="secondary-text kind-tag"> Deployment </span>
+                    <LabelGroup labelProps={Utils.getUILabelModelArray(deployment.metadata.labels)}
+                        wrappingBehavior={WrappingBehavior.OneLine}
+                        fadeOutOverflow={true}>
+                    </LabelGroup>
+                </div>
             </div>
         );
     }

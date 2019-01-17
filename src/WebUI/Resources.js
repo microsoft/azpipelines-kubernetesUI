@@ -3,7 +3,7 @@
 define("Environments/Providers/Kubernetes/Resources", ["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.AgeText = "Age";
+    exports.AgeText = "Created";
     exports.NodeNameText = "Node Name";
     exports.NameText = "Name";
     exports.StatusText = "Status";
@@ -16,15 +16,14 @@ define("Environments/Providers/Kubernetes/Resources", ["require", "exports"], fu
     exports.ExternalIPText = "External IP";
     exports.TypeText = "Type";
     exports.AppNameText = "App Name";
-    exports.ReplicaSetText = "Replica set";
+    exports.ReplicaSetText = "ReplicaSet";
     exports.PackageText = "Package";
     exports.PipelineText = "Pipeline";
-    exports.PodsText = "Pods";
+    exports.PodsText = "Pods running";
     exports.PortText = "Port";
     exports.NamespaceHeadingText = "Namespace: {0}";
     exports.PivotServiceText = "Services";
     exports.PivotWorkloadsText = "Workloads";
-    exports.PodAge = "Age";
     exports.PodIP = "IP";
     exports.Created = "Created";
     exports.AgoBy = " ago. Image: {0}";

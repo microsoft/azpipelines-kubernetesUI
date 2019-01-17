@@ -6,8 +6,8 @@
 import { IColumn } from "azure-devops-ui/Components/VssDetailsList/VssDetailsList.Props";
 import { TooltipHost, TooltipOverflowMode } from "azure-devops-ui/Tooltip";
 import { VssDetailsList } from "azure-devops-ui/VssDetailsList";
-import { ConstrainMode, SelectionMode } from "office-ui-fabric-react/lib/DetailsList";
-import { BaseComponent, css } from "office-ui-fabric-react/lib/Utilities";
+import { ConstrainMode, SelectionMode, IDetailsHeaderProps, IDetailsRowProps, DetailsRow } from "office-ui-fabric-react/lib/DetailsList";
+import { BaseComponent, css, IRenderFunction } from "office-ui-fabric-react/lib/Utilities";
 import * as React from "react";
 import { IVssComponentProperties } from "../Types";
 import "./ListComponent.scss";
@@ -37,6 +37,7 @@ export class ListComponent<T> extends BaseComponent<IListComponentProperties<T>>
                 className={"kube-list"}
                 items={this.props.items}
                 columns={this.props.columns}
+                onRenderRow={this._onRenderRow}
                 onRenderItemColumn={this.props.onRenderItemColumn}
                 isHeaderVisible={true}
                 selectionMode={SelectionMode.single}
@@ -44,6 +45,12 @@ export class ListComponent<T> extends BaseComponent<IListComponentProperties<T>>
                 onItemInvoked={this._onItemInvoked}
             />
         );
+    }
+
+    private _onRenderRow = (detailsRowProps: any, defaultRender?: any): JSX.Element => {
+        return (<div className={"kube-list-row"}>
+                    <DetailsRow {...detailsRowProps} />
+                </div>);
     }
 
     public static renderColumn(
@@ -85,12 +92,16 @@ export class ListComponent<T> extends BaseComponent<IListComponentProperties<T>>
         }
     }
 
-    private _getComponentHeadingContent(): JSX.Element {
+    private _getComponentHeadingContent(): JSX.Element | null {
+        if (!this.props.headingText && !this.props.headingContent) {
+            return null;
+        }
+
         return (
             <div className={"kube-list-heading heading"}>
                 {this.props.headingText
                     ? <h3 className={"heading-title"}>{this.props.headingText}</h3>
-                    : this.props.headingContent && this.props.headingContent}
+                    : this.props.headingContent}
             </div>
         );
     }
