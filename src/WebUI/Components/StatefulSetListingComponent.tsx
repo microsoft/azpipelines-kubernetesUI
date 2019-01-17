@@ -9,6 +9,7 @@ import { ListComponent } from "./ListComponent";
 import { IVssComponentProperties } from "../Types";
 import { Ago } from "azure-devops-ui/Ago";
 import { Utils } from "../Utils";
+import { PodStatusComponent } from "./Common";
 
 const setNameKey = "statefulset-name-key";
 const imageKey = "statefulset-image-key";
@@ -19,7 +20,6 @@ export interface IDaemonSetComponentProperties extends IVssComponentProperties {
     statefulSetList: V1StatefulSetList;
     onItemInvoked?: (item?: any, index?: number, ev?: Event) => void;
 }
-
 
 export class StatefulSetListingComponent extends BaseComponent<IDaemonSetComponentProperties, {}> {
     public render(): React.ReactNode {
@@ -38,14 +38,14 @@ export class StatefulSetListingComponent extends BaseComponent<IDaemonSetCompone
 
     private static _getColumns(): IColumn[] {
         let columns: IColumn[] = [];
-        const headerColumnClassName: string = "secondary-text";
+        const headerColumnClassName: string = "kube-col-header";
 
         columns.push({
             key: setNameKey,
             name: Resources.StatefulSetText,
             fieldName: setNameKey,
             minWidth: 250,
-            maxWidth: 250,
+            maxWidth: 500,
             headerClassName: css(headerColumnClassName, "first-col-header"),
             columnActionsMode: ColumnActionsMode.disabled
         });
@@ -55,7 +55,7 @@ export class StatefulSetListingComponent extends BaseComponent<IDaemonSetCompone
             name: Resources.ImageText,
             fieldName: imageKey,
             minWidth: 250,
-            maxWidth: 250,
+            maxWidth: 500,
             headerClassName: headerColumnClassName,
             columnActionsMode: ColumnActionsMode.disabled
         });
@@ -65,7 +65,7 @@ export class StatefulSetListingComponent extends BaseComponent<IDaemonSetCompone
             name: Resources.PodsText,
             fieldName: podsKey,
             minWidth: 80,
-            maxWidth: 80,
+            maxWidth: 160,
             headerClassName: headerColumnClassName,
             columnActionsMode: ColumnActionsMode.disabled
         });
@@ -75,7 +75,7 @@ export class StatefulSetListingComponent extends BaseComponent<IDaemonSetCompone
             name: Resources.AgeText,
             fieldName: ageKey,
             minWidth: 80,
-            maxWidth: 80,
+            maxWidth: 160,
             headerClassName: headerColumnClassName,
             columnActionsMode: ColumnActionsMode.disabled
         });
@@ -106,13 +106,11 @@ export class StatefulSetListingComponent extends BaseComponent<IDaemonSetCompone
                     podString = format("{0}/{1}", statefulSet.status.currentReplicas, statefulSet.status.replicas);
                 }
                 return (
-                    <div>
-                        {
-                            !!statusProps &&
-                            <Status {...statusProps} size={StatusSize.m} />
-                        }
-                        <span>{podString}</span>
-                    </div>);
+                    <PodStatusComponent 
+                        statusProps={statusProps} 
+                        statusSize={StatusSize.m} 
+                        statusDescription={podString} 
+                    />);
             }
             case ageKey: {
                 return (<Ago date={new Date(statefulSet.metadata.creationTimestamp)} />);
