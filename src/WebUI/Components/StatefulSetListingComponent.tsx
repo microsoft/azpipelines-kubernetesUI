@@ -1,13 +1,13 @@
 import { V1StatefulSet, V1StatefulSetList } from "@kubernetes/client-node";
 import { BaseComponent, css, format } from "@uifabric/utilities";
-import { IColumn } from "azure-devops-ui/Components/VssDetailsList/VssDetailsList.Props";
 import { IStatusProps, Status, Statuses, StatusSize } from "azure-devops-ui/Status";
-import { ColumnActionsMode } from "office-ui-fabric-react/lib/DetailsList";
 import * as React from "react";
 import * as Resources from "../Resources";
 import { ListComponent } from "./ListComponent";
 import { IVssComponentProperties } from "../Types";
 import { Ago } from "azure-devops-ui/Ago";
+import { ITableColumn, SimpleTableCell } from "azure-devops-ui/Table";
+import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
 import { Utils } from "../Utils";
 import { PodStatusComponent } from "./PodStatusComponent";
 
@@ -15,107 +15,102 @@ const setNameKey = "statefulset-name-key";
 const imageKey = "statefulset-image-key";
 const podsKey = "statefulset-pods-key";
 const ageKey = "statefulset-age-key";
+const colDataClassName: string = "list-col-content";
 
 export interface IDaemonSetComponentProperties extends IVssComponentProperties {
     statefulSetList: V1StatefulSetList;
-    onItemInvoked?: (item?: any, index?: number, ev?: Event) => void;
+    onItemActivated?: (event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>) => void;
 }
 
 export class StatefulSetListingComponent extends BaseComponent<IDaemonSetComponentProperties, {}> {
     public render(): React.ReactNode {
         return (
             <div>{
-
                 <ListComponent
-                    className={css("list-content", "top-padding", "depth-16" )}
-                    items={ this.props.statefulSetList.items || [] }
+                    className={css("list-content", "top-padding", "depth-16")}
+                    items={this.props.statefulSetList.items || []}
                     columns={StatefulSetListingComponent._getColumns()}
-                    onRenderItemColumn={StatefulSetListingComponent._onRenderItemColumn}
                 />
             }</div>
         );
     }
 
-    private static _getColumns(): IColumn[] {
-        let columns: IColumn[] = [];
+    private static _getColumns(): ITableColumn<V1StatefulSet>[] {
+        let columns: ITableColumn<V1StatefulSet>[] = [];
         const headerColumnClassName: string = "kube-col-header";
 
         columns.push({
-            key: setNameKey,
+            id: setNameKey,
             name: Resources.StatefulSetText,
-            fieldName: setNameKey,
-            minWidth: 250,
-            maxWidth: 500,
+            width: 250,
             headerClassName: css(headerColumnClassName, "first-col-header"),
-            columnActionsMode: ColumnActionsMode.disabled
+            renderCell: (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1StatefulSet>, statefulSet: V1StatefulSet) => this._renderSetNameCell(rowIndex, columnIndex, tableColumn, statefulSet),
         });
 
         columns.push({
-            key: imageKey,
+            id: imageKey,
             name: Resources.ImageText,
-            fieldName: imageKey,
-            minWidth: 250,
-            maxWidth: 500,
+            width: 250,
             headerClassName: headerColumnClassName,
-            columnActionsMode: ColumnActionsMode.disabled
+            renderCell: (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1StatefulSet>, statefulSet: V1StatefulSet) => this._renderImageCell(rowIndex, columnIndex, tableColumn, statefulSet),
         });
 
         columns.push({
-            key: podsKey,
+            id: podsKey,
             name: Resources.PodsText,
-            fieldName: podsKey,
-            minWidth: 80,
-            maxWidth: 160,
+            width: 80,
             headerClassName: headerColumnClassName,
-            columnActionsMode: ColumnActionsMode.disabled
+            renderCell: (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1StatefulSet>, statefulSet: V1StatefulSet) => this._renderPodsCell(rowIndex, columnIndex, tableColumn, statefulSet),
         });
 
         columns.push({
-            key: ageKey,
+            id: ageKey,
             name: Resources.AgeText,
-            fieldName: ageKey,
-            minWidth: 80,
-            maxWidth: 160,
+            width: 80,
             headerClassName: headerColumnClassName,
-            columnActionsMode: ColumnActionsMode.disabled
+            renderCell: (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1StatefulSet>, statefulSet: V1StatefulSet) => this._renderAgeCell(rowIndex, columnIndex, tableColumn, statefulSet),
         });
-
 
         return columns;
     }
-    private static _onRenderItemColumn(statefulSet?: V1StatefulSet, index?: number, column?: IColumn): React.ReactNode {
-        if (!statefulSet || !column) {
-            return null;
-        }
 
-        let textToRender: string | undefined;
-        let colDataClassName: string = "list-col-content";
-        switch (column.key) {
-            case setNameKey:
-                return ListComponent.renderTwoLineColumn(statefulSet.metadata.name,
+    private static _renderSetNameCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1StatefulSet>, statefulSet: V1StatefulSet): JSX.Element {
+        return (
+            <SimpleTableCell columnIndex={columnIndex} tableColumn={tableColumn} key={"col-" + columnIndex}>
+                {ListComponent.renderTwoLineColumn(statefulSet.metadata.name,
                     Utils.getPipelineText(statefulSet.metadata.annotations),
-                    colDataClassName,"primary-text", "secondary-text");
-            case imageKey:
-                textToRender = statefulSet.spec.template.spec.containers[0].image;
-                break;
-            case podsKey: {
-                let statusProps: IStatusProps | undefined;
-                let podString: string = "";
-                if (statefulSet.status.replicas > 0) {
-                    statusProps = Utils._getPodsStatusProps(statefulSet.status.currentReplicas, statefulSet.status.replicas);
-                    podString = format("{0}/{1}", statefulSet.status.currentReplicas, statefulSet.status.replicas);
-                }
-                return (
-                    <PodStatusComponent 
-                        statusProps={statusProps} 
-                        statusDescription={podString} 
-                    />);
-            }
-            case ageKey: {
-                return (<Ago date={new Date(statefulSet.metadata.creationTimestamp)} />);
-            }
-        }
-        return ListComponent.renderColumn(textToRender||"",ListComponent.defaultColumnRenderer,colDataClassName);
+                    colDataClassName, "primary-text", "secondary-text")}
+            </SimpleTableCell>);
     }
 
+    private static _renderImageCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1StatefulSet>, statefulSet: V1StatefulSet): JSX.Element {
+        const textToRender = statefulSet.spec.template.spec.containers[0].image;
+        return (
+            <SimpleTableCell columnIndex={columnIndex} tableColumn={tableColumn} key={"col-" + columnIndex}>
+                {ListComponent.renderColumn(textToRender || "", ListComponent.defaultColumnRenderer, colDataClassName)}
+            </SimpleTableCell>);
+    }
+
+    private static _renderPodsCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1StatefulSet>, statefulSet: V1StatefulSet): JSX.Element {
+        let statusProps: IStatusProps | undefined;
+        let podString: string = "";
+        if (statefulSet.status.replicas > 0) {
+            statusProps = Utils._getPodsStatusProps(statefulSet.status.currentReplicas, statefulSet.status.replicas);
+            podString = format("{0}/{1}", statefulSet.status.currentReplicas, statefulSet.status.replicas);
+        }
+        return (
+            <SimpleTableCell columnIndex={columnIndex} tableColumn={tableColumn} key={"col-" + columnIndex}>
+                <PodStatusComponent
+                    statusProps={statusProps}
+                    statusDescription={podString}
+                />
+            </SimpleTableCell>);
+    }
+
+    private static _renderAgeCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1StatefulSet>, statefulSet: V1StatefulSet): JSX.Element {
+        return (
+            <SimpleTableCell columnIndex={columnIndex} tableColumn={tableColumn} key={"col-" + columnIndex}>
+                <Ago date={new Date(statefulSet.metadata.creationTimestamp)} />
+            </SimpleTableCell>);
+    }
 }

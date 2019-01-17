@@ -24,7 +24,7 @@ export interface IServiceComponentProperties extends IVssComponentProperties {
 }
 
 export interface IServiceComponentState {
-    pods:Array<V1Pod>;
+    pods: Array<V1Pod>;
 }
 
 export class ServiceComponent extends BaseComponent<IServiceComponentProperties, IServiceComponentState> {
@@ -126,11 +126,11 @@ export class ServiceComponent extends BaseComponent<IServiceComponentProperties,
                 const props = {
                     columnIndex: columnIndex,
                     children:
-                        <LabelGroup
-                            labelProps={Utils.getUILabelModelArray(value)}
-                            wrappingBehavior={WrappingBehavior.FreeFlow}
-                            fadeOutOverflow={true}
-                        />,
+                    <LabelGroup
+                        labelProps={Utils.getUILabelModelArray(value)}
+                        wrappingBehavior={WrappingBehavior.FreeFlow}
+                        fadeOutOverflow={true}
+                    />,
                     tableColumn: tableColumn
                 };
 
@@ -147,7 +147,7 @@ export class ServiceComponent extends BaseComponent<IServiceComponentProperties,
         console.log("getting items");
         this.props.podListingPromise && this.props.podListingPromise.then(podList => {
             podList &&
-            podList.items &&
+                podList.items &&
                 this.setState({
                     pods: podList.items
                 });
@@ -158,7 +158,7 @@ export class ServiceComponent extends BaseComponent<IServiceComponentProperties,
 
     private _getAssociatedPods(): JSX.Element | null {
         return (
-            <PodsComponent 
+            <PodsComponent
                 podsToRender={this.state.pods}
                 headingText={Resources.AssociatedPodsText}
             />

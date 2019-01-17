@@ -12,18 +12,18 @@
     .kube-list-heading.heading {
         padding: 0px 8px 0px 12px;
         margin-bottom: 8px;
-    
+
         .heading-title {
             margin-bottom: 0px;
             margin-top: 6px;
         }
-    
+
         .kube-flex-row {
             display: flex;
             flex-direction: row;
             align-items: center;
         }
-    
+
         .kind-tag {
             margin-right: 8px;
         }
@@ -32,6 +32,10 @@
     .kube-list {
         .first-col-header {
             padding-left: 10px;
+        }
+
+        .bolt-table-row {
+            line-height: 30px;
         }
 
         .kube-col-header {

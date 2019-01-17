@@ -21,6 +21,7 @@ import "azure-devops-ui/Label.scss";
 import { DaemonSetListingComponent } from "./DaemonSetListingComponent";
 import { StatefulSetListingComponent } from "./StatefulSetListingComponent";
 import { PodsComponent } from "./PodsComponent";
+import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
 
 const workloadsPivotItemKey: string = "workloads";
 const servicesPivotItemKey: string = "services";
@@ -132,14 +133,14 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         });
 
         kubeService.getDaemonSets().then(dameonList => {
-            this.setState({ daemonSetList: dameonList});
+            this.setState({ daemonSetList: dameonList });
         });
 
         kubeService.getStatefulSets().then(statefulSets => {
-            this.setState({ statefulSetList: statefulSets});
+            this.setState({ statefulSetList: statefulSets });
         })
 
-        kubeService.getPods().then(podList =>{
+        kubeService.getPods().then(podList => {
             this.setState({
                 podList: podList
             })
@@ -191,15 +192,15 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
                     deploymentList={this.state.deploymentList || {} as V1DeploymentList}
                     replicaSetList={this.state.replicaSetList || {} as V1ReplicaSetList}
                     key={format("dc-{0}", this.state.namespace || "")}
-                    onItemInvoked={this._onDeploymentItemInvoked}
+                    onItemActivated={this._onDeploymentItemInvoked}
                 />
                 <DaemonSetListingComponent
                     daemonSetList={this.state.daemonSetList || {} as V1DaemonSetList}
-                    key={format("ds-list-{0}", this.state.namespace||"")}
+                    key={format("ds-list-{0}", this.state.namespace || "")}
                 />
-                <StatefulSetListingComponent 
+                <StatefulSetListingComponent
                     statefulSetList={this.state.statefulSetList || {} as V1StatefulSetList}
-                    key={format("sts-list-{0}", this.state.namespace||"")}
+                    key={format("sts-list-{0}", this.state.namespace || "")}
                 />
 
                 {this.state.podList && this.state.podList.items && this.state.podList.items.length > 0 && this.getOrphanPods()}
@@ -207,13 +208,8 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         );
     }
 
-    private _onDeploymentItemInvoked = (item?: any, index?: number, ev?: Event) => {
-        this.setState({
-            showDeployment: true,
-            selectedItem: item,
-            showService: false,
-            showSummary: false
-        });
+    private _onDeploymentItemInvoked = (event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>) => {
+        // TODO: Handle this after we introduce flux structure, as this requires selected DeploymentItem information which exists only with DeploymentsComponent as of now
     }
 
     private _getServicesPivot(): JSX.Element {
@@ -225,27 +221,31 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
             >
                 <ServicesComponent
                     servicesList={this.state.serviceList || {} as V1ServiceList}
-                    onItemInvoked={this._onServiceItemInvoked}
+                    onItemActivated={this._onServiceItemInvoked}
                 />
             </PivotItem>
         );
     }
 
-    private _onServiceItemInvoked = (item?: any, index?: number, ev?: Event) => {
-        this.setState({
-            showService: true,
-            selectedItem: item,
-            showDeployment: false,
-            showSummary: false
-        });
+    private _onServiceItemInvoked = (event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>) => {
+        if (this.state.serviceList) {
+            const serviceItems = ServicesComponent.getServiceItems(this.state.serviceList);
+            const selectedItem = serviceItems[tableRow.index];
+            this.setState({
+                showService: true,
+                selectedItem: selectedItem,
+                showDeployment: false,
+                showSummary: false
+            });
+        }
     }
 
     private _getServiceComponent(): JSX.Element {
-        const svc:V1Service = this.state.selectedItem.service;
+        const svc: V1Service = this.state.selectedItem.service;
         //service currently only supports equals with "and" operator. The generator generates that condition.
-        const labelSelector:string = Utils.generateEqualsConditionLabelSelector(svc.spec.selector || {});
-        const podsListing:Promise<any> = labelSelector && this.props.kubeService && this.props.kubeService.getPods(labelSelector)|| Promise.resolve({});
-        return <ServiceComponent service={this.state.selectedItem} podListingPromise={podsListing}/>;
+        const labelSelector: string = Utils.generateEqualsConditionLabelSelector(svc.spec.selector || {});
+        const podsListing: Promise<any> = labelSelector && this.props.kubeService && this.props.kubeService.getPods(labelSelector) || Promise.resolve({});
+        return <ServiceComponent service={this.state.selectedItem} podListingPromise={podsListing} />;
     }
 
     private getOrphanPods(): JSX.Element {

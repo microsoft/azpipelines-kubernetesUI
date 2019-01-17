@@ -5,13 +5,13 @@
 
 import { V1Service, V1ServiceList, V1ServicePort } from "@kubernetes/client-node";
 import { BaseComponent, css, format } from "@uifabric/utilities";
-import { IColumn } from "azure-devops-ui/Components/VssDetailsList/VssDetailsList.Props";
 import { Ago } from "azure-devops-ui/Ago";
-import { ColumnActionsMode } from "office-ui-fabric-react/lib/DetailsList";
 import * as React from "react";
 import * as Resources from "../Resources";
 import { IServiceItem, IVssComponentProperties } from "../Types";
 import { ListComponent } from "./ListComponent";
+import { ITableColumn, SimpleTableCell } from "azure-devops-ui/Table";
+import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
 import "./ServicesComponent.scss";
 import { Utils } from "../Utils";
 
@@ -21,10 +21,11 @@ const clusterIPKey: string = "cluster-ip-col";
 const externalIPKey: string = "external-ip-col";
 const portKey: string = "port-col";
 const ageKey: string = "age-col";
+const colDataClassName: string = "sc-col-data";
 
 export interface IServicesComponentProperties extends IVssComponentProperties {
     servicesList: V1ServiceList;
-    onItemInvoked?: (item?: any, index?: number, ev?: Event) => void;
+    onItemActivated?: (event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>) => void;
 }
 
 export class ServicesComponent extends BaseComponent<IServicesComponentProperties, {}> {
@@ -33,21 +34,20 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
         return (
             <ListComponent
                 className={css("list-content", "depth-16")}
-                items={ServicesComponent._getServiceItems(this.props.servicesList)}
+                items={ServicesComponent.getServiceItems(this.props.servicesList)}
                 columns={ServicesComponent._getColumns()}
-                onRenderItemColumn={ServicesComponent._onRenderItemColumn}
-                onItemInvoked={this._openServiceItem}
+                onItemActivated={this._openServiceItem}
             />
         );
     }
 
-    private _openServiceItem = (item?: any, index?: number, ev?: Event) => {
-        if (this.props.onItemInvoked) {
-            this.props.onItemInvoked(item, index, ev);
+    private _openServiceItem = (event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>) => {
+        if (this.props.onItemActivated) {
+            this.props.onItemActivated(event, tableRow);
         }
     }
 
-    private static _getServiceItems(servicesList: V1ServiceList): IServiceItem[] {
+    public static getServiceItems(servicesList: V1ServiceList): IServiceItem[] {
         let items: IServiceItem[] = [];
 
         (servicesList && servicesList.items || []).forEach(service => {
@@ -93,113 +93,116 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
         return format("{0}{1}/{2}", servicePort.port, nodePort, servicePort.protocol);
     }
 
-    private static _getColumns(): IColumn[] {
-        let columns: IColumn[] = [];
+    private static _getColumns(): ITableColumn<IServiceItem>[] {
+        let columns: ITableColumn<IServiceItem>[] = [];
         const headerColumnClassName: string = "kube-col-header";
-        const columnContentClassName: string = css("list-col-content","two-lines");
+        const columnContentClassName: string = "list-col-content";
 
         columns.push({
-            key: packageKey,
+            id: packageKey,
             name: Resources.NameText,
-            fieldName: packageKey,
-            minWidth: 250,
-            maxWidth: 500,
+            width: 250,
             headerClassName: css(headerColumnClassName, "first-col-header"),
-            columnActionsMode: ColumnActionsMode.disabled,
-            className: columnContentClassName
+            className: columnContentClassName,
+            renderCell: (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, service: IServiceItem) => this._renderPackageKeyCell(rowIndex, columnIndex, tableColumn, service)
         });
 
         columns.push({
-            key: typeKey,
+            id: typeKey,
             name: Resources.TypeText,
-            fieldName: typeKey,
-            minWidth: 120,
-            maxWidth: 240,
+            width: 120,
             headerClassName: css(headerColumnClassName, "first-col-header"),
-            columnActionsMode: ColumnActionsMode.disabled,
             className: columnContentClassName
         });
 
         columns.push({
-            key: clusterIPKey,
+            id: clusterIPKey,
             name: Resources.ClusterIPText,
-            fieldName: clusterIPKey,
-            minWidth: 150,
-            maxWidth: 150,
+            width: 150,
             headerClassName: headerColumnClassName,
-            columnActionsMode: ColumnActionsMode.disabled,
-            className: columnContentClassName
+            className: columnContentClassName,
+            renderCell: (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, service: IServiceItem) => this._renderClusterIpCell(rowIndex, columnIndex, tableColumn, service)
         });
 
         columns.push({
-            key: externalIPKey,
+            id: externalIPKey,
             name: Resources.ExternalIPText,
-            fieldName: externalIPKey,
-            minWidth: 150,
-            maxWidth: 150,
+            width: 150,
             headerClassName: headerColumnClassName,
-            columnActionsMode: ColumnActionsMode.disabled,
-            className: columnContentClassName
+            className: columnContentClassName,
+            renderCell: (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, service: IServiceItem) => this._renderExternalIpCell(rowIndex, columnIndex, tableColumn, service)
         });
 
         columns.push({
-            key: portKey,
+            id: portKey,
             name: Resources.PortText,
-            fieldName: portKey,
-            minWidth: 150,
-            maxWidth: 150,
+            width: 150,
             headerClassName: headerColumnClassName,
-            columnActionsMode: ColumnActionsMode.disabled,
-            className: columnContentClassName
+            className: columnContentClassName,
+            renderCell: (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, service: IServiceItem) => this._renderPortCell(rowIndex, columnIndex, tableColumn, service)
         });
 
         columns.push({
-            key: ageKey,
+            id: ageKey,
             name: Resources.AgeText,
-            fieldName: ageKey,
-            minWidth: 150,
-            maxWidth: 300,
+            width: 150,
             headerClassName: headerColumnClassName,
-            columnActionsMode: ColumnActionsMode.disabled,
-            className: columnContentClassName
+            className: columnContentClassName,
+            renderCell: (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, service: IServiceItem) => this._renderAgeCell(rowIndex, columnIndex, tableColumn, service)
         });
 
         return columns;
     }
 
-    private static _onRenderItemColumn(service?: IServiceItem, index?: number, column?: IColumn): React.ReactNode {
-        if (!service || !column) {
-            return null;
-        }
+    private static _renderPackageKeyCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, service: IServiceItem): JSX.Element => {
+        return (
+            <SimpleTableCell columnIndex={columnIndex} tableColumn={tableColumn} key={"col-" + columnIndex}>
+                {ListComponent.renderTwoLineColumn(service.package, service.pipeline, colDataClassName, "primary-text", "secondary-text")}
+            </SimpleTableCell>
+        );
+    }
 
-        const colDataClassName: string = "sc-col-data";
-        let textToRender: string = "";
-        switch (column.key) {
-            case packageKey:
-                return  ListComponent.renderTwoLineColumn(service.package, service.pipeline, colDataClassName, "primary-text", "secondary-text");
+    private static _renderTypeCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, service: IServiceItem): JSX.Element => {
+        const textToRender = service.type;
+        return (
+            <SimpleTableCell columnIndex={columnIndex} tableColumn={tableColumn} key={"col-" + columnIndex}>
+                {ListComponent.renderColumn(textToRender || "", ListComponent.defaultColumnRenderer, colDataClassName)}
+            </SimpleTableCell>
+        );
+    }
 
-            case typeKey:
-                textToRender = service.type;
-                break;
+    private static _renderClusterIpCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, service: IServiceItem): JSX.Element => {
+        const textToRender = service.clusterIP || Resources.NoneText;
+        return (
+            <SimpleTableCell columnIndex={columnIndex} tableColumn={tableColumn} key={"col-" + columnIndex}>
+                {ListComponent.renderColumn(textToRender || "", ListComponent.defaultColumnRenderer, colDataClassName)}
+            </SimpleTableCell>
+        );
+    }
 
-            case clusterIPKey:
-                textToRender = service.clusterIP || Resources.NoneText;
-                break;
+    private static _renderExternalIpCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, service: IServiceItem): JSX.Element => {
+        const textToRender = service.externalIP || Resources.NoneText;
+        return (
+            <SimpleTableCell columnIndex={columnIndex} tableColumn={tableColumn} key={"col-" + columnIndex}>
+                {ListComponent.renderColumn(textToRender || "", ListComponent.defaultColumnRenderer, colDataClassName)}
+            </SimpleTableCell>
+        );
+    }
 
-            case externalIPKey:
-                textToRender = service.externalIP || Resources.NoneText;
-                break;
+    private static _renderPortCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, service: IServiceItem): JSX.Element => {
+        const textToRender = service.port;
+        return (
+            <SimpleTableCell columnIndex={columnIndex} tableColumn={tableColumn} key={"col-" + columnIndex}>
+                {ListComponent.renderColumn(textToRender || "", ListComponent.defaultColumnRenderer, colDataClassName)}
+            </SimpleTableCell>
+        );
+    }
 
-            case portKey:
-                textToRender = service.port;
-                break;
-
-            case ageKey:
-                return (
-                    <Ago date={new Date(service.creationTimestamp)} />
-                );
-        }
-
-        return ListComponent.renderColumn(textToRender || "", ListComponent.defaultColumnRenderer, colDataClassName);
+    private static _renderAgeCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, service: IServiceItem): JSX.Element => {
+        return (
+            <SimpleTableCell columnIndex={columnIndex} tableColumn={tableColumn} key={"col-" + columnIndex}>
+                <Ago date={new Date(service.creationTimestamp)} />
+            </SimpleTableCell>
+        );
     }
 }
