@@ -191,7 +191,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
                     deploymentList={this.state.deploymentList || {} as V1DeploymentList}
                     replicaSetList={this.state.replicaSetList || {} as V1ReplicaSetList}
                     key={format("dc-{0}", this.state.namespace || "")}
-                    onItemInvoked={this._onDeploymentItemInvoked}
+                    // onItemInvoked={this._onDeploymentItemInvoked} -- Disabling double-click on deployments till the details view is revamped
                 />
                 <DaemonSetListingComponent
                     daemonSetList={this.state.daemonSetList || {} as V1DaemonSetList}
