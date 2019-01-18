@@ -16,7 +16,7 @@ import { IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
 import { ListComponent } from "./ListComponent";
 import "./PodListComponent.scss";
-import { PodStatusComponent } from "./Common";
+import { PodStatusComponent } from "./PodStatusComponent";
 
 const podStatusDic: { [index: string]: IStatusProps } = {
     "Running": Statuses.Success,
@@ -73,7 +73,6 @@ export class PodListComponent extends BaseComponent<IPodListComponentProperties>
                 return (
                     <PodStatusComponent 
                         statusProps={podStatusDic[pod.status.phase]} 
-                        statusSize={StatusSize.m} 
                         statusDescription={pod.metadata.name} 
                     />);
 
