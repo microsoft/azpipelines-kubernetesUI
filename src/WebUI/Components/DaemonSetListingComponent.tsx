@@ -28,7 +28,9 @@ export class DaemonSetListingComponent extends BaseComponent<IDaemonSetComponent
             <div>{
                 <ListComponent
                     className={css("list-content", "top-padding", "depth-16" )}
-                    items={this.props.daemonSetList.items || [] }
+                    items={(this.props.daemonSetList.items || []).filter((item)=>{
+                        return Utils.filterByName(item.metadata,this.props.nameFilterKey);
+                    }) }
                     columns={DaemonSetListingComponent._getColumns()}
                     onRenderItemColumn={DaemonSetListingComponent._onRenderItemColumn}
                 />

@@ -44,7 +44,7 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
 
     private _getDeploymentListView() {
         let renderList:JSX.Element[] =[];
-        DeploymentsComponent._generateDeploymentReplicaSetMap(this.props.deploymentList, this.props.replicaSetList).forEach((entry, index) => {
+        DeploymentsComponent._generateDeploymentReplicaSetMap(this.props.deploymentList, this.props.replicaSetList, this.props.nameFilterKey).forEach((entry, index) => {
             let columnClassName = css("list-content", "depth-16", index > 0 ? "replica-with-pod-list" : "");
             renderList.push( <ListComponent
                 className={columnClassName}
@@ -58,9 +58,11 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
         return renderList;
     }
 
-    private static _generateDeploymentReplicaSetMap(deploymentList: V1DeploymentList, replicaSetList:V1ReplicaSetList):IDeploymentReplicaSetMap[] {
-        let deploymentReplicaSetMap:IDeploymentReplicaSetMap[] = [];
-        (deploymentList && deploymentList.items || []).forEach(deployment => {
+    private static _generateDeploymentReplicaSetMap(deploymentList: V1DeploymentList, replicaSetList: V1ReplicaSetList, filterKey: string | undefined): IDeploymentReplicaSetMap[] {
+        let deploymentReplicaSetMap: IDeploymentReplicaSetMap[] = [];
+        (deploymentList && deploymentList.items || []).filter((deployment) => {
+            return Utils.filterByName(deployment.metadata, filterKey);
+        }).forEach(deployment => {
             const filteredReplicas: V1ReplicaSet[] = (replicaSetList && replicaSetList.items || [])
                 .filter(replica => DeploymentsComponent._isReplicaSetForDeployment(deployment, replica)) || [];
             filteredReplicas.sort((a, b) => {

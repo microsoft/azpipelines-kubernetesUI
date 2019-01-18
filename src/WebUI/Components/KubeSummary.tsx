@@ -21,6 +21,9 @@ import "azure-devops-ui/Label.scss";
 import { DaemonSetListingComponent } from "./DaemonSetListingComponent";
 import { StatefulSetListingComponent } from "./StatefulSetListingComponent";
 import { PodsComponent } from "./PodsComponent";
+import { Filter, IFilterState, FILTER_CHANGE_EVENT, IFilterItemState } from "azure-devops-ui/Utilities/Filter";
+import { KubeResourceType } from "../../Contracts/KubeServiceBase";
+import { FilterComponent } from "./FilterComponent";
 
 const workloadsPivotItemKey: string = "workloads";
 const servicesPivotItemKey: string = "services";
@@ -31,6 +34,10 @@ export interface IKubernetesContainerState extends IKubernetesSummary {
     showDeployment?: boolean;
     showService?: boolean;
     selectedItem?: any;
+    filter:Filter;
+    svcFilter: Filter;
+    workloadsFilterState?:IFilterState;
+    svcFilterState?:IFilterState;
 }
 
 export interface IKubeSummaryProps extends IVssComponentProperties {
@@ -42,12 +49,18 @@ export interface IKubeSummaryProps extends IVssComponentProperties {
 export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesContainerState> {
     constructor(props: IKubeSummaryProps) {
         super(props, {});
+        const filter = new Filter();
+        filter.subscribe(this._onFilterApplied, FILTER_CHANGE_EVENT);
+        const svcFilter = new Filter();
+        svcFilter.subscribe(this._onSvcFilterApplied, FILTER_CHANGE_EVENT);
         this.state = {
             namespace: this.props.namespace || "",
             selectedKey: workloadsPivotItemKey,
             showSummary: true,
             showDeployment: false,
-            showService: false
+            showService: false,
+            filter: filter,
+            svcFilter: svcFilter
         };
     }
 
@@ -187,22 +200,16 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
                 itemKey={workloadsPivotItemKey}
                 className="item-padding"
             >
-                <DeploymentsComponent
-                    deploymentList={this.state.deploymentList || {} as V1DeploymentList}
-                    replicaSetList={this.state.replicaSetList || {} as V1ReplicaSetList}
-                    key={format("dc-{0}", this.state.namespace || "")}
-                    onItemInvoked={this._onDeploymentItemInvoked}
+                <FilterComponent filter={this.state.filter}
+                    keywordPlaceHolder={Resources.PivotWorkloadsText.toLowerCase()}
+                    pickListPlaceHolder={Resources.KindText}
+                    pickListItemsFn={this._pickListItems}
+                    listItemsFn={this._listItems}
                 />
-                <DaemonSetListingComponent
-                    daemonSetList={this.state.daemonSetList || {} as V1DaemonSetList}
-                    key={format("ds-list-{0}", this.state.namespace||"")}
-                />
-                <StatefulSetListingComponent 
-                    statefulSetList={this.state.statefulSetList || {} as V1StatefulSetList}
-                    key={format("sts-list-{0}", this.state.namespace||"")}
-                />
-
-                {this.state.podList && this.state.podList.items && this.state.podList.items.length > 0 && this.getOrphanPods()}
+                {this._showComponent(KubeResourceType.Deployments) && this._getDeployments()}
+                {this._showComponent(KubeResourceType.DaemonSets) && this._getDaemonSetsComponent()}
+                {this._showComponent(KubeResourceType.StatefulSets) && this._getStatefulSetsComponent()}
+                {this.state.podList && this.state.podList.items && this.state.podList.items.length > 0 && this._showComponent(KubeResourceType.Pods) && this.getOrphanPods()}
             </PivotItem>
         );
     }
@@ -226,6 +233,8 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
                 <ServicesComponent
                     servicesList={this.state.serviceList || {} as V1ServiceList}
                     onItemInvoked={this._onServiceItemInvoked}
+                    filter={this.state.svcFilter}
+                    filterState={this.state.svcFilterState}
                 />
             </PivotItem>
         );
@@ -255,6 +264,97 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
                 pods.push(pod);
             }
         });
-        return <PodsComponent podsToRender={pods} />;
+        return <PodsComponent podsToRender={pods} nameFilterKey={this._getNameFilterKey()}/>;
     }
+
+    private _getDaemonSetsComponent():JSX.Element {
+        return (<DaemonSetListingComponent
+            daemonSetList={this.state.daemonSetList || {} as V1DaemonSetList}
+            key={format("ds-list-{0}", this.state.namespace || "")}
+            nameFilterKey={this._getNameFilterKey()}
+        />);
+    }
+
+    private _getStatefulSetsComponent(): JSX.Element {
+        return (<StatefulSetListingComponent
+            statefulSetList={this.state.statefulSetList || {} as V1StatefulSetList}
+            key={format("sts-list-{0}", this.state.namespace || "")}
+            nameFilterKey={this._getNameFilterKey()}
+        />);
+    }
+
+    private _getDeployments(): JSX.Element {
+        return (<DeploymentsComponent
+            deploymentList={this.state.deploymentList || {} as V1DeploymentList}
+            replicaSetList={this.state.replicaSetList || {} as V1ReplicaSetList}
+            key={format("dc-{0}", this.state.namespace || "")}
+            onItemInvoked={this._onDeploymentItemInvoked}
+            nameFilterKey={this._getNameFilterKey()}
+        />);
+    }
+
+    private _onFilterApplied = (currentState: IFilterState) => {
+        console.log(JSON.stringify(this.state.filter.getState()));
+        this.setState({
+            workloadsFilterState: this.state.filter.getState()
+        })
+    };
+
+    private _onSvcFilterApplied = (currentState: IFilterState) => {
+        console.log(JSON.stringify(this.state.filter.getState()));
+        this.setState({
+            svcFilterState: this.state.svcFilter.getState()
+        })
+    };
+
+    private _getNameFilterKey(): string | undefined {
+        const filterItem: IFilterItemState | null= this.state.workloadsFilterState? this.state.workloadsFilterState["nameKey"]: null;
+        return filterItem? (filterItem.value as string): undefined;
+    }
+
+    private _showComponent(resourceType: KubeResourceType): boolean{
+        const filterState: IFilterItemState | null = this.state.workloadsFilterState? this.state.workloadsFilterState["typeKey"]: null;
+        const selections: KubeResourceType[] = filterState? filterState.value : [];
+        // if no selections are made, show all components
+        if(selections.length > 0) {
+            return selections.indexOf(resourceType) != -1;
+        }
+        return true;
+    }
+
+    private _pickListItems = () => {
+        return [KubeResourceType.Deployments, 
+                KubeResourceType.ReplicaSets, 
+                KubeResourceType.DaemonSets, 
+                KubeResourceType.StatefulSets, 
+                KubeResourceType.Pods];
+    };
+
+    private _listItems = (item: any)=> {
+        let name:string = "";
+        switch(item){
+            case KubeResourceType.Deployments:
+                name = Resources.DeploymentsDetailsText;
+                break;
+            case KubeResourceType.ReplicaSets:
+                name = Resources.ReplicaSetText;
+                break;
+            case KubeResourceType.DaemonSets:
+                name = Resources.DaemonSetText;
+                break;
+            case KubeResourceType.StatefulSets:
+                name = Resources.StatefulSetText;
+                break;
+            case KubeResourceType.Pods:
+                name = Resources.PodsText;
+                break;
+            default:
+                name = "Unknown";
+                break;
+     };
+        return {
+            key: item.toString(),
+            name: name
+        };
+    };
 }

@@ -31,7 +31,9 @@ export class PodsComponent extends BaseComponent<IPodsComponentProperties> {
             <ListComponent
                 headingText={this.props.headingText}
                 className={css("list-content", "pl-details", "depth-16")}
-                items={this.props.podsToRender}
+                items={this.props.podsToRender.filter((pod)=> {
+                    return Utils.filterByName(pod.metadata, this.props.nameFilterKey);
+                })}
                 columns={PodsComponent._getColumns()}
                 onRenderItemColumn={PodsComponent._onRenderItemColumn}
             />

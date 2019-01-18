@@ -28,7 +28,9 @@ export class StatefulSetListingComponent extends BaseComponent<IDaemonSetCompone
 
                 <ListComponent
                     className={css("list-content", "top-padding", "depth-16" )}
-                    items={ this.props.statefulSetList.items || [] }
+                    items={ (this.props.statefulSetList.items || []).filter((set)=>{
+                        return Utils.filterByName(set.metadata,this.props.nameFilterKey);
+                    })}
                     columns={StatefulSetListingComponent._getColumns()}
                     onRenderItemColumn={StatefulSetListingComponent._onRenderItemColumn}
                 />
