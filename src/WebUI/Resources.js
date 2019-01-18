@@ -4,7 +4,6 @@ define("Environments/Providers/Kubernetes/Resources", ["require", "exports"], fu
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.AgeText = "Created";
-    exports.NodeNameText = "Node Name";
     exports.NameText = "Name";
     exports.StatusText = "Status";
     exports.ImageText = "Image";
@@ -15,7 +14,6 @@ define("Environments/Providers/Kubernetes/Resources", ["require", "exports"], fu
     exports.ClusterIPText = "Cluster IP";
     exports.ExternalIPText = "External IP";
     exports.TypeText = "Type";
-    exports.AppNameText = "App Name";
     exports.ReplicaSetText = "ReplicaSet";
     exports.PackageText = "Package";
     exports.PipelineText = "Pipeline";
@@ -35,7 +33,8 @@ define("Environments/Providers/Kubernetes/Resources", ["require", "exports"], fu
     exports.SelectorText = "Selector";
     exports.SessionAffinityText = "Session affinity";
     exports.NoneText = "None";
-    exports.AssociatedPodsText = "Associated Pods";
+    exports.AssociatedPodsText = "Associated pods";
     exports.DaemonSetText = "DaemonSet";
     exports.StatefulSetText = "StatefulSet";
+    exports.DeploymentText = "Deployment";
 });

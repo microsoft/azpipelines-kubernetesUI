@@ -16,7 +16,7 @@ import { ListComponent } from "./ListComponent";
 import { LabelGroup, WrappingBehavior } from "azure-devops-ui/Label";
 import { Ago } from "azure-devops-ui/Ago";
 import { Utils } from "../Utils";
-import { PodStatusComponent } from "./Common";
+import { PodStatusComponent } from "./PodStatusComponent";
 
 const replicaSetNameKey: string = "replicaSet-col";
 const podsKey: string = "pods-col";
@@ -205,7 +205,6 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
                 return (
                     <PodStatusComponent 
                         statusProps={deployment.statusProps}
-                        statusSize={StatusSize.m} 
                         statusDescription={deployment.pods} 
                     />);
             case imageKey:
@@ -225,7 +224,7 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
             <div>
                 <h3>{deployment.metadata.name}</h3>
                 <div className="kube-flex-row">
-                    <span className="secondary-text kind-tag"> Deployment </span>
+                    <span className="secondary-text kind-tag"> {Resources.DeploymentText} </span>
                     <LabelGroup labelProps={Utils.getUILabelModelArray(deployment.metadata.labels)}
                         wrappingBehavior={WrappingBehavior.OneLine}
                         fadeOutOverflow={true}>
