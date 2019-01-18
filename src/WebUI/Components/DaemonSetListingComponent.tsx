@@ -9,7 +9,7 @@ import { ListComponent } from "./ListComponent";
 import { IVssComponentProperties } from "../Types";
 import { Ago } from "azure-devops-ui/Ago";
 import { Utils } from "../Utils";
-import { PodStatusComponent } from "./Common";
+import { PodStatusComponent } from "./PodStatusComponent";
 
 const setNameKey = "set-name-key";
 const imageKey = "image-key";
@@ -108,7 +108,6 @@ export class DaemonSetListingComponent extends BaseComponent<IDaemonSetComponent
                 return (
                     <PodStatusComponent 
                         statusProps={statusProps} 
-                        statusSize={StatusSize.m} 
                         statusDescription={podString} 
                     />
                 );

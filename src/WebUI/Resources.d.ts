@@ -2,7 +2,6 @@
     Copyright (c) Microsoft Corporation. All rights reserved.
     Licensed under the MIT license.
 */
-export declare const NodeNameText: string;
 export declare const NameText: string;
 export declare const StatusText: string;
 export declare const ImageText: string;
@@ -13,7 +12,6 @@ export declare const DeploymentsDetailsText: string;
 export declare const ClusterIPText: string;
 export declare const ExternalIPText: string;
 export declare const TypeText: string;
-export declare const AppNameText: string;
 export declare const ReplicaSetText: string;
 export declare const PackageText: string;
 export declare const PipelineText: string;
@@ -37,3 +35,4 @@ export declare const NoneText: string;
 export declare const AssociatedPodsText: string;
 export declare const DaemonSetText: string;
 export declare const StatefulSetText: string;
+export declare const DeploymentText: string;

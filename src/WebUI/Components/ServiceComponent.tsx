@@ -101,7 +101,7 @@ export class ServiceComponent extends BaseComponent<IServiceComponentProperties,
                         className="s-full-details"
                         id={format("s-full-details-{0}", item.uid)}
                         showHeader={false}
-                        showLines={false}
+                        showLines={true}
                         singleClickActivation={false}
                         itemProvider={tableItems}
                         pageSize={tableItems.getCount()}
