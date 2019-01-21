@@ -13,10 +13,8 @@ import * as Resources from "../Resources";
 import { IServiceItem, IVssComponentProperties } from "../Types";
 import { ListComponent } from "./ListComponent";
 import "./ServicesComponent.scss";
-import { Filter, IFilterState, IFilterItemState } from "azure-devops-ui/Utilities/Filter";
 import { KubeServiceType } from "../../Contracts/KubeServiceBase";
 import { Utils } from "../Utils";
-import { FilterComponent } from "./FilterComponent";
 
 const packageKey: string = "package-col";
 const typeKey: string = "type-col";
@@ -27,8 +25,7 @@ const ageKey: string = "age-col";
 
 export interface IServicesComponentProperties extends IVssComponentProperties {
     servicesList: V1ServiceList;
-    filter: Filter;
-    filterState?: IFilterState
+    typeSelections: KubeServiceType[];
     onItemInvoked?: (item?: any, index?: number, ev?: Event) => void;
 }
 
@@ -36,24 +33,9 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
     public render(): React.ReactNode {
         return (
             <div>
-                <FilterComponent filter={this.props.filter}
-                    pickListPlaceHolder={Resources.TypeText}
-                    keywordPlaceHolder={Resources.PivotServiceText.toLowerCase()}
-                    pickListItemsFn={() => {
-                        return [KubeServiceType.ClusterIP,
-                        KubeServiceType.ExternalName,
-                        KubeServiceType.LoadBalancer,
-                        KubeServiceType.NodePort];
-                    }}
-                    listItemsFn={(item: any) => {
-                        return {
-                            key: item,
-                            name: item
-                        };
-                    }} />
                 <ListComponent
                     className={css("list-content", "depth-16")}
-                    items={ServicesComponent._getServiceItems(this.props.servicesList, this._getTypeSelections(), this._getNameFilterKey())}
+                    items={ServicesComponent._getServiceItems(this.props.servicesList, this.props.typeSelections, this.props.nameFilterKey)}
                     columns={ServicesComponent._getColumns()}
                     onRenderItemColumn={ServicesComponent._onRenderItemColumn}
                     onItemInvoked={this._openServiceItem}
@@ -228,16 +210,5 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
         }
 
         return ListComponent.renderColumn(textToRender || "", ListComponent.defaultColumnRenderer, colDataClassName);
-    }
-    
-
-    private _getNameFilterKey(): string | undefined {
-        const filterItem: IFilterItemState | null= this.props.filterState? this.props.filterState["nameKey"]: null;
-        return filterItem? (filterItem.value as string): undefined;
-    }
-
-    private _getTypeSelections(): KubeServiceType[] {
-        const filterItem: IFilterItemState | null= this.props.filterState? this.props.filterState["typeKey"]: null;
-        return filterItem? (filterItem.value as KubeServiceType[]) :[];
     }
 }
