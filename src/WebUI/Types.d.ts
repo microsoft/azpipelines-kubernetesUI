@@ -73,5 +73,4 @@ export interface IVssComponentProperties extends IBaseProps {
      */
     [property: string]: IObservable<any> | any;
 
-    nameFilterKey?:string;
 }

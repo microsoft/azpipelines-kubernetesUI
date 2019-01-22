@@ -27,13 +27,20 @@ export interface IDeploymentsComponentProperties extends IVssComponentProperties
     deploymentList: V1DeploymentList;
     replicaSetList: V1ReplicaSetList;
     onItemInvoked?: (item?: any, index?: number, ev?: Event) => void;
+    nameFilter?: string;
 }
 
 export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentProperties, {}> {
     public render(): React.ReactNode {
-        return (
-            <div>{this._getDeploymentListView()}</div>
-        );
+        const filteredDeployments: V1Deployment[] = (this.props.deploymentList && this.props.deploymentList.items || []).filter((deployment) => {
+            return Utils.filterByName(deployment.metadata.name, this.props.nameFilter);
+        });
+        if (filteredDeployments.length > 0) {
+            return (
+                <div>{this._getDeploymentListView(filteredDeployments)}</div>
+            );
+        }
+        return null;
     }
 
     private _openDeploymentItem = (item?: any, index?: number, ev?: Event) => {
@@ -42,11 +49,11 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
         }
     }
 
-    private _getDeploymentListView() {
-        let renderList:JSX.Element[] =[];
-        DeploymentsComponent._generateDeploymentReplicaSetMap(this.props.deploymentList, this.props.replicaSetList, this.props.nameFilterKey).forEach((entry, index) => {
+    private _getDeploymentListView(filteredDeployments: V1Deployment[]) {
+        let renderList: JSX.Element[] = [];
+        DeploymentsComponent._generateDeploymentReplicaSetMap(filteredDeployments, this.props.replicaSetList).forEach((entry, index) => {
             let columnClassName = css("list-content", "depth-16", index > 0 ? "replica-with-pod-list" : "");
-            renderList.push( <ListComponent
+            renderList.push(<ListComponent
                 className={columnClassName}
                 headingContent={DeploymentsComponent._getHeadingContent(entry.deployment)}
                 items={DeploymentsComponent._getDeploymentReplicaSetItems(entry.deployment, entry.replicaSets)}
@@ -54,15 +61,13 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
                 onRenderItemColumn={DeploymentsComponent._onRenderItemColumn}
                 onItemInvoked={this._openDeploymentItem}
             />);
-        }); 
+        });
         return renderList;
     }
 
-    private static _generateDeploymentReplicaSetMap(deploymentList: V1DeploymentList, replicaSetList: V1ReplicaSetList, filterKey: string | undefined): IDeploymentReplicaSetMap[] {
+    private static _generateDeploymentReplicaSetMap(deploymentList: V1Deployment[], replicaSetList: V1ReplicaSetList): IDeploymentReplicaSetMap[] {
         let deploymentReplicaSetMap: IDeploymentReplicaSetMap[] = [];
-        (deploymentList && deploymentList.items || []).filter((deployment) => {
-            return Utils.filterByName(deployment.metadata, filterKey);
-        }).forEach(deployment => {
+        deploymentList.forEach(deployment => {
             const filteredReplicas: V1ReplicaSet[] = (replicaSetList && replicaSetList.items || [])
                 .filter(replica => DeploymentsComponent._isReplicaSetForDeployment(deployment, replica)) || [];
             filteredReplicas.sort((a, b) => {

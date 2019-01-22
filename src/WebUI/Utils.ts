@@ -87,9 +87,9 @@ export class Utils {
         return Statuses.Failed;
     }
 
-    public static filterByName(objectMeta: V1ObjectMeta, filterKey?:string): boolean {
+    public static filterByName(objectName: string, filterKey?:string): boolean {
         if(filterKey) {
-            return objectMeta.name.includes(filterKey);
+            return objectName.includes(filterKey);
         }
         return true;
     }

@@ -21,7 +21,7 @@ import { DaemonSetListingComponent } from "./DaemonSetListingComponent";
 import { StatefulSetListingComponent } from "./StatefulSetListingComponent";
 import { PodsComponent } from "./PodsComponent";
 import { Filter, IFilterState, FILTER_CHANGE_EVENT, IFilterItemState } from "azure-devops-ui/Utilities/Filter";
-import { KubeResourceType, KubeServiceType } from "../../Contracts/KubeServiceBase";
+import { KubeResourceType } from "../../Contracts/KubeServiceBase";
 import { FilterComponent } from "./FilterComponent";
 import { Tab, TabBar, TabContent } from "azure-devops-ui/Tabs";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
@@ -40,7 +40,7 @@ export interface IKubernetesContainerState extends IKubernetesSummary {
     filter:Filter;
     svcFilter: Filter;
     workloadsFilterState?:IFilterState;
-    svcFilterState?:IFilterState;
+    svcFilterState?: IFilterState;
 }
 
 export interface IKubeSummaryProps extends IVssComponentProperties {
@@ -211,7 +211,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
                 onItemInvoked={this._onServiceItemInvoked}
                 filter={this.state.svcFilter}
                 filterState={this.state.svcFilterState}
-                nameFilterKey={this._getNameFilterKey()}
+                nameFilter={this._getNameFilterKey()}
                 typeSelections={this._getTypeSelection()}
             />);
         }
@@ -239,18 +239,14 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
                 pickListPlaceHolder={Resources.TypeText}
                 keywordPlaceHolder={Resources.PivotServiceText.toLowerCase()}
                 filterToggled={filterToggled}
-                pickListItemsFn={() => {
-                    return [KubeServiceType.ClusterIP,
-                    KubeServiceType.ExternalName,
-                    KubeServiceType.LoadBalancer,
-                    KubeServiceType.NodePort];
-                }}
+                pickListItemsFn={() => this._generateSvcTypes()}
                 listItemsFn={(item: any) => {
                     return {
                         key: item,
                         name: item
                     };
-                }} />);
+                }}
+            />);
         }
     }
 
@@ -287,14 +283,14 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
                 pods.push(pod);
             }
         });
-        return <PodsComponent podsToRender={pods} nameFilterKey={this._getNameFilterKey()}/>;
+        return <PodsComponent podsToRender={pods} nameFilter={this._getNameFilterKey()}/>;
     }
 
     private _getDaemonSetsComponent():JSX.Element {
         return (<DaemonSetListingComponent
             daemonSetList={this.state.daemonSetList || {} as V1DaemonSetList}
             key={format("ds-list-{0}", this.state.namespace || "")}
-            nameFilterKey={this._getNameFilterKey()}
+            nameFilter={this._getNameFilterKey()}
         />);
     }
 
@@ -302,7 +298,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         return (<StatefulSetListingComponent
             statefulSetList={this.state.statefulSetList || {} as V1StatefulSetList}
             key={format("sts-list-{0}", this.state.namespace || "")}
-            nameFilterKey={this._getNameFilterKey()}
+            nameFilter={this._getNameFilterKey()}
         />);
     }
 
@@ -312,7 +308,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
             replicaSetList={this.state.replicaSetList || {} as V1ReplicaSetList}
             key={format("dc-{0}", this.state.namespace || "")}
             onItemInvoked={this._onDeploymentItemInvoked}
-            nameFilterKey={this._getNameFilterKey()}
+            nameFilter={this._getNameFilterKey()}
         />);
     }
 
@@ -385,4 +381,14 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
             name: name
         };
     };
+
+    private _generateSvcTypes(): string[] {
+        let svcTypes: string[] = [];
+        this.state.serviceList && this.state.serviceList.items && this.state.serviceList.items.forEach((svc) => {
+            if (svcTypes.indexOf(svc.spec.type) == -1) {
+                svcTypes.push(svc.spec.type);
+            }
+        });
+        return svcTypes;
+    }
 }

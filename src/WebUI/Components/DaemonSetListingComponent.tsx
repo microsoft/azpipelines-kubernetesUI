@@ -19,23 +19,30 @@ const ageKey = "age-key";
 export interface IDaemonSetComponentProperties extends IVssComponentProperties {
     daemonSetList: V1DaemonSetList;
     onItemInvoked?: (item?: any, index?: number, ev?: Event) => void;
+    nameFilter?: string;
 }
 
 
 export class DaemonSetListingComponent extends BaseComponent<IDaemonSetComponentProperties, {}> {
     public render(): React.ReactNode {
-        return (
-            <div>{
-                <ListComponent
-                    className={css("list-content", "top-padding", "depth-16" )}
-                    items={(this.props.daemonSetList.items || []).filter((item)=>{
-                        return Utils.filterByName(item.metadata,this.props.nameFilterKey);
-                    }) }
-                    columns={DaemonSetListingComponent._getColumns()}
-                    onRenderItemColumn={DaemonSetListingComponent._onRenderItemColumn}
-                />
-            }</div>
-        );
+        const filteredItems: V1DaemonSet[] = (this.props.daemonSetList.items || []).filter((item) => {
+            return Utils.filterByName(item.metadata.name, this.props.nameFilter);
+        });
+        if (filteredItems.length > 0) {
+            return (
+                <div>{
+                    <ListComponent
+                        className={css("list-content", "top-padding", "depth-16")}
+                        items={(this.props.daemonSetList.items || []).filter((item) => {
+                            return Utils.filterByName(item.metadata.name, this.props.nameFilter);
+                        })}
+                        columns={DaemonSetListingComponent._getColumns()}
+                        onRenderItemColumn={DaemonSetListingComponent._onRenderItemColumn}
+                    />
+                }</div>
+            );
+        }
+        return null;
     }
 
     private static _getColumns(): IColumn[] {

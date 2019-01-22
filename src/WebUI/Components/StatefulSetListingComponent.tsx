@@ -19,23 +19,27 @@ const ageKey = "statefulset-age-key";
 export interface IDaemonSetComponentProperties extends IVssComponentProperties {
     statefulSetList: V1StatefulSetList;
     onItemInvoked?: (item?: any, index?: number, ev?: Event) => void;
+    nameFilter?: string;
 }
 
 export class StatefulSetListingComponent extends BaseComponent<IDaemonSetComponentProperties, {}> {
     public render(): React.ReactNode {
-        return (
-            <div>{
-
-                <ListComponent
-                    className={css("list-content", "top-padding", "depth-16" )}
-                    items={ (this.props.statefulSetList.items || []).filter((set)=>{
-                        return Utils.filterByName(set.metadata,this.props.nameFilterKey);
-                    })}
-                    columns={StatefulSetListingComponent._getColumns()}
-                    onRenderItemColumn={StatefulSetListingComponent._onRenderItemColumn}
-                />
-            }</div>
-        );
+        const filteredSet: V1StatefulSet[] = (this.props.statefulSetList.items || []).filter((set) => {
+            return Utils.filterByName(set.metadata.name, this.props.nameFilter);
+        });
+        if (filteredSet.length > 0) {
+            return (
+                <div>{
+                    <ListComponent
+                        className={css("list-content", "top-padding", "depth-16")}
+                        items={filteredSet}
+                        columns={StatefulSetListingComponent._getColumns()}
+                        onRenderItemColumn={StatefulSetListingComponent._onRenderItemColumn}
+                    />
+                }</div>
+            );
+        }
+        return null;
     }
 
     private static _getColumns(): IColumn[] {

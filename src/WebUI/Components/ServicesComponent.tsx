@@ -13,7 +13,6 @@ import * as Resources from "../Resources";
 import { IServiceItem, IVssComponentProperties } from "../Types";
 import { ListComponent } from "./ListComponent";
 import "./ServicesComponent.scss";
-import { KubeServiceType } from "../../Contracts/KubeServiceBase";
 import { Utils } from "../Utils";
 
 const packageKey: string = "package-col";
@@ -25,23 +24,32 @@ const ageKey: string = "age-col";
 
 export interface IServicesComponentProperties extends IVssComponentProperties {
     servicesList: V1ServiceList;
-    typeSelections: KubeServiceType[];
+    typeSelections: string[];
+    nameFilter?: string,
     onItemInvoked?: (item?: any, index?: number, ev?: Event) => void;
 }
 
 export class ServicesComponent extends BaseComponent<IServicesComponentProperties, {}> {
     public render(): React.ReactNode {
-        return (
-            <div>
-                <ListComponent
-                    className={css("list-content", "depth-16")}
-                    items={ServicesComponent._getServiceItems(this.props.servicesList, this.props.typeSelections, this.props.nameFilterKey)}
-                    columns={ServicesComponent._getColumns()}
-                    onRenderItemColumn={ServicesComponent._onRenderItemColumn}
-                    onItemInvoked={this._openServiceItem}
-                />
-            </div>
-        );
+        const filteredSvc: V1Service[] = (this.props.servicesList && this.props.servicesList.items || [])
+            .filter((svc) => {
+                return this._filterService(svc);
+            });
+        if (filteredSvc.length > 0) {
+            return (
+                <div>{
+                    <ListComponent
+                        className={css("list-content", "depth-16")}
+                        items={ServicesComponent._getServiceItems(filteredSvc)}
+                        columns={ServicesComponent._getColumns()}
+                        onRenderItemColumn={ServicesComponent._onRenderItemColumn}
+                        onItemInvoked={this._openServiceItem}
+                    />
+                }
+                </div>
+            );
+        }
+        return null;
     }
 
     private _openServiceItem = (item?: any, index?: number, ev?: Event) => {
@@ -50,16 +58,9 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
         }
     }
 
-    private static _getServiceItems(servicesList: V1ServiceList, typeSelections:KubeServiceType[], filterKey:string | undefined): IServiceItem[] {
+    private static _getServiceItems(servicesList: V1Service[]): IServiceItem[] {
         let items: IServiceItem[] = [];
-
-        (servicesList && servicesList.items || []).filter((item) => {
-            //filtering by name
-            return Utils.filterByName(item.metadata,filterKey);
-        }).filter((item) => {
-            //filtering by type
-            return typeSelections.length > 0? typeSelections.indexOf(item.spec.type as KubeServiceType)!= -1 : true;
-        }).forEach(service => {
+        servicesList.forEach(service => {
             items.push({
                 package: service.metadata.name,
                 type: service.spec.type,
@@ -210,5 +211,12 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
         }
 
         return ListComponent.renderColumn(textToRender || "", ListComponent.defaultColumnRenderer, colDataClassName);
+    }
+
+    private _filterService(svc: V1Service): boolean {
+        const nameMatches: boolean = Utils.filterByName(svc.metadata.name, this.props.nameFilter);
+        const typeMatches: boolean = this.props.typeSelections.length > 0 ? this.props.typeSelections.indexOf(svc.spec.type) != -1 : true;
+
+        return nameMatches && typeMatches;
     }
 }

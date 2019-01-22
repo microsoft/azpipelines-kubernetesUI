@@ -16,13 +16,6 @@ export enum KubeResourceType {
     StatefulSets = 32,
 }
 
-export enum KubeServiceType {
-    ClusterIP = 'ClusterIP',
-    LoadBalancer = 'LoadBalancer',
-    ExternalName = 'ExternalName',
-    NodePort = 'NodePort'
-}
-
 export abstract class KubeServiceBase implements IKubeService {
     getPods(labelSelector?:string): Promise<K8sTypes.V1PodList> {
         return this.fetch(KubeResourceType.Pods, labelSelector);
