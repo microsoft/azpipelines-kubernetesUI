@@ -16,6 +16,7 @@ import { IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
 import { ListComponent } from "./ListComponent";
 import "./PodListComponent.scss";
+import { PodStatusComponent } from "./PodStatusComponent";
 
 const podStatusDic: { [index: string]: IStatusProps } = {
     "Running": Statuses.Success,
@@ -70,11 +71,10 @@ export class PodListComponent extends BaseComponent<IPodListComponentProperties>
         switch (column.key) {
             case podStatusKey:
                 return (
-                    <div className="pod-status">
-                        <Status {...podStatusDic[pod.status.phase]} animated={false} size={StatusSize.s} />
-                        <span className="pod-name"> {pod.metadata.name}</span>
-                    </div>
-                );
+                    <PodStatusComponent 
+                        statusProps={podStatusDic[pod.status.phase]} 
+                        statusDescription={pod.metadata.name} 
+                    />);
 
             case podIPKey:
                 textToRender = pod.status.podIP;
@@ -140,7 +140,7 @@ export class PodListComponent extends BaseComponent<IPodListComponentProperties>
 
     private static _getColumns(): IColumn[] {
         let columns: IColumn[] = [];
-        const headerColumnClassName = "pdl-col-header";
+        const headerColumnClassName = "kube-col-header";
 
         columns.push({
             key: podStatusKey,
@@ -164,7 +164,7 @@ export class PodListComponent extends BaseComponent<IPodListComponentProperties>
 
         columns.push({
             key: podAgeKey,
-            name: Resources.PodAge,
+            name: Resources.AgeText,
             fieldName: podAgeKey,
             minWidth: 200,
             maxWidth: 200,

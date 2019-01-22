@@ -1,18 +1,47 @@
+@import "azure-devops-ui/Core/_platformCommon.scss";
+
 .kube-list-content {
+    padding: 16px;
     border-radius: 4px;
     /* todo :: use std colors */
     background-color: white;
     min-width: 750px;
     /* todo :: use std colors */
     border: 1px solid lightgray;
-}
 
-.kube-list {
-    .first-col-header {
-        padding-left: 10px;
+    .kube-list-heading.heading {
+        padding: 0px 8px 0px 12px;
+        margin-bottom: 8px;
+    
+        .heading-title {
+            margin-bottom: 0px;
+            margin-top: 6px;
+        }
+    
+        .kube-flex-row {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+        }
+    
+        .kind-tag {
+            margin-right: 8px;
+        }
     }
-}
 
-.kube-list-heading.heading {
-    padding: 0px 10px;
+    .kube-list {
+        .first-col-header {
+            padding-left: 10px;
+        }
+
+        .kube-col-header {
+            color: $secondary-text;
+            font-size: $fontSize;
+            font-weight: $fontWeightHeavy;
+        }
+
+        .kube-list-row {
+            padding-left: 4px;
+        }
+    }
 }

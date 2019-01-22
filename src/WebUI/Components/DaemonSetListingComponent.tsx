@@ -9,6 +9,7 @@ import { ListComponent } from "./ListComponent";
 import { IVssComponentProperties } from "../Types";
 import { Ago } from "azure-devops-ui/Ago";
 import { Utils } from "../Utils";
+import { PodStatusComponent } from "./PodStatusComponent";
 
 const setNameKey = "set-name-key";
 const imageKey = "image-key";
@@ -37,14 +38,14 @@ export class DaemonSetListingComponent extends BaseComponent<IDaemonSetComponent
 
     private static _getColumns(): IColumn[] {
         let columns: IColumn[] = [];
-        const headerColumnClassName: string = "secondary-text";
+        const headerColumnClassName: string = "kube-col-header";
 
         columns.push({
             key: setNameKey,
             name: Resources.DaemonSetText,
             fieldName: setNameKey,
             minWidth: 250,
-            maxWidth: 250,
+            maxWidth: 500,
             headerClassName: headerColumnClassName,
             columnActionsMode: ColumnActionsMode.disabled
         });
@@ -54,7 +55,7 @@ export class DaemonSetListingComponent extends BaseComponent<IDaemonSetComponent
             name: Resources.ImageText,
             fieldName: imageKey,
             minWidth: 250,
-            maxWidth: 250,
+            maxWidth: 500,
             headerClassName: headerColumnClassName,
             columnActionsMode: ColumnActionsMode.disabled
         });
@@ -64,7 +65,7 @@ export class DaemonSetListingComponent extends BaseComponent<IDaemonSetComponent
             name: Resources.PodsText,
             fieldName: podsKey,
             minWidth: 80,
-            maxWidth: 80,
+            maxWidth: 160,
             headerClassName: headerColumnClassName,
             columnActionsMode: ColumnActionsMode.disabled
         });
@@ -74,7 +75,7 @@ export class DaemonSetListingComponent extends BaseComponent<IDaemonSetComponent
             name: Resources.AgeText,
             fieldName: ageKey,
             minWidth: 80,
-            maxWidth: 80,
+            maxWidth: 160,
             headerClassName: headerColumnClassName,
             columnActionsMode: ColumnActionsMode.disabled
         });
@@ -105,13 +106,11 @@ export class DaemonSetListingComponent extends BaseComponent<IDaemonSetComponent
                     podString = format("{0}/{1}", daemonSet.status.currentNumberScheduled, daemonSet.status.desiredNumberScheduled);
                 }
                 return (
-                    <div>
-                        {
-                            !!statusProps &&
-                            <Status {...statusProps} size={StatusSize.m} />
-                        }
-                        <span>{podString}</span>
-                    </div>);
+                    <PodStatusComponent 
+                        statusProps={statusProps} 
+                        statusDescription={podString} 
+                    />
+                );
             }
             case ageKey: {
                 return (<Ago date={new Date(daemonSet.metadata.creationTimestamp)} />);

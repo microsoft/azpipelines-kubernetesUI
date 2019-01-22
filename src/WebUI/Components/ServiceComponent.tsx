@@ -27,11 +27,6 @@ export interface IServiceComponentState {
     pods:Array<V1Pod>;
 }
 
-const podNameKey: string = "svc-pod-name-key";
-const podImageKey: string = "svc-pod-image-key";
-const podStatusKey: string = "svc-pod-status-key";
-const podCreatedTimeKey:string = "svc-pod-age-key";
-
 export class ServiceComponent extends BaseComponent<IServiceComponentProperties, IServiceComponentState> {
     constructor(props: IServiceComponentProperties) {
         super(props, {});
@@ -70,7 +65,7 @@ export class ServiceComponent extends BaseComponent<IServiceComponentProperties,
     private _getServiceDetails(): JSX.Element | null {
         const item = this.props.service;
         if (item && item.service) {
-            const columns = [
+            const columns: ITableColumn<any>[] = [
                 {
                     id: "key",
                     name: "key",
@@ -106,7 +101,7 @@ export class ServiceComponent extends BaseComponent<IServiceComponentProperties,
                         className="s-full-details"
                         id={format("s-full-details-{0}", item.uid)}
                         showHeader={false}
-                        showLines={false}
+                        showLines={true}
                         singleClickActivation={false}
                         itemProvider={tableItems}
                         pageSize={tableItems.getCount()}
@@ -142,7 +137,9 @@ export class ServiceComponent extends BaseComponent<IServiceComponentProperties,
                 return renderTableCell(props);
 
             default:
-                return renderSimpleCell(rowIndex, columnIndex, tableColumn, tableItem);
+                return (<div className="kube-simple-cell">
+                        { renderSimpleCell(rowIndex, columnIndex, tableColumn, tableItem) }
+                    </div>);
         }
     }
 
