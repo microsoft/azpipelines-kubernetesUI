@@ -29,7 +29,7 @@ export class Editor extends BaseComponent<IEditorProps> {
                             language: "yaml",
                             readOnly: true,
                             renderWhitespace: "all",
-                            theme: "vs-dark",
+                            theme: "vs",
                             scrollbar: { horizontalScrollbarSize: 16 },
                             lineNumbers: "on",
                             extraEditorClassName: "k8s-monaco-editor",
