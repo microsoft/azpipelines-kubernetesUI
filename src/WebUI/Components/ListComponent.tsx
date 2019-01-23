@@ -7,8 +7,8 @@ import { TooltipHost, TooltipOverflowMode } from "azure-devops-ui/Tooltip";
 import { BaseComponent, css, IRenderFunction } from "office-ui-fabric-react/lib/Utilities";
 import * as React from "react";
 import { IVssComponentProperties } from "../Types";
-import { Table, ITableColumn } from "azure-devops-ui/Table";
-import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
+import { Table, ITableColumn, TableRow, ITableRowProps, SimpleTableCell } from "azure-devops-ui/Table";
+import { ITableRow, ITableRowDetails } from "azure-devops-ui/Components/Table/Table.Props";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import "./ListComponent.scss";
 
@@ -17,7 +17,7 @@ export interface IListComponentProperties<T> extends IVssComponentProperties {
     headingContent?: JSX.Element;
     items: T[];
     columns: ITableColumn<T>[];
-    onItemActivated?: (event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>) => void;
+    onItemActivated?: (event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>, selectedItem: any) => void;
 }
 
 export class ListComponent<T> extends BaseComponent<IListComponentProperties<T>> {
@@ -44,12 +44,6 @@ export class ListComponent<T> extends BaseComponent<IListComponentProperties<T>>
         );
     }
 
-    private _onRenderRow = (detailsRowProps: any, defaultRender?: any): JSX.Element => {
-        return (<div className={"kube-list-row"}>
-                    <DetailsRow {...detailsRowProps} />
-                </div>);
-    }
-
     public static renderColumn(
         text: string,
         renderer: (text: string, className?: string) => React.ReactNode, className?: string): React.ReactNode {
@@ -64,6 +58,13 @@ export class ListComponent<T> extends BaseComponent<IListComponentProperties<T>>
                 </TooltipHost>
             </div>
         );
+    }
+
+    public static renderTableCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<any>, itemToRender: React.ReactNode): JSX.Element {
+        return (
+            <SimpleTableCell columnIndex={columnIndex} tableColumn={tableColumn} key={"col-" + columnIndex}>
+                {itemToRender}
+            </SimpleTableCell>);
     }
 
     public static renderTwoLineColumn(primaryText: string, subText: string, className?: string, primaryTextClassName?: string, secondaryTextClassName?: string): React.ReactNode {
@@ -85,7 +86,7 @@ export class ListComponent<T> extends BaseComponent<IListComponentProperties<T>>
 
     private _onItemActivated = (event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>) => {
         if (this.props.onItemActivated) {
-            this.props.onItemActivated(event, tableRow);
+            this.props.onItemActivated(event, tableRow, this.props.items[tableRow.index]);
         }
     }
 

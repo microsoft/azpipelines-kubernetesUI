@@ -25,7 +25,7 @@ const colDataClassName: string = "sc-col-data";
 
 export interface IServicesComponentProperties extends IVssComponentProperties {
     servicesList: V1ServiceList;
-    onItemActivated?: (event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>) => void;
+    onItemActivated?: (event: React.SyntheticEvent<HTMLElement>, item: IServiceItem) => void;
 }
 
 export class ServicesComponent extends BaseComponent<IServicesComponentProperties, {}> {
@@ -34,20 +34,20 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
         return (
             <ListComponent
                 className={css("list-content", "depth-16")}
-                items={ServicesComponent.getServiceItems(this.props.servicesList)}
+                items={ServicesComponent._getServiceItems(this.props.servicesList)}
                 columns={ServicesComponent._getColumns()}
                 onItemActivated={this._openServiceItem}
             />
         );
     }
 
-    private _openServiceItem = (event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>) => {
+    private _openServiceItem = (event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>, selectedItem: any) => {
         if (this.props.onItemActivated) {
-            this.props.onItemActivated(event, tableRow);
+            this.props.onItemActivated(event, selectedItem);
         }
     }
 
-    public static getServiceItems(servicesList: V1ServiceList): IServiceItem[] {
+    private static _getServiceItems(servicesList: V1ServiceList): IServiceItem[] {
         let items: IServiceItem[] = [];
 
         (servicesList && servicesList.items || []).forEach(service => {
@@ -64,6 +64,7 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
             });
         });
 
+        ServicesComponent._serviceItems = items;
         return items;
     }
 
@@ -104,7 +105,7 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
             width: 250,
             headerClassName: css(headerColumnClassName, "first-col-header"),
             className: columnContentClassName,
-            renderCell: (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, service: IServiceItem) => this._renderPackageKeyCell(rowIndex, columnIndex, tableColumn, service)
+            renderCell: ServicesComponent._renderPackageKeyCell
         });
 
         columns.push({
@@ -112,7 +113,8 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
             name: Resources.TypeText,
             width: 120,
             headerClassName: css(headerColumnClassName, "first-col-header"),
-            className: columnContentClassName
+            className: columnContentClassName,
+            renderCell: ServicesComponent._renderTypeCell
         });
 
         columns.push({
@@ -121,7 +123,7 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
             width: 150,
             headerClassName: headerColumnClassName,
             className: columnContentClassName,
-            renderCell: (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, service: IServiceItem) => this._renderClusterIpCell(rowIndex, columnIndex, tableColumn, service)
+            renderCell: ServicesComponent._renderClusterIpCell
         });
 
         columns.push({
@@ -130,7 +132,7 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
             width: 150,
             headerClassName: headerColumnClassName,
             className: columnContentClassName,
-            renderCell: (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, service: IServiceItem) => this._renderExternalIpCell(rowIndex, columnIndex, tableColumn, service)
+            renderCell: ServicesComponent._renderExternalIpCell
         });
 
         columns.push({
@@ -139,7 +141,7 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
             width: 150,
             headerClassName: headerColumnClassName,
             className: columnContentClassName,
-            renderCell: (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, service: IServiceItem) => this._renderPortCell(rowIndex, columnIndex, tableColumn, service)
+            renderCell: ServicesComponent._renderPortCell
         });
 
         columns.push({
@@ -148,61 +150,45 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
             width: 150,
             headerClassName: headerColumnClassName,
             className: columnContentClassName,
-            renderCell: (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, service: IServiceItem) => this._renderAgeCell(rowIndex, columnIndex, tableColumn, service)
+            renderCell: ServicesComponent._renderAgeCell
         });
 
         return columns;
     }
 
     private static _renderPackageKeyCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, service: IServiceItem): JSX.Element => {
-        return (
-            <SimpleTableCell columnIndex={columnIndex} tableColumn={tableColumn} key={"col-" + columnIndex}>
-                {ListComponent.renderTwoLineColumn(service.package, service.pipeline, colDataClassName, "primary-text", "secondary-text")}
-            </SimpleTableCell>
-        );
+        const itemToRender = ListComponent.renderTwoLineColumn(service.package, service.pipeline, colDataClassName, "primary-text", "secondary-text");
+        return ListComponent.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
     private static _renderTypeCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, service: IServiceItem): JSX.Element => {
         const textToRender = service.type;
-        return (
-            <SimpleTableCell columnIndex={columnIndex} tableColumn={tableColumn} key={"col-" + columnIndex}>
-                {ListComponent.renderColumn(textToRender || "", ListComponent.defaultColumnRenderer, colDataClassName)}
-            </SimpleTableCell>
-        );
+        const itemToRender = ListComponent.renderColumn(textToRender || "", ListComponent.defaultColumnRenderer, colDataClassName);
+        return ListComponent.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
     private static _renderClusterIpCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, service: IServiceItem): JSX.Element => {
         const textToRender = service.clusterIP || Resources.NoneText;
-        return (
-            <SimpleTableCell columnIndex={columnIndex} tableColumn={tableColumn} key={"col-" + columnIndex}>
-                {ListComponent.renderColumn(textToRender || "", ListComponent.defaultColumnRenderer, colDataClassName)}
-            </SimpleTableCell>
-        );
+        const itemToRender = ListComponent.renderColumn(textToRender || "", ListComponent.defaultColumnRenderer, colDataClassName);
+        return ListComponent.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
     private static _renderExternalIpCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, service: IServiceItem): JSX.Element => {
         const textToRender = service.externalIP || Resources.NoneText;
-        return (
-            <SimpleTableCell columnIndex={columnIndex} tableColumn={tableColumn} key={"col-" + columnIndex}>
-                {ListComponent.renderColumn(textToRender || "", ListComponent.defaultColumnRenderer, colDataClassName)}
-            </SimpleTableCell>
-        );
+        const itemToRender = ListComponent.renderColumn(textToRender || "", ListComponent.defaultColumnRenderer, colDataClassName);
+        return ListComponent.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
     private static _renderPortCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, service: IServiceItem): JSX.Element => {
         const textToRender = service.port;
-        return (
-            <SimpleTableCell columnIndex={columnIndex} tableColumn={tableColumn} key={"col-" + columnIndex}>
-                {ListComponent.renderColumn(textToRender || "", ListComponent.defaultColumnRenderer, colDataClassName)}
-            </SimpleTableCell>
-        );
+        const itemToRender = ListComponent.renderColumn(textToRender || "", ListComponent.defaultColumnRenderer, colDataClassName);
+        return ListComponent.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
     private static _renderAgeCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, service: IServiceItem): JSX.Element => {
-        return (
-            <SimpleTableCell columnIndex={columnIndex} tableColumn={tableColumn} key={"col-" + columnIndex}>
-                <Ago date={new Date(service.creationTimestamp)} />
-            </SimpleTableCell>
-        );
+        const itemToRender = (<Ago date={new Date(service.creationTimestamp)} />);
+        return ListComponent.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
+
+    private static _serviceItems: IServiceItem[] = [];
 }

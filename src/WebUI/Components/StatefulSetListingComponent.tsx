@@ -19,7 +19,6 @@ const colDataClassName: string = "list-col-content";
 
 export interface IDaemonSetComponentProperties extends IVssComponentProperties {
     statefulSetList: V1StatefulSetList;
-    onItemActivated?: (event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>) => void;
 }
 
 export class StatefulSetListingComponent extends BaseComponent<IDaemonSetComponentProperties, {}> {
@@ -44,7 +43,7 @@ export class StatefulSetListingComponent extends BaseComponent<IDaemonSetCompone
             name: Resources.StatefulSetText,
             width: 250,
             headerClassName: css(headerColumnClassName, "first-col-header"),
-            renderCell: (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1StatefulSet>, statefulSet: V1StatefulSet) => this._renderSetNameCell(rowIndex, columnIndex, tableColumn, statefulSet),
+            renderCell: StatefulSetListingComponent._renderSetNameCell
         });
 
         columns.push({
@@ -52,7 +51,7 @@ export class StatefulSetListingComponent extends BaseComponent<IDaemonSetCompone
             name: Resources.ImageText,
             width: 250,
             headerClassName: headerColumnClassName,
-            renderCell: (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1StatefulSet>, statefulSet: V1StatefulSet) => this._renderImageCell(rowIndex, columnIndex, tableColumn, statefulSet),
+            renderCell: StatefulSetListingComponent._renderImageCell
         });
 
         columns.push({
@@ -60,7 +59,7 @@ export class StatefulSetListingComponent extends BaseComponent<IDaemonSetCompone
             name: Resources.PodsText,
             width: 80,
             headerClassName: headerColumnClassName,
-            renderCell: (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1StatefulSet>, statefulSet: V1StatefulSet) => this._renderPodsCell(rowIndex, columnIndex, tableColumn, statefulSet),
+            renderCell: StatefulSetListingComponent._renderPodsCell
         });
 
         columns.push({
@@ -68,27 +67,21 @@ export class StatefulSetListingComponent extends BaseComponent<IDaemonSetCompone
             name: Resources.AgeText,
             width: 80,
             headerClassName: headerColumnClassName,
-            renderCell: (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1StatefulSet>, statefulSet: V1StatefulSet) => this._renderAgeCell(rowIndex, columnIndex, tableColumn, statefulSet),
+            renderCell: StatefulSetListingComponent._renderAgeCell
         });
 
         return columns;
     }
 
     private static _renderSetNameCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1StatefulSet>, statefulSet: V1StatefulSet): JSX.Element {
-        return (
-            <SimpleTableCell columnIndex={columnIndex} tableColumn={tableColumn} key={"col-" + columnIndex}>
-                {ListComponent.renderTwoLineColumn(statefulSet.metadata.name,
-                    Utils.getPipelineText(statefulSet.metadata.annotations),
-                    colDataClassName, "primary-text", "secondary-text")}
-            </SimpleTableCell>);
+        const itemToRender = ListComponent.renderTwoLineColumn(statefulSet.metadata.name, Utils.getPipelineText(statefulSet.metadata.annotations), colDataClassName, "primary-text", "secondary-text");
+        return ListComponent.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
     private static _renderImageCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1StatefulSet>, statefulSet: V1StatefulSet): JSX.Element {
         const textToRender = statefulSet.spec.template.spec.containers[0].image;
-        return (
-            <SimpleTableCell columnIndex={columnIndex} tableColumn={tableColumn} key={"col-" + columnIndex}>
-                {ListComponent.renderColumn(textToRender || "", ListComponent.defaultColumnRenderer, colDataClassName)}
-            </SimpleTableCell>);
+        const itemToRender = ListComponent.renderColumn(textToRender || "", ListComponent.defaultColumnRenderer, colDataClassName);
+        return ListComponent.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
     private static _renderPodsCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1StatefulSet>, statefulSet: V1StatefulSet): JSX.Element {
@@ -98,19 +91,18 @@ export class StatefulSetListingComponent extends BaseComponent<IDaemonSetCompone
             statusProps = Utils._getPodsStatusProps(statefulSet.status.currentReplicas, statefulSet.status.replicas);
             podString = format("{0}/{1}", statefulSet.status.currentReplicas, statefulSet.status.replicas);
         }
-        return (
-            <SimpleTableCell columnIndex={columnIndex} tableColumn={tableColumn} key={"col-" + columnIndex}>
-                <PodStatusComponent
-                    statusProps={statusProps}
-                    statusDescription={podString}
-                />
-            </SimpleTableCell>);
+
+        const itemToRender = (
+            <PodStatusComponent
+                statusProps={statusProps}
+                statusDescription={podString}
+            />
+        );
+        return ListComponent.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
     private static _renderAgeCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1StatefulSet>, statefulSet: V1StatefulSet): JSX.Element {
-        return (
-            <SimpleTableCell columnIndex={columnIndex} tableColumn={tableColumn} key={"col-" + columnIndex}>
-                <Ago date={new Date(statefulSet.metadata.creationTimestamp)} />
-            </SimpleTableCell>);
+        const itemToRender = (<Ago date={new Date(statefulSet.metadata.creationTimestamp)} />);
+        return ListComponent.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 }

@@ -9,7 +9,7 @@ import { Pivot, PivotItem } from "office-ui-fabric-react/lib/Pivot";
 import * as React from "react";
 import { IKubeService } from "../../Contracts/Contracts";
 import * as Resources from "../Resources";
-import { IKubernetesSummary, IVssComponentProperties } from "../Types";
+import { IKubernetesSummary, IVssComponentProperties, IServiceItem, IDeploymentItem } from "../Types";
 import { Utils } from "../Utils";
 import { DeploymentsComponent } from "./DeploymentsComponent";
 import "./KubeSummary.scss";
@@ -208,8 +208,13 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         );
     }
 
-    private _onDeploymentItemInvoked = (event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>) => {
-        // TODO: Handle this after we introduce flux structure, as this requires selected DeploymentItem information which exists only with DeploymentsComponent as of now
+    private _onDeploymentItemInvoked = (event: React.SyntheticEvent<HTMLElement>, item: IDeploymentItem) => {
+        this.setState({
+            showDeployment: true,	
+            selectedItem: item,	
+            showService: false,	
+            showSummary: false	
+        });
     }
 
     private _getServicesPivot(): JSX.Element {
@@ -227,17 +232,13 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         );
     }
 
-    private _onServiceItemInvoked = (event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>) => {
-        if (this.state.serviceList) {
-            const serviceItems = ServicesComponent.getServiceItems(this.state.serviceList);
-            const selectedItem = serviceItems[tableRow.index];
-            this.setState({
-                showService: true,
-                selectedItem: selectedItem,
-                showDeployment: false,
-                showSummary: false
-            });
-        }
+    private _onServiceItemInvoked = (event: React.SyntheticEvent<HTMLElement>, item: IServiceItem) => {
+        this.setState({
+            showService: true,
+            selectedItem: item,
+            showDeployment: false,
+            showSummary: false
+        });
     }
 
     private _getServiceComponent(): JSX.Element {

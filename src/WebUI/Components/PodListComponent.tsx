@@ -35,7 +35,6 @@ export interface IPodListComponentProperties extends IVssComponentProperties {
 
 export class PodListComponent extends BaseComponent<IPodListComponentProperties> {
     public render(): JSX.Element {
-        console.log(this.props.pods);
         return (
             <div className="pod-list-content">
                 <ListComponent
@@ -60,28 +59,24 @@ export class PodListComponent extends BaseComponent<IPodListComponentProperties>
         );
     }
 
-    private static _renderPodStatusCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod): JSX.Element => {
-        return (
-            <SimpleTableCell columnIndex={columnIndex} tableColumn={tableColumn} key={"col-" + columnIndex}>
-                <PodStatusComponent
-                    statusProps={podStatusDic[pod.status.phase]}
-                    statusDescription={pod.metadata.name}
-                />)
-            </SimpleTableCell>);
+    private static _renderPodStatusCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod): JSX.Element {
+        const itemToRender = (
+            <PodStatusComponent
+                statusProps={podStatusDic[pod.status.phase]}
+                statusDescription={pod.metadata.name}
+            />
+        );
+        return ListComponent.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
-    private static _renderPodIpCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod): JSX.Element => {
-        return (
-            <SimpleTableCell columnIndex={columnIndex} tableColumn={tableColumn} key={"col-" + columnIndex}>
-                {ListComponent.renderColumn(pod.status.podIP, ListComponent.defaultColumnRenderer, "pdl-col-data")}
-            </SimpleTableCell>);
+    private static _renderPodIpCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod): JSX.Element {
+        const itemToRender = ListComponent.renderColumn(pod.status.podIP, ListComponent.defaultColumnRenderer, "pdl-col-data");
+        return ListComponent.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
-    private static _renderPodAgeCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod): JSX.Element => {
-        return (
-            <SimpleTableCell columnIndex={columnIndex} tableColumn={tableColumn} key={"col-" + columnIndex}>
-                <Duration startDate={new Date(pod.metadata.creationTimestamp)} endDate={new Date()} />
-            </SimpleTableCell>);
+    private static _renderPodAgeCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod): JSX.Element {
+        const itemToRender = (<Duration startDate={new Date(pod.metadata.creationTimestamp)} endDate={new Date()} />);
+        return ListComponent.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
     private _getReplicaSetLabels(): React.ReactNode | null {
@@ -144,7 +139,7 @@ export class PodListComponent extends BaseComponent<IPodListComponentProperties>
             name: Resources.PodsDetailsText,
             width: 250,
             headerClassName: headerColumnClassName,
-            renderCell: (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod) => this._renderPodStatusCell(rowIndex, columnIndex, tableColumn, pod),
+            renderCell: PodListComponent._renderPodStatusCell
         });
 
         columns.push({
@@ -152,7 +147,7 @@ export class PodListComponent extends BaseComponent<IPodListComponentProperties>
             name: Resources.PodIP,
             width: 250,
             headerClassName: headerColumnClassName,
-            renderCell: (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod) => this._renderPodIpCell(rowIndex, columnIndex, tableColumn, pod),
+            renderCell: PodListComponent._renderPodIpCell
         });
 
         columns.push({
@@ -160,7 +155,7 @@ export class PodListComponent extends BaseComponent<IPodListComponentProperties>
             name: Resources.AgeText,
             width: 200,
             headerClassName: headerColumnClassName,
-            renderCell: (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod) => this._renderPodAgeCell(rowIndex, columnIndex, tableColumn, pod),
+            renderCell: PodListComponent._renderPodAgeCell
         });
 
         return columns;

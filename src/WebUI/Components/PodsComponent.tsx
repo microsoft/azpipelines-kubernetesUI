@@ -47,7 +47,7 @@ export class PodsComponent extends BaseComponent<IPodsComponentProperties> {
             width: 250,
             headerClassName: css(headerColumnClassName, "first-col-header"),
             className: columnContentClassName,
-            renderCell: (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod) => this._renderPodNameCell(rowIndex, columnIndex, tableColumn, pod),
+            renderCell: PodsComponent._renderPodNameCell
         });
 
         columns.push({
@@ -56,7 +56,7 @@ export class PodsComponent extends BaseComponent<IPodsComponentProperties> {
             width: 250,
             headerClassName: headerColumnClassName,
             className: columnContentClassName,
-            renderCell: (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod) => this._renderPodImageCell(rowIndex, columnIndex, tableColumn, pod),
+            renderCell: PodsComponent._renderPodImageCell
         });
 
         columns.push({
@@ -65,7 +65,7 @@ export class PodsComponent extends BaseComponent<IPodsComponentProperties> {
             width: 80,
             headerClassName: headerColumnClassName,
             className: columnContentClassName,
-            renderCell: (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod) => this._renderPodStatusCell(rowIndex, columnIndex, tableColumn, pod),
+            renderCell: PodsComponent._renderPodStatusCell
         });
 
         columns.push({
@@ -74,32 +74,26 @@ export class PodsComponent extends BaseComponent<IPodsComponentProperties> {
             width: 80,
             headerClassName: headerColumnClassName,
             className: columnContentClassName,
-            renderCell: (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod) => this._renderPodAgeCell(rowIndex, columnIndex, tableColumn, pod),
+            renderCell: PodsComponent._renderPodAgeCell
         });
 
         return columns;
     }
 
-    private static _renderPodNameCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod): JSX.Element => {
+    private static _renderPodNameCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod): JSX.Element {
         const textToRender = pod.metadata.name;
         let colDataClass = css(colDataClassName, "primary-text");
-        return (
-            <SimpleTableCell columnIndex={columnIndex} tableColumn={tableColumn} key={"col-" + columnIndex}>
-                {ListComponent.renderColumn(textToRender || "", ListComponent.defaultColumnRenderer, colDataClass)}
-            </SimpleTableCell>
-        );
+        const itemToRender = ListComponent.renderColumn(textToRender || "", ListComponent.defaultColumnRenderer, colDataClass);
+        return ListComponent.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
-    private static _renderPodImageCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod): JSX.Element => {
+    private static _renderPodImageCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod): JSX.Element {
         const textToRender = pod.spec.containers[0].image;
-        return (
-            <SimpleTableCell columnIndex={columnIndex} tableColumn={tableColumn} key={"col-" + columnIndex}>
-                {ListComponent.renderColumn(textToRender || "", ListComponent.defaultColumnRenderer, colDataClassName)}
-            </SimpleTableCell>
-        );
+        const itemToRender = ListComponent.renderColumn(textToRender || "", ListComponent.defaultColumnRenderer, colDataClassName);
+        return ListComponent.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
-    private static _renderPodStatusCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod): JSX.Element => {
+    private static _renderPodStatusCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod): JSX.Element {
         let statusDescription: string = "";
         let customDescription: React.ReactNode = null;
 
@@ -109,22 +103,21 @@ export class PodsComponent extends BaseComponent<IPodsComponentProperties> {
         else {
             statusDescription = pod.status.phase;
         }
-        return (
-            <SimpleTableCell columnIndex={columnIndex} tableColumn={tableColumn} key={"col-" + columnIndex}>
-                <PodStatusComponent
-                    statusProps={Utils.generatePodStatusProps(pod.status)}
-                    statusDescription={statusDescription}
-                    customDescription={customDescription}
-                />
-            </SimpleTableCell>
+
+        const itemToRender = (
+            <PodStatusComponent
+                statusProps={Utils.generatePodStatusProps(pod.status)}
+                statusDescription={statusDescription}
+                customDescription={customDescription}
+            />
         );
+        return ListComponent.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
-    private static _renderPodAgeCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod): JSX.Element => {
-        return (
-            <SimpleTableCell columnIndex={columnIndex} tableColumn={tableColumn} key={"col-" + columnIndex}>
-                <Ago date={new Date(pod.status.startTime)} />
-            </SimpleTableCell>
+    private static _renderPodAgeCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod): JSX.Element {
+        const itemToRender = (
+            <Ago date={new Date(pod.status.startTime)} />
         );
+        return ListComponent.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 }

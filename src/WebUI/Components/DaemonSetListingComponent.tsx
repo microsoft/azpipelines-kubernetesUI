@@ -19,7 +19,6 @@ const colDataClassName: string = "list-col-content";
 
 export interface IDaemonSetComponentProperties extends IVssComponentProperties {
     daemonSetList: V1DaemonSetList;
-    onItemActivated?: (event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>) => void;
 }
 
 
@@ -45,7 +44,7 @@ export class DaemonSetListingComponent extends BaseComponent<IDaemonSetComponent
             name: Resources.DaemonSetText,
             width: 250,
             headerClassName: headerColumnClassName,
-            renderCell: (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1DaemonSet>, daemonSet: V1DaemonSet) => this._renderSetNameCell(rowIndex, columnIndex, tableColumn, daemonSet),
+            renderCell: DaemonSetListingComponent._renderSetNameCell
         });
 
         columns.push({
@@ -53,7 +52,7 @@ export class DaemonSetListingComponent extends BaseComponent<IDaemonSetComponent
             name: Resources.ImageText,
             width: 250,
             headerClassName: headerColumnClassName,
-            renderCell: (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1DaemonSet>, daemonSet: V1DaemonSet) => this._renderImageCell(rowIndex, columnIndex, tableColumn, daemonSet),
+            renderCell: DaemonSetListingComponent._renderImageCell
         });
 
         columns.push({
@@ -61,7 +60,7 @@ export class DaemonSetListingComponent extends BaseComponent<IDaemonSetComponent
             name: Resources.PodsText,
             width: 80,
             headerClassName: headerColumnClassName,
-            renderCell: (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1DaemonSet>, daemonSet: V1DaemonSet) => this._renderPodsCell(rowIndex, columnIndex, tableColumn, daemonSet),
+            renderCell: DaemonSetListingComponent._renderPodsCell
         });
 
         columns.push({
@@ -69,27 +68,21 @@ export class DaemonSetListingComponent extends BaseComponent<IDaemonSetComponent
             name: Resources.AgeText,
             width: 80,
             headerClassName: headerColumnClassName,
-            renderCell: (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1DaemonSet>, daemonSet: V1DaemonSet) => this._renderAgeCell(rowIndex, columnIndex, tableColumn, daemonSet),
+            renderCell: DaemonSetListingComponent._renderAgeCell
         });
 
         return columns;
     }
 
-    private static _renderSetNameCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1DaemonSet>, daemonSet: V1DaemonSet): JSX.Element {
-        return (
-            <SimpleTableCell columnIndex={columnIndex} tableColumn={tableColumn} key={"col-" + columnIndex}>
-                {ListComponent.renderTwoLineColumn(daemonSet.metadata.name,
-                    Utils.getPipelineText(daemonSet.metadata.annotations),
-                    colDataClassName, "primary-text", "secondary-text")}
-            </SimpleTableCell>);
+    private static _renderDaemonSetNameCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1DaemonSet>, daemonSet: V1DaemonSet): JSX.Element {
+        const itemToRender = ListComponent.renderTwoLineColumn(daemonSet.metadata.name, Utils.getPipelineText(daemonSet.metadata.annotations), colDataClassName, "primary-text", "secondary-text");
+        return ListComponent.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
     private static _renderImageCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1DaemonSet>, daemonSet: V1DaemonSet): JSX.Element {
         const textToRender = daemonSet.spec.template.spec.containers[0].image;
-        return (
-            <SimpleTableCell columnIndex={columnIndex} tableColumn={tableColumn} key={"col-" + columnIndex}>
-                {ListComponent.renderColumn(textToRender || "", ListComponent.defaultColumnRenderer, colDataClassName)}
-            </SimpleTableCell>);
+        const itemToRender = ListComponent.renderColumn(textToRender || "", ListComponent.defaultColumnRenderer, colDataClassName);
+        return ListComponent.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
     private static _renderPodsCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1DaemonSet>, daemonSet: V1DaemonSet): JSX.Element {
@@ -100,19 +93,19 @@ export class DaemonSetListingComponent extends BaseComponent<IDaemonSetComponent
             podString = format("{0}/{1}", daemonSet.status.currentNumberScheduled, daemonSet.status.desiredNumberScheduled);
         }
 
-        return (
-            <SimpleTableCell columnIndex={columnIndex} tableColumn={tableColumn} key={"col-" + columnIndex}>
-                <PodStatusComponent
-                    statusProps={statusProps}
-                    statusDescription={podString}
-                />
-            </SimpleTableCell>);
+        const itemToRender = (
+            <PodStatusComponent
+                statusProps={statusProps}
+                statusDescription={podString}
+            />
+        );
+        return ListComponent.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
     private static _renderAgeCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1DaemonSet>, daemonSet: V1DaemonSet): JSX.Element {
-        return (
-            <SimpleTableCell columnIndex={columnIndex} tableColumn={tableColumn} key={"col-" + columnIndex}>
-                <Ago date={new Date(daemonSet.metadata.creationTimestamp)} />
-            </SimpleTableCell>);
+        const itemToRender = (
+            <Ago date={new Date(daemonSet.metadata.creationTimestamp)} />
+        );
+        return ListComponent.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 }

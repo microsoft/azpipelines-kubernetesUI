@@ -27,7 +27,7 @@ const colDataClassName: string = "dc-col-data";
 export interface IDeploymentsComponentProperties extends IVssComponentProperties {
     deploymentList: V1DeploymentList;
     replicaSetList: V1ReplicaSetList;
-    onItemActivated?: (event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>) => void;
+    onItemActivated?: (event: React.SyntheticEvent<HTMLElement>, item: IDeploymentItem) => void;
 }
 
 export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentProperties, {}> {
@@ -37,29 +37,29 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
         );
     }
 
-    private _openDeploymentItem = (event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>) => {
+    private _openDeploymentItem = (event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>, selectedItem: any) => {
         if (this.props.onItemActivated) {
-            this.props.onItemActivated(event, tableRow);
+            this.props.onItemActivated(event, selectedItem);
         }
     }
 
     private _getDeploymentListView() {
-        let renderList:JSX.Element[] =[];
+        let renderList: JSX.Element[] = [];
         DeploymentsComponent._generateDeploymentReplicaSetMap(this.props.deploymentList, this.props.replicaSetList).forEach((entry, index) => {
             let columnClassName = css("list-content", "depth-16", index > 0 ? "replica-with-pod-list" : "");
-            renderList.push( <ListComponent
+            renderList.push(<ListComponent
                 className={columnClassName}
                 headingContent={DeploymentsComponent._getHeadingContent(entry.deployment)}
                 items={DeploymentsComponent._getDeploymentReplicaSetItems(entry.deployment, entry.replicaSets)}
                 columns={DeploymentsComponent._getColumns()}
                 onItemActivated={this._openDeploymentItem}
             />);
-        }); 
+        });
         return renderList;
     }
 
-    private static _generateDeploymentReplicaSetMap(deploymentList: V1DeploymentList, replicaSetList:V1ReplicaSetList):IDeploymentReplicaSetMap[] {
-        let deploymentReplicaSetMap:IDeploymentReplicaSetMap[] = [];
+    private static _generateDeploymentReplicaSetMap(deploymentList: V1DeploymentList, replicaSetList: V1ReplicaSetList): IDeploymentReplicaSetMap[] {
+        let deploymentReplicaSetMap: IDeploymentReplicaSetMap[] = [];
         (deploymentList && deploymentList.items || []).forEach(deployment => {
             const filteredReplicas: V1ReplicaSet[] = (replicaSetList && replicaSetList.items || [])
                 .filter(replica => DeploymentsComponent._isReplicaSetForDeployment(deployment, replica)) || [];
@@ -79,7 +79,7 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
         IDeploymentItem[] {
         let items: IDeploymentItem[] = [];
         replicaSets.forEach((replicaSet, index) => {
-                items.push(DeploymentsComponent._getDeploymentItem(deployment, replicaSet, index, replicaSets.length));
+            items.push(DeploymentsComponent._getDeploymentItem(deployment, replicaSet, index, replicaSets.length));
         });
 
         return items;
@@ -149,7 +149,7 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
             width: 250,
             headerClassName: headerColumnClassName,
             className: columnContentClassname,
-            renderCell: (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IDeploymentItem>, deployment: IDeploymentItem) => this._renderReplicaSetNameCell(rowIndex, columnIndex, tableColumn, deployment),
+            renderCell: DeploymentsComponent._renderReplicaSetNameCell
         });
         columns.push({
             id: imageKey,
@@ -157,7 +157,7 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
             width: 250,
             headerClassName: headerColumnClassName,
             className: columnContentClassname,
-            renderCell: (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IDeploymentItem>, deployment: IDeploymentItem) => this._renderImageCell(rowIndex, columnIndex, tableColumn, deployment),
+            renderCell: DeploymentsComponent._renderImageCell
         });
         columns.push({
             id: podsKey,
@@ -165,7 +165,7 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
             width: 80,
             headerClassName: headerColumnClassName,
             className: columnContentClassname,
-            renderCell: (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IDeploymentItem>, deployment: IDeploymentItem) => this._renderPodsCell(rowIndex, columnIndex, tableColumn, deployment),
+            renderCell: DeploymentsComponent._renderPodsCell
         });
         columns.push({
             id: ageKey,
@@ -173,7 +173,7 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
             width: 80,
             headerClassName: headerColumnClassName,
             className: columnContentClassname,
-            renderCell: (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IDeploymentItem>, deployment: IDeploymentItem) => this._renderAgeCell(rowIndex, columnIndex, tableColumn, deployment),
+            renderCell: DeploymentsComponent._renderAgeCell
         });
 
         return columns;
@@ -181,36 +181,30 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
 
     private static _renderReplicaSetNameCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IDeploymentItem>, deployment: IDeploymentItem): JSX.Element {
         const textToRender: string | undefined = deployment.replicaSetName;
-        return (
-            <SimpleTableCell columnIndex={columnIndex} tableColumn={tableColumn} key={"col-" + columnIndex}>
-                {ListComponent.renderTwoLineColumn(deployment.replicaSetName || "", deployment.pipeline || "", colDataClassName, "primary-text", "secondary-text")}
-            </SimpleTableCell>);
+        const itemToRender = ListComponent.renderTwoLineColumn(deployment.replicaSetName || "", deployment.pipeline || "", colDataClassName, "primary-text", "secondary-text");
+        return ListComponent.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
     private static _renderPodsCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IDeploymentItem>, deployment: IDeploymentItem): JSX.Element {
-        return (
-            <SimpleTableCell columnIndex={columnIndex} tableColumn={tableColumn} key={"col-" + columnIndex}>
-                <PodStatusComponent
-                    statusProps={deployment.statusProps}
-                    statusDescription={deployment.pods}
-                />)
-            </SimpleTableCell>);
+        const itemToRender = (
+            <PodStatusComponent
+                statusProps={deployment.statusProps}
+                statusDescription={deployment.pods}
+            />);
+
+        return ListComponent.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
     private static _renderImageCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IDeploymentItem>, deployment: IDeploymentItem): JSX.Element {
         const textToRender: string | undefined = deployment.image;
-        return (
-            <SimpleTableCell columnIndex={columnIndex} tableColumn={tableColumn} key={"col-" + columnIndex}>
-                {ListComponent.renderColumn(textToRender || "", ListComponent.defaultColumnRenderer, colDataClassName)}
-            </SimpleTableCell>);
+        const itemToRender = ListComponent.renderColumn(textToRender || "", ListComponent.defaultColumnRenderer, colDataClassName);
+        return ListComponent.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
     private static _renderAgeCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IDeploymentItem>, deployment: IDeploymentItem): JSX.Element {
         const textToRender: string | undefined = deployment.image;
-        return (
-            <SimpleTableCell columnIndex={columnIndex} tableColumn={tableColumn} key={"col-" + columnIndex}>
-                <Ago date={new Date(deployment.creationTimeStamp)} />
-            </SimpleTableCell>);
+        const itemToRender = (<Ago date={new Date(deployment.creationTimeStamp)} />);
+        return ListComponent.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
     private static _getHeadingContent(deployment: V1Deployment): JSX.Element {
