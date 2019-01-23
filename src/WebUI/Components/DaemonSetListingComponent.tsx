@@ -44,7 +44,7 @@ export class DaemonSetListingComponent extends BaseComponent<IDaemonSetComponent
             name: Resources.DaemonSetText,
             width: 250,
             headerClassName: headerColumnClassName,
-            renderCell: DaemonSetListingComponent._renderSetNameCell
+            renderCell: DaemonSetListingComponent._renderDaemonSetNameCell
         });
 
         columns.push({

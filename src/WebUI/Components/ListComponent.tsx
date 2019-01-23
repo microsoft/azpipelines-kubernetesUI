@@ -25,7 +25,7 @@ export class ListComponent<T> extends BaseComponent<IListComponentProperties<T>>
         return (
             <div className={css("kube-list-content", this.props.className)}>
                 {this._getComponentHeadingContent()}
-                {this._getComponent()}
+                {this.props.items && this.props.items.length > 0 && this._getComponent()}
             </div>
         );
     }

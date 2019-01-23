@@ -27,6 +27,7 @@ const podStatusDic: { [index: string]: IStatusProps } = {
 const podStatusKey = "pods-list-status-col";
 const podIPKey = "pods-list-ip-col";
 const podAgeKey = "pods-list-age-col";
+const colDataClassName: string = "list-col-content";
 
 export interface IPodListComponentProperties extends IVssComponentProperties {
     replicaSet: V1ReplicaSet;
@@ -139,6 +140,7 @@ export class PodListComponent extends BaseComponent<IPodListComponentProperties>
             name: Resources.PodsDetailsText,
             width: 250,
             headerClassName: headerColumnClassName,
+            className: colDataClassName,
             renderCell: PodListComponent._renderPodStatusCell
         });
 
@@ -147,6 +149,7 @@ export class PodListComponent extends BaseComponent<IPodListComponentProperties>
             name: Resources.PodIP,
             width: 250,
             headerClassName: headerColumnClassName,
+            className: colDataClassName,
             renderCell: PodListComponent._renderPodIpCell
         });
 
@@ -155,6 +158,7 @@ export class PodListComponent extends BaseComponent<IPodListComponentProperties>
             name: Resources.AgeText,
             width: 200,
             headerClassName: headerColumnClassName,
+            className: colDataClassName,
             renderCell: PodListComponent._renderPodAgeCell
         });
 
