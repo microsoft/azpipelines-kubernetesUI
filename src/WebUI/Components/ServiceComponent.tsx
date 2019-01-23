@@ -17,6 +17,7 @@ import { Utils } from "../Utils";
 import "./ServiceComponent.scss";
 import { V1PodList, V1Pod } from "@kubernetes/client-node";
 import { PodsComponent } from "./PodsComponent";
+import { ZeroDataComponent } from "./ZeroDataComponent";
 
 export interface IServiceComponentProperties extends IVssComponentProperties {
     service: IServiceItem;
@@ -157,8 +158,20 @@ export class ServiceComponent extends BaseComponent<IServiceComponentProperties,
     }
 
     private _getAssociatedPods(): JSX.Element | null {
+        if (this.state.pods.length === 0) {
+            return (
+                <ZeroDataComponent
+                    imagePath={require("../zero_data.png")}
+                    title={Resources.AssociatedPodsText}
+                    textline1={Resources.NoPodsForSvcText}
+                    hyperLink="https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/"
+                    hyperLinkLabel={Resources.LearnMoreText}
+                    textline2={Resources.LinkSvcToPodsText}
+                />
+            );
+        }
         return (
-            <PodsComponent 
+            <PodsComponent
                 podsToRender={this.state.pods}
                 headingText={Resources.AssociatedPodsText}
             />
