@@ -1,32 +1,33 @@
+/*
+    Copyright (c) Microsoft Corporation. All rights reserved.
+    Licensed under the MIT license.
+*/
+
+import { V1Pod } from "@kubernetes/client-node";
 import { BaseComponent, css } from "@uifabric/utilities";
-import { IColumn } from "azure-devops-ui/Components/VssDetailsList/VssDetailsList.Props";
 import { Ago } from "azure-devops-ui/Ago";
+import { IColumn } from "azure-devops-ui/Components/VssDetailsList/VssDetailsList.Props";
 import { ColumnActionsMode } from "office-ui-fabric-react/lib/DetailsList";
 import * as React from "react";
 import * as Resources from "../Resources";
-import { ListComponent } from "./ListComponent";
 import { IVssComponentProperties } from "../Types";
-import "./PodsComponent.scss";
-import { V1Pod } from "@kubernetes/client-node";
 import { Utils } from "../Utils";
-import { StatusSize, Status } from "azure-devops-ui/Status";
-import { Tooltip } from "azure-devops-ui/TooltipEx";
+import { ListComponent } from "./ListComponent";
+import "./PodsComponent.scss";
 import { PodStatusComponent } from "./PodStatusComponent";
 
-const podNameKey:string = "pl-name-key";
-const podImageKey:string = "pl-image-key";
-const podStatusKey:string = "pl-status-key";
-const podAgeKey:string = "pl-age-key";
+const podNameKey: string = "pl-name-key";
+const podImageKey: string = "pl-image-key";
+const podStatusKey: string = "pl-status-key";
+const podAgeKey: string = "pl-age-key";
 
 export interface IPodsComponentProperties extends IVssComponentProperties {
-    podsToRender:V1Pod[];
-    headingText?:string;
+    podsToRender: V1Pod[];
+    headingText?: string;
 }
-
 
 export class PodsComponent extends BaseComponent<IPodsComponentProperties> {
     public render(): React.ReactNode {
-
         return (
             <ListComponent
                 headingText={this.props.headingText}
@@ -108,26 +109,17 @@ export class PodsComponent extends BaseComponent<IPodsComponentProperties> {
                 break;
 
             case podStatusKey:
-                    let statusDescription: string = "";
-                    let customDescription: React.ReactNode = null;
-
-                    if(pod.status.message) {
-                        customDescription = <Tooltip showOnFocus={true} text={pod.status.message}>{pod.status.reason}</Tooltip>;
-                    }
-                    else {
-                        statusDescription = pod.status.phase;
-                    }
-
-                    return (<PodStatusComponent 
-                        statusProps={Utils.generatePodStatusProps(pod.status)} 
-                        statusDescription={statusDescription} 
-                        customDescription={customDescription}
-                    />);
+                return (
+                    <PodStatusComponent
+                        statusProps={Utils.generatePodStatusProps(pod.status)}
+                        statusDescription={pod.status.phase}
+                        customStatusDescription={pod.status.reason || ""}
+                        customTooltipText={pod.status.message || ""}
+                    />
+                );
 
             case podAgeKey:
-                return(
-                    <Ago date={new Date(pod.status.startTime)} />
-                );
+                return <Ago date={new Date(pod.status.startTime)} />;
         }
 
         return ListComponent.renderColumn(textToRender || "", ListComponent.defaultColumnRenderer, colDataClassName);

@@ -4,18 +4,19 @@
 */
 
 import { V1Deployment, V1DeploymentList, V1ObjectMeta, V1ReplicaSet, V1ReplicaSetList } from "@kubernetes/client-node";
-import { BaseComponent, css, format } from "@uifabric/utilities";
+import { BaseComponent, css } from "@uifabric/utilities";
+import { Ago } from "azure-devops-ui/Ago";
 import { IColumn } from "azure-devops-ui/Components/VssDetailsList/VssDetailsList.Props";
-import { IStatusProps, Status, Statuses, StatusSize } from "azure-devops-ui/Status";
+import { localeFormat } from "azure-devops-ui/Core/Util/String";
+import { LabelGroup, WrappingBehavior } from "azure-devops-ui/Label";
+import { IStatusProps, Statuses } from "azure-devops-ui/Status";
 import { ColumnActionsMode } from "office-ui-fabric-react/lib/DetailsList";
 import * as React from "react";
 import * as Resources from "../Resources";
-import { IDeploymentItem, IVssComponentProperties, IDeploymentReplicaSetMap } from "../Types";
+import { IDeploymentItem, IDeploymentReplicaSetMap, IVssComponentProperties } from "../Types";
+import { Utils } from "../Utils";
 import "./DeploymentsComponent.scss";
 import { ListComponent } from "./ListComponent";
-import { LabelGroup, WrappingBehavior } from "azure-devops-ui/Label";
-import { Ago } from "azure-devops-ui/Ago";
-import { Utils } from "../Utils";
 import { PodStatusComponent } from "./PodStatusComponent";
 
 const replicaSetNameKey: string = "replicaSet-col";
@@ -32,7 +33,7 @@ export interface IDeploymentsComponentProperties extends IVssComponentProperties
 export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentProperties, {}> {
     public render(): React.ReactNode {
         return (
-            <div>{this._getDeploymentListView()}</div>
+            <div className="deployments-components">{this._getDeploymentListView()}</div>
         );
     }
 
@@ -42,36 +43,42 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
         }
     }
 
-    private _getDeploymentListView() {
-        let renderList:JSX.Element[] =[];
+    private _getDeploymentListView(): JSX.Element[] {
+        let renderList: JSX.Element[] = [];
         DeploymentsComponent._generateDeploymentReplicaSetMap(this.props.deploymentList, this.props.replicaSetList).forEach((entry, index) => {
-            let columnClassName = css("list-content", "depth-16", index > 0 ? "replica-with-pod-list" : "");
-            renderList.push( <ListComponent
-                className={columnClassName}
-                headingContent={DeploymentsComponent._getHeadingContent(entry.deployment)}
-                items={DeploymentsComponent._getDeploymentReplicaSetItems(entry.deployment, entry.replicaSets)}
-                columns={DeploymentsComponent._getColumns()}
-                onRenderItemColumn={DeploymentsComponent._onRenderItemColumn}
-                onItemInvoked={this._openDeploymentItem}
-            />);
-        }); 
+            const columnClassName = css("list-content", "depth-16", index > 0 ? "replica-with-pod-list" : "");
+            renderList.push(
+                <ListComponent
+                    className={columnClassName}
+                    headingContent={DeploymentsComponent._getHeadingContent(entry.deployment)}
+                    items={DeploymentsComponent._getDeploymentReplicaSetItems(entry.deployment, entry.replicaSets)}
+                    columns={DeploymentsComponent._getColumns()}
+                    onRenderItemColumn={DeploymentsComponent._onRenderItemColumn}
+                    onItemInvoked={this._openDeploymentItem}
+                />
+            );
+        });
+
         return renderList;
     }
 
-    private static _generateDeploymentReplicaSetMap(deploymentList: V1DeploymentList, replicaSetList:V1ReplicaSetList):IDeploymentReplicaSetMap[] {
-        let deploymentReplicaSetMap:IDeploymentReplicaSetMap[] = [];
+    private static _generateDeploymentReplicaSetMap(deploymentList: V1DeploymentList, replicaSetList: V1ReplicaSetList): IDeploymentReplicaSetMap[] {
+        let deploymentReplicaSetMap: IDeploymentReplicaSetMap[] = [];
         (deploymentList && deploymentList.items || []).forEach(deployment => {
             const filteredReplicas: V1ReplicaSet[] = (replicaSetList && replicaSetList.items || [])
                 .filter(replica => DeploymentsComponent._isReplicaSetForDeployment(deployment, replica)) || [];
+
             filteredReplicas.sort((a, b) => {
                 // descending order
                 return DeploymentsComponent._getCreationTime(b.metadata) - DeploymentsComponent._getCreationTime(a.metadata);
             });
+
             deploymentReplicaSetMap.push({
                 deployment: deployment,
                 replicaSets: filteredReplicas
             });
         });
+
         return deploymentReplicaSetMap;
     }
 
@@ -79,7 +86,7 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
         IDeploymentItem[] {
         let items: IDeploymentItem[] = [];
         replicaSets.forEach((replicaSet, index) => {
-                items.push(DeploymentsComponent._getDeploymentItem(deployment, replicaSet, index, replicaSets.length));
+            items.push(DeploymentsComponent._getDeploymentItem(deployment, replicaSet, index, replicaSets.length));
         });
 
         return items;
@@ -124,7 +131,7 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
 
     private static _getPodsText(availableReplicas: number, replicas: number): string {
         if (replicas != null && availableReplicas != null && replicas > 0) {
-            return format("{0}/{1}", availableReplicas, replicas);
+            return localeFormat("{0}/{1}", availableReplicas, replicas);
         }
 
         return "";
@@ -153,6 +160,7 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
             columnActionsMode: ColumnActionsMode.disabled,
             className: columnContentClassname
         });
+
         columns.push({
             key: imageKey,
             name: Resources.ImageText,
@@ -195,25 +203,25 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
         }
 
         let textToRender: string | undefined;
-        let colDataClassName: string = "dc-col-data";
+        const colDataClassName: string = "dc-col-data";
         switch (column.key) {
             case replicaSetNameKey:
-                textToRender = deployment.replicaSetName;
-                return ListComponent.renderTwoLineColumn(deployment.replicaSetName||"", deployment.pipeline||"",colDataClassName,"primary-text", "secondary-text");
+                return ListComponent.renderTwoLineColumn(deployment.replicaSetName || "", deployment.pipeline || "", colDataClassName, "primary-text", "secondary-text");
 
             case podsKey:
                 return (
-                    <PodStatusComponent 
+                    <PodStatusComponent
                         statusProps={deployment.statusProps}
-                        statusDescription={deployment.pods} 
-                    />);
+                        statusDescription={deployment.pods}
+                    />
+                );
+
             case imageKey:
                 textToRender = deployment.image;
                 break;
+
             case ageKey:
-            return (
-                <Ago date={new Date(deployment.creationTimeStamp)} />
-            );
+                return <Ago date={new Date(deployment.creationTimeStamp)} />;
         }
 
         return ListComponent.renderColumn(textToRender || "", ListComponent.defaultColumnRenderer, colDataClassName);
@@ -224,7 +232,7 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
             <div>
                 <h3>{deployment.metadata.name}</h3>
                 <div className="kube-flex-row">
-                    <span className="secondary-text kind-tag"> {Resources.DeploymentText} </span>
+                    <span className="secondary-text kind-tag">{Resources.DeploymentText}</span>
                     <LabelGroup labelProps={Utils.getUILabelModelArray(deployment.metadata.labels)}
                         wrappingBehavior={WrappingBehavior.OneLine}
                         fadeOutOverflow={true}>

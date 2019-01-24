@@ -4,11 +4,12 @@
 */
 
 import { V1Pod, V1ReplicaSet } from "@kubernetes/client-node";
-import { autobind, BaseComponent, css, format } from "@uifabric/utilities";
+import { autobind, BaseComponent, css } from "@uifabric/utilities";
 import { IColumn } from "azure-devops-ui/Components/VssDetailsList/VssDetailsList.Props";
+import { localeFormat } from "azure-devops-ui/Core/Util/String";
 import { Duration } from "azure-devops-ui/Duration";
 import { LabelGroup, WrappingBehavior } from "azure-devops-ui/Label";
-import { IStatusProps, Status, Statuses, StatusSize } from "azure-devops-ui/Status";
+import { IStatusProps, Statuses } from "azure-devops-ui/Status";
 import { ColumnActionsMode } from "office-ui-fabric-react/lib/DetailsList";
 import * as React from "react";
 import * as Resources from "../Resources";
@@ -50,7 +51,7 @@ export class PodListComponent extends BaseComponent<IPodListComponentProperties>
     }
 
     private _getReplicaSetHeadingContent(): JSX.Element {
-        const replicaSetHeading = format(Resources.ReplicaSet, this.props.replicaSet.metadata.name);
+        const replicaSetHeading = localeFormat(Resources.ReplicaSet, this.props.replicaSet.metadata.name);
 
         return (
             <div className={"replica-heading"}>
@@ -71,10 +72,11 @@ export class PodListComponent extends BaseComponent<IPodListComponentProperties>
         switch (column.key) {
             case podStatusKey:
                 return (
-                    <PodStatusComponent 
-                        statusProps={podStatusDic[pod.status.phase]} 
-                        statusDescription={pod.metadata.name} 
-                    />);
+                    <PodStatusComponent
+                        statusProps={podStatusDic[pod.status.phase]}
+                        statusDescription={pod.metadata.name}
+                    />
+                );
 
             case podIPKey:
                 textToRender = pod.status.podIP;
@@ -110,7 +112,7 @@ export class PodListComponent extends BaseComponent<IPodListComponentProperties>
             let des = "";
             const imageName = this._getImageName();
             if (imageName) {
-                des = format(Resources.AgoBy, imageName)
+                des = localeFormat(Resources.AgoBy, imageName);
             }
 
             return (
