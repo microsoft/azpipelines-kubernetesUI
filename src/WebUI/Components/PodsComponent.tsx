@@ -109,17 +109,22 @@ export class PodsComponent extends BaseComponent<IPodsComponentProperties> {
                 break;
 
             case podStatusKey:
-                return (
-                    <PodStatusComponent
-                        statusProps={Utils.generatePodStatusProps(pod.status)}
-                        statusDescription={pod.status.phase}
-                        customStatusDescription={pod.status.reason || ""}
-                        customTooltipText={pod.status.message || ""}
-                    />
-                );
+                if (pod.status) {
+                    return (
+                        <PodStatusComponent
+                            statusProps={Utils.generatePodStatusProps(pod.status)}
+                            statusDescription={pod.status.phase}
+                            customStatusDescription={pod.status.reason || ""}
+                            customTooltipText={pod.status.message || ""}
+                        />
+                    );
+                }
+                else {
+                    return null;
+                }
 
             case podAgeKey:
-                return <Ago date={new Date(pod.status.startTime)} />;
+                return (pod.status && pod.status.startTime ? <Ago date={new Date(pod.status.startTime)} /> : null);
         }
 
         return ListComponent.renderColumn(textToRender || "", ListComponent.defaultColumnRenderer, colDataClassName);
