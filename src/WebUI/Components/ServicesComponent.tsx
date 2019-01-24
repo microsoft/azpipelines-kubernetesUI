@@ -14,6 +14,8 @@ import { IServiceItem, IVssComponentProperties } from "../Types";
 import { ListComponent } from "./ListComponent";
 import "./ServicesComponent.scss";
 import { Utils } from "../Utils";
+import { IStatusProps, Statuses } from "azure-devops-ui/Status";
+import { PodStatusComponent } from "./PodStatusComponent";
 
 const packageKey: string = "package-col";
 const typeKey: string = "type-col";
@@ -176,7 +178,7 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
         let textToRender: string = "";
         switch (column.key) {
             case packageKey:
-                return  ListComponent.renderTwoLineColumn(service.package, service.pipeline, colDataClassName, "primary-text", "secondary-text");
+                return ServicesComponent._getServiceStatus(service, colDataClassName);
 
             case typeKey:
                 textToRender = service.type;
@@ -201,5 +203,26 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
         }
 
         return ListComponent.renderColumn(textToRender || "", ListComponent.defaultColumnRenderer, colDataClassName);
+    }
+
+    private static _getServiceStatus(service: IServiceItem, cssClassName: string): React.ReactNode {
+        let statusProps: IStatusProps = Statuses.Success;
+        let tooltipText: string | undefined;
+        if (service.type == "LoadBalancer") {
+            if (service.externalIP == "") {
+                tooltipText = Resources.ExternalIPAllocPending;
+                statusProps = Statuses.Running;
+            }
+            tooltipText = Resources.ExternalIPAllocated;
+        }
+
+        return (
+            <div>
+                <PodStatusComponent statusProps={statusProps}
+                    customDescription={ListComponent.renderTwoLineColumn(service.package, service.pipeline, css(cssClassName, "kube-status-desc"), "primary-text", "secondary-text")}
+                    toolTipText={tooltipText}
+                />
+            </div>
+        );
     }
 }

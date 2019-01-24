@@ -37,4 +37,6 @@ define("Environments/Providers/Kubernetes/Resources", ["require", "exports"], fu
     exports.DaemonSetText = "DaemonSet";
     exports.StatefulSetText = "StatefulSet";
     exports.DeploymentText = "Deployment";
+    exports.ExternalIPAllocPending = "External IP allocation pending";
+    exports.ExternalIPAllocated = "External IP allocated";
 });

@@ -2,12 +2,14 @@ import * as React from "react";
 import { BaseComponent } from "@uifabric/utilities/lib";
 import { IStatusProps, Status, StatusSize } from "azure-devops-ui/Status";
 import { IVssComponentProperties } from "../Types";
+import { TooltipHost } from "azure-devops-ui/Tooltip";
 
 export interface IPodStatusProps extends IVssComponentProperties {
     statusProps: IStatusProps | undefined;
     statusSize?: StatusSize;
     statusDescription?: string;
     customDescription?: React.ReactNode;
+    toolTipText?: string;
 }
 
 export class PodStatusComponent extends BaseComponent<IPodStatusProps, {}> {
@@ -16,8 +18,10 @@ export class PodStatusComponent extends BaseComponent<IPodStatusProps, {}> {
         return (
             <div className="kube-status-container">
                 {
-                    this.props.statusProps &&
-                    <Status {...this.props.statusProps} size={this.props.statusSize || StatusSize.m} />
+                    this.props.toolTipText ?
+                        <TooltipHost content={this.props.toolTipText} >
+                            {this._getStatus()}
+                        </TooltipHost> : this._getStatus()
                 }
                 {
                     this.props.statusDescription && 
@@ -28,5 +32,10 @@ export class PodStatusComponent extends BaseComponent<IPodStatusProps, {}> {
                 }
             </div>
         );
+    }
+
+    private _getStatus(): React.ReactNode {
+        return this.props.statusProps &&
+            <Status {...this.props.statusProps} size={this.props.statusSize || StatusSize.m} />;
     }
 }

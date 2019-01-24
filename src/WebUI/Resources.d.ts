@@ -36,3 +36,5 @@ export declare const AssociatedPodsText: string;
 export declare const DaemonSetText: string;
 export declare const StatefulSetText: string;
 export declare const DeploymentText: string;
+export declare const ExternalIPAllocPending: string;
+export declare const ExternalIPAllocated: string;
