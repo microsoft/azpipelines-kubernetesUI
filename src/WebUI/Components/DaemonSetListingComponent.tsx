@@ -1,6 +1,7 @@
 import { V1DaemonSet, V1DaemonSetList } from "@kubernetes/client-node";
 import { BaseComponent, css, format } from "@uifabric/utilities";
 import { IStatusProps, Status, Statuses, StatusSize } from "azure-devops-ui/Status";
+import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import * as React from "react";
 import * as Resources from "../Resources";
 import { ListComponent } from "./ListComponent";
@@ -42,7 +43,8 @@ export class DaemonSetListingComponent extends BaseComponent<IDaemonSetComponent
         columns.push({
             id: setNameKey,
             name: Resources.DaemonSetText,
-            width: 250,
+            minWidth: 250,
+            width: new ObservableValue(500),
             headerClassName: headerColumnClassName,
             renderCell: DaemonSetListingComponent._renderDaemonSetNameCell
         });
@@ -50,7 +52,8 @@ export class DaemonSetListingComponent extends BaseComponent<IDaemonSetComponent
         columns.push({
             id: imageKey,
             name: Resources.ImageText,
-            width: 250,
+            minWidth: 250,
+            width: new ObservableValue(500),
             headerClassName: headerColumnClassName,
             renderCell: DaemonSetListingComponent._renderImageCell
         });
@@ -58,7 +61,8 @@ export class DaemonSetListingComponent extends BaseComponent<IDaemonSetComponent
         columns.push({
             id: podsKey,
             name: Resources.PodsText,
-            width: 80,
+            minWidth: 80,
+            width: new ObservableValue(160),
             headerClassName: headerColumnClassName,
             renderCell: DaemonSetListingComponent._renderPodsCell
         });
@@ -66,7 +70,8 @@ export class DaemonSetListingComponent extends BaseComponent<IDaemonSetComponent
         columns.push({
             id: ageKey,
             name: Resources.AgeText,
-            width: 80,
+            minWidth: 80,
+            width: new ObservableValue(160),
             headerClassName: headerColumnClassName,
             renderCell: DaemonSetListingComponent._renderAgeCell
         });

@@ -6,6 +6,7 @@
 import { V1Deployment, V1DeploymentList, V1ObjectMeta, V1ReplicaSet, V1ReplicaSetList } from "@kubernetes/client-node";
 import { BaseComponent, css, format } from "@uifabric/utilities";
 import { IStatusProps, Status, Statuses, StatusSize } from "azure-devops-ui/Status";
+import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import * as React from "react";
 import * as Resources from "../Resources";
 import { IDeploymentItem, IVssComponentProperties, IDeploymentReplicaSetMap } from "../Types";
@@ -146,7 +147,8 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
         columns.push({
             id: replicaSetNameKey,
             name: Resources.ReplicaSetText,
-            width: 250,
+            minWidth: 250,
+            width: new ObservableValue(500),
             headerClassName: headerColumnClassName,
             className: columnContentClassname,
             renderCell: DeploymentsComponent._renderReplicaSetNameCell
@@ -154,7 +156,8 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
         columns.push({
             id: imageKey,
             name: Resources.ImageText,
-            width: 250,
+            minWidth: 250,
+            width: new ObservableValue(500),
             headerClassName: headerColumnClassName,
             className: columnContentClassname,
             renderCell: DeploymentsComponent._renderImageCell
@@ -162,7 +165,8 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
         columns.push({
             id: podsKey,
             name: Resources.PodsText,
-            width: 80,
+            minWidth: 80,
+            width: new ObservableValue(160),
             headerClassName: headerColumnClassName,
             className: columnContentClassname,
             renderCell: DeploymentsComponent._renderPodsCell
@@ -170,7 +174,8 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
         columns.push({
             id: ageKey,
             name: Resources.AgeText,
-            width: 80,
+            minWidth: 80,
+            width: new ObservableValue(160),
             headerClassName: headerColumnClassName,
             className: columnContentClassname,
             renderCell: DeploymentsComponent._renderAgeCell

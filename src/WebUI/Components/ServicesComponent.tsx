@@ -6,6 +6,7 @@
 import { V1Service, V1ServiceList, V1ServicePort } from "@kubernetes/client-node";
 import { BaseComponent, css, format } from "@uifabric/utilities";
 import { Ago } from "azure-devops-ui/Ago";
+import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import * as React from "react";
 import * as Resources from "../Resources";
 import { IServiceItem, IVssComponentProperties } from "../Types";
@@ -64,7 +65,6 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
             });
         });
 
-        ServicesComponent._serviceItems = items;
         return items;
     }
 
@@ -102,7 +102,8 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
         columns.push({
             id: packageKey,
             name: Resources.NameText,
-            width: 250,
+            minWidth: 250,
+            width: new ObservableValue(500),
             headerClassName: css(headerColumnClassName, "first-col-header"),
             className: columnContentClassName,
             renderCell: ServicesComponent._renderPackageKeyCell
@@ -111,7 +112,8 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
         columns.push({
             id: typeKey,
             name: Resources.TypeText,
-            width: 120,
+            minWidth: 120,
+            width: new ObservableValue(240),
             headerClassName: css(headerColumnClassName, "first-col-header"),
             className: columnContentClassName,
             renderCell: ServicesComponent._renderTypeCell
@@ -120,7 +122,8 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
         columns.push({
             id: clusterIPKey,
             name: Resources.ClusterIPText,
-            width: 150,
+            minWidth: 150,
+            width: new ObservableValue(150),
             headerClassName: headerColumnClassName,
             className: columnContentClassName,
             renderCell: ServicesComponent._renderClusterIpCell
@@ -129,7 +132,8 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
         columns.push({
             id: externalIPKey,
             name: Resources.ExternalIPText,
-            width: 150,
+            minWidth: 150,
+            width: new ObservableValue(150),
             headerClassName: headerColumnClassName,
             className: columnContentClassName,
             renderCell: ServicesComponent._renderExternalIpCell
@@ -138,7 +142,8 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
         columns.push({
             id: portKey,
             name: Resources.PortText,
-            width: 150,
+            minWidth: 150,
+            width: new ObservableValue(150),
             headerClassName: headerColumnClassName,
             className: columnContentClassName,
             renderCell: ServicesComponent._renderPortCell
@@ -147,7 +152,8 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
         columns.push({
             id: ageKey,
             name: Resources.AgeText,
-            width: 150,
+            minWidth: 150,
+            width: new ObservableValue(300),
             headerClassName: headerColumnClassName,
             className: columnContentClassName,
             renderCell: ServicesComponent._renderAgeCell
@@ -189,6 +195,4 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
         const itemToRender = (<Ago date={new Date(service.creationTimestamp)} />);
         return ListComponent.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
-
-    private static _serviceItems: IServiceItem[] = [];
 }

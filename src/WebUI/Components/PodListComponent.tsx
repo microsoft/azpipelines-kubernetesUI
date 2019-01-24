@@ -8,6 +8,7 @@ import { autobind, BaseComponent, css, format } from "@uifabric/utilities";
 import { Duration } from "azure-devops-ui/Duration";
 import { LabelGroup, WrappingBehavior } from "azure-devops-ui/Label";
 import { IStatusProps, Status, Statuses, StatusSize } from "azure-devops-ui/Status";
+import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import * as React from "react";
 import * as Resources from "../Resources";
 import { IVssComponentProperties } from "../Types";
@@ -138,7 +139,8 @@ export class PodListComponent extends BaseComponent<IPodListComponentProperties>
         columns.push({
             id: podStatusKey,
             name: Resources.PodsDetailsText,
-            width: 250,
+            minWidth: 250,
+            width: new ObservableValue(250),
             headerClassName: headerColumnClassName,
             className: colDataClassName,
             renderCell: PodListComponent._renderPodStatusCell
@@ -147,7 +149,8 @@ export class PodListComponent extends BaseComponent<IPodListComponentProperties>
         columns.push({
             id: podIPKey,
             name: Resources.PodIP,
-            width: 250,
+            minWidth: 250,
+            width: new ObservableValue(250),
             headerClassName: headerColumnClassName,
             className: colDataClassName,
             renderCell: PodListComponent._renderPodIpCell
@@ -156,7 +159,8 @@ export class PodListComponent extends BaseComponent<IPodListComponentProperties>
         columns.push({
             id: podAgeKey,
             name: Resources.AgeText,
-            width: 200,
+            minWidth: 200,
+            width: new ObservableValue(200),
             headerClassName: headerColumnClassName,
             className: colDataClassName,
             renderCell: PodListComponent._renderPodAgeCell

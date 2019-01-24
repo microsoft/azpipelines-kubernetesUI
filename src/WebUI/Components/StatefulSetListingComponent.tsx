@@ -8,6 +8,7 @@ import { IVssComponentProperties } from "../Types";
 import { Ago } from "azure-devops-ui/Ago";
 import { ITableColumn, SimpleTableCell } from "azure-devops-ui/Table";
 import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
+import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { Utils } from "../Utils";
 import { PodStatusComponent } from "./PodStatusComponent";
 
@@ -41,7 +42,8 @@ export class StatefulSetListingComponent extends BaseComponent<IDaemonSetCompone
         columns.push({
             id: setNameKey,
             name: Resources.StatefulSetText,
-            width: 250,
+            minWidth: 250,
+            width: new ObservableValue(500),
             headerClassName: css(headerColumnClassName, "first-col-header"),
             renderCell: StatefulSetListingComponent._renderSetNameCell
         });
@@ -49,7 +51,8 @@ export class StatefulSetListingComponent extends BaseComponent<IDaemonSetCompone
         columns.push({
             id: imageKey,
             name: Resources.ImageText,
-            width: 250,
+            minWidth: 250,
+            width: new ObservableValue(500),
             headerClassName: headerColumnClassName,
             renderCell: StatefulSetListingComponent._renderImageCell
         });
@@ -57,7 +60,8 @@ export class StatefulSetListingComponent extends BaseComponent<IDaemonSetCompone
         columns.push({
             id: podsKey,
             name: Resources.PodsText,
-            width: 80,
+            minWidth: 80,
+            width: new ObservableValue(160),
             headerClassName: headerColumnClassName,
             renderCell: StatefulSetListingComponent._renderPodsCell
         });
@@ -65,7 +69,8 @@ export class StatefulSetListingComponent extends BaseComponent<IDaemonSetCompone
         columns.push({
             id: ageKey,
             name: Resources.AgeText,
-            width: 80,
+            minWidth: 80,
+            width: new ObservableValue(160),
             headerClassName: headerColumnClassName,
             renderCell: StatefulSetListingComponent._renderAgeCell
         });

@@ -10,6 +10,7 @@ import { Utils } from "../Utils";
 import { StatusSize, Status } from "azure-devops-ui/Status";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
 import { ITableColumn, SimpleTableCell } from "azure-devops-ui/Table";
+import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { PodStatusComponent } from "./PodStatusComponent";
 
 const podNameKey: string = "pl-name-key";
@@ -44,7 +45,8 @@ export class PodsComponent extends BaseComponent<IPodsComponentProperties> {
         columns.push({
             id: podNameKey,
             name: Resources.PodsDetailsText,
-            width: 250,
+            minWidth: 250,
+            width: new ObservableValue(500),
             headerClassName: css(headerColumnClassName, "first-col-header"),
             className: columnContentClassName,
             renderCell: PodsComponent._renderPodNameCell
@@ -53,7 +55,8 @@ export class PodsComponent extends BaseComponent<IPodsComponentProperties> {
         columns.push({
             id: podImageKey,
             name: Resources.ImageText,
-            width: 250,
+            minWidth: 250,
+            width: new ObservableValue(500),
             headerClassName: headerColumnClassName,
             className: columnContentClassName,
             renderCell: PodsComponent._renderPodImageCell
@@ -62,7 +65,8 @@ export class PodsComponent extends BaseComponent<IPodsComponentProperties> {
         columns.push({
             id: podStatusKey,
             name: Resources.StatusText,
-            width: 80,
+            minWidth: 80,
+            width: new ObservableValue(160),
             headerClassName: headerColumnClassName,
             className: columnContentClassName,
             renderCell: PodsComponent._renderPodStatusCell
@@ -71,7 +75,8 @@ export class PodsComponent extends BaseComponent<IPodsComponentProperties> {
         columns.push({
             id: podAgeKey,
             name: Resources.AgeText,
-            width: 80,
+            minWidth: 80,
+            width: new ObservableValue(160),
             headerClassName: headerColumnClassName,
             className: columnContentClassName,
             renderCell: PodsComponent._renderPodAgeCell
