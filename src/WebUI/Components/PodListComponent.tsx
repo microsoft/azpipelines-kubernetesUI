@@ -5,16 +5,16 @@
 
 import { V1Pod, V1ReplicaSet } from "@kubernetes/client-node";
 import { autobind, BaseComponent, css, format } from "@uifabric/utilities";
-import { IColumn } from "azure-devops-ui/Components/VssDetailsList/VssDetailsList.Props";
 import { Duration } from "azure-devops-ui/Duration";
 import { LabelGroup, WrappingBehavior } from "azure-devops-ui/Label";
 import { IStatusProps, Status, Statuses, StatusSize } from "azure-devops-ui/Status";
-import { ColumnActionsMode } from "office-ui-fabric-react/lib/DetailsList";
+import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import * as React from "react";
 import * as Resources from "../Resources";
 import { IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
 import { ListComponent } from "./ListComponent";
+import { ITableColumn, SimpleTableCell } from "azure-devops-ui/Table";
 import "./PodListComponent.scss";
 import { ResourceStatusComponent } from "./ResourceStatusComponent";
 
@@ -28,6 +28,7 @@ const podStatusDic: { [index: string]: IStatusProps } = {
 const podStatusKey = "pods-list-status-col";
 const podIPKey = "pods-list-ip-col";
 const podAgeKey = "pods-list-age-col";
+const colDataClassName: string = "list-col-content";
 
 export interface IPodListComponentProperties extends IVssComponentProperties {
     replicaSet: V1ReplicaSet;
@@ -43,7 +44,6 @@ export class PodListComponent extends BaseComponent<IPodListComponentProperties>
                     headingContent={this._getReplicaSetHeadingContent()}
                     items={this.props.pods}
                     columns={PodListComponent._getColumns()}
-                    onRenderItemColumn={this._onRenderItemColumn}
                 />
             </div>
         );
@@ -61,30 +61,24 @@ export class PodListComponent extends BaseComponent<IPodListComponentProperties>
         );
     }
 
-    @autobind
-    private _onRenderItemColumn(pod?: V1Pod, index?: number, column?: IColumn): React.ReactNode {
-        if (!pod || !column) {
-            return null;
-        }
+    private static _renderPodStatusCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod): JSX.Element {
+        const itemToRender = (
+            <ResourceStatusComponent
+                statusProps={podStatusDic[pod.status.phase]}
+                statusDescription={pod.metadata.name}
+            />
+        );
+        return ListComponent.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
+    }
 
-        let textToRender: string = "";
-        switch (column.key) {
-            case podStatusKey:
-                return (
-                    <ResourceStatusComponent 
-                        statusProps={podStatusDic[pod.status.phase]} 
-                        statusDescription={pod.metadata.name} 
-                    />);
+    private static _renderPodIpCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod): JSX.Element {
+        const itemToRender = ListComponent.renderColumn(pod.status.podIP, ListComponent.defaultColumnRenderer, "pdl-col-data");
+        return ListComponent.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
+    }
 
-            case podIPKey:
-                textToRender = pod.status.podIP;
-                break;
-
-            case podAgeKey:
-                return <Duration startDate={new Date(pod.metadata.creationTimestamp)} endDate={new Date()} />;
-        }
-
-        return ListComponent.renderColumn(textToRender, ListComponent.defaultColumnRenderer, "pdl-col-data");
+    private static _renderPodAgeCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod): JSX.Element {
+        const itemToRender = (<Duration startDate={new Date(pod.metadata.creationTimestamp)} endDate={new Date()} />);
+        return ListComponent.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
     private _getReplicaSetLabels(): React.ReactNode | null {
@@ -138,38 +132,38 @@ export class PodListComponent extends BaseComponent<IPodListComponentProperties>
         return null;
     }
 
-    private static _getColumns(): IColumn[] {
-        let columns: IColumn[] = [];
+    private static _getColumns(): ITableColumn<V1Pod>[] {
+        let columns: ITableColumn<V1Pod>[] = [];
         const headerColumnClassName = "kube-col-header";
 
         columns.push({
-            key: podStatusKey,
+            id: podStatusKey,
             name: Resources.PodsDetailsText,
-            fieldName: podStatusKey,
             minWidth: 250,
-            maxWidth: 250,
+            width: new ObservableValue(250),
             headerClassName: headerColumnClassName,
-            columnActionsMode: ColumnActionsMode.disabled
+            className: colDataClassName,
+            renderCell: PodListComponent._renderPodStatusCell
         });
 
         columns.push({
-            key: podIPKey,
+            id: podIPKey,
             name: Resources.PodIP,
-            fieldName: podIPKey,
             minWidth: 250,
-            maxWidth: 250,
+            width: new ObservableValue(250),
             headerClassName: headerColumnClassName,
-            columnActionsMode: ColumnActionsMode.disabled
+            className: colDataClassName,
+            renderCell: PodListComponent._renderPodIpCell
         });
 
         columns.push({
-            key: podAgeKey,
+            id: podAgeKey,
             name: Resources.AgeText,
-            fieldName: podAgeKey,
             minWidth: 200,
-            maxWidth: 200,
+            width: new ObservableValue(200),
             headerClassName: headerColumnClassName,
-            columnActionsMode: ColumnActionsMode.disabled
+            className: colDataClassName,
+            renderCell: PodListComponent._renderPodAgeCell
         });
 
         return columns;
