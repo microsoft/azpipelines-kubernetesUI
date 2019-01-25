@@ -122,7 +122,8 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
             }
 
             this.setState({
-                deploymentList: deploymentList, namespace: this.state.namespace || deploymentNamespace,
+                deploymentList: deploymentList,
+                namespace: this.state.namespace || deploymentNamespace
             });
         });
 
@@ -159,8 +160,8 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
                         imagePath={require("../zero_data.png")}
                         hyperLink="https://kubernetes.io/docs/concepts/workloads/pods/pod/"
                         hyperLinkLabel={Resources.LearnMoreText}
-                        textline1={Resources.NoWorkLoadsText}
-                        textline2={Resources.CreateWorkLoadText}
+                        descriptionText={Resources.NoWorkLoadsText}
+                        additionalHelpText={Resources.CreateWorkLoadText}
                     />}
             </div>
         );
@@ -203,8 +204,8 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
                         imagePath={require("../zero_data.png")}
                         hyperLink="https://kubernetes.io/docs/concepts/workloads/pods/pod/"
                         hyperLinkLabel={Resources.LearnMoreText}
-                        textline1={Resources.NoWorkLoadsText}
-                        textline2={Resources.CreateWorkLoadText}
+                        descriptionText={Resources.NoWorkLoadsText}
+                        additionalHelpText={Resources.CreateWorkLoadText}
                     />
 
                 </PivotItem>
@@ -257,12 +258,12 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
                         imagePath={require("../zero_data.png")}
                         hyperLink="https://kubernetes.io/docs/concepts/services-networking/service/"
                         hyperLinkLabel={Resources.LearnMoreText}
-                        textline1={Resources.NoServicesText}
-                        textline2={Resources.CreateServiceText}
+                        descriptionText={Resources.NoServicesText}
+                        additionalHelpText={Resources.CreateServiceText}
                     /> :
                         <ServicesComponent
                             servicesList={this.state.serviceList || {} as V1ServiceList}
-                            onItemInvoked={this._onServiceItemInvoked}
+                            onItemActivated={this._onServiceItemInvoked}
                         />
                 }
             </PivotItem>

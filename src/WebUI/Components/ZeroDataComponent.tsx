@@ -10,9 +10,9 @@ import './ListComponent.scss'
 export interface IZeroDataComponentProps extends IVssComponentProperties {
     title?: string,
     hyperLink?: string,
-    textline1?: string,
+    descriptionText?: string,
     hyperLinkLabel?: string,
-    textline2?: string
+    additionalHelpText?: string
     imagePath?: string,
     imageAltText?: string
     className?: string
@@ -25,39 +25,37 @@ export class ZeroDataComponent extends BaseComponent<IZeroDataComponentProps> {
 
     public render(): JSX.Element {
         return (
-            <div>
-                <Card title={this.props.title} className={css("flex-grow", "top-padding", "kube-list-content")}>
-                    <ZeroData
-                        className="flex-grow"
-                        imageAltText={this.props.imageAltText || ""}
-                        imagePath={this.props.imagePath || ""}
-                        secondaryText={this.__getTextArea()}
-                    />
-                </Card>
-            </div>
+            <Card title={this.props.title} className={css("flex-grow", "top-padding", "kube-list-content", this.props.className)}>
+                <ZeroData
+                    className="flex-grow"
+                    imageAltText={this.props.imageAltText || ""}
+                    imagePath={this.props.imagePath || ""}
+                    secondaryText={this._getTextArea()}
+                />
+            </Card>
         );
     }
 
-    private __getTextArea(): JSX.Element {
+    private _getTextArea(): JSX.Element {
         return (<div>
-            {this.__getTextLine1()}<br />
-            {this.__getHyperLink()}
+            {this._getTextLine1()}<br />
+            {this._getHyperLink()}
         </div>);
     }
 
-    private __getTextLine1(): JSX.Element | null {
-        if (this.props.textline1) {
-            return (<span>{this.props.textline1}</span>)
+    private _getTextLine1(): JSX.Element | null {
+        if (this.props.descriptionText) {
+            return (<span>{this.props.descriptionText}</span>)
         }
         return null;
     }
 
-    private __getHyperLink(): JSX.Element | null {
+    private _getHyperLink(): JSX.Element | null {
         if (this.props.hyperLink) {
             return (<span>
                 <Link href={this.props.hyperLink} target="_blank" rel="nofollow noopener">
                     {this.props.hyperLinkLabel}
-                </Link>{" "}{this.props.textline2}
+                </Link>{" "}{this.props.additionalHelpText}
             </span>);
         }
         return null;

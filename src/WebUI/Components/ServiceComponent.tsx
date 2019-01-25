@@ -163,10 +163,10 @@ export class ServiceComponent extends BaseComponent<IServiceComponentProperties,
                 <ZeroDataComponent
                     imagePath={require("../zero_data.png")}
                     title={Resources.AssociatedPodsText}
-                    textline1={Resources.NoPodsForSvcText}
+                    descriptionText={Resources.NoPodsForSvcText}
                     hyperLink="https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/"
                     hyperLinkLabel={Resources.LearnMoreText}
-                    textline2={Resources.LinkSvcToPodsText}
+                    additionalHelpText={Resources.LinkSvcToPodsText}
                 />
             );
         }
