@@ -9,7 +9,7 @@ import { ListComponent } from "./ListComponent";
 import { IVssComponentProperties } from "../Types";
 import { Ago } from "azure-devops-ui/Ago";
 import { Utils } from "../Utils";
-import { PodStatusComponent } from "./PodStatusComponent";
+import { ResourceStatusComponent } from "./ResourceStatusComponent";
 
 const setNameKey = "statefulset-name-key";
 const imageKey = "statefulset-image-key";
@@ -106,7 +106,7 @@ export class StatefulSetListingComponent extends BaseComponent<IDaemonSetCompone
                     podString = format("{0}/{1}", statefulSet.status.currentReplicas, statefulSet.status.replicas);
                 }
                 return (
-                    <PodStatusComponent 
+                    <ResourceStatusComponent 
                         statusProps={statusProps} 
                         statusDescription={podString} 
                     />);

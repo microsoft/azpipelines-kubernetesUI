@@ -11,7 +11,7 @@ import { V1Pod } from "@kubernetes/client-node";
 import { Utils } from "../Utils";
 import { StatusSize, Status } from "azure-devops-ui/Status";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
-import { PodStatusComponent } from "./PodStatusComponent";
+import { ResourceStatusComponent } from "./ResourceStatusComponent";
 
 const podNameKey:string = "pl-name-key";
 const podImageKey:string = "pl-image-key";
@@ -118,7 +118,7 @@ export class PodsComponent extends BaseComponent<IPodsComponentProperties> {
                         statusDescription = pod.status.phase;
                     }
 
-                    return (<PodStatusComponent 
+                    return (<ResourceStatusComponent 
                         statusProps={Utils.generatePodStatusProps(pod.status)} 
                         statusDescription={statusDescription} 
                         customDescription={customDescription}

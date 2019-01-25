@@ -15,7 +15,7 @@ import { ListComponent } from "./ListComponent";
 import "./ServicesComponent.scss";
 import { Utils } from "../Utils";
 import { IStatusProps, Statuses } from "azure-devops-ui/Status";
-import { PodStatusComponent } from "./PodStatusComponent";
+import { ResourceStatusComponent } from "./ResourceStatusComponent";
 
 const packageKey: string = "package-col";
 const typeKey: string = "type-col";
@@ -23,6 +23,7 @@ const clusterIPKey: string = "cluster-ip-col";
 const externalIPKey: string = "external-ip-col";
 const portKey: string = "port-col";
 const ageKey: string = "age-col";
+const loadBalancerKey: string = "LoadBalancer";
 
 export interface IServicesComponentProperties extends IVssComponentProperties {
     servicesList: V1ServiceList;
@@ -178,7 +179,7 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
         let textToRender: string = "";
         switch (column.key) {
             case packageKey:
-                return ServicesComponent._getServiceStatus(service, colDataClassName);
+                return ServicesComponent._getServiceStatusWithName(service, colDataClassName);
 
             case typeKey:
                 textToRender = service.type;
@@ -205,24 +206,23 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
         return ListComponent.renderColumn(textToRender || "", ListComponent.defaultColumnRenderer, colDataClassName);
     }
 
-    private static _getServiceStatus(service: IServiceItem, cssClassName: string): React.ReactNode {
+    private static _getServiceStatusWithName(service: IServiceItem, cssClassName: string): React.ReactNode {
         let statusProps: IStatusProps = Statuses.Success;
-        let tooltipText: string | undefined;
-        if (service.type == "LoadBalancer") {
-            if (service.externalIP == "") {
+        let tooltipText: string ="";
+        if (service.type === loadBalancerKey) {
+            tooltipText = Resources.ExternalIPAllocated;
+            if (!service.externalIP) {
                 tooltipText = Resources.ExternalIPAllocPending;
                 statusProps = Statuses.Running;
             }
-            tooltipText = Resources.ExternalIPAllocated;
         }
 
         return (
-            <div>
-                <PodStatusComponent statusProps={statusProps}
-                    customDescription={ListComponent.renderTwoLineColumn(service.package, service.pipeline, css(cssClassName, "kube-status-desc"), "primary-text", "secondary-text")}
-                    toolTipText={tooltipText}
-                />
-            </div>
+            <ResourceStatusComponent
+                statusProps={statusProps}
+                customDescription={ListComponent.renderTwoLineColumn(service.package, service.pipeline, css(cssClassName, "kube-status-desc"), "primary-text", "secondary-text")}
+                toolTipText={tooltipText}
+            />
         );
     }
 }

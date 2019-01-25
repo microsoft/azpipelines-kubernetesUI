@@ -9,7 +9,7 @@ import { ListComponent } from "./ListComponent";
 import { IVssComponentProperties } from "../Types";
 import { Ago } from "azure-devops-ui/Ago";
 import { Utils } from "../Utils";
-import { PodStatusComponent } from "./PodStatusComponent";
+import { ResourceStatusComponent } from "./ResourceStatusComponent";
 
 const setNameKey = "set-name-key";
 const imageKey = "image-key";
@@ -106,7 +106,7 @@ export class DaemonSetListingComponent extends BaseComponent<IDaemonSetComponent
                     podString = format("{0}/{1}", daemonSet.status.currentNumberScheduled, daemonSet.status.desiredNumberScheduled);
                 }
                 return (
-                    <PodStatusComponent 
+                    <ResourceStatusComponent 
                         statusProps={statusProps} 
                         statusDescription={podString} 
                     />

@@ -16,7 +16,7 @@ import { ListComponent } from "./ListComponent";
 import { LabelGroup, WrappingBehavior } from "azure-devops-ui/Label";
 import { Ago } from "azure-devops-ui/Ago";
 import { Utils } from "../Utils";
-import { PodStatusComponent } from "./PodStatusComponent";
+import { ResourceStatusComponent } from "./ResourceStatusComponent";
 
 const replicaSetNameKey: string = "replicaSet-col";
 const podsKey: string = "pods-col";
@@ -203,7 +203,7 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
 
             case podsKey:
                 return (
-                    <PodStatusComponent 
+                    <ResourceStatusComponent 
                         statusProps={deployment.statusProps}
                         statusDescription={deployment.pods} 
                     />);
