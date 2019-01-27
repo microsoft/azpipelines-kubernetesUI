@@ -43,12 +43,20 @@ module.exports = {
         loader: "ts-loader"
       },
       {
-        test: /\.(sa|sc|c)ss$/,
+        test: /\.(sa|sc)ss$/,
           use: [
+            "style-loader",
             MiniCssExtractPlugin.loader,
             "css-loader",
             "./buildScripts/css-variables-loader",
             "sass-loader"
+          ]
+      },
+      {
+        test: /\.css$/,
+          use: [
+            MiniCssExtractPlugin.loader,
+            "css-loader"
           ]
       },
       {
