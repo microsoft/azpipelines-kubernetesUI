@@ -1,6 +1,8 @@
 const path = require('path');
 const webpack = require('webpack');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const OptimizeCSSAssetsPlugin = require("optimize-css-assets-webpack-plugin");
 
 module.exports = {
   entry: {
@@ -23,9 +25,17 @@ module.exports = {
       new UglifyJsPlugin({
         sourceMap: true,
         include: /\.min\.js$/,
+        extractComments: "all"
       })
     ]
   },
+  plugins: [
+    new MiniCssExtractPlugin({
+      filename: "[name].css",
+      chunkFilename: "[id].css"
+    }),
+    new OptimizeCSSAssetsPlugin({})
+  ],
   module: {
     rules: [
       {
@@ -33,12 +43,13 @@ module.exports = {
         loader: "ts-loader"
       },
       {
-        test: /\.scss$/,
-        use: ["style-loader", "css-loader", "./buildScripts/css-variables-loader", "sass-loader"]
-      },
-      {
-        test: /\.css$/,
-        use: ["style-loader", "css-loader"],
+        test: /\.(sa|sc|c)ss$/,
+          use: [
+            MiniCssExtractPlugin.loader,
+            "css-loader",
+            "./buildScripts/css-variables-loader",
+            "sass-loader"
+          ]
       },
       {
         test: /\.woff$/,
@@ -57,6 +68,8 @@ module.exports = {
   },
   externals: {
     react: 'react',
-    "react-dom": 'react-dom'
+    "react-dom": 'react-dom',
+    "office-ui-fabric-react/lib/Pivot": "office-ui-fabric-react/lib/Pivot",
+    "office-ui-fabric-react/lib/Utilities": "office-ui-fabric-react/lib/Utilities"
   }
 }
