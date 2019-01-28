@@ -3,22 +3,21 @@
     Licensed under the MIT license.
 */
 
-import { IColumn } from "azure-devops-ui/Components/VssDetailsList/VssDetailsList.Props";
 import { TooltipHost, TooltipOverflowMode } from "azure-devops-ui/Tooltip";
-import { VssDetailsList } from "azure-devops-ui/VssDetailsList";
-import { ConstrainMode, SelectionMode, IDetailsHeaderProps, IDetailsRowProps, DetailsRow } from "office-ui-fabric-react/lib/DetailsList";
 import { BaseComponent, css, IRenderFunction } from "office-ui-fabric-react/lib/Utilities";
 import * as React from "react";
 import { IVssComponentProperties } from "../Types";
+import { Table, ITableColumn, TableRow, ITableRowProps, SimpleTableCell } from "azure-devops-ui/Table";
+import { ITableRow, ITableRowDetails } from "azure-devops-ui/Components/Table/Table.Props";
+import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import "./ListComponent.scss";
 
 export interface IListComponentProperties<T> extends IVssComponentProperties {
     headingText?: string;
     headingContent?: JSX.Element;
     items: T[];
-    columns: IColumn[];
-    onRenderItemColumn: (item?: T, index?: number, column?: IColumn) => React.ReactNode;
-    onItemInvoked?: (item?: any, index?: number, ev?: Event) => void;
+    columns: ITableColumn<T>[];
+    onItemActivated?: (event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>, selectedItem: any) => void;
 }
 
 export class ListComponent<T> extends BaseComponent<IListComponentProperties<T>> {
@@ -26,31 +25,23 @@ export class ListComponent<T> extends BaseComponent<IListComponentProperties<T>>
         return (
             <div className={css("kube-list-content", this.props.className)}>
                 {this._getComponentHeadingContent()}
-                {this._getComponent()}
+                {this.props.items && this.props.items.length > 0 && this._getComponent()}
             </div>
         );
     }
 
     private _getComponent(): JSX.Element {
         return (
-            <VssDetailsList
+            <Table
                 className={"kube-list"}
-                items={this.props.items}
+                itemProvider={new ArrayItemProvider<T>(this.props.items)}
                 columns={this.props.columns}
-                onRenderRow={this._onRenderRow}
-                onRenderItemColumn={this.props.onRenderItemColumn}
-                isHeaderVisible={true}
-                selectionMode={SelectionMode.single}
-                constrainMode={ConstrainMode.unconstrained}
-                onItemInvoked={this._onItemInvoked}
+                showHeader={true}
+                showLines={false}
+                singleClickActivation={false}
+                onActivate={this._onItemActivated}
             />
         );
-    }
-
-    private _onRenderRow = (detailsRowProps: any, defaultRender?: any): JSX.Element => {
-        return (<div className={"kube-list-row"}>
-                    <DetailsRow {...detailsRowProps} />
-                </div>);
     }
 
     public static renderColumn(
@@ -69,7 +60,14 @@ export class ListComponent<T> extends BaseComponent<IListComponentProperties<T>>
         );
     }
 
-    public static renderTwoLineColumn(primaryText: string, subText: string, className?:string, primaryTextClassName?: string, secondaryTextClassName?:string ) : React.ReactNode {
+    public static renderTableCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<any>, itemToRender: React.ReactNode): JSX.Element {
+        return (
+            <SimpleTableCell columnIndex={columnIndex} tableColumn={tableColumn} key={"col-" + columnIndex}>
+                {itemToRender}
+            </SimpleTableCell>);
+    }
+
+    public static renderTwoLineColumn(primaryText: string, subText: string, className?: string, primaryTextClassName?: string, secondaryTextClassName?: string): React.ReactNode {
         return (
             <div className={css("kube-list-col-data overflow-ellipsis", className)}>
                 <div className={css("kube-list-col-data overflow-ellipsis", primaryTextClassName)}>
@@ -86,9 +84,9 @@ export class ListComponent<T> extends BaseComponent<IListComponentProperties<T>>
         );
     }
 
-    private _onItemInvoked = (item?: any, index?: number, ev?: Event) => {
-        if (this.props.onItemInvoked) {
-            this.props.onItemInvoked(item, index, ev);
+    private _onItemActivated = (event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>) => {
+        if (this.props.onItemActivated) {
+            this.props.onItemActivated(event, tableRow, this.props.items[tableRow.index]);
         }
     }
 
