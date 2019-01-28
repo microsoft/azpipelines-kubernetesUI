@@ -9,16 +9,17 @@ import { Pivot, PivotItem } from "office-ui-fabric-react/lib/Pivot";
 import * as React from "react";
 import { IKubeService } from "../../Contracts/Contracts";
 import * as Resources from "../Resources";
-import { IKubernetesSummary, IVssComponentProperties, IServiceItem, IDeploymentItem } from "../Types";
+import { IKubernetesSummary, IVssComponentProperties, IServiceItem, IDeploymentReplicaSetItem } from "../Types";
 import { Utils } from "../Utils";
 import { DeploymentsComponent } from "./DeploymentsComponent";
 import "./KubeSummary.scss";
 import { IReplicaSetListComponentProperties, ReplicaSetListComponent } from "./ReplicaSetListComponent";
+import { WorkloadPodsView } from "./WorkloadPodsView";
 import { ServiceComponent } from "./ServiceComponent";
 import { ServicesComponent } from "./ServicesComponent";
 // todo :: work around till this issue is fixed in devops ui
 import "azure-devops-ui/Label.scss";
-import { DaemonSetListingComponent } from "./DaemonSetListingComponent";
+import { DaemonSetListComponent } from "./DaemonSetListComponent";
 import { StatefulSetListingComponent } from "./StatefulSetListingComponent";
 import { PodsComponent } from "./PodsComponent";
 import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
@@ -65,7 +66,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
                 }
                 {
                     !!this.state.showDeployment &&
-                    this._getReplicaSetPodListComponent()
+                    this._getReplicaSetPodDetails()
                 }
                 {
                     !!this.state.showService &&
@@ -78,7 +79,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
     private _getReplicaSetPodListComponent(): JSX.Element | null {
         const selectedItem = this.state.selectedItem;
         if (selectedItem) {
-            const selectedItemUId: string = selectedItem.uid.toLowerCase();
+            const selectedItemUId: string = selectedItem.deploymentId.toLowerCase();
             const replicas = this.state.replicaSetList;
             const filteredReplicas = (replicas && replicas.items || []).filter(replica => {
                 return Utils.isOwnerMatched(replica.metadata, selectedItemUId);
@@ -98,6 +99,28 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
                 };
 
                 return (<ReplicaSetListComponent {...replicaSetList} />);
+            }
+        }
+
+        return null;
+    }
+
+    private _getReplicaSetPodDetails(): JSX.Element | null {
+        const selectedItem = this.state.selectedItem;
+        if (selectedItem) {
+            const selectedItemDeploymentUId: string = selectedItem.deploymentId.toLowerCase();
+            const selectedItemReplicaSetUId: string = selectedItem.replicaSetId.toLowerCase();
+            const replicas = this.state.replicaSetList;
+            const filteredReplicas = (replicas && replicas.items || []).filter(replica => {
+                return Utils.isOwnerMatched(replica.metadata, selectedItemDeploymentUId) && replica.metadata.uid.toLowerCase() === selectedItemReplicaSetUId;
+            });
+
+            if (filteredReplicas) {
+                return (<WorkloadPodsView
+                    metaData={filteredReplicas[0].metadata}
+                    template={filteredReplicas[0].spec && filteredReplicas[0].spec.template}
+                    kind={"ReplicaSet"}
+                    podsPromise={this.props.kubeService && this.props.kubeService.getPods() || Promise.resolve({})} />);
             }
         }
 
@@ -194,7 +217,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
                     key={format("dc-{0}", this.state.namespace || "")}
                     onItemActivated={this._onDeploymentItemInvoked}
                 />
-                <DaemonSetListingComponent
+                <DaemonSetListComponent
                     daemonSetList={this.state.daemonSetList || {} as V1DaemonSetList}
                     key={format("ds-list-{0}", this.state.namespace || "")}
                 />
@@ -208,12 +231,12 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         );
     }
 
-    private _onDeploymentItemInvoked = (event: React.SyntheticEvent<HTMLElement>, item: IDeploymentItem) => {
+    private _onDeploymentItemInvoked = (event: React.SyntheticEvent<HTMLElement>, item: IDeploymentReplicaSetItem) => {
         this.setState({
-            showDeployment: true,	
-            selectedItem: item,	
-            showService: false,	
-            showSummary: false	
+            showDeployment: true,
+            selectedItem: item,
+            showService: false,
+            showSummary: false
         });
     }
 

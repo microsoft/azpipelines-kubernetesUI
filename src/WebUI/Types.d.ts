@@ -17,10 +17,11 @@ export interface IKubernetesSummary {
     statefulSetList?: V1StatefulSetList;
 }
 
-export interface IDeploymentItem {
+export interface IDeploymentReplicaSetItem {
     name?: string;
     replicaSetName?: string;
-    uid?: string;
+    deploymentId?: string;
+    replicaSetId?: string;
     pipeline?: string;
     pods?: string;
     statusProps?: IStatusProps;

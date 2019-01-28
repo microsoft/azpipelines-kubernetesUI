@@ -9,7 +9,7 @@ import { IStatusProps, Status, Statuses, StatusSize } from "azure-devops-ui/Stat
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import * as React from "react";
 import * as Resources from "../Resources";
-import { IDeploymentItem, IVssComponentProperties, IDeploymentReplicaSetMap } from "../Types";
+import { IDeploymentReplicaSetItem, IVssComponentProperties, IDeploymentReplicaSetMap } from "../Types";
 import "./DeploymentsComponent.scss";
 import { ListComponent } from "./ListComponent";
 import { LabelGroup, WrappingBehavior } from "azure-devops-ui/Label";
@@ -28,7 +28,7 @@ const colDataClassName: string = "dc-col-data";
 export interface IDeploymentsComponentProperties extends IVssComponentProperties {
     deploymentList: V1DeploymentList;
     replicaSetList: V1ReplicaSetList;
-    onItemActivated?: (event: React.SyntheticEvent<HTMLElement>, item: IDeploymentItem) => void;
+    onItemActivated?: (event: React.SyntheticEvent<HTMLElement>, item: IDeploymentReplicaSetItem) => void;
 }
 
 export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentProperties, {}> {
@@ -77,20 +77,20 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
     }
 
     private static _getDeploymentReplicaSetItems(deployment: V1Deployment, replicaSets: V1ReplicaSet[]):
-        IDeploymentItem[] {
-        let items: IDeploymentItem[] = [];
+        IDeploymentReplicaSetItem[] {
+        let items: IDeploymentReplicaSetItem[] = [];
         replicaSets.forEach((replicaSet, index) => {
-            items.push(DeploymentsComponent._getDeploymentItem(deployment, replicaSet, index, replicaSets.length));
+            items.push(DeploymentsComponent._getDeploymentReplicaSetItem(deployment, replicaSet, index, replicaSets.length));
         });
 
         return items;
     }
 
-    private static _getDeploymentItem(
+    private static _getDeploymentReplicaSetItem(
         deployment: V1Deployment,
         replica: V1ReplicaSet,
         index: number,
-        replicaSetLength: number): IDeploymentItem {
+        replicaSetLength: number): IDeploymentReplicaSetItem {
         // todo :: annotations are taken from deployment for the first replica, rest of the replicas from respective replicas
         const annotations: {
             [key: string]: string;
@@ -98,7 +98,8 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
 
         return {
             name: index > 0 ? "" : deployment.metadata.name,
-            uid: deployment.metadata.uid,
+            deploymentId: deployment.metadata.uid,
+            replicaSetId: replica.metadata.uid,
             replicaSetName: replica.metadata.name,
             pipeline: Utils.getPipelineText(annotations),
             // todo :: how to find error in replicaSet
@@ -140,8 +141,8 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
     }
 
 
-    private static _getColumns(): ITableColumn<IDeploymentItem>[] {
-        let columns: ITableColumn<IDeploymentItem>[] = [];
+    private static _getColumns(): ITableColumn<IDeploymentReplicaSetItem>[] {
+        let columns: ITableColumn<IDeploymentReplicaSetItem>[] = [];
         const headerColumnClassName: string = "kube-col-header";
         const columnContentClassname: string = "list-col-content";
         columns.push({
@@ -169,7 +170,7 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
             width: new ObservableValue(160),
             headerClassName: headerColumnClassName,
             className: columnContentClassname,
-            renderCell: DeploymentsComponent._renderPodsCell
+            renderCell: DeploymentsComponent._renderPodsCountCell
         });
         columns.push({
             id: ageKey,
@@ -184,13 +185,13 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
         return columns;
     }
 
-    private static _renderReplicaSetNameCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IDeploymentItem>, deployment: IDeploymentItem): JSX.Element {
+    private static _renderReplicaSetNameCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IDeploymentReplicaSetItem>, deployment: IDeploymentReplicaSetItem): JSX.Element {
         const textToRender: string | undefined = deployment.replicaSetName;
         const itemToRender = ListComponent.renderTwoLineColumn(deployment.replicaSetName || "", deployment.pipeline || "", colDataClassName, "primary-text", "secondary-text");
         return ListComponent.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
-    private static _renderPodsCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IDeploymentItem>, deployment: IDeploymentItem): JSX.Element {
+    private static _renderPodsCountCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IDeploymentReplicaSetItem>, deployment: IDeploymentReplicaSetItem): JSX.Element {
         const itemToRender = (
             <PodStatusComponent
                 statusProps={deployment.statusProps}
@@ -200,13 +201,13 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
         return ListComponent.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
-    private static _renderImageCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IDeploymentItem>, deployment: IDeploymentItem): JSX.Element {
+    private static _renderImageCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IDeploymentReplicaSetItem>, deployment: IDeploymentReplicaSetItem): JSX.Element {
         const textToRender: string | undefined = deployment.image;
         const itemToRender = ListComponent.renderColumn(textToRender || "", ListComponent.defaultColumnRenderer, colDataClassName);
         return ListComponent.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
-    private static _renderAgeCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IDeploymentItem>, deployment: IDeploymentItem): JSX.Element {
+    private static _renderAgeCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IDeploymentReplicaSetItem>, deployment: IDeploymentReplicaSetItem): JSX.Element {
         const textToRender: string | undefined = deployment.image;
         const itemToRender = (<Ago date={new Date(deployment.creationTimeStamp)} />);
         return ListComponent.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
