@@ -38,3 +38,4 @@ export declare const StatefulSetText: string;
 export declare const DeploymentText: string;
 export declare const FindByNameText: string;
 export declare const KindText: string;
+export declare const NoItemsText: string;

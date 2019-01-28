@@ -208,7 +208,7 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
 
     private _filterService(svc: V1Service): boolean {
         const nameMatches: boolean = Utils.filterByName(svc.metadata.name, this.props.nameFilter);
-        const typeMatches: boolean = this.props.typeSelections.length > 0 ? this.props.typeSelections.indexOf(svc.spec.type) != -1 : true;
+        const typeMatches: boolean = this.props.typeSelections.length > 0 ? this.props.typeSelections.indexOf(svc.spec.type) >= 0 : true;
 
         return nameMatches && typeMatches;
     }

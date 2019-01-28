@@ -39,4 +39,5 @@ define("Environments/Providers/Kubernetes/Resources", ["require", "exports"], fu
     exports.DeploymentText = "Deployment";
     exports.FindByNameText = "Find by {0} name";
     exports.KindText = "Kind";
+    exports.NoItemsText = "No Items found"
 });

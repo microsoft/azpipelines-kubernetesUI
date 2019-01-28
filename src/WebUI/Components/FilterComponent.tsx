@@ -10,6 +10,9 @@ import { Filter } from "azure-devops-ui/Utilities/Filter";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { ConditionalChildren } from "azure-devops-ui/ConditionalChildren";
 
+export const NameKey: string = "nameKey";
+export const TypeKey: string = "typeKey";
+
 export interface IFilterComponentProperties extends IVssComponentProperties {
     filter: Filter,
     keywordPlaceHolder: string,
@@ -25,13 +28,13 @@ export class FilterComponent extends BaseComponent<IFilterComponentProperties, {
         return (
             <ConditionalChildren renderChildren={this.props.filterToggled}>
                 <FilterBar filter={this.props.filter}>
-                    <KeywordFilterBarItem filterItemKey="nameKey" placeholder={format(Resources.FindByNameText, this.props.keywordPlaceHolder)} />
+                    <KeywordFilterBarItem filterItemKey={NameKey} placeholder={format(Resources.FindByNameText, this.props.keywordPlaceHolder.toLowerCase())} />
                     <PickListFilterBarItem
                         placeholder={this.props.pickListPlaceHolder}
                         showPlaceholderAsLabel={true}
-                        filterItemKey="typeKey"
+                        filterItemKey={TypeKey}
                         selectionMode={SelectionMode.multiple}
-                        noItemsText="No items found"
+                        noItemsText={Resources.NoItemsText}
                         showSelectAll={false}
                         hideClearButton={false}
                         getPickListItems={this.props.pickListItemsFn}

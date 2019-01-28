@@ -32,13 +32,11 @@ export class DaemonSetListingComponent extends BaseComponent<IDaemonSetComponent
         });
         if (filteredItems.length > 0) {
             return (
-                <div>{
-                    <ListComponent
-                        className={css("list-content", "top-padding", "depth-16")}
-                        items={filteredItems}
-                        columns={DaemonSetListingComponent._getColumns()}
-                    />
-                }</div>
+                <ListComponent
+                    className={css("list-content", "top-padding", "depth-16")}
+                    items={filteredItems}
+                    columns={DaemonSetListingComponent._getColumns()}
+                />
             );
         }
         return null;

@@ -31,13 +31,11 @@ export class StatefulSetListingComponent extends BaseComponent<IDaemonSetCompone
         });
         if (filteredSet.length > 0) {
             return (
-                <div>{
-                    <ListComponent
-                        className={css("list-content", "top-padding", "depth-16")}
-                        items={filteredSet}
-                        columns={StatefulSetListingComponent._getColumns()}
-                    />
-                }</div>
+                <ListComponent
+                    className={css("list-content", "top-padding", "depth-16")}
+                    items={filteredSet}
+                    columns={StatefulSetListingComponent._getColumns()}
+                />
             );
         }
         return null;

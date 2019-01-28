@@ -22,7 +22,7 @@ import { StatefulSetListingComponent } from "./StatefulSetListingComponent";
 import { PodsComponent } from "./PodsComponent";
 import { Filter, IFilterState, FILTER_CHANGE_EVENT, IFilterItemState } from "azure-devops-ui/Utilities/Filter";
 import { KubeResourceType } from "../../Contracts/KubeServiceBase";
-import { FilterComponent } from "./FilterComponent";
+import { FilterComponent, NameKey, TypeKey } from "./FilterComponent";
 import { Tab, TabBar, TabContent } from "azure-devops-ui/Tabs";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { HeaderCommandBarWithFilter } from 'azure-devops-ui/HeaderCommandBar';
@@ -32,13 +32,14 @@ const workloadsPivotItemKey: string = "workloads";
 const servicesPivotItemKey: string = "services";
 const filterToggled = new ObservableValue<boolean>(false);
 
+//todo: refactor filter properties to respective resource type components
 export interface IKubernetesContainerState extends IKubernetesSummary {
     selectedKey?: string;
     showSummary?: boolean;
     showDeployment?: boolean;
     showService?: boolean;
     selectedItem?: any;
-    filter:Filter;
+    workloadsFilter:Filter;
     svcFilter: Filter;
     workloadsFilterState?:IFilterState;
     svcFilterState?: IFilterState;
@@ -54,7 +55,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
     constructor(props: IKubeSummaryProps) {
         super(props, {});
         const filter = new Filter();
-        filter.subscribe(this._onFilterApplied, FILTER_CHANGE_EVENT);
+        filter.subscribe(this._onWorkloadsFilterApplied, FILTER_CHANGE_EVENT);
         const svcFilter = new Filter();
         svcFilter.subscribe(this._onSvcFilterApplied, FILTER_CHANGE_EVENT);
         this.state = {
@@ -63,7 +64,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
             showSummary: true,
             showDeployment: false,
             showService: false,
-            filter: filter,
+            workloadsFilter: filter,
             svcFilter: svcFilter
         };
     }
@@ -184,12 +185,13 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
     private _getMainPivot(): JSX.Element {
         return (
             <div className="content-with-pivot">
-                <TabBar onSelectedTabChanged={(key: string) => { this.setState({ selectedKey: key }) }}
+                <TabBar
+                    onSelectedTabChanged={(key: string) => { this.setState({ selectedKey: key }) }}
                     orientation={0}
                     selectedTabId={this.state.selectedKey}
                     renderAdditionalContent={() => {
                         return (<HeaderCommandBarWithFilter filter={this.state.selectedKey === workloadsPivotItemKey ?
-                            this.state.filter : this.state.svcFilter}
+                            this.state.workloadsFilter : this.state.svcFilter}
                             filterToggled={filterToggled} items={[]} />);
                     }}>
                     <Tab name={Resources.PivotWorkloadsText} id={workloadsPivotItemKey} />
@@ -227,8 +229,8 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
 
     private _getFilterBar(): JSX.Element {
         if (this.state.selectedKey === workloadsPivotItemKey) {
-            return (<FilterComponent filter={this.state.filter}
-                keywordPlaceHolder={Resources.PivotWorkloadsText.toLowerCase()}
+            return (<FilterComponent filter={this.state.workloadsFilter}
+                keywordPlaceHolder={Resources.PivotWorkloadsText}
                 pickListPlaceHolder={Resources.KindText}
                 pickListItemsFn={this._pickListItems}
                 listItemsFn={this._listItems}
@@ -238,7 +240,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         else {
             return (<FilterComponent filter={this.state.svcFilter}
                 pickListPlaceHolder={Resources.TypeText}
-                keywordPlaceHolder={Resources.PivotServiceText.toLowerCase()}
+                keywordPlaceHolder={Resources.PivotServiceText}
                 filterToggled={filterToggled}
                 pickListItemsFn={() => this._generateSvcTypes()}
                 listItemsFn={(item: any) => {
@@ -313,9 +315,9 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         />);
     }
 
-    private _onFilterApplied = (currentState: IFilterState) => {
+    private _onWorkloadsFilterApplied = (currentState: IFilterState) => {
         this.setState({
-            workloadsFilterState: this.state.filter.getState()
+            workloadsFilterState: this.state.workloadsFilter.getState()
         })
     };
 
@@ -327,13 +329,13 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
 
     private _getNameFilterKey(): string | undefined {
         const filterState:IFilterState | undefined = this.state.selectedKey===workloadsPivotItemKey?this.state.workloadsFilterState:this.state.svcFilterState;
-        const filterItem: IFilterItemState | null= filterState? filterState["nameKey"]: null;
+        const filterItem: IFilterItemState | null= filterState? filterState[NameKey]: null;
         return filterItem? (filterItem.value as string): undefined;
     }
 
     private _getTypeSelection():any[] {
         const filterState:IFilterState | undefined = this.state.selectedKey===workloadsPivotItemKey?this.state.workloadsFilterState:this.state.svcFilterState;
-        const filterItem: IFilterItemState | null= filterState? filterState["typeKey"]: null;
+        const filterItem: IFilterItemState | null= filterState? filterState[TypeKey]: null;
         const selections: any[] = filterItem? filterItem.value : [];
         return selections;
     }
@@ -372,9 +374,6 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
                 break;
             case KubeResourceType.Pods:
                 name = Resources.PodsText;
-                break;
-            default:
-                name = "Unknown";
                 break;
      };
         return {
