@@ -29,6 +29,7 @@ export interface IDeploymentReplicaSetItem {
     deployment?: V1Deployment;
     image: string;
     creationTimeStamp: Date;
+    kind?: string;
 }
 
 export interface IServiceItem {
@@ -41,6 +42,7 @@ export interface IServiceItem {
     uid: string;
     pipeline: string;
     service?: V1Service;
+    kind?: string;
 }
 
 export interface IDeploymentReplicaSetMap {

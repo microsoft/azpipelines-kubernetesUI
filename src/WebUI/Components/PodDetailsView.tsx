@@ -55,7 +55,6 @@ export class PodDetailsView extends BaseComponent<IPodDetailsProps> {
 
         return (
             <Card className="kube-list-content s-details depth-16" title={Resources.SummaryText}>
-                {/*<h3 className="s-de-heading">{Resources.SummaryText}</h3>*/}
                 <Table
                     className="s-full-details"
                     id={format("s-full-details-{0}", pod.metadata.uid)}
@@ -81,13 +80,13 @@ export class PodDetailsView extends BaseComponent<IPodDetailsProps> {
                 let props = {
                     columnIndex: columnIndex,
                     children:
-                    <span>
+                    <span className="pod-details-created-cell">
                         <Duration startDate={value} endDate={new Date()} />
                         {format("{0}", Resources.Ago)}
                     </span>,
                     tableColumn: tableColumn
                 };
-                
+
                 return renderTableCell(props);
 
             case Resources.LabelsText:

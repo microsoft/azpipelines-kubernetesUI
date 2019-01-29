@@ -14,7 +14,7 @@ import { Utils } from "../Utils";
 import { DeploymentsComponent } from "./DeploymentsComponent";
 import "./KubeSummary.scss";
 import { IReplicaSetListComponentProperties, ReplicaSetListComponent } from "./ReplicaSetListComponent";
-import { WorkloadPodsView } from "./WorkloadPodsView";
+import { PodsViewComponent } from "./PodsViewComponent";
 import { ServiceComponent } from "./ServiceComponent";
 import { ServicesComponent } from "./ServicesComponent";
 // todo :: work around till this issue is fixed in devops ui
@@ -22,7 +22,6 @@ import "azure-devops-ui/Label.scss";
 import { DaemonSetListComponent } from "./DaemonSetListComponent";
 import { StatefulSetListingComponent } from "./StatefulSetListingComponent";
 import { PodsComponent } from "./PodsComponent";
-import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
 
 const workloadsPivotItemKey: string = "workloads";
 const servicesPivotItemKey: string = "services";
@@ -116,10 +115,10 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
             });
 
             if (filteredReplicas) {
-                return (<WorkloadPodsView
-                    metaData={filteredReplicas[0].metadata}
-                    template={filteredReplicas[0].spec && filteredReplicas[0].spec.template}
-                    kind={"ReplicaSet"}
+                return (<PodsViewComponent
+                    parentMetaData={filteredReplicas[0].metadata}
+                    podTemplate={filteredReplicas[0].spec && filteredReplicas[0].spec.template}
+                    parentKind={selectedItem.kind || "ReplicaSet"}
                     podsPromise={this.props.kubeService && this.props.kubeService.getPods() || Promise.resolve({})} />);
             }
         }

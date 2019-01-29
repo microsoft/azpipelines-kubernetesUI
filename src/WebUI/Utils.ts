@@ -3,7 +3,7 @@
     Licensed under the MIT license.
 */
 
-import { V1ObjectMeta, V1PodStatus } from "@kubernetes/client-node";
+import { V1ObjectMeta, V1PodStatus, V1PodTemplateSpec } from "@kubernetes/client-node";
 import { format } from "@uifabric/utilities/lib";
 import { ObservableArray } from "azure-devops-ui/Core/Observable";
 import { ILabelModel } from "azure-devops-ui/Label";
@@ -85,5 +85,16 @@ export class Utils {
                 return Statuses.Success;
         } 
         return Statuses.Failed;
+    }
+
+    public static getPodImageName(podTemplate: V1PodTemplateSpec): string | null {
+        if (podTemplate
+            && podTemplate.spec
+            && podTemplate.spec.containers
+            && podTemplate.spec.containers.length > 0) {
+            return podTemplate.spec.containers[0].image;
+        }
+
+        return null;
     }
 }

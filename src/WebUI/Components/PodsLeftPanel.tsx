@@ -32,9 +32,9 @@ const podStatusKey = "pods-list-status-col";
 const colDataClassName: string = "list-col-content";
 
 export interface IPodListComponentProperties extends IVssComponentProperties {
-    metaData: V1ObjectMeta;
-    template: V1PodTemplateSpec;
-    kind: string;
+    parentMetaData: V1ObjectMeta;
+    podTemplate: V1PodTemplateSpec;
+    parentKind: string;
     pods: V1Pod[];
     onSelectionChange?: (event: React.SyntheticEvent<HTMLElement>, selectedItem: V1Pod) => void;
 }
@@ -56,7 +56,7 @@ export class PodsLeftPanel extends BaseComponent<IPodListComponentProperties> {
     }
 
     private _getPanelHeaderContent(): JSX.Element {
-        const metadata: V1ObjectMeta = this.props.metaData;
+        const metadata: V1ObjectMeta = this.props.parentMetaData;
         const columns: ITableColumn<any>[] = [
             {
                 id: "PodsHeaderTable",
@@ -68,10 +68,10 @@ export class PodsLeftPanel extends BaseComponent<IPodListComponentProperties> {
             }
         ];
         const tableItems = new ArrayItemProvider<any>([
-            { key: Resources.KindText, value: this.props.kind },
+            { key: Resources.KindText, value: this.props.parentKind },
             { key: Resources.Created, value: metadata.creationTimestamp ? new Date(metadata.creationTimestamp) : new Date().getTime() },
             { key: Resources.LabelsText, value: metadata.labels || {} },
-            { key: Resources.ImageText, value: this._getImageName() }
+            { key: Resources.ImageText, value: Utils.getPodImageName(this.props.podTemplate) }
         ]);
 
         return (
@@ -125,7 +125,7 @@ export class PodsLeftPanel extends BaseComponent<IPodListComponentProperties> {
         let { key, value } = tableItem;
         switch (key) {
             case Resources.Created:
-                value = (<span>
+                value = (<span className="pods-left-panel-header-created-cell">
                     <Duration startDate={value} endDate={new Date()} />
                     {format("{0}", Resources.Ago)}
                 </span>);
@@ -140,8 +140,8 @@ export class PodsLeftPanel extends BaseComponent<IPodListComponentProperties> {
         }
 
         let itemToRender = <div className="kube-simple-cell">
-            <span>{key + ":  "}</span>
-            <span>{value}</span>
+            <span className="pods-left-panel-header-key">{key + ": "}</span>
+            <span className="pods-left-panel-header-value">{value}</span>
         </div>;
         return ListComponent.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
@@ -154,17 +154,5 @@ export class PodsLeftPanel extends BaseComponent<IPodListComponentProperties> {
             />
         );
         return ListComponent.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
-    }
-
-    private _getImageName(): string | null {
-        if (this.props.spec
-            && this.props.template
-            && this.props.template.spec
-            && this.props.template.spec.containers
-            && this.props.template.spec.containers.length > 0) {
-            return this.props.template.spec.containers[0].image;
-        }
-
-        return null;
     }
 }

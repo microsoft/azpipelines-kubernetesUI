@@ -109,7 +109,8 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
             deployment: deployment,
             //todo :: should we show all images of all containers in a replica set?
             image: replica.spec.template.spec.containers[0].image,
-            creationTimeStamp: replica.metadata.creationTimestamp
+            creationTimeStamp: replica.metadata.creationTimestamp,
+            kind: replica.kind || "ReplicaSet"
         };
     }
 

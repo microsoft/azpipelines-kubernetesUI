@@ -12,22 +12,22 @@ import { IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
 import { PodsLeftPanel } from "./PodsLeftPanel";
 import { PodsRightPanel } from "./PodsRightPanel";
-import "./WorkloadPodsView.scss";
+import "./PodsViewComponent.scss";
 
-export interface IWorkloadPodsViewProperties extends IVssComponentProperties {
-    metaData: V1ObjectMeta;
+export interface IPodsViewComponentProperties extends IVssComponentProperties {
+    parentMetaData: V1ObjectMeta;
     podsPromise: Promise<V1PodList>;
-    template: V1PodTemplateSpec;
-    kind: string;
+    podTemplate: V1PodTemplateSpec;
+    parentKind: string;
 }
 
-export interface IWorkloadPodsViewState {
+export interface IPodsViewComponentState {
     pods: V1Pod[];
     selectedPod: V1Pod | null;
 }
 
-export class WorkloadPodsView extends BaseComponent<IWorkloadPodsViewProperties, IWorkloadPodsViewState> {
-    constructor(props: IWorkloadPodsViewProperties) {
+export class PodsViewComponent extends BaseComponent<IPodsViewComponentProperties, IPodsViewComponentState> {
+    constructor(props: IPodsViewComponentProperties) {
         super(props, {});
         this.state = {
             pods: [],
@@ -43,16 +43,16 @@ export class WorkloadPodsView extends BaseComponent<IWorkloadPodsViewProperties,
 
         const leftPanel = (
             <PodsLeftPanel
-                metaData={this.props.metaData}
-                template={this.props.template}
-                kind={this.props.kind}
+                parentMetaData={this.props.parentMetaData}
+                podTemplate={this.props.podTemplate}
+                parentKind={this.props.parentKind}
                 pods={this.state.pods}
                 onSelectionChange={this._onPodSelectionChange} />
         );
 
         const rightPanel = (selectedPod ?
             <PodsRightPanel
-                pod={this.state.selectedPod ? this.state.selectedPod : this.state.pods[0]} />
+                pod={selectedPod} />
             : <div className="zero-pods-text-container">{Resources.NoPodsFoundText}</div>);
 
         return (
@@ -69,11 +69,11 @@ export class WorkloadPodsView extends BaseComponent<IWorkloadPodsViewProperties,
     }
 
     private _updatePodsIfNeeded(): void {
-        if (this.props.metaData && this.props.podsPromise && !this._havePodsUpdated) {
+        if (this.props.parentMetaData && this.props.podsPromise && !this._havePodsUpdated) {
             this._havePodsUpdated = true;
             this.props.podsPromise.then((podList: V1PodList) => {
                 let pods: V1Pod[] = (podList && podList.items || []).filter(pod => {
-                    return Utils.isOwnerMatched(pod.metadata, this.props.metaData.uid);
+                    return Utils.isOwnerMatched(pod.metadata, this.props.parentMetaData.uid);
                 });
 
                 this.setState({
