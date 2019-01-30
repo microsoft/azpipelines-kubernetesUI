@@ -10,7 +10,7 @@ import { ITableColumn, SimpleTableCell } from "azure-devops-ui/Table";
 import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { Utils } from "../Utils";
-import { PodStatusComponent } from "./PodStatusComponent";
+import { ResourceStatusComponent } from "./ResourceStatusComponent";
 
 const setNameKey = "statefulset-name-key";
 const imageKey = "statefulset-image-key";
@@ -20,19 +20,25 @@ const colDataClassName: string = "list-col-content";
 
 export interface IDaemonSetComponentProperties extends IVssComponentProperties {
     statefulSetList: V1StatefulSetList;
+    onItemInvoked?: (item?: any, index?: number, ev?: Event) => void;
+    nameFilter?: string;
 }
 
 export class StatefulSetListingComponent extends BaseComponent<IDaemonSetComponentProperties, {}> {
     public render(): React.ReactNode {
-        return (
-            <div>{
+        const filteredSet: V1StatefulSet[] = (this.props.statefulSetList.items || []).filter((set) => {
+            return Utils.filterByName(set.metadata.name, this.props.nameFilter);
+        });
+        if (filteredSet.length > 0) {
+            return (
                 <ListComponent
                     className={css("list-content", "top-padding", "depth-16")}
-                    items={this.props.statefulSetList.items || []}
+                    items={filteredSet}
                     columns={StatefulSetListingComponent._getColumns()}
                 />
-            }</div>
-        );
+            );
+        }
+        return null;
     }
 
     private static _getColumns(): ITableColumn<V1StatefulSet>[] {
@@ -98,7 +104,7 @@ export class StatefulSetListingComponent extends BaseComponent<IDaemonSetCompone
         }
 
         const itemToRender = (
-            <PodStatusComponent
+            <ResourceStatusComponent
                 statusProps={statusProps}
                 statusDescription={podString}
             />

@@ -19,7 +19,7 @@ import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import { Card } from "azure-devops-ui/Card";
 import "./PodsLeftPanel.scss";
-import { PodStatusComponent } from "./PodStatusComponent";
+import { ResourceStatusComponent } from "./ResourceStatusComponent";
 
 const podStatusDic: { [index: string]: IStatusProps } = {
     "Running": Statuses.Success,
@@ -148,7 +148,7 @@ export class PodsLeftPanel extends BaseComponent<IPodListComponentProperties> {
 
     private static _renderPodNameCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod): JSX.Element {
         const itemToRender = (
-            <PodStatusComponent
+            <ResourceStatusComponent
                 statusProps={podStatusDic[pod.status.phase]}
                 statusDescription={pod.metadata.name}
             />

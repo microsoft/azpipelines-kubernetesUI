@@ -5,7 +5,6 @@
 
 import { V1DeploymentList, V1ReplicaSet, V1ReplicaSetList, V1ServiceList, V1DaemonSetList, V1StatefulSetList, V1Service, V1PodList, V1Pod } from "@kubernetes/client-node";
 import { BaseComponent, format } from "@uifabric/utilities";
-import { Pivot, PivotItem } from "office-ui-fabric-react/lib/Pivot";
 import * as React from "react";
 import { IKubeService } from "../../Contracts/Contracts";
 import * as Resources from "../Resources";
@@ -23,17 +22,29 @@ import { DaemonSetListComponent } from "./DaemonSetListComponent";
 import { StatefulSetListingComponent } from "./StatefulSetListingComponent";
 import { PodsComponent } from "./PodsComponent";
 import { ZeroDataComponent } from "./ZeroDataComponent";
+import { Filter, IFilterState, FILTER_CHANGE_EVENT, IFilterItemState } from "azure-devops-ui/Utilities/Filter";
+import { KubeResourceType } from "../../Contracts/KubeServiceBase";
+import { FilterComponent, NameKey, TypeKey } from "./FilterComponent";
+import { Tab, TabBar, TabContent } from "azure-devops-ui/Tabs";
+import { ObservableValue } from "azure-devops-ui/Core/Observable";
+import { HeaderCommandBarWithFilter } from 'azure-devops-ui/HeaderCommandBar';
 import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
 
 const workloadsPivotItemKey: string = "workloads";
 const servicesPivotItemKey: string = "services";
+const filterToggled = new ObservableValue<boolean>(false);
 
+//todo: refactor filter properties to respective resource type components
 export interface IKubernetesContainerState extends IKubernetesSummary {
     selectedKey?: string;
     showSummary?: boolean;
     showDeployment?: boolean;
     showService?: boolean;
     selectedItem?: any;
+    workloadsFilter:Filter;
+    svcFilter: Filter;
+    workloadsFilterState?:IFilterState;
+    svcFilterState?: IFilterState;
 }
 
 export interface IKubeSummaryProps extends IVssComponentProperties {
@@ -45,12 +56,18 @@ export interface IKubeSummaryProps extends IVssComponentProperties {
 export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesContainerState> {
     constructor(props: IKubeSummaryProps) {
         super(props, {});
+        const filter = new Filter();
+        filter.subscribe(this._onWorkloadsFilterApplied, FILTER_CHANGE_EVENT);
+        const svcFilter = new Filter();
+        svcFilter.subscribe(this._onSvcFilterApplied, FILTER_CHANGE_EVENT);
         this.state = {
             namespace: this.props.namespace || "",
             selectedKey: workloadsPivotItemKey,
             showSummary: true,
             showDeployment: false,
-            showService: false
+            showService: false,
+            workloadsFilter: filter,
+            svcFilter: svcFilter
         };
     }
 
@@ -202,62 +219,89 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
     private _getMainPivot(): JSX.Element {
         return (
             <div className="content-with-pivot">
-                <Pivot
-                    selectedKey={this.state.selectedKey}
-                    onLinkClick={(item) => this.setState({ selectedKey: item && item.props.itemKey })}
-                    className="pivot-main"
-                >
-                    {this._getDeploymentPivot()}
-                    {this._getServicesPivot()}
-                </Pivot>
+                <TabBar
+                    onSelectedTabChanged={(key: string) => { this.setState({ selectedKey: key }) }}
+                    orientation={0}
+                    selectedTabId={this.state.selectedKey}
+                    renderAdditionalContent={() => {
+                        return (<HeaderCommandBarWithFilter filter={this.state.selectedKey === workloadsPivotItemKey ?
+                            this.state.workloadsFilter : this.state.svcFilter}
+                            filterToggled={filterToggled} items={[]} />);
+                    }}>
+                    <Tab name={Resources.PivotWorkloadsText} id={workloadsPivotItemKey} />
+                    <Tab name={Resources.PivotServiceText} id={servicesPivotItemKey} />
+                </TabBar>
+                <TabContent>
+                    <div className="item-padding">
+                        {this._getFilterBar()}
+                        {this._getContent()}
+                    </div>
+                </TabContent>
             </div>
         );
     }
 
-    private _getDeploymentPivot(): JSX.Element {
-        //todo: adding top margin between each listing components
-        if (this._getWorkloadSize() === 0) {
-            return (
-                <PivotItem
-                    headerText={Resources.PivotWorkloadsText}
-                    itemKey={workloadsPivotItemKey}
-                    className="item-padding"
-                >
-                    <ZeroDataComponent
-                        imagePath={require("../zero_data.png")}
-                        hyperLink="https://kubernetes.io/docs/concepts/workloads/pods/pod/"
-                        hyperLinkLabel={Resources.LearnMoreText}
-                        descriptionText={Resources.NoWorkLoadsText}
-                        additionalHelpText={Resources.CreateWorkLoadText}
-                    />
-
-                </PivotItem>
-            );
+    private _getContent(): JSX.Element {
+        if (this.state.selectedKey === servicesPivotItemKey) {
+        const serivceSize: number = this.state.serviceList ? this.state.serviceList.items.length : 0;
+            return (serivceSize === 0 ?
+                <ZeroDataComponent
+                    imagePath={require("../zero_data.png")}
+                    hyperLink="https://kubernetes.io/docs/concepts/services-networking/service/"
+                    hyperLinkLabel={Resources.LearnMoreText}
+                    descriptionText={Resources.NoServicesText}
+                    additionalHelpText={Resources.CreateServiceText}
+                /> :
+                <ServicesComponent
+                    servicesList={this.state.serviceList || {} as V1ServiceList}
+                    onItemActivated={this._onServiceItemInvoked}
+                    filter={this.state.svcFilter}
+                    filterState={this.state.svcFilterState}
+                    nameFilter={this._getNameFilterKey()}
+                    typeSelections={this._getTypeSelection()}
+                />);
         }
-        return (
-            <PivotItem
-                headerText={Resources.PivotWorkloadsText}
-                itemKey={workloadsPivotItemKey}
-                className="item-padding"
-            >
-                <DeploymentsComponent
-                    deploymentList={this.state.deploymentList || {} as V1DeploymentList}
-                    replicaSetList={this.state.replicaSetList || {} as V1ReplicaSetList}
-                    key={format("dc-{0}", this.state.namespace || "")}
-                    onItemActivated={this._onDeploymentItemInvoked}
-                />
-                <DaemonSetListComponent
-                    daemonSetList={this.state.daemonSetList || {} as V1DaemonSetList}
-                    key={format("ds-list-{0}", this.state.namespace || "")}
-                />
-                <StatefulSetListingComponent
-                    statefulSetList={this.state.statefulSetList || {} as V1StatefulSetList}
-                    key={format("sts-list-{0}", this.state.namespace || "")}
-                />
+        return (this._getWorkloadSize() === 0 ?
+            <ZeroDataComponent
+                imagePath={require("../zero_data.png")}
+                hyperLink="https://kubernetes.io/docs/concepts/workloads/pods/pod/"
+                hyperLinkLabel={Resources.LearnMoreText}
+                descriptionText={Resources.NoWorkLoadsText}
+                additionalHelpText={Resources.CreateWorkLoadText}
+            /> :
+            <div>
+                {this._showComponent(KubeResourceType.Deployments) && this._getDeployments()}
+                {this._showComponent(KubeResourceType.DaemonSets) && this._getDaemonSetsComponent()}
+                {this._showComponent(KubeResourceType.StatefulSets) && this._getStatefulSetsComponent()}
+                {this.state.podList && this.state.podList.items && this.state.podList.items.length > 0 &&
+                    this._showComponent(KubeResourceType.Pods) && this.getOrphanPods()}
+            </div>);
+    }
 
-                {this.state.podList && this.state.podList.items && this.state.podList.items.length > 0 && this.getOrphanPods()}
-            </PivotItem>
-        );
+    private _getFilterBar(): JSX.Element {
+        if (this.state.selectedKey === workloadsPivotItemKey) {
+            return (<FilterComponent filter={this.state.workloadsFilter}
+                keywordPlaceHolder={Resources.PivotWorkloadsText}
+                pickListPlaceHolder={Resources.KindText}
+                pickListItemsFn={this._pickListItems}
+                listItemsFn={this._listItems}
+                filterToggled={filterToggled}
+            />);
+        }
+        else {
+            return (<FilterComponent filter={this.state.svcFilter}
+                pickListPlaceHolder={Resources.TypeText}
+                keywordPlaceHolder={Resources.PivotServiceText}
+                filterToggled={filterToggled}
+                pickListItemsFn={() => this._generateSvcTypes()}
+                listItemsFn={(item: any) => {
+                    return {
+                        key: item,
+                        name: item
+                    };
+                }}
+            />);
+        }
     }
 
     private _onDeploymentItemInvoked = (event: React.SyntheticEvent<HTMLElement>, item: IDeploymentReplicaSetItem) => {
@@ -267,30 +311,6 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
             showService: false,
             showSummary: false
         });
-    }
-
-    private _getServicesPivot(): JSX.Element {
-        const serivceSize: number = this.state.serviceList ? this.state.serviceList.items.length : 0;
-        return (
-            <PivotItem
-                headerText={Resources.PivotServiceText}
-                itemKey={servicesPivotItemKey}
-                className="item-padding"
-            >{
-                    serivceSize == 0 ? <ZeroDataComponent
-                        imagePath={require("../zero_data.png")}
-                        hyperLink="https://kubernetes.io/docs/concepts/services-networking/service/"
-                        hyperLinkLabel={Resources.LearnMoreText}
-                        descriptionText={Resources.NoServicesText}
-                        additionalHelpText={Resources.CreateServiceText}
-                    /> :
-                        <ServicesComponent
-                            servicesList={this.state.serviceList || {} as V1ServiceList}
-                            onItemActivated={this._onServiceItemInvoked}
-                        />
-                }
-            </PivotItem>
-        );
     }
 
     private _onServiceItemInvoked = (event: React.SyntheticEvent<HTMLElement>, item: IServiceItem) => {
@@ -317,7 +337,110 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
                 pods.push(pod);
             }
         });
-        return <PodsComponent podsToRender={pods} />;
+        return <PodsComponent podsToRender={pods} nameFilter={this._getNameFilterKey()}/>;
+    }
+
+    private _getDaemonSetsComponent():JSX.Element {
+        return (<DaemonSetListComponent
+            daemonSetList={this.state.daemonSetList || {} as V1DaemonSetList}
+            key={format("ds-list-{0}", this.state.namespace || "")}
+            nameFilter={this._getNameFilterKey()}
+        />);
+    }
+
+    private _getStatefulSetsComponent(): JSX.Element {
+        return (<StatefulSetListingComponent
+            statefulSetList={this.state.statefulSetList || {} as V1StatefulSetList}
+            key={format("sts-list-{0}", this.state.namespace || "")}
+            nameFilter={this._getNameFilterKey()}
+        />);
+    }
+
+    private _getDeployments(): JSX.Element {
+        return (<DeploymentsComponent
+            deploymentList={this.state.deploymentList || {} as V1DeploymentList}
+            replicaSetList={this.state.replicaSetList || {} as V1ReplicaSetList}
+            key={format("dc-{0}", this.state.namespace || "")}
+            onItem={this._onDeploymentItemInvoked}
+            nameFilter={this._getNameFilterKey()}
+        />);
+    }
+
+    private _onWorkloadsFilterApplied = (currentState: IFilterState) => {
+        this.setState({
+            workloadsFilterState: this.state.workloadsFilter.getState()
+        })
+    };
+
+    private _onSvcFilterApplied = (currentState: IFilterState) => {
+        this.setState({
+            svcFilterState: this.state.svcFilter.getState()
+        })
+    };
+
+    private _getNameFilterKey(): string | undefined {
+        const filterState:IFilterState | undefined = this.state.selectedKey===workloadsPivotItemKey?this.state.workloadsFilterState:this.state.svcFilterState;
+        const filterItem: IFilterItemState | null= filterState? filterState[NameKey]: null;
+        return filterItem? (filterItem.value as string): undefined;
+    }
+
+    private _getTypeSelection():any[] {
+        const filterState:IFilterState | undefined = this.state.selectedKey===workloadsPivotItemKey?this.state.workloadsFilterState:this.state.svcFilterState;
+        const filterItem: IFilterItemState | null= filterState? filterState[TypeKey]: null;
+        const selections: any[] = filterItem? filterItem.value : [];
+        return selections;
+    }
+
+    private _showComponent(resourceType: KubeResourceType): boolean{
+        const selections: KubeResourceType[] = this._getTypeSelection();
+        // if no selections are made, show all components
+        if(selections.length > 0) {
+            return selections.indexOf(resourceType) != -1;
+        }
+        return true;
+    }
+
+    private _pickListItems = () => {
+        return [KubeResourceType.Deployments, 
+                KubeResourceType.ReplicaSets, 
+                KubeResourceType.DaemonSets, 
+                KubeResourceType.StatefulSets, 
+                KubeResourceType.Pods];
+    };
+
+    private _listItems = (item: any)=> {
+        let name:string = "";
+        switch(item){
+            case KubeResourceType.Deployments:
+                name = Resources.DeploymentsDetailsText;
+                break;
+            case KubeResourceType.ReplicaSets:
+                name = Resources.ReplicaSetText;
+                break;
+            case KubeResourceType.DaemonSets:
+                name = Resources.DaemonSetText;
+                break;
+            case KubeResourceType.StatefulSets:
+                name = Resources.StatefulSetText;
+                break;
+            case KubeResourceType.Pods:
+                name = Resources.PodsText;
+                break;
+     };
+        return {
+            key: item.toString(),
+            name: name
+        };
+    };
+
+    private _generateSvcTypes(): string[] {
+        let svcTypes: string[] = [];
+        this.state.serviceList && this.state.serviceList.items && this.state.serviceList.items.forEach((svc) => {
+            if (svcTypes.indexOf(svc.spec.type) == -1) {
+                svcTypes.push(svc.spec.type);
+            }
+        });
+        return svcTypes;
     }
 
     private _getWorkloadSize(): number {

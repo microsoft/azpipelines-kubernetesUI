@@ -11,7 +11,7 @@ import { StatusSize, Status } from "azure-devops-ui/Status";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
 import { ITableColumn, SimpleTableCell } from "azure-devops-ui/Table";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
-import { PodStatusComponent } from "./PodStatusComponent";
+import { ResourceStatusComponent } from "./ResourceStatusComponent";
 
 const podNameKey: string = "pl-name-key";
 const podImageKey: string = "pl-image-key";
@@ -20,21 +20,27 @@ const podAgeKey: string = "pl-age-key";
 const colDataClassName: string = "list-col-content";
 
 export interface IPodsComponentProperties extends IVssComponentProperties {
-    podsToRender: V1Pod[];
+    podsToRender:V1Pod[];
     headingText?: string;
+    nameFilter?: string;
 }
 
 export class PodsComponent extends BaseComponent<IPodsComponentProperties> {
     public render(): React.ReactNode {
-
-        return (
-            <ListComponent
-                headingText={this.props.headingText}
-                className={css("list-content", "pl-details", "depth-16")}
-                items={this.props.podsToRender}
-                columns={PodsComponent._getColumns()}
-            />
-        );
+        const filteredPods: V1Pod[] = this.props.podsToRender.filter((pod) => {
+            return Utils.filterByName(pod.metadata.name, this.props.nameFilter);
+        });
+        if (filteredPods.length > 0) {
+            return (
+                <ListComponent
+                    headingText={this.props.headingText}
+                    className={css("list-content", "pl-details", "depth-16")}
+                    items={this.props.podsToRender}
+                    columns={PodsComponent._getColumns()}
+                />
+            );
+        }
+        return null;
     }
 
     private static _getColumns(): ITableColumn<V1Pod>[] {
@@ -110,7 +116,7 @@ export class PodsComponent extends BaseComponent<IPodsComponentProperties> {
         }
 
         const itemToRender = (
-            <PodStatusComponent
+            <ResourceStatusComponent
                 statusProps={Utils.generatePodStatusProps(pod.status)}
                 statusDescription={statusDescription}
                 customDescription={customDescription}

@@ -10,7 +10,7 @@ import { Ago } from "azure-devops-ui/Ago";
 import { ITableColumn, SimpleTableCell } from "azure-devops-ui/Table";
 import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
 import { Utils } from "../Utils";
-import { PodStatusComponent } from "./PodStatusComponent";
+import { ResourceStatusComponent } from "./ResourceStatusComponent";
 
 const setNameKey = "set-name-key";
 const imageKey = "image-key";
@@ -20,18 +20,26 @@ const colDataClassName: string = "list-col-content";
 
 export interface IDaemonSetComponentProperties extends IVssComponentProperties {
     daemonSetList: V1DaemonSetList;
+    onItemInvoked?: (item?: any, index?: number, ev?: Event) => void;
+    nameFilter?: string;
 }
 
 
 export class DaemonSetListComponent extends BaseComponent<IDaemonSetComponentProperties, {}> {
     public render(): React.ReactNode {
-        return (
-            <ListComponent
-                className={css("list-content", "top-padding", "depth-16")}
-                items={this.props.daemonSetList.items || []}
-                columns={DaemonSetListComponent._getColumns()}
-            />
-        );
+        const filteredItems: V1DaemonSet[] = (this.props.daemonSetList.items || []).filter((item) => {
+            return Utils.filterByName(item.metadata.name, this.props.nameFilter);
+        });
+        if (filteredItems.length > 0) {
+            return (
+                <ListComponent
+                    className={css("list-content", "top-padding", "depth-16")}
+                    items={this.props.daemonSetList.items || []}
+                    columns={DaemonSetListComponent._getColumns()}
+                />
+            );
+        }
+        return null;
     }
 
     private static _getColumns(): ITableColumn<V1DaemonSet>[] {
@@ -97,7 +105,7 @@ export class DaemonSetListComponent extends BaseComponent<IDaemonSetComponentPro
         }
 
         const itemToRender = (
-            <PodStatusComponent
+            <ResourceStatusComponent
                 statusProps={statusProps}
                 statusDescription={podString}
             />
