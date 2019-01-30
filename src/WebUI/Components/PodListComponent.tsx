@@ -102,7 +102,7 @@ export class PodListComponent extends BaseComponent<IPodListComponentProperties>
         if (this.props.replicaSet.metadata
             && this.props.replicaSet.metadata.creationTimestamp) {
             let des = "";
-            const imageName = this._getImageName();
+            const imageName = Utils.getPodImageName(this.props.replicaSet.spec && this.props.replicaSet.spec.template);
             if (imageName) {
                 des = format(Resources.AgoBy, imageName)
             }

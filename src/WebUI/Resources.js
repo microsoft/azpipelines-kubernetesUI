@@ -39,4 +39,15 @@ define("Environments/Providers/Kubernetes/Resources", ["require", "exports"], fu
     exports.DeploymentText = "Deployment";
     exports.ExternalIPAllocPending = "External IP allocation pending";
     exports.ExternalIPAllocated = "External IP allocated";
+    exports.SummaryText = "Summary";
+    exports.KindText = "Kind";
+    exports.AnnotationsText = "Annotations";
+    exports.RestartPolicyText = "Restart policy";
+    exports.QoSClassText = "QoS class";
+    exports.NodeText = "Node";
+    exports.PodsListHeaderText = "Pods";
+    exports.LogsText = "Logs";
+    exports.YamlText = "YAML";
+    exports.Ago = " ago";
+    exports.NoPodsFoundText = "No pods are detected in this Kubernetes workload";
 });

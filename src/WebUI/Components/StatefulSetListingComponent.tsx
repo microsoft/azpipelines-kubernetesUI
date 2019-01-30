@@ -63,7 +63,7 @@ export class StatefulSetListingComponent extends BaseComponent<IDaemonSetCompone
             minWidth: 80,
             width: new ObservableValue(160),
             headerClassName: headerColumnClassName,
-            renderCell: StatefulSetListingComponent._renderPodsCell
+            renderCell: StatefulSetListingComponent._renderPodsCountCell
         });
 
         columns.push({
@@ -89,7 +89,7 @@ export class StatefulSetListingComponent extends BaseComponent<IDaemonSetCompone
         return ListComponent.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
-    private static _renderPodsCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1StatefulSet>, statefulSet: V1StatefulSet): JSX.Element {
+    private static _renderPodsCountCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1StatefulSet>, statefulSet: V1StatefulSet): JSX.Element {
         let statusProps: IStatusProps | undefined;
         let podString: string = "";
         if (statefulSet.status.replicas > 0) {

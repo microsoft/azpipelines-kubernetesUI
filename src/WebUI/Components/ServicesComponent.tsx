@@ -64,7 +64,8 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
                 creationTimestamp: service.metadata.creationTimestamp,
                 uid: service.metadata.uid.toLowerCase(),
                 pipeline: Utils.getPipelineText(service.metadata.annotations),
-                service: service
+                service: service,
+                kind: service.kind || "Service"
             });
         });
 
