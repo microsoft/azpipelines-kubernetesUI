@@ -40,4 +40,15 @@ define("Environments/Providers/Kubernetes/Resources", ["require", "exports"], fu
     exports.FindByNameText = "Find by {0} name";
     exports.KindText = "Kind";
     exports.NoItemsText = "No Items found"
+    exports.SummaryText = "Summary";
+    exports.KindText = "Kind";
+    exports.AnnotationsText = "Annotations";
+    exports.RestartPolicyText = "Restart policy";
+    exports.QoSClassText = "QoS class";
+    exports.NodeText = "Node";
+    exports.PodsListHeaderText = "Pods";
+    exports.LogsText = "Logs";
+    exports.YamlText = "YAML";
+    exports.Ago = " ago";
+    exports.NoPodsFoundText = "No pods are detected in this Kubernetes workload";
 });
