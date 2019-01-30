@@ -37,4 +37,15 @@ define("Environments/Providers/Kubernetes/Resources", ["require", "exports"], fu
     exports.DaemonSetText = "DaemonSet";
     exports.StatefulSetText = "StatefulSet";
     exports.DeploymentText = "Deployment";
+    exports.SummaryText = "Summary";
+    exports.KindText = "Kind";
+    exports.AnnotationsText = "Annotations";
+    exports.RestartPolicyText = "Restart policy";
+    exports.QoSClassText = "QoS class";
+    exports.NodeText = "Node";
+    exports.PodsListHeaderText = "Pods";
+    exports.LogsText = "Logs";
+    exports.YamlText = "YAML";
+    exports.Ago = " ago";
+    exports.NoPodsFoundText = "No pods are detected in this Kubernetes workload";
 });

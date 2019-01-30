@@ -18,6 +18,7 @@ export interface IListComponentProperties<T> extends IVssComponentProperties {
     items: T[];
     columns: ITableColumn<T>[];
     onItemActivated?: (event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>, selectedItem: any) => void;
+    onItemSelected?: (event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>, selectedItem: any) => void;
 }
 
 export class ListComponent<T> extends BaseComponent<IListComponentProperties<T>> {
@@ -40,6 +41,7 @@ export class ListComponent<T> extends BaseComponent<IListComponentProperties<T>>
                 showLines={false}
                 singleClickActivation={false}
                 onActivate={this._onItemActivated}
+                onSelect={this._onItemSelected}
             />
         );
     }
@@ -87,6 +89,12 @@ export class ListComponent<T> extends BaseComponent<IListComponentProperties<T>>
     private _onItemActivated = (event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>) => {
         if (this.props.onItemActivated) {
             this.props.onItemActivated(event, tableRow, this.props.items[tableRow.index]);
+        }
+    }
+
+    private _onItemSelected = (event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>) => {
+        if (this.props.onItemSelected) {
+            this.props.onItemSelected(event, tableRow, this.props.items[tableRow.index]);
         }
     }
 
