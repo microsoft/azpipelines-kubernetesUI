@@ -20,21 +20,27 @@ const podAgeKey: string = "pl-age-key";
 const colDataClassName: string = "list-col-content";
 
 export interface IPodsComponentProperties extends IVssComponentProperties {
-    podsToRender: V1Pod[];
+    podsToRender:V1Pod[];
     headingText?: string;
+    nameFilter?: string;
 }
 
 export class PodsComponent extends BaseComponent<IPodsComponentProperties> {
     public render(): React.ReactNode {
-
-        return (
-            <ListComponent
-                headingText={this.props.headingText}
-                className={css("list-content", "pl-details", "depth-16")}
-                items={this.props.podsToRender}
-                columns={PodsComponent._getColumns()}
-            />
-        );
+        const filteredPods: V1Pod[] = this.props.podsToRender.filter((pod) => {
+            return Utils.filterByName(pod.metadata.name, this.props.nameFilter);
+        });
+        if (filteredPods.length > 0) {
+            return (
+                <ListComponent
+                    headingText={this.props.headingText}
+                    className={css("list-content", "pl-details", "depth-16")}
+                    items={this.props.podsToRender}
+                    columns={PodsComponent._getColumns()}
+                />
+            );
+        }
+        return null;
     }
 
     private static _getColumns(): ITableColumn<V1Pod>[] {

@@ -87,6 +87,13 @@ export class Utils {
         return Statuses.Failed;
     }
 
+    public static filterByName(objectName: string, filterKey?: string): boolean {
+        if (filterKey) {
+            return objectName.includes(filterKey);
+        }
+        return true;
+    }
+    
     public static getPodImageName(podTemplate: V1PodTemplateSpec): string | null {
         if (podTemplate
             && podTemplate.spec

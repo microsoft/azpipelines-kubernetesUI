@@ -37,6 +37,9 @@ define("Environments/Providers/Kubernetes/Resources", ["require", "exports"], fu
     exports.DaemonSetText = "DaemonSet";
     exports.StatefulSetText = "StatefulSet";
     exports.DeploymentText = "Deployment";
+    exports.FindByNameText = "Find by {0} name";
+    exports.KindText = "Kind";
+    exports.NoItemsText = "No Items found"
     exports.SummaryText = "Summary";
     exports.KindText = "Kind";
     exports.AnnotationsText = "Annotations";

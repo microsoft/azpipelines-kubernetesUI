@@ -26,20 +26,31 @@ const colDataClassName: string = "sc-col-data";
 
 export interface IServicesComponentProperties extends IVssComponentProperties {
     servicesList: V1ServiceList;
+    typeSelections: string[];
+    nameFilter?: string,
     onItemActivated?: (event: React.SyntheticEvent<HTMLElement>, item: IServiceItem) => void;
 }
 
 export class ServicesComponent extends BaseComponent<IServicesComponentProperties, {}> {
     public render(): React.ReactNode {
-
-        return (
-            <ListComponent
-                className={css("list-content", "depth-16")}
-                items={ServicesComponent._getServiceItems(this.props.servicesList)}
-                columns={ServicesComponent._getColumns()}
-                onItemActivated={this._openServiceItem}
-            />
-        );
+        const filteredSvc: V1Service[] = (this.props.servicesList && this.props.servicesList.items || [])
+            .filter((svc) => {
+                return this._filterService(svc);
+            });
+        if (filteredSvc.length > 0) {
+            return (
+                <div>{
+                    <ListComponent
+                        className={css("list-content", "depth-16")}
+                        items={ServicesComponent._getServiceItems(filteredSvc)}
+                        columns={ServicesComponent._getColumns()}
+                        onItemActivated={this._openServiceItem}
+                    />
+                }
+                </div>
+            );
+        }
+        return null;
     }
 
     private _openServiceItem = (event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>, selectedItem: any) => {
@@ -48,10 +59,9 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
         }
     }
 
-    private static _getServiceItems(servicesList: V1ServiceList): IServiceItem[] {
+    private static _getServiceItems(servicesList: V1Service[]): IServiceItem[] {
         let items: IServiceItem[] = [];
-
-        (servicesList && servicesList.items || []).forEach(service => {
+        servicesList.forEach(service => {
             items.push({
                 package: service.metadata.name,
                 type: service.spec.type,
@@ -195,5 +205,12 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
     private static _renderAgeCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, service: IServiceItem): JSX.Element => {
         const itemToRender = (<Ago date={new Date(service.creationTimestamp)} />);
         return ListComponent.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
+    }
+
+    private _filterService(svc: V1Service): boolean {
+        const nameMatches: boolean = Utils.filterByName(svc.metadata.name, this.props.nameFilter);
+        const typeMatches: boolean = this.props.typeSelections.length > 0 ? this.props.typeSelections.indexOf(svc.spec.type) >= 0 : true;
+
+        return nameMatches && typeMatches;
     }
 }
