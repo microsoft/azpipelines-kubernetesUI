@@ -37,6 +37,7 @@ define("Environments/Providers/Kubernetes/Resources", ["require", "exports"], fu
     exports.DaemonSetText = "DaemonSet";
     exports.StatefulSetText = "StatefulSet";
     exports.DeploymentText = "Deployment";
+<<<<<<< HEAD
     exports.LearnMoreText = "Learn more";
     exports.NoPodsForSvcText = "This service currently does not map to any pods";
     exports.NoWorkLoadsText = "No workloads are detected in this Kubernetes namespace";
@@ -44,4 +45,17 @@ define("Environments/Providers/Kubernetes/Resources", ["require", "exports"], fu
     exports.CreateWorkLoadText = "about how workloads can be added to the namespace";
     exports.NoServicesText = "No services are detected in this Kubernetes namespace";
     exports.CreateServiceText = "about how services can be added to the namespace";
+=======
+    exports.SummaryText = "Summary";
+    exports.KindText = "Kind";
+    exports.AnnotationsText = "Annotations";
+    exports.RestartPolicyText = "Restart policy";
+    exports.QoSClassText = "QoS class";
+    exports.NodeText = "Node";
+    exports.PodsListHeaderText = "Pods";
+    exports.LogsText = "Logs";
+    exports.YamlText = "YAML";
+    exports.Ago = " ago";
+    exports.NoPodsFoundText = "No pods are detected in this Kubernetes workload";
+>>>>>>> origin/master
 });

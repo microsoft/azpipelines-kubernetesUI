@@ -23,16 +23,14 @@ export interface IDaemonSetComponentProperties extends IVssComponentProperties {
 }
 
 
-export class DaemonSetListingComponent extends BaseComponent<IDaemonSetComponentProperties, {}> {
+export class DaemonSetListComponent extends BaseComponent<IDaemonSetComponentProperties, {}> {
     public render(): React.ReactNode {
         return (
-            <div>{
-                <ListComponent
-                    className={css("list-content", "top-padding", "depth-16")}
-                    items={this.props.daemonSetList.items || []}
-                    columns={DaemonSetListingComponent._getColumns()}
-                />
-            }</div>
+            <ListComponent
+                className={css("list-content", "top-padding", "depth-16")}
+                items={this.props.daemonSetList.items || []}
+                columns={DaemonSetListComponent._getColumns()}
+            />
         );
     }
 
@@ -46,7 +44,7 @@ export class DaemonSetListingComponent extends BaseComponent<IDaemonSetComponent
             minWidth: 250,
             width: new ObservableValue(500),
             headerClassName: headerColumnClassName,
-            renderCell: DaemonSetListingComponent._renderDaemonSetNameCell
+            renderCell: DaemonSetListComponent._renderDaemonSetNameCell
         });
 
         columns.push({
@@ -55,7 +53,7 @@ export class DaemonSetListingComponent extends BaseComponent<IDaemonSetComponent
             minWidth: 250,
             width: new ObservableValue(500),
             headerClassName: headerColumnClassName,
-            renderCell: DaemonSetListingComponent._renderImageCell
+            renderCell: DaemonSetListComponent._renderImageCell
         });
 
         columns.push({
@@ -64,7 +62,7 @@ export class DaemonSetListingComponent extends BaseComponent<IDaemonSetComponent
             minWidth: 80,
             width: new ObservableValue(160),
             headerClassName: headerColumnClassName,
-            renderCell: DaemonSetListingComponent._renderPodsCell
+            renderCell: DaemonSetListComponent._renderPodsCountCell
         });
 
         columns.push({
@@ -73,7 +71,7 @@ export class DaemonSetListingComponent extends BaseComponent<IDaemonSetComponent
             minWidth: 80,
             width: new ObservableValue(160),
             headerClassName: headerColumnClassName,
-            renderCell: DaemonSetListingComponent._renderAgeCell
+            renderCell: DaemonSetListComponent._renderAgeCell
         });
 
         return columns;
@@ -90,7 +88,7 @@ export class DaemonSetListingComponent extends BaseComponent<IDaemonSetComponent
         return ListComponent.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
-    private static _renderPodsCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1DaemonSet>, daemonSet: V1DaemonSet): JSX.Element {
+    private static _renderPodsCountCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1DaemonSet>, daemonSet: V1DaemonSet): JSX.Element {
         let statusProps: IStatusProps | undefined;
         let podString: string = "";
         if (daemonSet.status.desiredNumberScheduled > 0) {
