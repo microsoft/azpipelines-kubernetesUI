@@ -10,8 +10,9 @@ import { Utils } from "../Utils";
 import { StatusSize, Status } from "azure-devops-ui/Status";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
 import { ITableColumn, SimpleTableCell } from "azure-devops-ui/Table";
-import { ObservableValue } from "azure-devops-ui/Core/Observable";
-import { ResourceStatusComponent } from "./ResourceStatusComponent";
+import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
+import { ResourceStatusComponent } from "./ResourceStatusComponent
+
 
 const podNameKey: string = "pl-name-key";
 const podImageKey: string = "pl-image-key";
@@ -23,6 +24,7 @@ export interface IPodsComponentProperties extends IVssComponentProperties {
     podsToRender:V1Pod[];
     headingText?: string;
     nameFilter?: string;
+    onItemActivated?: (event: React.SyntheticEvent<HTMLElement>, item: V1Pod) => void;
 }
 
 export class PodsComponent extends BaseComponent<IPodsComponentProperties> {
@@ -37,6 +39,7 @@ export class PodsComponent extends BaseComponent<IPodsComponentProperties> {
                     className={css("list-content", "pl-details", "depth-16")}
                     items={this.props.podsToRender}
                     columns={PodsComponent._getColumns()}
+                    onItemActivated={this._showPodDetails}
                 />
             );
         }
@@ -52,7 +55,7 @@ export class PodsComponent extends BaseComponent<IPodsComponentProperties> {
             id: podNameKey,
             name: Resources.PodsDetailsText,
             minWidth: 250,
-            width: new ObservableValue(500),
+            width: -100,
             headerClassName: css(headerColumnClassName, "first-col-header"),
             className: columnContentClassName,
             renderCell: PodsComponent._renderPodNameCell
@@ -62,7 +65,7 @@ export class PodsComponent extends BaseComponent<IPodsComponentProperties> {
             id: podImageKey,
             name: Resources.ImageText,
             minWidth: 250,
-            width: new ObservableValue(500),
+            width: -100,
             headerClassName: headerColumnClassName,
             className: columnContentClassName,
             renderCell: PodsComponent._renderPodImageCell
@@ -72,7 +75,7 @@ export class PodsComponent extends BaseComponent<IPodsComponentProperties> {
             id: podStatusKey,
             name: Resources.StatusText,
             minWidth: 80,
-            width: new ObservableValue(160),
+            width: -100,
             headerClassName: headerColumnClassName,
             className: columnContentClassName,
             renderCell: PodsComponent._renderPodStatusCell
@@ -82,13 +85,19 @@ export class PodsComponent extends BaseComponent<IPodsComponentProperties> {
             id: podAgeKey,
             name: Resources.AgeText,
             minWidth: 80,
-            width: new ObservableValue(160),
+            width: -100,
             headerClassName: headerColumnClassName,
             className: columnContentClassName,
             renderCell: PodsComponent._renderPodAgeCell
         });
 
         return columns;
+    }
+
+    private _showPodDetails = (event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>, selectedItem: V1Pod) => {
+        if (this.props.onItemActivated) {
+            this.props.onItemActivated(event, selectedItem);
+        }
     }
 
     private static _renderPodNameCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod): JSX.Element {

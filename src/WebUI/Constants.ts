@@ -8,3 +8,11 @@ export const enum PodsRightPanelTabsKeys {
     PodsLogsKey = "pod-logs",
     PodsYamlKey= "pod-yaml"
 }
+
+export const enum SelectedItemKeys {
+    ReplicaSetKey = "replica-set",
+    DaemonSetKey = "daemon-set",
+    StatefulSetKey = "stateful-set",
+    OrphanPodKey = "orphan-pod",
+    ServiceItemKey = "service-item"
+}

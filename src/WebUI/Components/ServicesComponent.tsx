@@ -6,7 +6,6 @@
 import { V1Service, V1ServiceList, V1ServicePort } from "@kubernetes/client-node";
 import { BaseComponent, css, format } from "@uifabric/utilities";
 import { Ago } from "azure-devops-ui/Ago";
-import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import * as React from "react";
 import * as Resources from "../Resources";
 import { IServiceItem, IVssComponentProperties } from "../Types";
@@ -117,7 +116,7 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
             id: packageKey,
             name: Resources.NameText,
             minWidth: 250,
-            width: new ObservableValue(500),
+            width: -100,
             headerClassName: css(headerColumnClassName, "first-col-header"),
             className: columnContentClassName,
             renderCell: ServicesComponent._renderPackageKeyCell
@@ -127,7 +126,7 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
             id: typeKey,
             name: Resources.TypeText,
             minWidth: 120,
-            width: new ObservableValue(240),
+            width: -100,
             headerClassName: css(headerColumnClassName, "first-col-header"),
             className: columnContentClassName,
             renderCell: ServicesComponent._renderTypeCell
@@ -137,7 +136,7 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
             id: clusterIPKey,
             name: Resources.ClusterIPText,
             minWidth: 150,
-            width: new ObservableValue(150),
+            width: -100,
             headerClassName: headerColumnClassName,
             className: columnContentClassName,
             renderCell: ServicesComponent._renderClusterIpCell
@@ -147,7 +146,7 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
             id: externalIPKey,
             name: Resources.ExternalIPText,
             minWidth: 150,
-            width: new ObservableValue(150),
+            width: -100,
             headerClassName: headerColumnClassName,
             className: columnContentClassName,
             renderCell: ServicesComponent._renderExternalIpCell
@@ -157,7 +156,7 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
             id: portKey,
             name: Resources.PortText,
             minWidth: 150,
-            width: new ObservableValue(150),
+            width: -100,
             headerClassName: headerColumnClassName,
             className: columnContentClassName,
             renderCell: ServicesComponent._renderPortCell
@@ -167,7 +166,7 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
             id: ageKey,
             name: Resources.AgeText,
             minWidth: 150,
-            width: new ObservableValue(300),
+            width: -100,
             headerClassName: headerColumnClassName,
             className: columnContentClassName,
             renderCell: ServicesComponent._renderAgeCell

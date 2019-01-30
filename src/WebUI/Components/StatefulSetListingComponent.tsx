@@ -8,7 +8,6 @@ import { IVssComponentProperties } from "../Types";
 import { Ago } from "azure-devops-ui/Ago";
 import { ITableColumn, SimpleTableCell } from "azure-devops-ui/Table";
 import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
-import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { Utils } from "../Utils";
 import { ResourceStatusComponent } from "./ResourceStatusComponent";
 
@@ -20,8 +19,8 @@ const colDataClassName: string = "list-col-content";
 
 export interface IDaemonSetComponentProperties extends IVssComponentProperties {
     statefulSetList: V1StatefulSetList;
-    onItemInvoked?: (item?: any, index?: number, ev?: Event) => void;
-    nameFilter?: string;
+    onItemActivated?: (event: React.SyntheticEvent<HTMLElement>, item: V1StatefulSet) => void;
+    nameFilter?: string;;
 }
 
 export class StatefulSetListingComponent extends BaseComponent<IDaemonSetComponentProperties, {}> {
@@ -35,10 +34,17 @@ export class StatefulSetListingComponent extends BaseComponent<IDaemonSetCompone
                     className={css("list-content", "top-padding", "depth-16")}
                     items={filteredSet}
                     columns={StatefulSetListingComponent._getColumns()}
+                    onItemActivated={this._openStatefulSetItem}
                 />
             );
         }
         return null;
+    }
+
+    private _openStatefulSetItem = (event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>, selectedItem: V1StatefulSet) => {
+        if (this.props.onItemActivated) {
+            this.props.onItemActivated(event, selectedItem);
+        }
     }
 
     private static _getColumns(): ITableColumn<V1StatefulSet>[] {
@@ -49,7 +55,7 @@ export class StatefulSetListingComponent extends BaseComponent<IDaemonSetCompone
             id: setNameKey,
             name: Resources.StatefulSetText,
             minWidth: 250,
-            width: new ObservableValue(500),
+            width: -100,
             headerClassName: css(headerColumnClassName, "first-col-header"),
             renderCell: StatefulSetListingComponent._renderSetNameCell
         });
@@ -58,7 +64,7 @@ export class StatefulSetListingComponent extends BaseComponent<IDaemonSetCompone
             id: imageKey,
             name: Resources.ImageText,
             minWidth: 250,
-            width: new ObservableValue(500),
+            width: -100,
             headerClassName: headerColumnClassName,
             renderCell: StatefulSetListingComponent._renderImageCell
         });
@@ -67,7 +73,7 @@ export class StatefulSetListingComponent extends BaseComponent<IDaemonSetCompone
             id: podsKey,
             name: Resources.PodsText,
             minWidth: 80,
-            width: new ObservableValue(160),
+            width: -100,
             headerClassName: headerColumnClassName,
             renderCell: StatefulSetListingComponent._renderPodsCountCell
         });
@@ -76,7 +82,7 @@ export class StatefulSetListingComponent extends BaseComponent<IDaemonSetCompone
             id: ageKey,
             name: Resources.AgeText,
             minWidth: 80,
-            width: new ObservableValue(160),
+            width: -100,
             headerClassName: headerColumnClassName,
             renderCell: StatefulSetListingComponent._renderAgeCell
         });
