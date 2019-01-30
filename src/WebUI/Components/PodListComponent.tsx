@@ -16,7 +16,7 @@ import { Utils } from "../Utils";
 import { ListComponent } from "./ListComponent";
 import { ITableColumn, SimpleTableCell } from "azure-devops-ui/Table";
 import "./PodListComponent.scss";
-import { PodStatusComponent } from "./PodStatusComponent";
+import { ResourceStatusComponent } from "./ResourceStatusComponent";
 
 const podStatusDic: { [index: string]: IStatusProps } = {
     "Running": Statuses.Success,
@@ -63,7 +63,7 @@ export class PodListComponent extends BaseComponent<IPodListComponentProperties>
 
     private static _renderPodStatusCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod): JSX.Element {
         const itemToRender = (
-            <PodStatusComponent
+            <ResourceStatusComponent
                 statusProps={podStatusDic[pod.status.phase]}
                 statusDescription={pod.metadata.name}
             />

@@ -11,7 +11,7 @@ import { StatusSize, Status } from "azure-devops-ui/Status";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
 import { ITableColumn, SimpleTableCell } from "azure-devops-ui/Table";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
-import { PodStatusComponent } from "./PodStatusComponent";
+import { ResourceStatusComponent } from "./ResourceStatusComponent";
 
 const podNameKey: string = "pl-name-key";
 const podImageKey: string = "pl-image-key";
@@ -116,7 +116,7 @@ export class PodsComponent extends BaseComponent<IPodsComponentProperties> {
         }
 
         const itemToRender = (
-            <PodStatusComponent
+            <ResourceStatusComponent
                 statusProps={Utils.generatePodStatusProps(pod.status)}
                 statusDescription={statusDescription}
                 customDescription={customDescription}

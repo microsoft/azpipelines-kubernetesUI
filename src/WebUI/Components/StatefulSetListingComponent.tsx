@@ -10,7 +10,7 @@ import { ITableColumn, SimpleTableCell } from "azure-devops-ui/Table";
 import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { Utils } from "../Utils";
-import { PodStatusComponent } from "./PodStatusComponent";
+import { ResourceStatusComponent } from "./ResourceStatusComponent";
 
 const setNameKey = "statefulset-name-key";
 const imageKey = "statefulset-image-key";
@@ -104,7 +104,7 @@ export class StatefulSetListingComponent extends BaseComponent<IDaemonSetCompone
         }
 
         const itemToRender = (
-            <PodStatusComponent
+            <ResourceStatusComponent
                 statusProps={statusProps}
                 statusDescription={podString}
             />

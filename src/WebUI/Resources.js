@@ -37,6 +37,8 @@ define("Environments/Providers/Kubernetes/Resources", ["require", "exports"], fu
     exports.DaemonSetText = "DaemonSet";
     exports.StatefulSetText = "StatefulSet";
     exports.DeploymentText = "Deployment";
+    exports.ExternalIPAllocPending = "External IP allocation pending";
+    exports.ExternalIPAllocated = "External IP allocated";
     exports.FindByNameText = "Find by {0} name";
     exports.KindText = "Kind";
     exports.NoItemsText = "No Items found"

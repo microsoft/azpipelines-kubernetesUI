@@ -10,7 +10,7 @@ import { Ago } from "azure-devops-ui/Ago";
 import { ITableColumn, SimpleTableCell } from "azure-devops-ui/Table";
 import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
 import { Utils } from "../Utils";
-import { PodStatusComponent } from "./PodStatusComponent";
+import { ResourceStatusComponent } from "./ResourceStatusComponent";
 
 const setNameKey = "set-name-key";
 const imageKey = "image-key";
@@ -105,7 +105,7 @@ export class DaemonSetListComponent extends BaseComponent<IDaemonSetComponentPro
         }
 
         const itemToRender = (
-            <PodStatusComponent
+            <ResourceStatusComponent
                 statusProps={statusProps}
                 statusDescription={podString}
             />

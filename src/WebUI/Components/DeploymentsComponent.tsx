@@ -17,7 +17,7 @@ import { Ago } from "azure-devops-ui/Ago";
 import { ITableColumn, SimpleTableCell } from "azure-devops-ui/Table";
 import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
 import { Utils } from "../Utils";
-import { PodStatusComponent } from "./PodStatusComponent";
+import { ResourceStatusComponent } from "./ResourceStatusComponent";
 
 const replicaSetNameKey: string = "replicaSet-col";
 const podsKey: string = "pods-col";
@@ -201,7 +201,7 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
 
     private static _renderPodsCountCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IDeploymentReplicaSetItem>, deployment: IDeploymentReplicaSetItem): JSX.Element {
         const itemToRender = (
-            <PodStatusComponent
+            <ResourceStatusComponent
                 statusProps={deployment.statusProps}
                 statusDescription={deployment.pods}
             />);

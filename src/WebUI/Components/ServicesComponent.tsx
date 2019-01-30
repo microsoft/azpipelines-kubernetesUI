@@ -15,6 +15,8 @@ import { ITableColumn, SimpleTableCell } from "azure-devops-ui/Table";
 import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
 import "./ServicesComponent.scss";
 import { Utils } from "../Utils";
+import { IStatusProps, Statuses } from "azure-devops-ui/Status";
+import { ResourceStatusComponent } from "./ResourceStatusComponent";
 
 const packageKey: string = "package-col";
 const typeKey: string = "type-col";
@@ -22,6 +24,7 @@ const clusterIPKey: string = "cluster-ip-col";
 const externalIPKey: string = "external-ip-col";
 const portKey: string = "port-col";
 const ageKey: string = "age-col";
+const loadBalancerKey: string = "LoadBalancer";
 const colDataClassName: string = "sc-col-data";
 
 export interface IServicesComponentProperties extends IVssComponentProperties {
@@ -174,7 +177,7 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
     }
 
     private static _renderPackageKeyCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, service: IServiceItem): JSX.Element => {
-        const itemToRender = ListComponent.renderTwoLineColumn(service.package, service.pipeline, colDataClassName, "primary-text", "secondary-text");
+        const itemToRender = ServicesComponent._getServiceStatusWithName(service, colDataClassName);
         return ListComponent.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
@@ -207,6 +210,26 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
         return ListComponent.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
+    private static _getServiceStatusWithName(service: IServiceItem, cssClassName: string): React.ReactNode {
+        let statusProps: IStatusProps = Statuses.Success;
+        let tooltipText: string ="";
+        if (service.type === loadBalancerKey) {
+            tooltipText = Resources.ExternalIPAllocated;
+            if (!service.externalIP) {
+                tooltipText = Resources.ExternalIPAllocPending;
+                statusProps = Statuses.Running;
+            }
+        }
+
+        return (
+            <ResourceStatusComponent
+                statusProps={statusProps}
+                customDescription={ListComponent.renderTwoLineColumn(service.package, service.pipeline, css(cssClassName, "kube-status-desc"), "primary-text", "secondary-text")}
+                toolTipText={tooltipText}
+            />
+        );
+    }
+    
     private _filterService(svc: V1Service): boolean {
         const nameMatches: boolean = Utils.filterByName(svc.metadata.name, this.props.nameFilter);
         const typeMatches: boolean = this.props.typeSelections.length > 0 ? this.props.typeSelections.indexOf(svc.spec.type) >= 0 : true;
