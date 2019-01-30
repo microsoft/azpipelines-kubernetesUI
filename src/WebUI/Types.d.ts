@@ -75,4 +75,5 @@ export interface IVssComponentProperties extends IBaseProps {
      * Any of the properties MAY be accessed as an IObservable.
      */
     [property: string]: IObservable<any> | any;
+
 }

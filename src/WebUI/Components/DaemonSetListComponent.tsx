@@ -20,18 +20,26 @@ const colDataClassName: string = "list-col-content";
 
 export interface IDaemonSetComponentProperties extends IVssComponentProperties {
     daemonSetList: V1DaemonSetList;
+    onItemInvoked?: (item?: any, index?: number, ev?: Event) => void;
+    nameFilter?: string;
 }
 
 
 export class DaemonSetListComponent extends BaseComponent<IDaemonSetComponentProperties, {}> {
     public render(): React.ReactNode {
-        return (
-            <ListComponent
-                className={css("list-content", "top-padding", "depth-16")}
-                items={this.props.daemonSetList.items || []}
-                columns={DaemonSetListComponent._getColumns()}
-            />
-        );
+        const filteredItems: V1DaemonSet[] = (this.props.daemonSetList.items || []).filter((item) => {
+            return Utils.filterByName(item.metadata.name, this.props.nameFilter);
+        });
+        if (filteredItems.length > 0) {
+            return (
+                <ListComponent
+                    className={css("list-content", "top-padding", "depth-16")}
+                    items={this.props.daemonSetList.items || []}
+                    columns={DaemonSetListComponent._getColumns()}
+                />
+            );
+        }
+        return null;
     }
 
     private static _getColumns(): ITableColumn<V1DaemonSet>[] {

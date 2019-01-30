@@ -39,6 +39,9 @@ define("Environments/Providers/Kubernetes/Resources", ["require", "exports"], fu
     exports.DeploymentText = "Deployment";
     exports.ExternalIPAllocPending = "External IP allocation pending";
     exports.ExternalIPAllocated = "External IP allocated";
+    exports.FindByNameText = "Find by {0} name";
+    exports.KindText = "Kind";
+    exports.NoItemsText = "No Items found"
     exports.SummaryText = "Summary";
     exports.KindText = "Kind";
     exports.AnnotationsText = "Annotations";
