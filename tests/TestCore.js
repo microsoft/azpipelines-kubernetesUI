@@ -39,3 +39,19 @@ exports.render = function render(nextElement, options) {
 
     return wrapper;
 };
+
+var spyConsole;
+beforeEach(() => {
+    spyConsole = jest.spyOn(console, "error");
+});
+
+afterEach(() => {
+    if (spyConsole) {
+        expect(spyConsole).toHaveBeenCalledTimes(0);
+        spyConsole.mockRestore();
+    }
+
+    spyConsole = null;
+});
+
+exports.spyConsole = spyConsole;
