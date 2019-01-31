@@ -194,15 +194,11 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         return (
             <div className="main-content">
                 {this._getMainHeading()}
-                {(this._getWorkloadSize()+ (this.state.serviceList ? this.state.serviceList.items.length : 0)) > 0 ?
+                {this._getTotalResourceSize() > 0 ?
                     this._getMainPivot() :
-                    <ZeroDataComponent
-                        imagePath={require("../zero_data.png")}
-                        hyperLink="https://kubernetes.io/docs/concepts/workloads/pods/pod/"
-                        hyperLinkLabel={Resources.LearnMoreText}
-                        descriptionText={Resources.NoWorkLoadsText}
-                        additionalHelpText={Resources.CreateWorkLoadText}
-                    />}
+                    ZeroDataComponent._getDefaultZeroData("https://kubernetes.io/docs/concepts/workloads/pods/pod/",
+                        Resources.LearnMoreText, Resources.NoWorkLoadsText, Resources.CreateWorkLoadText)
+                }
             </div>
         );
     }
@@ -245,13 +241,9 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         if (this.state.selectedKey === servicesPivotItemKey) {
         const serivceSize: number = this.state.serviceList ? this.state.serviceList.items.length : 0;
             return (serivceSize === 0 ?
-                <ZeroDataComponent
-                    imagePath={require("../zero_data.png")}
-                    hyperLink="https://kubernetes.io/docs/concepts/services-networking/service/"
-                    hyperLinkLabel={Resources.LearnMoreText}
-                    descriptionText={Resources.NoServicesText}
-                    additionalHelpText={Resources.CreateServiceText}
-                /> :
+                ZeroDataComponent._getDefaultZeroData("https://kubernetes.io/docs/concepts/services-networking/service/",
+                    Resources.LearnMoreText, Resources.NoServicesText, Resources.CreateServiceText)
+                :
                 <ServicesComponent
                     servicesList={this.state.serviceList || {} as V1ServiceList}
                     onItemActivated={this._onServiceItemInvoked}
@@ -262,13 +254,9 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
                 />);
         }
         return (this._getWorkloadSize() === 0 ?
-            <ZeroDataComponent
-                imagePath={require("../zero_data.png")}
-                hyperLink="https://kubernetes.io/docs/concepts/workloads/pods/pod/"
-                hyperLinkLabel={Resources.LearnMoreText}
-                descriptionText={Resources.NoWorkLoadsText}
-                additionalHelpText={Resources.CreateWorkLoadText}
-            /> :
+            ZeroDataComponent._getDefaultZeroData("https://kubernetes.io/docs/concepts/workloads/pods/pod/", Resources.LearnMoreText,
+                Resources.NoWorkLoadsText, Resources.NoWorkLoadsText)
+            :
             <div>
                 {this._showComponent(KubeResourceType.Deployments) && this._getDeployments()}
                 {this._showComponent(KubeResourceType.DaemonSets) && this._getDaemonSetsComponent()}
@@ -449,5 +437,9 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
             (this.state.daemonSetList ? this.state.daemonSetList.items.length : 0 ) +
             (this.state.statefulSetList ? this.state.statefulSetList.items.length : 0 ) +
             (this.state.podList ? this.state.podList.items.length : 0 ) ;
+    }
+
+    private _getTotalResourceSize(): number {
+        return (this._getWorkloadSize() + (this.state.serviceList ? this.state.serviceList.items.length : 0));
     }
 }

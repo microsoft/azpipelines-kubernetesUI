@@ -25,7 +25,7 @@ export class ZeroDataComponent extends BaseComponent<IZeroDataComponentProps> {
 
     public render(): JSX.Element {
         return (
-            <Card title={this.props.title} className={css("flex-grow", "top-padding", "kube-list-content", this.props.className)}>
+            <Card title={this.props.title} className={css("flex-grow", "item-top-padding", "kube-list-content", this.props.className)}>
                 <ZeroData
                     className="flex-grow"
                     imageAltText={this.props.imageAltText || ""}
@@ -36,14 +36,29 @@ export class ZeroDataComponent extends BaseComponent<IZeroDataComponentProps> {
         );
     }
 
+    public static _getDefaultZeroData(hyperLink: string, hyperLinkLabel: string, description: string,
+                                    additionalText: string, title?: string, className?: string): JSX.Element{
+        return (
+            <ZeroDataComponent
+                imagePath={require("../zero_data.png")}
+                title={title}
+                hyperLink={hyperLink}
+                hyperLinkLabel={hyperLinkLabel}
+                descriptionText={description}
+                additionalHelpText={additionalText}
+                className={className}
+            />
+        );
+    }
+
     private _getTextArea(): JSX.Element {
         return (<div>
-            {this._getTextLine1()}<br />
+            {this._getDescription()}<br />
             {this._getHyperLink()}
         </div>);
     }
 
-    private _getTextLine1(): JSX.Element | null {
+    private _getDescription(): JSX.Element | null {
         if (this.props.descriptionText) {
             return (<span>{this.props.descriptionText}</span>)
         }

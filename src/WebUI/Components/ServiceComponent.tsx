@@ -159,16 +159,9 @@ export class ServiceComponent extends BaseComponent<IServiceComponentProperties,
 
     private _getAssociatedPods(): JSX.Element | null {
         if (this.state.pods.length === 0) {
-            return (
-                <ZeroDataComponent
-                    imagePath={require("../zero_data.png")}
-                    title={Resources.AssociatedPodsText}
-                    descriptionText={Resources.NoPodsForSvcText}
-                    hyperLink="https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/"
-                    hyperLinkLabel={Resources.LearnMoreText}
-                    additionalHelpText={Resources.LinkSvcToPodsText}
-                />
-            );
+            return ZeroDataComponent._getDefaultZeroData("https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/",
+                Resources.LearnMoreText, Resources.NoPodsForSvcText,
+                Resources.LinkSvcToPodsText, Resources.AssociatedPodsText);
         }
         return (
             <PodsComponent
