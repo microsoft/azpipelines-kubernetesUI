@@ -46,6 +46,15 @@ Note: On windows if it's still returning npm 2.x run `where npm`. Notice hits in
     npm install
     npm run build
 
+## Test
+To clean test binaries, build test binaries and run tests
+
+    npm run ctest
+
+To build test binaries and run tests
+
+    npm test
+
 ## Dependencies
 
 This repository depends on the following packages:
@@ -59,6 +68,8 @@ Some external dependencies:
 - `TypeScript` - Samples are written in TypeScript and complied to JavaScript
 - `SASS` - Extension samples are styled using SASS (which is compiled to CSS and delivered in webpack js bundles).
 - `webpack` - Is used to gather dependencies into a single javascript bundle for each sample.
+- `jest` - Is used as unit test framework.
+- `enzyme` - Test utility to test react components.
 
 ## Contributing
 
