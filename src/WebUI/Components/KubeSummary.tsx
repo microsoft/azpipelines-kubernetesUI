@@ -21,6 +21,7 @@ import "azure-devops-ui/Label.scss";
 import { DaemonSetListComponent } from "./DaemonSetListComponent";
 import { StatefulSetListingComponent } from "./StatefulSetListingComponent";
 import { PodsComponent } from "./PodsComponent";
+import { ZeroDataComponent } from "./ZeroDataComponent";
 import { Filter, IFilterState, FILTER_CHANGE_EVENT, IFilterItemState } from "azure-devops-ui/Utilities/Filter";
 import { KubeResourceType } from "../../Contracts/KubeServiceBase";
 import { FilterComponent, NameKey, TypeKey } from "./FilterComponent";
@@ -149,7 +150,6 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         if (!kubeService) {
             return;
         }
-
         kubeService.getDeployments().then(deploymentList => {
             let deploymentNamespace: string = "";
             if (!this.state.namespace) {
@@ -161,7 +161,10 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
                 }
             }
 
-            this.setState({ deploymentList: deploymentList, namespace: this.state.namespace || deploymentNamespace });
+            this.setState({
+                deploymentList: deploymentList,
+                namespace: this.state.namespace || deploymentNamespace
+            });
         });
 
         kubeService.getReplicaSets().then(replicaSetList => {
@@ -191,7 +194,11 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         return (
             <div className="main-content">
                 {this._getMainHeading()}
-                {this._getMainPivot()}
+                {this._getTotalResourceSize() > 0 ?
+                    this._getMainPivot() :
+                    ZeroDataComponent._getDefaultZeroData("https://kubernetes.io/docs/concepts/workloads/pods/pod/",
+                        Resources.LearnMoreText, Resources.NoWorkLoadsText, Resources.CreateWorkLoadText)
+                }
             </div>
         );
     }
@@ -232,22 +239,31 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
 
     private _getContent(): JSX.Element {
         if (this.state.selectedKey === servicesPivotItemKey) {
-            return (<ServicesComponent
-                servicesList={this.state.serviceList || {} as V1ServiceList}
-                onItemActivated={this._onServiceItemInvoked}
-                filter={this.state.svcFilter}
-                filterState={this.state.svcFilterState}
-                nameFilter={this._getNameFilterKey()}
-                typeSelections={this._getTypeSelection()}
-            />);
+        const serivceSize: number = this.state.serviceList ? this.state.serviceList.items.length : 0;
+            return (serivceSize === 0 ?
+                ZeroDataComponent._getDefaultZeroData("https://kubernetes.io/docs/concepts/services-networking/service/",
+                    Resources.LearnMoreText, Resources.NoServicesText, Resources.CreateServiceText)
+                :
+                <ServicesComponent
+                    servicesList={this.state.serviceList || {} as V1ServiceList}
+                    onItemActivated={this._onServiceItemInvoked}
+                    filter={this.state.svcFilter}
+                    filterState={this.state.svcFilterState}
+                    nameFilter={this._getNameFilterKey()}
+                    typeSelections={this._getTypeSelection()}
+                />);
         }
-        return (<div>
-            {this._showComponent(KubeResourceType.Deployments) && this._getDeployments()}
-            {this._showComponent(KubeResourceType.DaemonSets) && this._getDaemonSetsComponent()}
-            {this._showComponent(KubeResourceType.StatefulSets) && this._getStatefulSetsComponent()}
-            {this.state.podList && this.state.podList.items && this.state.podList.items.length > 0 && 
-                                    this._showComponent(KubeResourceType.Pods) && this.getOrphanPods()}
-        </div>);
+        return (this._getWorkloadSize() === 0 ?
+            ZeroDataComponent._getDefaultZeroData("https://kubernetes.io/docs/concepts/workloads/pods/pod/", Resources.LearnMoreText,
+                Resources.NoWorkLoadsText, Resources.NoWorkLoadsText)
+            :
+            <div>
+                {this._showComponent(KubeResourceType.Deployments) && this._getDeployments()}
+                {this._showComponent(KubeResourceType.DaemonSets) && this._getDaemonSetsComponent()}
+                {this._showComponent(KubeResourceType.StatefulSets) && this._getStatefulSetsComponent()}
+                {this.state.podList && this.state.podList.items && this.state.podList.items.length > 0 &&
+                    this._showComponent(KubeResourceType.Pods) && this.getOrphanPods()}
+            </div>);
     }
 
     private _getFilterBar(): JSX.Element {
@@ -413,5 +429,17 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
             }
         });
         return svcTypes;
+    }
+
+    private _getWorkloadSize(): number {
+        return  (this.state.deploymentList ? this.state.deploymentList.items.length : 0) +
+            (this.state.replicaSetList ? this.state.replicaSetList.items.length : 0) +
+            (this.state.daemonSetList ? this.state.daemonSetList.items.length : 0 ) +
+            (this.state.statefulSetList ? this.state.statefulSetList.items.length : 0 ) +
+            (this.state.podList ? this.state.podList.items.length : 0 ) ;
+    }
+
+    private _getTotalResourceSize(): number {
+        return (this._getWorkloadSize() + (this.state.serviceList ? this.state.serviceList.items.length : 0));
     }
 }
