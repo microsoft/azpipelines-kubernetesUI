@@ -4,16 +4,18 @@
     padding: 16px;
     border-radius: 4px;
     /* todo :: use std colors */
-    background-color: white;
+    background-color: $white;
     min-width: 750px;
     /* todo :: use std colors */
-    border: 1px solid lightgray;
+    border: 1px solid $neutral-20;
 
     .kube-list-heading.heading {
         padding: 0px 8px 0px 12px;
         margin-bottom: 8px;
     
         .heading-title {
+            font-size: $fontSizeML;
+            font-weight: $fontWeightSemiBold;
             margin-bottom: 0px;
             margin-top: 6px;
         }

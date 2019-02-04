@@ -223,7 +223,7 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
     private static _getHeadingContent(deployment: V1Deployment): JSX.Element {
         return (
             <div>
-                <h3>{deployment.metadata.name}</h3>
+                <span className="heading-title">{deployment.metadata.name}</span>
                 <div className="kube-flex-row">
                     <span className="secondary-text kind-tag"> {Resources.DeploymentText} </span>
                     <LabelGroup labelProps={Utils.getUILabelModelArray(deployment.metadata.labels)}
