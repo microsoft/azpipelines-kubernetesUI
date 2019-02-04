@@ -20,10 +20,10 @@ const colDataClassName: string = "list-col-content";
 export interface IDaemonSetComponentProperties extends IVssComponentProperties {
     statefulSetList: V1StatefulSetList;
     onItemActivated?: (event: React.SyntheticEvent<HTMLElement>, item: V1StatefulSet) => void;
-    nameFilter?: string;;
+    nameFilter?: string;
 }
 
-export class StatefulSetListingComponent extends BaseComponent<IDaemonSetComponentProperties, {}> {
+export class StatefulSetListComponent extends BaseComponent<IDaemonSetComponentProperties, {}> {
     public render(): React.ReactNode {
         const filteredSet: V1StatefulSet[] = (this.props.statefulSetList.items || []).filter((set) => {
             return Utils.filterByName(set.metadata.name, this.props.nameFilter);

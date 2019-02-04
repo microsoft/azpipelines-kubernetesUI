@@ -18,6 +18,7 @@ import "./ServiceComponent.scss";
 import { V1PodList, V1Pod } from "@kubernetes/client-node";
 import { PodsComponent } from "./PodsComponent";
 import { PodDetailsView } from "./PodDetailsView";
+import { ZeroDataComponent } from "./ZeroDataComponent";
 
 export interface IServiceComponentProperties extends IVssComponentProperties {
     service: IServiceItem;

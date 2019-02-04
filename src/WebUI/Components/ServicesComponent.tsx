@@ -112,6 +112,7 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
         const headerColumnClassName: string = "kube-col-header";
         const columnContentClassName: string = "list-col-content";
 
+         // Negative widths are interpreted as percentages. Since we want the table columns to occupy full available width, setting width -100 which is equivalent to 100%
         columns.push({
             id: packageKey,
             name: Resources.NameText,

@@ -11,8 +11,7 @@ import { StatusSize, Status } from "azure-devops-ui/Status";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
 import { ITableColumn, SimpleTableCell } from "azure-devops-ui/Table";
 import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
-import { ResourceStatusComponent } from "./ResourceStatusComponent
-
+import { ResourceStatusComponent } from "./ResourceStatusComponent";
 
 const podNameKey: string = "pl-name-key";
 const podImageKey: string = "pl-image-key";
