@@ -115,7 +115,7 @@ export class PodsComponent extends BaseComponent<IPodsComponentProperties> {
                     if(pod.status.message) {
                         customDescription = (
                             <Tooltip showOnFocus={true} text={pod.status.message}>
-                                <div className="kube-status-desc">{pod.status.reason}</div>
+                                <span className="kube-status-desc">{pod.status.reason}</span>
                             </Tooltip>
                         );
                     }
