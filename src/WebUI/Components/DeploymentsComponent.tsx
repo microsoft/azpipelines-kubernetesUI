@@ -18,6 +18,7 @@ import { ITableColumn, SimpleTableCell } from "azure-devops-ui/Table";
 import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
 import { Utils } from "../Utils";
 import { ResourceStatusComponent } from "./ResourceStatusComponent";
+import { localeFormat } from "azure-devops-ui/Core/Util/String";
 
 const replicaSetNameKey: string = "replicaSet-col";
 const podsKey: string = "pods-col";
@@ -135,7 +136,7 @@ export class DeploymentsComponent extends BaseComponent<IDeploymentsComponentPro
 
     private static _getPodsText(availableReplicas: number, replicas: number): string {
         if (replicas != null && availableReplicas != null && replicas > 0) {
-            return format("{0}/{1}", availableReplicas, replicas);
+            return localeFormat("{0}/{1}", availableReplicas, replicas);
         }
 
         return "";

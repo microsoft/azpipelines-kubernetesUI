@@ -12,6 +12,7 @@ import * as Resources from "../Resources";
 import { IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
 import { IPodListComponentProperties, PodListComponent } from "./PodListComponent";
+import { localeFormat } from "azure-devops-ui/Core/Util/String";
 
 export interface IReplicaSetListComponentProperties extends IVssComponentProperties {
     replicas: { [uid: string]: V1ReplicaSet };
@@ -83,7 +84,7 @@ export class ReplicaSetListComponent extends BaseComponent<IReplicaSetListCompon
 
     private _getMainHeading(): JSX.Element | null {
         if (this.props.deployment && this.props.deployment.metadata) {
-            const deploymentHeading = format(Resources.Deployment, this.props.deployment.metadata.name);
+            const deploymentHeading = localeFormat(Resources.Deployment, this.props.deployment.metadata.name);
             return (
                 <div className="content-main-heading">
                     <h2 className="title-heading">{deploymentHeading}</h2>

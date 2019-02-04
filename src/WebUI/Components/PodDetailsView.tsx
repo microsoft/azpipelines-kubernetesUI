@@ -82,7 +82,7 @@ export class PodDetailsView extends BaseComponent<IPodDetailsProps> {
                     children:
                     <span className="pod-details-created-cell">
                         <Duration startDate={value} endDate={new Date()} />
-                        {format("{0}", Resources.Ago)}
+                        {Resources.Ago}
                     </span>,
                     tableColumn: tableColumn
                 };

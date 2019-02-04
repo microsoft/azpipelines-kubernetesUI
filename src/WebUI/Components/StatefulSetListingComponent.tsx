@@ -11,6 +11,7 @@ import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { Utils } from "../Utils";
 import { ResourceStatusComponent } from "./ResourceStatusComponent";
+import { localeFormat } from "azure-devops-ui/Core/Util/String";
 
 const setNameKey = "statefulset-name-key";
 const imageKey = "statefulset-image-key";
@@ -100,7 +101,7 @@ export class StatefulSetListingComponent extends BaseComponent<IDaemonSetCompone
         let podString: string = "";
         if (statefulSet.status.replicas > 0) {
             statusProps = Utils._getPodsStatusProps(statefulSet.status.currentReplicas, statefulSet.status.replicas);
-            podString = format("{0}/{1}", statefulSet.status.currentReplicas, statefulSet.status.replicas);
+            podString = localeFormat("{0}/{1}", statefulSet.status.currentReplicas, statefulSet.status.replicas);
         }
 
         const itemToRender = (

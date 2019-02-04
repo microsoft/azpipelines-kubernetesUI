@@ -17,6 +17,7 @@ import { ListComponent } from "./ListComponent";
 import { ITableColumn, SimpleTableCell } from "azure-devops-ui/Table";
 import "./PodListComponent.scss";
 import { ResourceStatusComponent } from "./ResourceStatusComponent";
+import { localeFormat } from "azure-devops-ui/Core/Util/String";
 
 const podStatusDic: { [index: string]: IStatusProps } = {
     "Running": Statuses.Success,
@@ -50,7 +51,7 @@ export class PodListComponent extends BaseComponent<IPodListComponentProperties>
     }
 
     private _getReplicaSetHeadingContent(): JSX.Element {
-        const replicaSetHeading = format(Resources.ReplicaSet, this.props.replicaSet.metadata.name);
+        const replicaSetHeading = localeFormat(Resources.ReplicaSet, this.props.replicaSet.metadata.name);
 
         return (
             <div className={"replica-heading"}>
@@ -104,7 +105,7 @@ export class PodListComponent extends BaseComponent<IPodListComponentProperties>
             let des = "";
             const imageName = Utils.getPodImageName(this.props.replicaSet.spec && this.props.replicaSet.spec.template);
             if (imageName) {
-                des = format(Resources.AgoBy, imageName)
+                des = localeFormat(Resources.AgoBy, imageName)
             }
 
             return (

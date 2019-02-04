@@ -17,6 +17,7 @@ import "./ServicesComponent.scss";
 import { Utils } from "../Utils";
 import { IStatusProps, Statuses } from "azure-devops-ui/Status";
 import { ResourceStatusComponent } from "./ResourceStatusComponent";
+import { localeFormat } from "azure-devops-ui/Core/Util/String";
 
 const packageKey: string = "package-col";
 const typeKey: string = "type-col";
@@ -105,7 +106,7 @@ export class ServicesComponent extends BaseComponent<IServicesComponentPropertie
     private static _formatPortString(servicePort: V1ServicePort): string {
         const nodePort = servicePort.nodePort ? ":" + servicePort.nodePort : "";
         // example: 80:2080/TCP, if nodeport. 80/TCP, if no nodeport
-        return format("{0}{1}/{2}", servicePort.port, nodePort, servicePort.protocol);
+        return localeFormat("{0}{1}/{2}", servicePort.port, nodePort, servicePort.protocol);
     }
 
     private static _getColumns(): ITableColumn<IServiceItem>[] {

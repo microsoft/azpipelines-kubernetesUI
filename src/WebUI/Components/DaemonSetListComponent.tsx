@@ -11,6 +11,7 @@ import { ITableColumn, SimpleTableCell } from "azure-devops-ui/Table";
 import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
 import { Utils } from "../Utils";
 import { ResourceStatusComponent } from "./ResourceStatusComponent";
+import { localeFormat } from "azure-devops-ui/Core/Util/String";
 
 const setNameKey = "set-name-key";
 const imageKey = "image-key";
@@ -101,7 +102,7 @@ export class DaemonSetListComponent extends BaseComponent<IDaemonSetComponentPro
         let podString: string = "";
         if (daemonSet.status.desiredNumberScheduled > 0) {
             statusProps = Utils._getPodsStatusProps(daemonSet.status.currentNumberScheduled, daemonSet.status.desiredNumberScheduled);
-            podString = format("{0}/{1}", daemonSet.status.currentNumberScheduled, daemonSet.status.desiredNumberScheduled);
+            podString = localeFormat("{0}/{1}", daemonSet.status.currentNumberScheduled, daemonSet.status.desiredNumberScheduled);
         }
 
         const itemToRender = (

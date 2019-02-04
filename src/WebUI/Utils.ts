@@ -8,6 +8,7 @@ import { format } from "@uifabric/utilities/lib";
 import { ObservableArray } from "azure-devops-ui/Core/Observable";
 import { ILabelModel } from "azure-devops-ui/Label";
 import { IStatusProps, Statuses } from "azure-devops-ui/Status";
+import { localeFormat } from "azure-devops-ui/Core/Util/String";
 
 const pipelineNameAnnotationKey: string = "pipeline-name";
 const pipelineIdAnnotationKey: string = "pipeline-id";
@@ -56,7 +57,7 @@ export class Utils {
             return !!pipelineName && !!pipelineId;
         });
 
-        return pipelineName && pipelineId ? format("{0} / {1}", pipelineName, pipelineId) : "";
+        return pipelineName && pipelineId ? localeFormat("{0} / {1}", pipelineName, pipelineId) : "";
     }
 
     public static _getPodsStatusProps(currentScheduledPods: number, desiredPods: number): IStatusProps | undefined {

@@ -9,6 +9,8 @@ import { V1Pod } from "@kubernetes/client-node";
 import { Utils } from "../Utils";
 import { StatusSize, Status } from "azure-devops-ui/Status";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
+// todo :: remove once this css is included in devops-ui
+import "azure-devops-ui/Components/TooltipEx/Tooltip.scss";
 import { ITableColumn, SimpleTableCell } from "azure-devops-ui/Table";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { ResourceStatusComponent } from "./ResourceStatusComponent";
@@ -109,7 +111,11 @@ export class PodsComponent extends BaseComponent<IPodsComponentProperties> {
         let customDescription: React.ReactNode = null;
 
         if (pod.status.message) {
-            customDescription = <Tooltip showOnFocus={true} text={pod.status.message}>{pod.status.reason}</Tooltip>;
+            customDescription = (
+                <Tooltip showOnFocus={true} text={pod.status.message}>
+                    <span className="kube-status-desc">{pod.status.reason}</span>
+                </Tooltip>
+            );
         }
         else {
             statusDescription = pod.status.phase;
@@ -126,9 +132,7 @@ export class PodsComponent extends BaseComponent<IPodsComponentProperties> {
     }
 
     private static _renderPodAgeCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod): JSX.Element {
-        const itemToRender = (
-            <Ago date={new Date(pod.status.startTime)} />
-        );
+        const itemToRender = pod.status && pod.status.startTime ? <Ago date={new Date(pod.status.startTime)} /> : null;
         return ListComponent.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 }

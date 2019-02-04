@@ -29,6 +29,7 @@ import { Tab, TabBar, TabContent } from "azure-devops-ui/Tabs";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { HeaderCommandBarWithFilter } from 'azure-devops-ui/HeaderCommandBar';
 import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
+import { localeFormat } from "azure-devops-ui/Core/Util/String";
 
 const workloadsPivotItemKey: string = "workloads";
 const servicesPivotItemKey: string = "services";
@@ -207,7 +208,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         return (
             <div className="content-main-heading">
                 <h2 className="title-heading">{this.props.title}</h2>
-                <div className={"sub-heading"}>{format(Resources.NamespaceHeadingText, this.state.namespace || "")}</div>
+                <div className={"sub-heading"}>{localeFormat(Resources.NamespaceHeadingText, this.state.namespace || "")}</div>
             </div>
         );
     }

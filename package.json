@@ -37,7 +37,6 @@
   "dependencies": {
     "@kubernetes/client-node": "~0.7.1",
     "azure-devops-ui": "~1.144.1",
-    "office-ui-fabric-react": "5.131.5",
     "react": "~16.3.2",
     "react-dom": "~16.3.2"
   },
@@ -66,9 +65,9 @@
     "style-loader": "~0.23.1",
     "ts-loader": "~5.2.2",
     "typescript": "^2.9.2",
+    "uglifyjs-webpack-plugin": "^2.1.0",
     "webpack": "^4.27.0",
-    "webpack-cli": "^3.1.2",
-    "uglifyjs-webpack-plugin": "^2.1.0"
+    "webpack-cli": "^3.1.2"
   },
   "bugs": {
     "url": "https://github.com/Microsoft/azpipelines-kubernetesUI/issues"

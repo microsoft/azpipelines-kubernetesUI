@@ -4,7 +4,7 @@
 */
 
 import { TooltipHost, TooltipOverflowMode } from "azure-devops-ui/Tooltip";
-import { BaseComponent, css, IRenderFunction } from "office-ui-fabric-react/lib/Utilities";
+import { BaseComponent, css, IRenderFunction } from "@uifabric/utilities";
 import * as React from "react";
 import { IVssComponentProperties } from "../Types";
 import { Table, ITableColumn, TableRow, ITableRowProps, SimpleTableCell } from "azure-devops-ui/Table";

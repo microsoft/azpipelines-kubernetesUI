@@ -127,7 +127,7 @@ export class PodsLeftPanel extends BaseComponent<IPodListComponentProperties> {
             case Resources.Created:
                 value = (<span className="pods-left-panel-header-created-cell">
                     <Duration startDate={value} endDate={new Date()} />
-                    {format("{0}", Resources.Ago)}
+                    {Resources.Ago}
                 </span>);
                 break;
             case Resources.LabelsText:
