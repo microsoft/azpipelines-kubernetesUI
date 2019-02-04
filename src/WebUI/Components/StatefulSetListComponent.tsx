@@ -33,7 +33,7 @@ export class StatefulSetListComponent extends BaseComponent<IDaemonSetComponentP
                 <ListComponent
                     className={css("list-content", "top-padding", "depth-16")}
                     items={filteredSet}
-                    columns={StatefulSetListingComponent._getColumns()}
+                    columns={StatefulSetListComponent._getColumns()}
                     onItemActivated={this._openStatefulSetItem}
                 />
             );
@@ -57,7 +57,7 @@ export class StatefulSetListComponent extends BaseComponent<IDaemonSetComponentP
             minWidth: 250,
             width: -100,
             headerClassName: css(headerColumnClassName, "first-col-header"),
-            renderCell: StatefulSetListingComponent._renderSetNameCell
+            renderCell: StatefulSetListComponent._renderSetNameCell
         });
 
         columns.push({
@@ -66,7 +66,7 @@ export class StatefulSetListComponent extends BaseComponent<IDaemonSetComponentP
             minWidth: 250,
             width: -100,
             headerClassName: headerColumnClassName,
-            renderCell: StatefulSetListingComponent._renderImageCell
+            renderCell: StatefulSetListComponent._renderImageCell
         });
 
         columns.push({
@@ -75,7 +75,7 @@ export class StatefulSetListComponent extends BaseComponent<IDaemonSetComponentP
             minWidth: 80,
             width: -100,
             headerClassName: headerColumnClassName,
-            renderCell: StatefulSetListingComponent._renderPodsCountCell
+            renderCell: StatefulSetListComponent._renderPodsCountCell
         });
 
         columns.push({
@@ -84,7 +84,7 @@ export class StatefulSetListComponent extends BaseComponent<IDaemonSetComponentP
             minWidth: 80,
             width: -100,
             headerClassName: headerColumnClassName,
-            renderCell: StatefulSetListingComponent._renderAgeCell
+            renderCell: StatefulSetListComponent._renderAgeCell
         });
 
         return columns;
