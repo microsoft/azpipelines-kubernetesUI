@@ -17,6 +17,7 @@ import { Utils } from "../Utils";
 import "./ServiceComponent.scss";
 import { V1PodList, V1Pod } from "@kubernetes/client-node";
 import { PodsComponent } from "./PodsComponent";
+import { PodDetailsView } from "./PodDetailsView";
 import { ZeroDataComponent } from "./ZeroDataComponent";
 
 export interface IServiceComponentProperties extends IVssComponentProperties {
@@ -26,17 +27,27 @@ export interface IServiceComponentProperties extends IVssComponentProperties {
 
 export interface IServiceComponentState {
     pods: Array<V1Pod>;
+    selectedPod: V1Pod | null;
+    showSelectedPod: boolean;
 }
 
 export class ServiceComponent extends BaseComponent<IServiceComponentProperties, IServiceComponentState> {
     constructor(props: IServiceComponentProperties) {
         super(props, {});
         this.state = {
-            pods: []
+            pods: [],
+            selectedPod: null,
+            showSelectedPod: false
         };
     }
 
     public render(): JSX.Element {
+        if (this.state.selectedPod && this.state.showSelectedPod) {
+            return (<PodDetailsView
+                pod={this.state.selectedPod}
+            />);
+        }
+
         return (
             <div className="service-main-content">
                 {this._getMainHeading()}
@@ -165,8 +176,15 @@ export class ServiceComponent extends BaseComponent<IServiceComponentProperties,
             <PodsComponent
                 podsToRender={this.state.pods}
                 headingText={Resources.AssociatedPodsText}
+                onItemActivated={this._onSelectedPodInvoked}
             />
         );
     }
 
+    private _onSelectedPodInvoked = (event: React.SyntheticEvent<HTMLElement>, pod: V1Pod) => {
+        this.setState({
+            showSelectedPod: true,
+            selectedPod: pod
+        });
+    }
 }

@@ -8,7 +8,6 @@ import { autobind, BaseComponent, css, format } from "@uifabric/utilities";
 import { Duration } from "azure-devops-ui/Duration";
 import { LabelGroup, WrappingBehavior } from "azure-devops-ui/Label";
 import { IStatusProps, Status, Statuses, StatusSize } from "azure-devops-ui/Status";
-import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import * as React from "react";
 import * as Resources from "../Resources";
 import { IVssComponentProperties } from "../Types";
@@ -61,7 +60,7 @@ export class PodsLeftPanel extends BaseComponent<IPodListComponentProperties> {
             {
                 id: "PodsHeaderTable",
                 name: metadata.name,
-                width: new ObservableValue(250),
+                width: -100,
                 className: "s-key",
                 minWidth: 180,
                 renderCell: PodsLeftPanel._renderValueCell
@@ -97,7 +96,7 @@ export class PodsLeftPanel extends BaseComponent<IPodListComponentProperties> {
             id: podStatusKey,
             name: Resources.PodsListHeaderText,
             minWidth: 250,
-            width: new ObservableValue(250),
+            width: -100,
             headerClassName: headerColumnClassName,
             className: colDataClassName,
             renderCell: PodsLeftPanel._renderPodNameCell

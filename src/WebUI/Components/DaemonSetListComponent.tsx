@@ -1,7 +1,6 @@
 import { V1DaemonSet, V1DaemonSetList } from "@kubernetes/client-node";
 import { BaseComponent, css, format } from "@uifabric/utilities";
 import { IStatusProps, Status, Statuses, StatusSize } from "azure-devops-ui/Status";
-import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import * as React from "react";
 import * as Resources from "../Resources";
 import { ListComponent } from "./ListComponent";
@@ -20,7 +19,7 @@ const colDataClassName: string = "list-col-content";
 
 export interface IDaemonSetComponentProperties extends IVssComponentProperties {
     daemonSetList: V1DaemonSetList;
-    onItemInvoked?: (item?: any, index?: number, ev?: Event) => void;
+    onItemActivated?: (event: React.SyntheticEvent<HTMLElement>, item: V1DaemonSet) => void;
     nameFilter?: string;
 }
 
@@ -36,10 +35,17 @@ export class DaemonSetListComponent extends BaseComponent<IDaemonSetComponentPro
                     className={css("list-content", "top-padding", "depth-16")}
                     items={this.props.daemonSetList.items || []}
                     columns={DaemonSetListComponent._getColumns()}
+                    onItemActivated={this._openDaemonSetItem}
                 />
             );
         }
         return null;
+    }
+
+    private _openDaemonSetItem = (event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>, selectedItem: V1DaemonSet) => {
+        if (this.props.onItemActivated) {
+            this.props.onItemActivated(event, selectedItem);
+        }
     }
 
     private static _getColumns(): ITableColumn<V1DaemonSet>[] {
@@ -50,7 +56,7 @@ export class DaemonSetListComponent extends BaseComponent<IDaemonSetComponentPro
             id: setNameKey,
             name: Resources.DaemonSetText,
             minWidth: 250,
-            width: new ObservableValue(500),
+            width: -100,
             headerClassName: headerColumnClassName,
             renderCell: DaemonSetListComponent._renderDaemonSetNameCell
         });
@@ -59,7 +65,7 @@ export class DaemonSetListComponent extends BaseComponent<IDaemonSetComponentPro
             id: imageKey,
             name: Resources.ImageText,
             minWidth: 250,
-            width: new ObservableValue(500),
+            width: -100,
             headerClassName: headerColumnClassName,
             renderCell: DaemonSetListComponent._renderImageCell
         });
@@ -68,7 +74,7 @@ export class DaemonSetListComponent extends BaseComponent<IDaemonSetComponentPro
             id: podsKey,
             name: Resources.PodsText,
             minWidth: 80,
-            width: new ObservableValue(160),
+            width: -100,
             headerClassName: headerColumnClassName,
             renderCell: DaemonSetListComponent._renderPodsCountCell
         });
@@ -77,7 +83,7 @@ export class DaemonSetListComponent extends BaseComponent<IDaemonSetComponentPro
             id: ageKey,
             name: Resources.AgeText,
             minWidth: 80,
-            width: new ObservableValue(160),
+            width: -100,
             headerClassName: headerColumnClassName,
             renderCell: DaemonSetListComponent._renderAgeCell
         });

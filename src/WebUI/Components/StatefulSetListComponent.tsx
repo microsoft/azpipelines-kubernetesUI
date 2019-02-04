@@ -8,7 +8,6 @@ import { IVssComponentProperties } from "../Types";
 import { Ago } from "azure-devops-ui/Ago";
 import { ITableColumn, SimpleTableCell } from "azure-devops-ui/Table";
 import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
-import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { Utils } from "../Utils";
 import { ResourceStatusComponent } from "./ResourceStatusComponent";
 
@@ -20,11 +19,11 @@ const colDataClassName: string = "list-col-content";
 
 export interface IDaemonSetComponentProperties extends IVssComponentProperties {
     statefulSetList: V1StatefulSetList;
-    onItemInvoked?: (item?: any, index?: number, ev?: Event) => void;
+    onItemActivated?: (event: React.SyntheticEvent<HTMLElement>, item: V1StatefulSet) => void;
     nameFilter?: string;
 }
 
-export class StatefulSetListingComponent extends BaseComponent<IDaemonSetComponentProperties, {}> {
+export class StatefulSetListComponent extends BaseComponent<IDaemonSetComponentProperties, {}> {
     public render(): React.ReactNode {
         const filteredSet: V1StatefulSet[] = (this.props.statefulSetList.items || []).filter((set) => {
             return Utils.filterByName(set.metadata.name, this.props.nameFilter);
@@ -34,11 +33,18 @@ export class StatefulSetListingComponent extends BaseComponent<IDaemonSetCompone
                 <ListComponent
                     className={css("list-content", "top-padding", "depth-16")}
                     items={filteredSet}
-                    columns={StatefulSetListingComponent._getColumns()}
+                    columns={StatefulSetListComponent._getColumns()}
+                    onItemActivated={this._openStatefulSetItem}
                 />
             );
         }
         return null;
+    }
+
+    private _openStatefulSetItem = (event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>, selectedItem: V1StatefulSet) => {
+        if (this.props.onItemActivated) {
+            this.props.onItemActivated(event, selectedItem);
+        }
     }
 
     private static _getColumns(): ITableColumn<V1StatefulSet>[] {
@@ -49,36 +55,36 @@ export class StatefulSetListingComponent extends BaseComponent<IDaemonSetCompone
             id: setNameKey,
             name: Resources.StatefulSetText,
             minWidth: 250,
-            width: new ObservableValue(500),
+            width: -100,
             headerClassName: css(headerColumnClassName, "first-col-header"),
-            renderCell: StatefulSetListingComponent._renderSetNameCell
+            renderCell: StatefulSetListComponent._renderSetNameCell
         });
 
         columns.push({
             id: imageKey,
             name: Resources.ImageText,
             minWidth: 250,
-            width: new ObservableValue(500),
+            width: -100,
             headerClassName: headerColumnClassName,
-            renderCell: StatefulSetListingComponent._renderImageCell
+            renderCell: StatefulSetListComponent._renderImageCell
         });
 
         columns.push({
             id: podsKey,
             name: Resources.PodsText,
             minWidth: 80,
-            width: new ObservableValue(160),
+            width: -100,
             headerClassName: headerColumnClassName,
-            renderCell: StatefulSetListingComponent._renderPodsCountCell
+            renderCell: StatefulSetListComponent._renderPodsCountCell
         });
 
         columns.push({
             id: ageKey,
             name: Resources.AgeText,
             minWidth: 80,
-            width: new ObservableValue(160),
+            width: -100,
             headerClassName: headerColumnClassName,
-            renderCell: StatefulSetListingComponent._renderAgeCell
+            renderCell: StatefulSetListComponent._renderAgeCell
         });
 
         return columns;
