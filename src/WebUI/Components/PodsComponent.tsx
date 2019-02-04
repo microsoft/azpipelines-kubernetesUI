@@ -12,6 +12,7 @@ import { Utils } from "../Utils";
 import { StatusSize, Status } from "azure-devops-ui/Status";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
 import { PodStatusComponent } from "./PodStatusComponent";
+import "azure-devops-ui/Components/TooltipEx/Tooltip.scss";
 
 const podNameKey:string = "pl-name-key";
 const podImageKey:string = "pl-image-key";
@@ -112,7 +113,11 @@ export class PodsComponent extends BaseComponent<IPodsComponentProperties> {
                     let customDescription: React.ReactNode = null;
 
                     if(pod.status.message) {
-                        customDescription = <Tooltip showOnFocus={true} text={pod.status.message}>{pod.status.reason}</Tooltip>;
+                        customDescription = (
+                            <Tooltip showOnFocus={true} text={pod.status.message}>
+                                <span className="kube-status-desc">{pod.status.reason}</span>
+                            </Tooltip>
+                        );
                     }
                     else {
                         statusDescription = pod.status.phase;
@@ -125,9 +130,7 @@ export class PodsComponent extends BaseComponent<IPodsComponentProperties> {
                     />);
 
             case podAgeKey:
-                return(
-                    <Ago date={new Date(pod.status.startTime)} />
-                );
+                return (pod.status && pod.status.startTime ? <Ago date={new Date(pod.status.startTime)} /> : null);
         }
 
         return ListComponent.renderColumn(textToRender || "", ListComponent.defaultColumnRenderer, colDataClassName);

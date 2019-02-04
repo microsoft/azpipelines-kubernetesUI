@@ -1,6 +1,6 @@
 {
   "name": "@azurepipelines/azdevops-kube-summary",
-  "version": "2.2.2",
+  "version": "2.2.4",
   "description": "Azure DevOps Kubernetes Summary",
   "engines": {
     "node": ">=8.4.0",
@@ -76,6 +76,6 @@
   "jest-junit": {
     "suiteName": "L0 Uts",
     "outputDirectory": ".",
-    "outputName": "./jest-l0-uts.xml"
+    "outputName": "./dist_tests/jest-l0-uts.xml"
   }
 }

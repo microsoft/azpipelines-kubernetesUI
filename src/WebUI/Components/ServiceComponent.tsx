@@ -137,9 +137,7 @@ export class ServiceComponent extends BaseComponent<IServiceComponentProperties,
                 return renderTableCell(props);
 
             default:
-                return (<div className="kube-simple-cell">
-                        { renderSimpleCell(rowIndex, columnIndex, tableColumn, tableItem) }
-                    </div>);
+                return renderSimpleCell(rowIndex, columnIndex, tableColumn, tableItem);
         }
     }
 

@@ -39,3 +39,23 @@ exports.render = function render(nextElement, options) {
 
     return wrapper;
 };
+
+var spyConsole;
+// beforeAll/afterAll will always fail last scenario [if there are any errors].
+// beforeEach will help to find the scenario causing the issue.
+beforeEach(() => {
+    // react warnings are logged as console.error
+    // so spying on error function of console.
+    spyConsole = jest.spyOn(console, "error");
+});
+
+afterEach(() => {
+    if (spyConsole) {
+        expect(spyConsole).toHaveBeenCalledTimes(0);
+        spyConsole.mockRestore();
+    }
+
+    spyConsole = null;
+});
+
+exports.spyConsole = spyConsole;
