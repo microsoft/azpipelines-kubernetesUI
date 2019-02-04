@@ -100,7 +100,7 @@ export class ListComponent<T> extends BaseComponent<IListComponentProperties<T>>
         return (
             <div className={"kube-list-heading heading"}>
                 {this.props.headingText
-                    ? <h3 className={"heading-title"}>{this.props.headingText}</h3>
+                    ? <span className={"heading-title"}>{this.props.headingText}</span>
                     : this.props.headingContent}
             </div>
         );
