@@ -68,6 +68,8 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
             workloadsFilter: filter,
             svcFilter: svcFilter
         };
+
+        this._setSelectedKeyPodsViewMap();
     }
 
     public componentDidMount(): void {
@@ -91,7 +93,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         const selectedItemType = this.state.selectedItemType;
 
         if (selectedItem && selectedItemType && this._selectedItemViewMap.hasOwnProperty(selectedItemType)) {
-            return this._selectedItemViewMap[selectedItemType];
+            return this._selectedItemViewMap[selectedItemType](selectedItem);
         }
 
         return null;
@@ -223,10 +225,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
                 :
                 <ServicesComponent
                     servicesList={this.state.serviceList || {} as V1ServiceList}
-                    onItemActivated={(e, item) => {
-                        this._selectedItemViewMap[SelectedItemKeys.ServiceItemKey] = this._getServiceComponent(item);
-                        this._onSelectedItemInvoked(e, item, SelectedItemKeys.ServiceItemKey)
-                    }}
+                    onItemActivated={(e, item) => this._onSelectedItemInvoked(e, item, SelectedItemKeys.ServiceItemKey)}
                     filter={this.state.svcFilter}
                     filterState={this.state.svcFilterState}
                     nameFilter={this._getNameFilterKey()}
@@ -298,10 +297,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
 
         return <PodsComponent
             podsToRender={pods}
-            onItemActivated={(e, item) => {
-                this._selectedItemViewMap[SelectedItemKeys.OrphanPodKey] = (<PodDetailsView pod={item} />);
-                this._onSelectedItemInvoked(e, item, SelectedItemKeys.OrphanPodKey);
-            }}
+            onItemActivated={(e, item) => this._onSelectedItemInvoked(e, item, SelectedItemKeys.OrphanPodKey)}
         />;
     }
 
@@ -310,10 +306,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
             daemonSetList={this.state.daemonSetList || {} as V1DaemonSetList}
             key={format("ds-list-{0}", this.state.namespace || "")}
             nameFilter={this._getNameFilterKey()}
-            onItemActivated={(e, item) => {
-                this._selectedItemViewMap[SelectedItemKeys.DaemonSetKey] = this._getPodsViewComponent(item.metadata, item.spec && item.spec.template, item.kind || "DaemonSet");
-                this._onSelectedItemInvoked(e, item, SelectedItemKeys.DaemonSetKey)
-            }}
+            onItemActivated={(e, item) => this._onSelectedItemInvoked(e, item, SelectedItemKeys.DaemonSetKey)}
         />);
     }
 
@@ -322,10 +315,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
             statefulSetList={this.state.statefulSetList || {} as V1StatefulSetList}
             key={format("sts-list-{0}", this.state.namespace || "")}
             nameFilter={this._getNameFilterKey()}
-            onItemActivated={(e, item) => {
-                this._selectedItemViewMap[SelectedItemKeys.StatefulSetKey] = this._getPodsViewComponent(item.metadata, item.spec && item.spec.template, item.kind || "StatefulSet");
-                this._onSelectedItemInvoked(e, item, SelectedItemKeys.StatefulSetKey)
-            }}
+            onItemActivated={(e, item) => this._onSelectedItemInvoked(e, item, SelectedItemKeys.StatefulSetKey)}
         />);
     }
 
@@ -335,10 +325,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
             replicaSetList={this.state.replicaSetList || {} as V1ReplicaSetList}
             key={format("dc-{0}", this.state.namespace || "")}
             nameFilter={this._getNameFilterKey()}
-            onItemActivated={(e, item) => {
-                this._selectedItemViewMap[SelectedItemKeys.ReplicaSetKey] = this._getReplicaSetPodDetails(item);
-                this._onSelectedItemInvoked(e, item, SelectedItemKeys.ReplicaSetKey)
-            }}
+            onItemActivated={(e, item) => this._onSelectedItemInvoked(e, item, SelectedItemKeys.ReplicaSetKey)}
         />);
     }
 
@@ -431,5 +418,13 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         return (this._getWorkloadSize() + (this.state.serviceList ? this.state.serviceList.items.length : 0));
     }
 
-    private _selectedItemViewMap = {};
+    private _setSelectedKeyPodsViewMap() {
+        this._selectedItemViewMap[SelectedItemKeys.StatefulSetKey] = (item) => this._getPodsViewComponent(item.metadata, item.spec && item.spec.template, item.kind || "StatefulSet");
+        this._selectedItemViewMap[SelectedItemKeys.ServiceItemKey] = (item) => this._getServiceComponent(item);
+        this._selectedItemViewMap[SelectedItemKeys.DaemonSetKey] = (item) => this._getPodsViewComponent(item.metadata, item.spec && item.spec.template, item.kind || "DaemonSet");
+        this._selectedItemViewMap[SelectedItemKeys.OrphanPodKey] = (item) => { return <PodDetailsView pod={item} />; }
+        this._selectedItemViewMap[SelectedItemKeys.ReplicaSetKey] = (item) => this._getReplicaSetPodDetails(item);
+    }
+
+    private _selectedItemViewMap: { [selectedItemKey: string]: (selectedItem: any) => JSX.Element | null } = {};
 }
