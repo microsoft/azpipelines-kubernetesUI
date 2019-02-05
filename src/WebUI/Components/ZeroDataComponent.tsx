@@ -68,8 +68,9 @@ export class ZeroDataComponent extends BaseComponent<IZeroDataComponentProps> {
     private _getHyperLink(): JSX.Element | null {
         if (this.props.hyperLink) {
             return (<span>
-                <Link href={this.props.hyperLink} target="_blank" rel="nofollow noopener">
+                <Link href={this.props.hyperLink} target="_blank" rel="nofollow noopener" aria-describedby="linkDescription">
                     {this.props.hyperLinkLabel}
+                    <div id="linkDescription" className={css("hidden-item")}>{this.props.additionalHelpText}</div>
                 </Link>{" "}{this.props.additionalHelpText}
             </span>);
         }
