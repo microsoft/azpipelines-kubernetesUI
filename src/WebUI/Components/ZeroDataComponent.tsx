@@ -40,7 +40,7 @@ export class ZeroDataComponent extends BaseComponent<IZeroDataComponentProps> {
                                     additionalText: string, title?: string, className?: string): JSX.Element{
         return (
             <ZeroDataComponent
-                imagePath={require("../zero_data.png")}
+                imagePath={require("../../img/zero_data.png")}
                 title={title}
                 hyperLink={hyperLink}
                 hyperLinkLabel={hyperLinkLabel}
