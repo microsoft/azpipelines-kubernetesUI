@@ -37,6 +37,7 @@ export interface IKubeSummaryProps extends IVssComponentProperties {
     title: string;
     kubeService: IKubeService;
     namespace?: string;
+    markTTI?: () => void;
 }
 
 export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesContainerState> {
@@ -53,6 +54,10 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
 
     public componentDidMount(): void {
         this._populateStateData();
+    }
+
+    public componentDidUpdate(prevProps: IKubeSummaryProps, prevState: IKubernetesContainerState) {
+        this._markTTI(prevProps, prevState);
     }
 
     public render(): React.ReactNode {
@@ -257,4 +262,17 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         });
         return <PodsComponent podsToRender={pods} />;
     }
+
+    private _markTTI(prevProps: IKubeSummaryProps, prevState: IKubernetesContainerState): void {
+        if (!this._isTTIMarked && this.props.markTTI) {
+            // if previously replicaSet did not exist and is rendered just now
+            if ((!prevState.replicaSetList || !prevState.replicaSetList.items) && 
+                (this.state.replicaSetList && this.state.replicaSetList.items)) {
+                    this.props.markTTI();
+                    this._isTTIMarked = true;
+            }
+        }
+    }
+
+    private _isTTIMarked: boolean = false;
 }
