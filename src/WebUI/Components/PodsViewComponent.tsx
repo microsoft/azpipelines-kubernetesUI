@@ -19,6 +19,8 @@ export interface IPodsViewComponentProperties extends IVssComponentProperties {
     podsPromise: Promise<V1PodList>;
     podTemplate: V1PodTemplateSpec;
     parentKind: string;
+    podLogs?: (itemName: string) => Promise<any>;
+    podSSHConfig?: () => Promise<string>;
 }
 
 export interface IPodsViewComponentState {
@@ -52,7 +54,10 @@ export class PodsViewComponent extends BaseComponent<IPodsViewComponentPropertie
 
         const rightPanel = (selectedPod ?
             <PodsRightPanel
-                pod={selectedPod} />
+                pod={selectedPod}
+                podLogs={this.props.podLogs}
+                podSSHConfig={this.props.podSSHConfig}
+            />
             : <div className="zero-pods-text-container">{Resources.NoPodsFoundText}</div>);
 
         return (

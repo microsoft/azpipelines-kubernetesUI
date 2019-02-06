@@ -1,4 +1,3 @@
-import WebSocket = require('isomorphic-ws');
 import { Terminal } from 'xterm';
 import * as fit from 'xterm/lib/addons/fit/fit';
 Terminal.applyAddon(fit);
@@ -9,15 +8,18 @@ export class TerminalHandler {
     private terminal:Terminal | null = null;
     private socket: WebSocket | null = null;
     private clusterUrl: string;
-    constructor(config:any, termRef: HTMLDivElement | null) {
+    private termOpened: (state: boolean) => void;
+    constructor(config:any, termRef: HTMLDivElement | null, cb: (state: boolean) => void) {
         const ssl = config.server.startsWith('https://');
         const target  = ssl ? config.server.substr(8) : config.server.substr(7);
         const proto = ssl ? 'wss' : 'ws';
         this.server = `${proto}://${target}`;
         const b64enctoken = btoa(config.token);
-        this.token = b64enctoken.substring(0, b64enctoken.indexOf('=')); //stripping the = padding in base64 encoded token
+        //stripping the = padding in base64 encoded token
+        this.token = b64enctoken.indexOf('=')>=0?b64enctoken.substring(0, b64enctoken.indexOf('=')):b64enctoken;
         this.termRef = termRef;
         this.clusterUrl = config.server;
+        this.termOpened= cb;
     }
 
     public generateTTYForPod(podName: string, containerName:string):void {
@@ -65,6 +67,7 @@ export class TerminalHandler {
                 this.terminal.open(this.termRef);
                 (this.terminal as any).fit();
                 this.terminal.focus();
+                this.termOpened(true);
             }
         };
 
@@ -73,12 +76,14 @@ export class TerminalHandler {
             this.socket = null;
             this.terminal && this.terminal.dispose();
             this.terminal = null;
+            this.termOpened(false);
         }
 
         sock.onclose = (event) => {
             this.socket = null;
             this.terminal && this.terminal.dispose();
             this.terminal = null;
+            this.termOpened(false);
         }
 
         sock.onmessage = (event) => {

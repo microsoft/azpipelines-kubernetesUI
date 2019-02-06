@@ -121,7 +121,9 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
             parentMetaData={parentMetaData}
             podTemplate={podTemplate}
             parentKind={parentKind}
-            podsPromise={this.props.kubeService && this.props.kubeService.getPods() || Promise.resolve({})} />);
+            podsPromise={this.props.kubeService && this.props.kubeService.getPods() || Promise.resolve({})}
+            podLogs={this._podLogs}
+            podSSHConfig={this._podSSH}/>);
     }
 
     private _populateStateData(): void {
@@ -427,7 +429,8 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
     }
 
     private _selectedItemViewMap: { [selectedItemKey: string]: (selectedItem: any) => JSX.Element | null } = {};
-    private _onPodInvoked = (podName:string ) => {
+    
+    private _podLogs = (podName: string) => {
         return this.props.kubeService.getPodLogs(podName);
     };
 

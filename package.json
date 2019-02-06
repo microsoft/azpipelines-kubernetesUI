@@ -37,15 +37,14 @@
   ],
   "dependencies": {
     "@kubernetes/client-node": "~0.7.2",
-    "@types/node": "^10.12.18",
     "azure-devops-ui": "~1.144.1",
-    "isomorphic-ws": "^4.0.1",
     "office-ui-fabric-react": "5.131.5",
     "react": "~16.3.2",
     "react-dom": "~16.3.2",
     "xterm": "^3.7.0"
   },
   "devDependencies": {
+    "@types/node": "^10.12.18",
     "@types/enzyme": "^3.1.15",
     "@types/enzyme-adapter-react-16": "^1.0.3",
     "@types/enzyme-to-json": "^1.5.2",

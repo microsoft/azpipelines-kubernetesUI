@@ -6,7 +6,8 @@
 export const enum PodsRightPanelTabsKeys {
     PodsDetailsKey = "pod-details",
     PodsLogsKey = "pod-logs",
-    PodsYamlKey= "pod-yaml"
+    PodsYamlKey = "pod-yaml",
+    PodsSSHKey = "pod-ssh"
 }
 
 export const enum SelectedItemKeys {

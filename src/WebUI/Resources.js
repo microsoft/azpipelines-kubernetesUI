@@ -60,4 +60,5 @@ define("Environments/Providers/Kubernetes/Resources", ["require", "exports"], fu
     exports.YamlText = "YAML";
     exports.Ago = " ago";
     exports.NoPodsFoundText = "No pods are detected in this Kubernetes workload";
+    exports.SSHText = "SSH";
 });
