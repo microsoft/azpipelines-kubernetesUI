@@ -29,7 +29,7 @@
     "Kubernetes-UI"
   ],
   "license": "MIT",
-  "main": "dist/WebUI/Components/KubeSummary.js",
+  "main": "dist/WebUI/Common/KubeSummary.js",
   "files": [
     "dist",
     "_bundles"
