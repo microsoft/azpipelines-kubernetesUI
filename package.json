@@ -64,11 +64,12 @@
     "rimraf": "~2.6.2",
     "sass-loader": "~7.1.0",
     "style-loader": "~0.23.1",
+    "terser-webpack-plugin": "^1.2.2",
     "ts-loader": "~5.2.2",
     "typescript": "^2.9.2",
+    "uglifyjs-webpack-plugin": "^2.1.0",
     "webpack": "^4.27.0",
-    "webpack-cli": "^3.1.2",
-    "uglifyjs-webpack-plugin": "^2.1.0"
+    "webpack-cli": "^3.1.2"
   },
   "bugs": {
     "url": "https://github.com/Microsoft/azpipelines-kubernetesUI/issues"

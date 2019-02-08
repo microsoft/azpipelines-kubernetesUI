@@ -1,6 +1,7 @@
 const path = require('path');
 const webpack = require('webpack');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
 
 module.exports = {
   entry: {
@@ -20,9 +21,10 @@ module.exports = {
   devtool: 'source-map',
   optimization: {
     minimizer: [
-      new UglifyJsPlugin({
+      new TerserPlugin({
         sourceMap: true,
         include: /\.min\.js$/,
+        parallel: 4
       })
     ]
   },
@@ -54,7 +56,10 @@ module.exports = {
     ]
   },
   node: {
-    fs: 'empty'
+    fs: 'empty',
+    tls: 'mock',
+    child_process: 'empty',
+    net: 'empty'
   },
   externals: {
     react: 'react',

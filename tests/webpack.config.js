@@ -60,5 +60,11 @@ module.exports = {
             },
             { test: /\.(png|jpg)$/, loader: 'file-loader' },
         ]
+    },
+    node: {
+        fs: 'empty',
+        tls: 'mock',
+        child_process: 'empty',
+        net: 'empty'
     }
 };
