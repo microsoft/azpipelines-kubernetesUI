@@ -16,3 +16,27 @@ export const enum SelectedItemKeys {
     OrphanPodKey = "orphan-pod",
     ServiceItemKey = "service-item"
 }
+
+export const enum SelectedItemKeys2 {
+    PodKey = "pod",
+    ServiceItemKey = "service-item"
+}
+
+export namespace WorkloadsEvents {
+    export const DeploymentsFetchedEvent: string = "DEPLOYMENTS_FETCHED_EVENT";
+    export const ReplicaSetsFetchedEvent: string = "REPLICA_SETS_FETCHED_EVENT";
+    export const DaemonSetsFetchedEvent: string = "DAEMON_SETS_FETCHED_EVENT";
+    export const StatefulSetsFetchedEvent: string = "STATEFUL_SETS_FETCHED_EVENT";
+    export const WorkloadPodsFetchedEvent: string = "WORKLOAD_PODS_FETCHED_EVENT";
+    export const ZeroWorkloadsFoundEvent: string = "ZERO_WORKLOADS_FOUND_EVENT";
+}
+
+export namespace ServicesEvents {
+    export const ServicesFetchedEvent: string = "SERVICES_FETCHED_EVENT";
+    export const ServicePodsFetchedEvent: string = "SERVICE_PODS_FETCHED_EVENT";
+    export const ZeroServicesFoundEvent: string = "ZERO_SERVICES_FOUND_EVENT";
+}
+
+export namespace PodsEvents {
+    export const PodsFetchedEvent: string = "ALL_PODS_FETCHED_EVENT";
+}

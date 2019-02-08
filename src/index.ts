@@ -1,3 +1,3 @@
 export * from "./Contracts/Contracts";
 export * from "./Contracts/KubeServiceBase";
-export * from "./WebUI/Components/KubeSummary";
+export * from "./WebUI/Common/KubeSummary";

@@ -3,12 +3,12 @@ import * as String_Utils from "azure-devops-ui/Core/Util/String";
 import * as Date_Utils from "azure-devops-ui/Utilities/Date";
 import * as React from "react";
 
-import { ServiceComponent } from "../../../src/WebUI/Components/ServiceComponent";
+import { ServiceDetailsView } from "../../../src/WebUI/Services/ServiceDetailsView";
 import * as Resources from "../../../src/WebUI/Resources";
 import { IServiceItem } from "../../../src/WebUI/Types";
 import { mount, shallow } from "../../TestCore";
 
-describe("ServiceComponent component tests", () => {
+describe("ServiceDetailsView component tests", () => {
 
     const name = "some package name" + String_Utils.newGuid();
     const uid = "f32f9f29-ebed-11e8-ac56-829606b05f65";
@@ -65,7 +65,7 @@ describe("ServiceComponent component tests", () => {
     } as IServiceItem;
 
     it("Check header of the component", () => {
-        const wrapper = shallow(<ServiceComponent service={item} />);
+        const wrapper = shallow(<ServiceDetailsView service={item} />);
         const agoText = Date_Utils.ago(new Date(item.creationTimestamp), Date_Utils.AgoFormat.Compact);
         const headingClass = ".service-main-content .content-main-heading";
 
@@ -89,7 +89,7 @@ describe("ServiceComponent component tests", () => {
 
     it("Check header when no service is available", () => {
         const itemLocal = { ...item, service: null };
-        const wrapper = shallow(<ServiceComponent service={itemLocal} />);
+        const wrapper = shallow(<ServiceDetailsView service={itemLocal} />);
         const headingClass = ".service-main-content .content-main-heading";
 
         // check header --> should exist
@@ -102,7 +102,7 @@ describe("ServiceComponent component tests", () => {
     });
 
     it("Check service component after mount", () => {
-        const wrapper = mount(<ServiceComponent service={item} />);
+        const wrapper = mount(<ServiceDetailsView service={item} />);
         const sTableKeys = wrapper.find(".service-main-content .s-details .s-full-details .s-key");
         expect(!!sTableKeys && sTableKeys.length > 0).toBeTruthy();
         expect(sTableKeys.length).toStrictEqual(7);

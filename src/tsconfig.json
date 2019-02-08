@@ -16,6 +16,7 @@
         "noImplicitAny": false,
         "noImplicitThis": true,
         "skipDefaultLibCheck": true,
+        "strictPropertyInitialization": false,
         "skipLibCheck": true,
         "strict": true,
         "outDir": "../dist",
