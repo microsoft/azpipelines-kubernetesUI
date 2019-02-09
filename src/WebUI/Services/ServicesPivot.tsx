@@ -10,54 +10,39 @@ import { IKubeService } from "../../Contracts/Contracts";
 import * as Resources from "../Resources";
 import { IVssComponentProperties, IServiceItem, IDeploymentReplicaSetItem } from "../Types";
 import { Utils } from "../Utils";
-import { DeploymentsTable } from "../Workloads/DeploymentsTable";
 import "../Common/KubeSummary.scss";
-import { ServiceDetailsView } from "../Services/ServiceDetailsView";
 import { ServicesTable } from "../Services/ServicesTable";
 // todo :: work around till this issue is fixed in devops ui
 import "azure-devops-ui/Label.scss";
-import { DaemonSetTable } from "../Workloads/DaemonSetTable";
-import { StatefulSetTable } from "../Workloads/StatefulSetTable";
-import { PodsTable } from "../Pods/PodsTable";
 import { KubeZeroData } from "../Common//KubeZeroData";
-import { Filter, IFilterState, FILTER_CHANGE_EVENT, IFilterItemState } from "azure-devops-ui/Utilities/Filter";
-import { KubeResourceType } from "../../Contracts/KubeServiceBase";
+import { Filter, IFilterState, IFilterItemState } from "azure-devops-ui/Utilities/Filter";
 import { ServicesFilterBar } from "./ServicesFilterBar";
-import { Tab, TabBar, TabContent } from "azure-devops-ui/Tabs";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
-import { HeaderCommandBarWithFilter } from 'azure-devops-ui/HeaderCommandBar';
-import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
-import { SelectedItemKeys } from "../Constants";
-import { PodDetailsView } from "../Pods/PodDetailsView";
 import { ServicesActionsCreator } from "./ServicesActionsCreator";
-import { IServicesStoreState, ServicesStore } from "./ServicesStore";
+import { ServicesStore } from "./ServicesStore";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
 import { ServicesEvents } from "../Constants";
 import { NameKey, TypeKey } from "../Common/KubeFilterBar";
 
-const workloadsPivotItemKey: string = "workloads";
-const servicesPivotItemKey: string = "services";
-const filterToggled = new ObservableValue<boolean>(false);
-
 export interface IServicesPivotState {
     serviceList?: V1ServiceList;
 }
 
-export interface IWorkloadsPivotProps extends IVssComponentProperties {
+export interface IServicesPivotProps extends IVssComponentProperties {
     kubeService: IKubeService;
     filter: Filter;
     namespace?: string;
+    filterToggled: ObservableValue<boolean>;
 }
 
-export class ServicesPivot extends BaseComponent<IWorkloadsPivotProps, IServicesPivotState> {
-    constructor(props: IWorkloadsPivotProps) {
+export class ServicesPivot extends BaseComponent<IServicesPivotProps, IServicesPivotState> {
+    constructor(props: IServicesPivotProps) {
         super(props, {});
 
         this._actionCreator = ActionsCreatorManager.GetActionCreator<ServicesActionsCreator>(ServicesActionsCreator);
         this._store = StoreManager.GetStore<ServicesStore>(ServicesStore);
 
-        const filter = new Filter();
         this.state = {
             serviceList: undefined
         };
@@ -99,9 +84,9 @@ export class ServicesPivot extends BaseComponent<IWorkloadsPivotProps, IServices
 
     private _getFilterBar(): JSX.Element {
         return (<ServicesFilterBar
-            servicesList={this.state.serviceList || {} as V1ServiceList}
+            serviceList={this.state.serviceList || {} as V1ServiceList}
             filter={this.props.filter}
-            filterToggled={filterToggled}
+            filterToggled={this.props.filterToggled}
         />);
     }
 

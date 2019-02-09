@@ -39,7 +39,7 @@ import { ServicesStore } from "../Services/ServicesStore";
 import { ServicesPivot } from "../Services/ServicesPivot";
 import { PodsStore } from "../Pods/PodsStore";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
-import { WorkloadsEvents } from "../Constants";
+import { WorkloadsEvents, ServicesEvents } from "../Constants";
 
 const workloadsPivotItemKey: string = "workloads";
 const servicesPivotItemKey: string = "services";
@@ -51,6 +51,7 @@ export interface IKubernetesContainerState {
     selectedPivotKey?: string;
     selectedItem?: V1ReplicaSet | V1DaemonSet | V1StatefulSet | V1Pod | IServiceItem;
     showSelectedItem?: boolean;
+    selectedItemType?: string;
     resourceSize: number;
     workloadsFilter: Filter;
     svcFilter: Filter;
@@ -71,12 +72,15 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         workloadsFilter.subscribe(this._onWorkloadsFilterApplied, FILTER_CHANGE_EVENT);
         servicesFilter.subscribe(this._onSvcFilterApplied, FILTER_CHANGE_EVENT);
 
+        this._setSelectedKeyPodsViewMap();
+
         // Take namespace from deployment store and rest from selection store
         this.state = {
             namespace: this.props.namespace || "",
             selectedPivotKey: workloadsPivotItemKey,
             showSelectedItem: false,
             selectedItem: undefined,
+            selectedItemType: "",
             resourceSize: 0,
             svcFilter: servicesFilter,
             workloadsFilter: workloadsFilter
@@ -94,6 +98,9 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         // Fetch deployments in parent component we need to show nameSpace in heading and namespace is obtained from deployment metadata
         this._workloadsActionCreator.getDeployments(this.props.kubeService);
         this._workloadsStore.addListener(WorkloadsEvents.DeploymentsFetchedEvent, this._setNamespaceOnDeploymentsFetched);
+
+        this._workloadsStore.addListener(WorkloadsEvents.WorkloadsFoundEvent, this._onDataFound);
+        this._servicesStore.addListener(ServicesEvents.ServicesFoundEvent, this._onDataFound);
     }
 
     public render(): React.ReactNode {
@@ -111,6 +118,8 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
     public componentWillUnmount(): void {
         this._selectionStore.removeChangedListener(this._onSelectionStoreChanged);
         this._workloadsStore.removeListener(WorkloadsEvents.DeploymentsFetchedEvent, this._setNamespaceOnDeploymentsFetched);
+        this._workloadsStore.removeListener(WorkloadsEvents.WorkloadsFoundEvent, this._onDataFound);
+        this._servicesStore.removeListener(ServicesEvents.ServicesFoundEvent, this._onDataFound);
     }
 
     private _setNamespaceOnDeploymentsFetched = (): void => {
@@ -128,10 +137,13 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         this.setState({})
     };
 
-    private _onZeroDataFound = (): void => {
+    private _onDataFound = (): void => {
         const workloadSize = this._workloadsStore.getWorkloadSize();
         const servicesSize = this._servicesStore.getServicesSize();
-        this.setState({ resourceSize: workloadSize + servicesSize });
+        const resourceSize = workloadSize + servicesSize;
+        if (this.state.resourceSize <= 0 && resourceSize > 0) {
+            this.setState({ resourceSize: workloadSize + servicesSize });
+        }
     }
 
     private _getMainContent(): JSX.Element {
@@ -173,8 +185,8 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
                 </TabBar>
                 <TabContent>
                     <div className="item-padding">
-                        {this.state.selectedPivotKey === servicesPivotItemKey && <ServicesPivot kubeService={this.props.kubeService} namespace={this.state.namespace} filter={this.state.svcFilter} />}
-                        {this.state.selectedPivotKey === workloadsPivotItemKey && <WorkloadsPivot kubeService={this.props.kubeService} namespace={this.state.namespace} filter={this.state.workloadsFilter} />}
+                        {this.state.selectedPivotKey === servicesPivotItemKey && <ServicesPivot kubeService={this.props.kubeService} namespace={this.state.namespace} filter={this.state.svcFilter} filterToggled={filterToggled}/>}
+                        {this.state.selectedPivotKey === workloadsPivotItemKey && <WorkloadsPivot kubeService={this.props.kubeService} namespace={this.state.namespace} filter={this.state.workloadsFilter} filterToggled={filterToggled}/>}
                     </div>
 
                 </TabContent>
@@ -184,16 +196,9 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
 
     private _getSelectedItemPodsView(): JSX.Element | null {
         const selectedItem = this.state.selectedItem;
-        if (selectedItem) {
-            if (selectedItem instanceof V1DaemonSet || selectedItem instanceof V1StatefulSet || selectedItem instanceof V1ReplicaSet) {
-                return this._getWorkoadPodsViewComponent(selectedItem.metadata, selectedItem.spec && selectedItem.spec.template, selectedItem.kind);
-            }
-            else if (selectedItem instanceof V1Pod) {
-                return <PodDetailsView pod={selectedItem} />;
-            }
-            else {
-                return <ServiceDetailsView service={selectedItem} />;
-            }
+        const selectedItemType = this.state.selectedItemType;
+        if (selectedItem && selectedItemType && this._selectedItemViewMap.hasOwnProperty(selectedItemType)) {
+            return this._selectedItemViewMap[selectedItemType](selectedItem);
         }
 
         return null;
@@ -210,10 +215,20 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         const selectionStoreState = this._selectionStore.getState();
         this.setState({
             showSelectedItem: selectionStoreState.showSelectedItem,
-            selectedItem: selectionStoreState.selectedItem
+            selectedItem: selectionStoreState.selectedItem,
+            selectedItemType: selectionStoreState.selectedItemType
         });
     }
 
+    private _setSelectedKeyPodsViewMap() {
+        this._selectedItemViewMap[SelectedItemKeys.StatefulSetKey] = (item) => this._getWorkoadPodsViewComponent(item.metadata, item.spec && item.spec.template, item.kind || "StatefulSet");
+        this._selectedItemViewMap[SelectedItemKeys.ServiceItemKey] = (item) => { return <ServiceDetailsView kubeService={this.props.kubeService} service={item} /> };
+        this._selectedItemViewMap[SelectedItemKeys.DaemonSetKey] = (item) => this._getWorkoadPodsViewComponent(item.metadata, item.spec && item.spec.template, item.kind || "DaemonSet");
+        this._selectedItemViewMap[SelectedItemKeys.OrphanPodKey] = (item) => { return <PodDetailsView pod={item} />; }
+        this._selectedItemViewMap[SelectedItemKeys.ReplicaSetKey] = (item) => this._getWorkoadPodsViewComponent(item.metadata, item.spec && item.spec.template, item.kind || "ReplicaSet");
+    }
+
+    private _selectedItemViewMap: { [selectedItemKey: string]: (selectedItem: any) => JSX.Element | null } = {};
     private _selectionStore: SelectionStore;
     private _workloadsActionCreator: WorkloadsActionsCreator;
     private _workloadsStore: WorkloadsStore;

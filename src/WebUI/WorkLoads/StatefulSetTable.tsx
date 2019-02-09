@@ -15,7 +15,7 @@ import { WorkloadsActionsCreator } from "./WorkloadsActionsCreator";
 import { WorkloadsStore } from "./WorkloadsStore";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
-import { WorkloadsEvents } from "../Constants";
+import { WorkloadsEvents, SelectedItemKeys } from "../Constants";
 import { SelectionStore } from "../Selection/SelectionStore";
 import { SelectionActions } from "../Selection/SelectionActions";
 import { ActionsHubManager } from "../FluxCommon/ActionsHubManager";
@@ -79,7 +79,7 @@ export class StatefulSetTable extends BaseComponent<IStatefulSetTableProperties,
 
     private _openStatefulSetItem = (event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>, selectedItem: V1StatefulSet) => {
         if (selectedItem) {
-            ActionsHubManager.GetActionsHub<SelectionActions>(SelectionActions).selectItem.invoke({ item: selectedItem, showSelectedItem: true });
+            ActionsHubManager.GetActionsHub<SelectionActions>(SelectionActions).selectItem.invoke({ item: selectedItem, showSelectedItem: true, selectedItemType: SelectedItemKeys.StatefulSetKey });
         }
     }
 

@@ -13,6 +13,7 @@ import { IServiceItem } from "../Types";
 export interface ISelectionStoreState {
     selectedItem: V1ReplicaSet | V1DaemonSet | V1StatefulSet | IServiceItem | V1Pod | undefined;
     showSelectedItem: boolean;
+    selectedItemType: string;
 }
 
 export class SelectionStore extends StoreBase {
@@ -23,7 +24,7 @@ export class SelectionStore extends StoreBase {
     public initialize(instanceId?: string): void {
         super.initialize(instanceId);
 
-        this._state = { selectedItem: undefined, showSelectedItem: false };
+        this._state = { selectedItem: undefined, showSelectedItem: false, selectedItemType: "" };
 
         this._actions = ActionsHubManager.GetActionsHub<SelectionActions>(SelectionActions);
         this._actions.selectItem.addListener(this._select);
@@ -40,7 +41,7 @@ export class SelectionStore extends StoreBase {
     private _select = (payload: ISelectionPayload): void => {
         this._state.selectedItem = payload.item;
         this._state.showSelectedItem = payload.showSelectedItem;
-
+        this._state.selectedItemType = payload.selectedItemType;
         this.emitChanged();
     }
 

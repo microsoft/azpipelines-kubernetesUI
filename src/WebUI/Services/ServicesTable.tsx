@@ -20,7 +20,7 @@ import { ActionsHubManager } from "../FluxCommon/ActionsHubManager";
 import { SelectionActions } from "../Selection/SelectionActions";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
-import { ServicesEvents } from "../Constants";
+import { ServicesEvents, SelectedItemKeys } from "../Constants";
 import { ServicesStore } from "./ServicesStore";
 import { ServicesActionsCreator } from "./ServicesActionsCreator";
 
@@ -41,7 +41,7 @@ export interface IServicesComponentProperties extends IVssComponentProperties {
 
 export class ServicesTable extends BaseComponent<IServicesComponentProperties> {
     public render(): React.ReactNode {
-        const filteredSvc: V1Service[] = (this.props.servicesList && this.props.servicesList.items || [])
+        const filteredSvc: V1Service[] = (this.props.serviceList && this.props.serviceList.items || [])
             .filter((svc) => {
                 return this._filterService(svc);
             });
@@ -65,13 +65,13 @@ export class ServicesTable extends BaseComponent<IServicesComponentProperties> {
 
     private _openServiceItem = (event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>, selectedItem: IServiceItem) => {
         if (selectedItem) {
-            ActionsHubManager.GetActionsHub<SelectionActions>(SelectionActions).selectItem.invoke({ item: selectedItem, showSelectedItem: true });
+            ActionsHubManager.GetActionsHub<SelectionActions>(SelectionActions).selectItem.invoke({ item: selectedItem, showSelectedItem: true, selectedItemType: SelectedItemKeys.ServiceItemKey });
         }
     }
 
-    private static _getServiceItems(servicesList: V1Service[]): IServiceItem[] {
+    private static _getServiceItems(serviceList: V1Service[]): IServiceItem[] {
         let items: IServiceItem[] = [];
-        servicesList.forEach(service => {
+        serviceList.forEach(service => {
             items.push({
                 package: service.metadata.name,
                 type: service.spec.type,

@@ -31,12 +31,11 @@ import { PodDetailsView } from "../Pods/PodDetailsView";
 
 const workloadsPivotItemKey: string = "workloads";
 const servicesPivotItemKey: string = "services";
-const filterToggled = new ObservableValue<boolean>(false);
 
 export interface IWorkloadsFilterBarProps extends IVssComponentProperties {
     filter: Filter;
     filterToggled: ObservableValue<boolean>;
-    servicesList: V1ServiceList;
+    serviceList: V1ServiceList;
 }
 
 export class ServicesFilterBar extends BaseComponent<IWorkloadsFilterBarProps> {
@@ -57,7 +56,7 @@ export class ServicesFilterBar extends BaseComponent<IWorkloadsFilterBarProps> {
 
     private _generateSvcTypes(): string[] {
         let svcTypes: string[] = [];
-        this.props.servicesList && this.props.servicesList.items && this.props.servicesList.items.forEach((svc) => {
+        this.props.serviceList && this.props.serviceList.items && this.props.serviceList.items.forEach((svc) => {
             if (svcTypes.indexOf(svc.spec.type) == -1) {
                 svcTypes.push(svc.spec.type);
             }

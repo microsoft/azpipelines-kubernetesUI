@@ -14,6 +14,7 @@ import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
 import { ResourceStatus } from "../Common/ResourceStatus";
 import { ActionsHubManager } from "../FluxCommon/ActionsHubManager";
 import { SelectionActions } from "../Selection/SelectionActions";
+import { SelectedItemKeys } from "../Constants";
 
 const podNameKey: string = "pl-name-key";
 const podImageKey: string = "pl-image-key";
@@ -22,7 +23,7 @@ const podAgeKey: string = "pl-age-key";
 const colDataClassName: string = "list-col-content";
 
 export interface IPodsTableProperties extends IVssComponentProperties {
-    podsToRender:V1Pod[];
+    podsToRender: V1Pod[];
     headingText?: string;
     nameFilter?: string;
 }
@@ -44,7 +45,7 @@ export class PodsTable extends BaseComponent<IPodsTableProperties> {
                 />
             );
         }
-        
+
         return null;
     }
 
@@ -98,7 +99,7 @@ export class PodsTable extends BaseComponent<IPodsTableProperties> {
 
     private _showPodDetails = (event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>, selectedItem: V1Pod) => {
         if (selectedItem) {
-            ActionsHubManager.GetActionsHub<SelectionActions>(SelectionActions).selectItem.invoke({ item: selectedItem, showSelectedItem: true });
+            ActionsHubManager.GetActionsHub<SelectionActions>(SelectionActions).selectItem.invoke({ item: selectedItem, showSelectedItem: true, selectedItemType: SelectedItemKeys.OrphanPodKey });
         }
     }
 
