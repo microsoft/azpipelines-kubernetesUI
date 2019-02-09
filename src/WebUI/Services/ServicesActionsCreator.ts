@@ -11,7 +11,7 @@ import { ServicesActions } from "./ServicesActions";
 
 export class ServicesActionsCreator extends ActionCreatorBase {
     public static getKey(): string {
-        return "workloads-actionscreator";
+        return "services-actionscreator";
     }
 
     public initialize(instanceId?: string): void {

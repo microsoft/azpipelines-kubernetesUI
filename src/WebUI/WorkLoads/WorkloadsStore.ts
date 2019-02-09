@@ -71,32 +71,32 @@ export class WorkloadsStore extends StoreBase {
 
         this.emit(WorkloadsEvents.DeploymentsFetchedEvent, this);
 
-        if (!this._state.deploymentList || !this._state.deploymentList.items || this._state.deploymentList.items.length <= 0) {
-            this.emit(WorkloadsEvents.ZeroWorkloadsFoundEvent, this);
+        if (this._state.deploymentList && this._state.deploymentList.items && this._state.deploymentList.items.length > 0) {
+            this.emit(WorkloadsEvents.WorkloadsFoundEvent, this);
         }
     }
 
     private _setReplicaSetsList = (replicaSetList: V1ReplicaSetList): void => {
         this._state.replicaSetList = replicaSetList;
         this.emit(WorkloadsEvents.ReplicaSetsFetchedEvent, this);
-        if (!this._state.replicaSetList || !this._state.replicaSetList.items || this._state.replicaSetList.items.length <= 0) {
-            this.emit(WorkloadsEvents.ZeroWorkloadsFoundEvent, this);
+        if (this._state.replicaSetList && this._state.replicaSetList.items && this._state.replicaSetList.items.length > 0) {
+            this.emit(WorkloadsEvents.WorkloadsFoundEvent, this);
         }
     }
 
     private _setDaemonSetsList = (daemonSetList: V1DaemonSetList): void => {
         this._state.daemonSetList = daemonSetList;
         this.emit(WorkloadsEvents.DaemonSetsFetchedEvent, this);
-        if (!this._state.daemonSetList || !this._state.daemonSetList.items || this._state.daemonSetList.items.length <= 0) {
-            this.emit(WorkloadsEvents.ZeroWorkloadsFoundEvent, this);
+        if (this._state.daemonSetList && this._state.daemonSetList.items && this._state.daemonSetList.items.length > 0) {
+            this.emit(WorkloadsEvents.WorkloadsFoundEvent, this);
         }
     }
 
     private _setStatefulsetsList = (statefulSetList: V1StatefulSetList): void => {
         this._state.statefulSetList = statefulSetList;
         this.emit(WorkloadsEvents.StatefulSetsFetchedEvent, this);
-        if (!this._state.statefulSetList || !this._state.statefulSetList.items || this._state.statefulSetList.items.length <= 0) {
-            this.emit(WorkloadsEvents.ZeroWorkloadsFoundEvent, this);
+        if (this._state.statefulSetList && this._state.statefulSetList.items && this._state.statefulSetList.items.length > 0) {
+            this.emit(WorkloadsEvents.WorkloadsFoundEvent, this);
         }
     }
 
@@ -109,8 +109,10 @@ export class WorkloadsStore extends StoreBase {
         });
 
         this._state.orphanPodsList = orphanPods;
-        if (!this._state.orphanPodsList || this._state.orphanPodsList.length <= 0) {
-            this.emit(WorkloadsEvents.ZeroWorkloadsFoundEvent, this);
+        this.emit(WorkloadsEvents.WorkloadPodsFetchedEvent, this);
+        
+        if (this._state.orphanPodsList && this._state.orphanPodsList.length > 0) {
+            this.emit(WorkloadsEvents.WorkloadsFoundEvent, this);
         }
     }
 

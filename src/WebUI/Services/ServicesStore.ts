@@ -30,7 +30,7 @@ export class ServicesStore extends StoreBase {
         this._podsActions = ActionsHubManager.GetActionsHub<PodsActions>(PodsActions);
 
         this._servicesActions.servicesFetched.addListener(this._servicesFetched);
-        this._podsActions.podsFetchedByLabel.removeListener(this._setAssociatedPodsList);
+        this._podsActions.podsFetchedByLabel.addListener(this._setAssociatedPodsList);
     }
 
     public disposeInternal(): void {
@@ -49,8 +49,8 @@ export class ServicesStore extends StoreBase {
     private _servicesFetched = (serviceList: V1ServiceList): void => {
         this._state.serviceList = serviceList;
         this.emit(ServicesEvents.ServicesFetchedEvent, this);
-        if (!this._state.serviceList || !this._state.serviceList.items || this._state.serviceList.items.length <= 0) {
-            this.emit(ServicesEvents.ZeroServicesFoundEvent, this);
+        if (this._state.serviceList && this._state.serviceList.items && this._state.serviceList.items.length > 0) {
+            this.emit(ServicesEvents.ServicesFoundEvent, this);
         }
     }
 

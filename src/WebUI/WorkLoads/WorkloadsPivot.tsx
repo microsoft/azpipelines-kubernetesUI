@@ -35,21 +35,23 @@ import { WorkloadsStore, IWorkloadsStoreState } from "./WorkloadsStore";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
 import { WorkloadsEvents } from "../Constants";
+import {PodsStore} from "../Pods/PodsStore";
 import { NameKey, TypeKey } from "../Common/KubeFilterBar";
 
 const workloadsPivotItemKey: string = "workloads";
 const servicesPivotItemKey: string = "services";
-const filterToggled = new ObservableValue<boolean>(false);
 
 //todo: refactor filter properties to respective resource type components
-export interface IWorkloadsPivotState extends IWorkloadsStoreState {
+export interface IWorkloadsPivotState {
     workloadResourceSize: number;
+    orphanPodsList: V1Pod[];
 }
 
 export interface IWorkloadsPivotProps extends IVssComponentProperties {
     kubeService: IKubeService;
     filter: Filter;
     namespace?: string;
+    filterToggled: ObservableValue<boolean>;
 }
 
 export class WorkloadsPivot extends BaseComponent<IWorkloadsPivotProps, IWorkloadsPivotState> {
@@ -58,12 +60,10 @@ export class WorkloadsPivot extends BaseComponent<IWorkloadsPivotProps, IWorkloa
 
         this._podsActionCreator = ActionsCreatorManager.GetActionCreator<PodsActionsCreator>(PodsActionsCreator);
         this._workloadsStore = StoreManager.GetStore<WorkloadsStore>(WorkloadsStore);
+        // Initialize pods store as pods list will be required in workloadPodsView on item selection
+        StoreManager.GetStore<PodsStore>(PodsStore);
 
         this.state = {
-            deploymentList: undefined,
-            replicaSetList: undefined,
-            daemonSetList: undefined,
-            statefulSetList: undefined,
             orphanPodsList: [],
             workloadResourceSize: 0
         };
@@ -72,7 +72,7 @@ export class WorkloadsPivot extends BaseComponent<IWorkloadsPivotProps, IWorkloa
         this._podsActionCreator.getPods(this.props.kubeService);
 
         this._workloadsStore.addListener(WorkloadsEvents.WorkloadPodsFetchedEvent, this._onPodsFetched);
-        this._workloadsStore.addListener(WorkloadsEvents.ZeroWorkloadsFoundEvent, this._onZeroDataFound);
+        this._workloadsStore.addListener(WorkloadsEvents.WorkloadsFoundEvent, this._onDataFound);
     }
 
     public render(): React.ReactNode {
@@ -86,17 +86,19 @@ export class WorkloadsPivot extends BaseComponent<IWorkloadsPivotProps, IWorkloa
 
     public componentWillUnmount(): void {
         this._workloadsStore.removeListener(WorkloadsEvents.WorkloadPodsFetchedEvent, this._onPodsFetched);
-        this._workloadsStore.removeListener(WorkloadsEvents.ZeroWorkloadsFoundEvent, this._onZeroDataFound);
+        this._workloadsStore.removeListener(WorkloadsEvents.WorkloadsFoundEvent, this._onDataFound);
     }
 
     private _onPodsFetched = (): void => {
         const storeState = this._workloadsStore.getState();
-        this.setState({ orphanPodsList: storeState.orphanPodsList });
+        this.setState({ orphanPodsList: storeState.orphanPodsList || [] });
     }
 
-    private _onZeroDataFound = (): void => {
+    private _onDataFound = (): void => {
         const workloadSize = this._workloadsStore.getWorkloadSize();
-        this.setState({ workloadResourceSize: workloadSize });
+        if (this.state.workloadResourceSize <= 0 && workloadSize > 0) {
+            this.setState({ workloadResourceSize: workloadSize });
+        }
     }
 
     private _getContent(): JSX.Element {
@@ -115,7 +117,7 @@ export class WorkloadsPivot extends BaseComponent<IWorkloadsPivotProps, IWorkloa
 
     private _getFilterBar(): JSX.Element {
         return (<WorkloadsFilterBar filter={this.props.filter}
-            filterToggled={filterToggled}
+            filterToggled={this.props.filterToggled}
         />);
     }
 

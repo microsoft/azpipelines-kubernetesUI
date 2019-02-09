@@ -22,7 +22,7 @@ import { WorkloadsActionsCreator } from "./WorkloadsActionsCreator";
 import { WorkloadsStore } from "./WorkloadsStore";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
-import { WorkloadsEvents } from "../Constants";
+import { WorkloadsEvents, SelectedItemKeys } from "../Constants";
 import { SelectionStore } from "../Selection/SelectionStore";
 import { SelectionActions } from "../Selection/SelectionActions";
 import { ActionsHubManager } from "../FluxCommon/ActionsHubManager";
@@ -86,7 +86,7 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
 
     private _getDeploymentListView(filteredDeployments: V1Deployment[]) {
         let renderList: JSX.Element[] = [];
-        DeploymentsTable._generateDeploymentReplicaSetMap(filteredDeployments, this.props.replicaSetList).forEach((entry, index) => {
+        DeploymentsTable._generateDeploymentReplicaSetMap(filteredDeployments, this.state.replicaSetList).forEach((entry, index) => {
             let columnClassName = css("list-content", "depth-16", index > 0 ? "replica-with-pod-list" : "");
             renderList.push(<BaseKubeTable
                 key={format("dep-{0}", index)}
@@ -100,7 +100,7 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
         return renderList;
     }
 
-    private static _generateDeploymentReplicaSetMap(deploymentList: V1Deployment[], replicaSetList: V1ReplicaSetList): IDeploymentReplicaSetMap[] {
+    private static _generateDeploymentReplicaSetMap(deploymentList: V1Deployment[], replicaSetList: V1ReplicaSetList | undefined): IDeploymentReplicaSetMap[] {
         let deploymentReplicaSetMap: IDeploymentReplicaSetMap[] = [];
         deploymentList.forEach(deployment => {
             const filteredReplicas: V1ReplicaSet[] = (replicaSetList && replicaSetList.items || [])
@@ -273,7 +273,7 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
     private _openDeploymentItem = (event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>, selectedItem: IDeploymentReplicaSetItem) => {
         const selectedReplicaSet = this._getSelectedReplicaSet(selectedItem);
         if (selectedReplicaSet) {
-            ActionsHubManager.GetActionsHub<SelectionActions>(SelectionActions).selectItem.invoke({ item: selectedReplicaSet, showSelectedItem: true });
+            ActionsHubManager.GetActionsHub<SelectionActions>(SelectionActions).selectItem.invoke({ item: selectedReplicaSet, showSelectedItem: true, selectedItemType: SelectedItemKeys.ReplicaSetKey });
         }
     }
 

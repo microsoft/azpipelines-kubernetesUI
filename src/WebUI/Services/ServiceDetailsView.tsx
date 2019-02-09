@@ -31,6 +31,7 @@ import { ServicesEvents } from "../Constants";
 import { ServicesStore } from "./ServicesStore";
 
 export interface IServiceDetailsViewProperties extends IVssComponentProperties {
+    kubeService: IKubeService;
     service: IServiceItem;
 }
 

@@ -10,6 +10,7 @@ import { IServiceItem } from "../Types";
 export interface ISelectionPayload {
     item: V1ReplicaSet | V1DaemonSet | V1StatefulSet | IServiceItem | V1Pod;
     showSelectedItem: boolean;
+    selectedItemType: string;
 }
 
 export class SelectionActions extends ActionsHubBase {
