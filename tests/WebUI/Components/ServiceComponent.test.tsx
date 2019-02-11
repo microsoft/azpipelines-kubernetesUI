@@ -7,6 +7,8 @@ import { ServiceDetailsView } from "../../../src/WebUI/Services/ServiceDetailsVi
 import * as Resources from "../../../src/WebUI/Resources";
 import { IServiceItem } from "../../../src/WebUI/Types";
 import { mount, shallow } from "../../TestCore";
+import { IKubeService } from "../../../src/Contracts/Contracts";
+import { KubeServiceBase, KubeResourceType } from "../../../src/Contracts/KubeServiceBase";
 
 describe("ServiceDetailsView component tests", () => {
 
@@ -64,8 +66,16 @@ describe("ServiceDetailsView component tests", () => {
         service: serviceObj as V1Service
     } as IServiceItem;
 
+    class MockKubeService extends KubeServiceBase {
+        public fetch(resourceType: KubeResourceType): Promise<any> {
+            return Promise.resolve({});
+        }
+    }
+
+    const kubeService = new MockKubeService();
+
     it("Check header of the component", () => {
-        const wrapper = shallow(<ServiceDetailsView service={item} />);
+        const wrapper = shallow(<ServiceDetailsView service={item} kubeService={kubeService} />);
         const agoText = Date_Utils.ago(new Date(item.creationTimestamp), Date_Utils.AgoFormat.Compact);
         const headingClass = ".service-main-content .content-main-heading";
 
@@ -89,7 +99,7 @@ describe("ServiceDetailsView component tests", () => {
 
     it("Check header when no service is available", () => {
         const itemLocal = { ...item, service: null };
-        const wrapper = shallow(<ServiceDetailsView service={itemLocal} />);
+        const wrapper = shallow(<ServiceDetailsView service={itemLocal} kubeService={kubeService} />);
         const headingClass = ".service-main-content .content-main-heading";
 
         // check header --> should exist
@@ -102,7 +112,7 @@ describe("ServiceDetailsView component tests", () => {
     });
 
     it("Check service component after mount", () => {
-        const wrapper = mount(<ServiceDetailsView service={item} />);
+        const wrapper = mount(<ServiceDetailsView service={item} kubeService={kubeService} />);
         const sTableKeys = wrapper.find(".service-main-content .s-details .s-full-details .s-key");
         expect(!!sTableKeys && sTableKeys.length > 0).toBeTruthy();
         expect(sTableKeys.length).toStrictEqual(7);
