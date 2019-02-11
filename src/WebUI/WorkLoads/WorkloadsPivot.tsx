@@ -12,8 +12,6 @@ import { IVssComponentProperties, IServiceItem, IDeploymentReplicaSetItem } from
 import { Utils } from "../Utils";
 import { DeploymentsTable } from "../Workloads/DeploymentsTable";
 import "../Common/KubeSummary.scss";
-import { ServiceDetailsView } from "../Services/ServiceDetailsView";
-import { ServicesTable } from "../Services/ServicesTable";
 // todo :: work around till this issue is fixed in devops ui
 import "azure-devops-ui/Label.scss";
 import { DaemonSetTable } from "../Workloads/DaemonSetTable";
@@ -23,25 +21,17 @@ import { KubeZeroData } from "../Common//KubeZeroData";
 import { Filter, IFilterState, FILTER_CHANGE_EVENT, IFilterItemState } from "azure-devops-ui/Utilities/Filter";
 import { KubeResourceType } from "../../Contracts/KubeServiceBase";
 import { WorkloadsFilterBar } from "./WorkloadsFilterBar";
-import { Tab, TabBar, TabContent } from "azure-devops-ui/Tabs";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
-import { HeaderCommandBarWithFilter } from 'azure-devops-ui/HeaderCommandBar';
-import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
 import { SelectedItemKeys } from "../Constants";
-import { PodDetailsView } from "../Pods/PodDetailsView";
 import { WorkloadsActionsCreator } from "./WorkloadsActionsCreator";
 import { PodsActionsCreator } from "../Pods/PodsActionsCreator";
-import { WorkloadsStore, IWorkloadsStoreState } from "./WorkloadsStore";
+import { WorkloadsStore } from "./WorkloadsStore";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
 import { WorkloadsEvents } from "../Constants";
-import {PodsStore} from "../Pods/PodsStore";
+import { PodsStore } from "../Pods/PodsStore";
 import { NameKey, TypeKey } from "../Common/KubeFilterBar";
 
-const workloadsPivotItemKey: string = "workloads";
-const servicesPivotItemKey: string = "services";
-
-//todo: refactor filter properties to respective resource type components
 export interface IWorkloadsPivotState {
     workloadResourceSize: number;
     orphanPodsList: V1Pod[];

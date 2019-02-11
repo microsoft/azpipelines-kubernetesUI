@@ -15,7 +15,7 @@ import * as Resources from "../Resources";
 import { IServiceItem, IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
 import "./ServiceDetailsView.scss";
-import { V1PodList, V1Pod } from "@kubernetes/client-node";
+import { V1Pod } from "@kubernetes/client-node";
 import { PodsTable } from "../Pods/PodsTable";
 import { PodDetailsView } from "../Pods/PodDetailsView";
 import { KubeZeroData } from "../Common/KubeZeroData";

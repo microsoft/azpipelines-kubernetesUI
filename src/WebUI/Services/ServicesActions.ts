@@ -4,7 +4,7 @@
 */
 
 import { ActionsHubBase, Action } from "../FluxCommon/Actions";
-import { V1ServiceList, V1PodList } from "@kubernetes/client-node";
+import { V1ServiceList } from "@kubernetes/client-node";
 
 export class ServicesActions extends ActionsHubBase {
     public static getKey(): string {

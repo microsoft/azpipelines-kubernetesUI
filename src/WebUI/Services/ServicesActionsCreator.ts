@@ -6,7 +6,6 @@
 import { ActionCreatorBase, Action } from "../FluxCommon/Actions";
 import { ActionsHubManager } from "../FluxCommon/ActionsHubManager";
 import { IKubeService } from "../../Contracts/Contracts";
-import { V1ServiceList } from "@kubernetes/client-node";
 import { ServicesActions } from "./ServicesActions";
 
 export class ServicesActionsCreator extends ActionCreatorBase {

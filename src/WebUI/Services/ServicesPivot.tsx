@@ -3,12 +3,12 @@
     Licensed under the MIT license.
 */
 
-import { V1DeploymentList, V1ReplicaSet, V1ReplicaSetList, V1ServiceList, V1DaemonSetList, V1StatefulSetList, V1Service, V1PodList, V1Pod, V1DaemonSet, V1StatefulSet, V1PodTemplateSpec, V1ObjectMeta } from "@kubernetes/client-node";
+import { V1ServiceList, V1Service } from "@kubernetes/client-node";
 import { BaseComponent, format } from "@uifabric/utilities";
 import * as React from "react";
 import { IKubeService } from "../../Contracts/Contracts";
 import * as Resources from "../Resources";
-import { IVssComponentProperties, IServiceItem, IDeploymentReplicaSetItem } from "../Types";
+import { IVssComponentProperties, IServiceItem } from "../Types";
 import { Utils } from "../Utils";
 import "../Common/KubeSummary.scss";
 import { ServicesTable } from "../Services/ServicesTable";
