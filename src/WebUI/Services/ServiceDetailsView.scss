@@ -2,13 +2,12 @@
 
 .s-details {
     margin-top: 10px;
-
+    width: auto;
     .s-key {
-        color: $secondary-text;
 
         &.bolt-table-cell {
             padding-left: 0px;
-            line-height: 40px;
+            line-height: 20px;
         }
     }
 
@@ -27,5 +26,5 @@
 }
 
 .s-de-heading {
-    padding-left: 8px;;
+    padding-left: 8px;
 }

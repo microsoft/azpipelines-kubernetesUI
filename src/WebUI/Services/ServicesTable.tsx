@@ -14,7 +14,7 @@ import { ITableColumn, SimpleTableCell } from "azure-devops-ui/Table";
 import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
 import "./ServicesTable.scss";
 import { Utils } from "../Utils";
-import { IStatusProps, Statuses } from "azure-devops-ui/Status";
+import { IStatusProps, Statuses, StatusSize } from "azure-devops-ui/Status";
 import { ResourceStatus } from "../Common/ResourceStatus";
 import { ActionsHubManager } from "../FluxCommon/ActionsHubManager";
 import { SelectionActions } from "../Selection/SelectionActions";
@@ -132,16 +132,6 @@ export class ServicesTable extends BaseComponent<IServicesComponentProperties> {
         });
 
         columns.push({
-            id: typeKey,
-            name: Resources.TypeText,
-            minWidth: 120,
-            width: -100,
-            headerClassName: css(headerColumnClassName, "first-col-header"),
-            className: columnContentClassName,
-            renderCell: ServicesTable._renderTypeCell
-        });
-
-        columns.push({
             id: clusterIPKey,
             name: Resources.ClusterIPText,
             minWidth: 150,
@@ -189,12 +179,6 @@ export class ServicesTable extends BaseComponent<IServicesComponentProperties> {
         return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
-    private static _renderTypeCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, service: IServiceItem): JSX.Element => {
-        const textToRender = service.type;
-        const itemToRender = BaseKubeTable.renderColumn(textToRender || "", BaseKubeTable.defaultColumnRenderer, colDataClassName);
-        return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
-    }
-
     private static _renderClusterIpCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, service: IServiceItem): JSX.Element => {
         const textToRender = service.clusterIP || Resources.NoneText;
         const itemToRender = BaseKubeTable.renderColumn(textToRender || "", BaseKubeTable.defaultColumnRenderer, colDataClassName);
@@ -232,8 +216,9 @@ export class ServicesTable extends BaseComponent<IServicesComponentProperties> {
         return (
             <ResourceStatus
                 statusProps={statusProps}
-                customDescription={BaseKubeTable.renderTwoLineColumn(service.package, service.pipeline, css(cssClassName, "kube-status-desc"), "primary-text", "secondary-text")}
+                customDescription={BaseKubeTable.renderTwoLineColumn(service.package, service.type, css(cssClassName, "kube-status-desc"), "primary-text", "secondary-text")}
                 toolTipText={tooltipText}
+                statusSize={StatusSize.l}
             />
         );
     }
