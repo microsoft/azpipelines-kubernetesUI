@@ -90,7 +90,7 @@ export class ServiceDetailsView extends BaseComponent<IServiceDetailsViewPropert
                     statusProps = Statuses.Running;
                 }
             }
-            const headerItem: React.ReactNode = (<h2 className="title-heading">{localeFormat(" {0}",item.package)}</h2>);
+            const headerItem: React.ReactNode = (<h2 className="title-heading">{item.package}</h2>);
             return (
                 <div className="content-main-heading">
                     <ResourceStatus statusProps={statusProps} customDescription={headerItem} statusSize={StatusSize.l} />
@@ -176,6 +176,7 @@ export class ServiceDetailsView extends BaseComponent<IServiceDetailsViewPropert
                             localeFormat(Resources.CreatedAgo, agoTime)}
                     </div>
                     <Table
+                        className="s-details"
                         id={format("s-details-tbl-{0}", item.uid)}
                         showHeader={false}
                         showLines={false}

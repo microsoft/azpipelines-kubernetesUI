@@ -80,21 +80,24 @@ describe("ServiceDetailsView component tests", () => {
         const headingClass = ".service-main-content .content-main-heading";
 
         // check all header details
-        const heading = wrapper.find(headingClass + " .title-heading");
+        const headingContainer = wrapper.find(headingClass);
+        expect(!!headingContainer && headingContainer.length > 0).toBeTruthy();
+
+        const heading = wrapper.find('ResourceStatus');
         expect(!!heading && heading.length > 0).toBeTruthy();
-        expect(heading.text()).toStrictEqual(name);
+        //large status size
+        expect(heading.prop('statusSize')).toStrictEqual('24');
 
-        const subHeading = wrapper.find(headingClass + " .sub-heading");
-        expect(!!subHeading && subHeading.length > 0).toBeTruthy();
-        expect(subHeading.text()).toStrictEqual(String_Utils.localeFormat(Resources.ServiceCreatedText, agoText));
+        const renderedHeading = heading.dive();
 
-        // check service details
-        const serviceClass = ".service-main-content .s-details";
-        const sHeader = wrapper.find(serviceClass + " .s-de-heading");
-        expect(!!sHeader && sHeader.length > 0).toBeTruthy();
-        expect(sHeader.text()).toStrictEqual(Resources.DetailsText);
-        const sTable = wrapper.find(serviceClass + " .s-full-details");
-        expect(!!sTable && sTable.length > 0).toBeTruthy();
+        const status = renderedHeading.find('Status');
+        expect(!!status && status.length > 0).toBeTruthy();
+        expect(status.prop('color')).toStrictEqual('success')
+
+        //expecting the title to be of h2
+        const pageTitle = renderedHeading.find('h2');
+        expect(!!pageTitle && pageTitle.length > 0).toBeTruthy();
+        expect(pageTitle.text()).toStrictEqual(item.package);
     });
 
     it("Check header when no service is available", () => {
@@ -113,8 +116,7 @@ describe("ServiceDetailsView component tests", () => {
 
     it("Check service component after mount", () => {
         const wrapper = mount(<ServiceDetailsView service={item} kubeService={kubeService} />);
-        const sTableKeys = wrapper.find(".service-main-content .s-details .s-full-details .s-key");
+        const sTableKeys = wrapper.find(".kube-list-content");
         expect(!!sTableKeys && sTableKeys.length > 0).toBeTruthy();
-        expect(sTableKeys.length).toStrictEqual(7);
     });
 });
