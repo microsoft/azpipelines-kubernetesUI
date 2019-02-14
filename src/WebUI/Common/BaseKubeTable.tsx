@@ -10,6 +10,7 @@ import { IVssComponentProperties } from "../Types";
 import { Table, ITableColumn, TableRow, ITableRowProps, SimpleTableCell } from "azure-devops-ui/Table";
 import { ITableRow, ITableRowDetails } from "azure-devops-ui/Components/Table/Table.Props";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
+import { Card, CardHeader, CardContent, CustomCard } from "azure-devops-ui/Card";
 import "./BaseKubeTable.scss";
 
 export interface ITableComponentProperties<T> extends IVssComponentProperties {
@@ -24,10 +25,14 @@ export interface ITableComponentProperties<T> extends IVssComponentProperties {
 export class BaseKubeTable<T> extends BaseComponent<ITableComponentProperties<T>> {
     public render(): React.ReactNode {
         return (
-            <div className={css("kube-list-content", this.props.className)}>
-                {this._getComponentHeadingContent()}
-                {this.props.items && this.props.items.length > 0 && this._getComponent()}
-            </div>
+            <CustomCard className={css("flex-grow", "bolt-card-no-vertical-padding", "item-top-padding", "kube-list-content")}>
+                <CardHeader>
+                    {this._getComponentHeadingContent()}
+                </CardHeader>
+                <CardContent className="item-no-padding">
+                    {this.props.items && this.props.items.length > 0 && this._getComponent()}
+                </CardContent>
+            </CustomCard>
         );
     }
 

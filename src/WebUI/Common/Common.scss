@@ -27,6 +27,7 @@
 }
 .secondary-text {
     color: $secondary-text;
+    font-size: $fontSizeMS;
 }
 
 .kube-status-container {
@@ -39,4 +40,8 @@
 }
 .item-top-padding {
     margin-top: 10px;
+}
+
+.item-no-padding {
+    padding: 0px 0px 0px 0px
 }

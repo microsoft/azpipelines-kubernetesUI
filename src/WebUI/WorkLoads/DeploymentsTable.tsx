@@ -259,7 +259,7 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
     private static _getHeadingContent(deployment: V1Deployment): JSX.Element {
         return (
             <div>
-                <div className="kube-flex-row">
+                <span className="kube-flex-row">
                     <h3>{deployment.metadata.name}</h3>
                     <div className="heading-labels">
                         <LabelGroup labelProps={Utils.getUILabelModelArray(deployment.metadata.labels)}
@@ -267,7 +267,7 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
                             fadeOutOverflow={true}>
                         </LabelGroup>
                     </div>
-                </div>
+                </span>
                 <span className="secondary-text kind-tag"> {Resources.DeploymentText} </span>
             </div>
         );
