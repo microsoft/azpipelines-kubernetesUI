@@ -121,7 +121,9 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
         IDeploymentReplicaSetItem[] {
         let items: IDeploymentReplicaSetItem[] = [];
         replicaSets.forEach((replicaSet, index) => {
-            items.push(DeploymentsTable._getDeploymentReplicaSetItem(deployment, replicaSet, index, replicaSets.length));
+            if (replicaSet.spec.replicas > 0) {
+                items.push(DeploymentsTable._getDeploymentReplicaSetItem(deployment, replicaSet, index, replicaSets.length));
+            }
         });
 
         return items;
@@ -228,7 +230,6 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
     }
 
     private static _renderReplicaSetNameCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IDeploymentReplicaSetItem>, deployment: IDeploymentReplicaSetItem): JSX.Element {
-        const textToRender: string | undefined = deployment.replicaSetName;
         const itemToRender = BaseKubeTable.renderTwoLineColumn(deployment.replicaSetName || "", deployment.pipeline || "", colDataClassName, "primary-text", "secondary-text");
         return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
@@ -258,14 +259,16 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
     private static _getHeadingContent(deployment: V1Deployment): JSX.Element {
         return (
             <div>
-                <h3>{deployment.metadata.name}</h3>
                 <div className="kube-flex-row">
-                    <span className="secondary-text kind-tag"> {Resources.DeploymentText} </span>
-                    <LabelGroup labelProps={Utils.getUILabelModelArray(deployment.metadata.labels)}
-                        wrappingBehavior={WrappingBehavior.OneLine}
-                        fadeOutOverflow={true}>
-                    </LabelGroup>
+                    <h3>{deployment.metadata.name}</h3>
+                    <div className="heading-labels">
+                        <LabelGroup labelProps={Utils.getUILabelModelArray(deployment.metadata.labels)}
+                            wrappingBehavior={WrappingBehavior.OneLine}
+                            fadeOutOverflow={true}>
+                        </LabelGroup>
+                    </div>
                 </div>
+                <span className="secondary-text kind-tag"> {Resources.DeploymentText} </span>
             </div>
         );
     }

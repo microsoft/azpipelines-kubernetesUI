@@ -13,10 +13,11 @@
 
 .list-col-content {
     align-items: center;
-    line-height: 30px;
+    line-height: 40px;
 
     &.two-lines {
         display: inline-flex;
+        line-height: 30px;
     }
     
 }

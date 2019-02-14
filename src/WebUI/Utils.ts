@@ -3,7 +3,7 @@
     Licensed under the MIT license.
 */
 
-import { V1ObjectMeta, V1PodStatus, V1PodTemplateSpec } from "@kubernetes/client-node";
+import { V1ObjectMeta, V1PodStatus, V1PodTemplateSpec, V1Container } from "@kubernetes/client-node";
 import { format } from "@uifabric/utilities/lib";
 import { ObservableArray } from "azure-devops-ui/Core/Observable";
 import { ILabelModel } from "azure-devops-ui/Label";

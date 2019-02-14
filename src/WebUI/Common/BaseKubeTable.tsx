@@ -38,7 +38,7 @@ export class BaseKubeTable<T> extends BaseComponent<ITableComponentProperties<T>
                 itemProvider={new ArrayItemProvider<T>(this.props.items)}
                 columns={this.props.columns}
                 showHeader={true}
-                showLines={false}
+                showLines={true}
                 singleClickActivation={false}
                 onActivate={this._onItemActivated}
                 onSelect={this._onItemSelected}

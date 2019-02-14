@@ -2,7 +2,7 @@
     Copyright (c) Microsoft Corporation. All rights reserved.
     Licensed under the MIT license.
 */
-import { V1Deployment, V1DeploymentList, V1PodList, V1ReplicaSetList, V1Service, V1ServiceList, V1ReplicaSet,  V1DaemonSetList, V1StatefulSetList } from "@kubernetes/client-node";
+import { V1Deployment, V1DeploymentList, V1PodList, V1ReplicaSetList, V1Service, V1ServiceList, V1ReplicaSet,  V1DaemonSetList, V1StatefulSetList, V1DaemonSet, V1StatefulSet } from "@kubernetes/client-node";
 import { IObservable } from "azure-devops-ui/Core/Observable";
 import { IStatusProps } from "azure-devops-ui/Status";
 import { IBaseProps } from "office-ui-fabric-react/lib/Utilities";
@@ -49,6 +49,16 @@ export interface IDeploymentReplicaSetMap {
     deployment: V1Deployment;
     //this list is sorted in descending order
     replicaSets:V1ReplicaSet[];
+}
+
+export interface ISetWorkloadTypeItem {
+    name: string;
+    kind: string;
+    image: string;
+    desiredPodCount: number;
+    currentPodCount: number;
+    creationTimeStamp: Date;
+    payload: V1DaemonSet | V1StatefulSet | V1ReplicaSet;
 }
 
 export interface IVssComponentProperties extends IBaseProps {

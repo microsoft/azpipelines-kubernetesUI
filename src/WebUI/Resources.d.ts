@@ -59,3 +59,4 @@ export declare const LogsText: string;
 export declare const YamlText: string;
 export declare const Ago: string;
 export declare const NoPodsFoundText: string;
+export declare const OtherWorkloadsText: string;

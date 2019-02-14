@@ -30,10 +30,12 @@ import { ServicesStore } from "../Services/ServicesStore";
 import { ServicesPivot } from "../Services/ServicesPivot";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { WorkloadsEvents, ServicesEvents } from "../Constants";
+import { ConditionalChildren } from "azure-devops-ui/ConditionalChildren";
 
 const workloadsPivotItemKey: string = "workloads";
 const servicesPivotItemKey: string = "services";
-const filterToggled = new ObservableValue<boolean>(false);
+const workloadsFilterToggled = new ObservableValue<boolean>(false);
+const servicesFilterToggled = new ObservableValue<boolean>(false);
 
 //todo: refactor filter properties to respective resource type components
 export interface IKubernetesContainerState {
@@ -165,18 +167,14 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
                     onSelectedTabChanged={(key: string) => { this.setState({ selectedPivotKey: key }) }}
                     orientation={0}
                     selectedTabId={this.state.selectedPivotKey || workloadsPivotItemKey}
-                    renderAdditionalContent={() => {
-                        return (<HeaderCommandBarWithFilter filter={this.state.selectedPivotKey === workloadsPivotItemKey ?
-                            this.state.workloadsFilter : this.state.svcFilter}
-                            filterToggled={filterToggled} items={[]} />);
-                    }}>
+                    renderAdditionalContent={() => { return this._getFiterHeaderBar(); }}>
                     <Tab name={Resources.PivotWorkloadsText} id={workloadsPivotItemKey} />
                     <Tab name={Resources.PivotServiceText} id={servicesPivotItemKey} />
                 </TabBar>
                 <TabContent>
                     <div className="item-padding">
-                        {this.state.selectedPivotKey === servicesPivotItemKey && <ServicesPivot kubeService={this.props.kubeService} namespace={this.state.namespace} filter={this.state.svcFilter} filterToggled={filterToggled}/>}
-                        {this.state.selectedPivotKey === workloadsPivotItemKey && <WorkloadsPivot kubeService={this.props.kubeService} namespace={this.state.namespace} filter={this.state.workloadsFilter} filterToggled={filterToggled}/>}
+                        {this.state.selectedPivotKey === servicesPivotItemKey && <ServicesPivot kubeService={this.props.kubeService} namespace={this.state.namespace} filter={this.state.svcFilter} filterToggled={servicesFilterToggled}/>}
+                        {this.state.selectedPivotKey === workloadsPivotItemKey && <WorkloadsPivot kubeService={this.props.kubeService} namespace={this.state.namespace} filter={this.state.workloadsFilter} filterToggled={workloadsFilterToggled}/>}
                     </div>
 
                 </TabContent>
@@ -216,6 +214,19 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         this._selectedItemViewMap[SelectedItemKeys.DaemonSetKey] = (item) => this._getWorkoadPodsViewComponent(item.metadata, item.spec && item.spec.template, item.kind || "DaemonSet");
         this._selectedItemViewMap[SelectedItemKeys.OrphanPodKey] = (item) => { return <PodDetailsView pod={item} />; }
         this._selectedItemViewMap[SelectedItemKeys.ReplicaSetKey] = (item) => this._getWorkoadPodsViewComponent(item.metadata, item.spec && item.spec.template, item.kind || "ReplicaSet");
+    }
+
+    private _getFiterHeaderBar(): JSX.Element {
+        return (
+            <div>
+                <ConditionalChildren renderChildren={this.state.selectedPivotKey === workloadsPivotItemKey || this.state.selectedPivotKey == undefined}>
+                    <HeaderCommandBarWithFilter filter={this.state.workloadsFilter} filterToggled={workloadsFilterToggled} items={[]} />
+                </ConditionalChildren>
+                <ConditionalChildren renderChildren={this.state.selectedPivotKey === servicesPivotItemKey}>
+                    <HeaderCommandBarWithFilter filter={this.state.svcFilter} filterToggled={servicesFilterToggled} items={[]} />
+                </ConditionalChildren>
+            </div>
+        );
     }
 
     private _selectedItemViewMap: { [selectedItemKey: string]: (selectedItem: any) => JSX.Element | null } = {};

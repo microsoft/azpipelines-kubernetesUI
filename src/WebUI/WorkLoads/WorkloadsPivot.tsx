@@ -3,7 +3,7 @@
     Licensed under the MIT license.
 */
 
-import { V1DeploymentList, V1ReplicaSet, V1ReplicaSetList, V1ServiceList, V1DaemonSetList, V1StatefulSetList, V1Service, V1PodList, V1Pod, V1DaemonSet, V1StatefulSet, V1PodTemplateSpec, V1ObjectMeta } from "@kubernetes/client-node";
+import { V1Pod } from "@kubernetes/client-node";
 import { BaseComponent, format } from "@uifabric/utilities";
 import * as React from "react";
 import { IKubeService } from "../../Contracts/Contracts";
@@ -14,9 +14,7 @@ import { DeploymentsTable } from "../Workloads/DeploymentsTable";
 import "../Common/KubeSummary.scss";
 // todo :: work around till this issue is fixed in devops ui
 import "azure-devops-ui/Label.scss";
-import { DaemonSetTable } from "../Workloads/DaemonSetTable";
-import { StatefulSetTable } from "../Workloads/StatefulSetTable";
-import { PodsTable } from "../Pods/PodsTable";
+import { OtherWorkloads } from "../WorkLoads/OtherWorkloadsTable";
 import { KubeZeroData } from "../Common//KubeZeroData";
 import { Filter, IFilterState, FILTER_CHANGE_EVENT, IFilterItemState } from "azure-devops-ui/Utilities/Filter";
 import { KubeResourceType } from "../../Contracts/KubeServiceBase";
@@ -34,7 +32,6 @@ import { NameKey, TypeKey } from "../Common/KubeFilterBar";
 
 export interface IWorkloadsPivotState {
     workloadResourceSize: number;
-    orphanPodsList: V1Pod[];
 }
 
 export interface IWorkloadsPivotProps extends IVssComponentProperties {
@@ -54,11 +51,10 @@ export class WorkloadsPivot extends BaseComponent<IWorkloadsPivotProps, IWorkloa
         StoreManager.GetStore<PodsStore>(PodsStore);
 
         this.state = {
-            orphanPodsList: [],
             workloadResourceSize: 0
         };
 
-        // Fetch all pods in parent component as the podList is required in orphan set table as well as selected workload pods view
+        // Fetch all pods in parent component as the podList is required in selected workload pods view
         this._podsActionCreator.getPods(this.props.kubeService);
 
         this._workloadsStore.addListener(WorkloadsEvents.WorkloadPodsFetchedEvent, this._onPodsFetched);
@@ -80,8 +76,6 @@ export class WorkloadsPivot extends BaseComponent<IWorkloadsPivotProps, IWorkloa
     }
 
     private _onPodsFetched = (): void => {
-        const storeState = this._workloadsStore.getState();
-        this.setState({ orphanPodsList: storeState.orphanPodsList || [] });
     }
 
     private _onDataFound = (): void => {
@@ -98,10 +92,7 @@ export class WorkloadsPivot extends BaseComponent<IWorkloadsPivotProps, IWorkloa
             :
             <div>
                 {this._showComponent(KubeResourceType.Deployments) && this._getDeployments()}
-                {this._showComponent(KubeResourceType.DaemonSets) && this._getDaemonSetsComponent()}
-                {this._showComponent(KubeResourceType.StatefulSets) && this._getStatefulSetsComponent()}
-                {this.state.orphanPodsList && this.state.orphanPodsList.length > 0 &&
-                    this._showComponent(KubeResourceType.Pods) && this.getOrphanPods()}
+                {this._getOtherWorkloadsComponent()}
             </div>);
     }
 
@@ -111,29 +102,12 @@ export class WorkloadsPivot extends BaseComponent<IWorkloadsPivotProps, IWorkloa
         />);
     }
 
-    private getOrphanPods(): JSX.Element {
-        let pods: V1Pod[] | undefined = this._workloadsStore.getState().orphanPodsList || [];
-        // Since PodsTable is a common component between services and workloads, we are sending pods to render as a prop
-        return <PodsTable
-            key={format("orphan-pods-list-{0}", this.props.namespace || "")}
-            podsToRender={pods}
-            nameFilter={this._getNameFilterValue()}
-        />;
-    }
-
-    private _getDaemonSetsComponent(): JSX.Element {
-        return (<DaemonSetTable
-            key={format("ds-list-{0}", this.props.namespace || "")}
-            kubeService={this.props.kubeService}
-            nameFilter={this._getNameFilterValue()}
-        />);
-    }
-
-    private _getStatefulSetsComponent(): JSX.Element {
-        return (<StatefulSetTable
+    private _getOtherWorkloadsComponent(): JSX.Element {
+        return (<OtherWorkloads
             key={format("sts-list-{0}", this.props.namespace || "")}
             kubeService={this.props.kubeService}
             nameFilter={this._getNameFilterValue()}
+            typeFilter={this._getTypeFilterValue()}
         />);
     }
 
