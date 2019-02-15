@@ -17,6 +17,7 @@ import { ITableColumn, SimpleTableCell, Table, renderSimpleCell } from "azure-de
 import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import { Card } from "azure-devops-ui/Card";
+import { TitleSize } from "azure-devops-ui/Header";
 import "./PodsLeftPanel.scss";
 import { ResourceStatus } from "../Common/ResourceStatus";
 
@@ -74,7 +75,12 @@ export class PodsLeftPanel extends BaseComponent<IPodsLeftPanelProperties> {
         ]);
 
         return (
-            <Card className="pods-left-pane-header-table" title={Resources.SummaryText}>
+            <Card className="pods-left-pane-header-table"
+                titleProps={{
+                    text: Resources.SummaryText,
+                    size: TitleSize.Large
+                }}
+            >
                 <Table
                     className="s-full-details"
                     id={format("s-full-details-{0}", metadata.uid)}
@@ -82,7 +88,7 @@ export class PodsLeftPanel extends BaseComponent<IPodsLeftPanelProperties> {
                     showLines={false}
                     singleClickActivation={false}
                     itemProvider={tableItems}
-                    pageSize={tableItems.getCount()}
+                    pageSize={tableItems.length}
                     columns={columns}
                 />
             </Card>
@@ -132,7 +138,7 @@ export class PodsLeftPanel extends BaseComponent<IPodsLeftPanelProperties> {
             case Resources.LabelsText:
                 value = <LabelGroup
                     labelProps={Utils.getUILabelModelArray(value)}
-                    wrappingBehavior={WrappingBehavior.FreeFlow}
+                    wrappingBehavior={WrappingBehavior.freeFlow}
                     fadeOutOverflow={true}
                 />;
                 break;

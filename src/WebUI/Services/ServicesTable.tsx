@@ -185,8 +185,13 @@ export class ServicesTable extends BaseComponent<IServicesComponentProperties> {
     }
 
     private static _renderPackageKeyCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, service: IServiceItem): JSX.Element => {
-        const itemToRender = ServicesTable._getServiceStatusWithName(service, colDataClassName);
-        return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
+        return (
+            <div className="stretch-full-width">
+                {ServicesTable._getServiceStatusWithName(service, colDataClassName, columnIndex, tableColumn)}
+            </div>
+        );
+
+        //return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
     private static _renderTypeCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, service: IServiceItem): JSX.Element => {
@@ -218,7 +223,7 @@ export class ServicesTable extends BaseComponent<IServicesComponentProperties> {
         return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
-    private static _getServiceStatusWithName(service: IServiceItem, cssClassName: string): React.ReactNode {
+    private static _getServiceStatusWithName(service: IServiceItem, cssClassName: string, columnIndex: number, tableColumn: ITableColumn<IServiceItem>): JSX.Element{
         let statusProps: IStatusProps = Statuses.Success;
         let tooltipText: string = "";
         if (service.type === loadBalancerKey) {
@@ -232,7 +237,7 @@ export class ServicesTable extends BaseComponent<IServicesComponentProperties> {
         return (
             <ResourceStatus
                 statusProps={statusProps}
-                customDescription={BaseKubeTable.renderTwoLineColumn(service.package, service.pipeline, css(cssClassName, "kube-status-desc"), "primary-text", "secondary-text")}
+                customDescription={BaseKubeTable.renderTwoLineColumn(columnIndex, tableColumn, service.package, service.pipeline, css(cssClassName, "two-lines", "kube-status-desc"), "primary-text", "secondary-text")}
                 toolTipText={tooltipText}
             />
         );

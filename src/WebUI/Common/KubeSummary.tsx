@@ -12,8 +12,6 @@ import { IVssComponentProperties, IServiceItem } from "../Types";
 import "./KubeSummary.scss";
 import { WorkloadPodsView } from "../Workloads/WorkloadPodsView";
 import { ServiceDetailsView } from "../Services/ServiceDetailsView";
-// todo :: work around till this issue is fixed in devops ui
-import "azure-devops-ui/Label.scss";
 import { KubeZeroData } from "./KubeZeroData";
 import { Filter, IFilterState, FILTER_CHANGE_EVENT, IFilterItemState } from "azure-devops-ui/Utilities/Filter";
 import { Tab, TabBar, TabContent } from "azure-devops-ui/Tabs";
@@ -31,6 +29,8 @@ import { ServicesPivot } from "../Services/ServicesPivot";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { WorkloadsEvents, ServicesEvents } from "../Constants";
 import { ConditionalChildren } from "azure-devops-ui/ConditionalChildren";
+import { Surface, SurfaceBackground } from "azure-devops-ui/Surface";
+import { Page } from "azure-devops-ui/Page"
 
 const workloadsPivotItemKey: string = "workloads";
 const servicesPivotItemKey: string = "services";
@@ -97,13 +97,15 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
 
     public render(): React.ReactNode {
         return (
-            <div className={"kubernetes-container"}>
-                {
-                    this.state.showSelectedItem ?
-                        this._getSelectedItemPodsView() :
-                        this._getMainContent()
-                }
-            </div >
+            <Surface background={SurfaceBackground.neutral}>
+                <Page className={"kubernetes-container"}>
+                    {
+                        this.state.showSelectedItem ?
+                            this._getSelectedItemPodsView() :
+                            this._getMainContent()
+                    }
+                </Page>
+            </Surface>
         );
     }
 
@@ -172,8 +174,8 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
                     <Tab name={Resources.PivotServiceText} id={servicesPivotItemKey} />
                 </TabBar>
                 <TabContent>
-                    {this.state.selectedPivotKey === servicesPivotItemKey && <ServicesPivot kubeService={this.props.kubeService} namespace={this.state.namespace} filter={this.state.svcFilter} filterToggled={servicesFilterToggled} />}
-                    {this.state.selectedPivotKey === workloadsPivotItemKey && <WorkloadsPivot kubeService={this.props.kubeService} namespace={this.state.namespace} filter={this.state.workloadsFilter} filterToggled={workloadsFilterToggled} />}
+                        {this.state.selectedPivotKey === servicesPivotItemKey && <ServicesPivot kubeService={this.props.kubeService} namespace={this.state.namespace} filter={this.state.svcFilter} filterToggled={servicesFilterToggled} />}
+                        {this.state.selectedPivotKey === workloadsPivotItemKey && <WorkloadsPivot kubeService={this.props.kubeService} namespace={this.state.namespace} filter={this.state.workloadsFilter} filterToggled={workloadsFilterToggled} />}
                 </TabContent>
             </div>
         );

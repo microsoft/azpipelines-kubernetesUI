@@ -138,7 +138,7 @@ export class ServiceDetailsView extends BaseComponent<IServiceDetailsViewPropert
                         showLines={true}
                         singleClickActivation={false}
                         itemProvider={tableItems}
-                        pageSize={tableItems.getCount()}
+                        pageSize={tableItems.length}
                         columns={columns}
                     />
                 </div>
@@ -162,7 +162,7 @@ export class ServiceDetailsView extends BaseComponent<IServiceDetailsViewPropert
                     children:
                     <LabelGroup
                         labelProps={Utils.getUILabelModelArray(value)}
-                        wrappingBehavior={WrappingBehavior.FreeFlow}
+                        wrappingBehavior={WrappingBehavior.freeFlow}
                         fadeOutOverflow={true}
                     />,
                     tableColumn: tableColumn

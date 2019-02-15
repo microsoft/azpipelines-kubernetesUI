@@ -7,15 +7,26 @@ import { TooltipHost, TooltipOverflowMode } from "azure-devops-ui/Tooltip";
 import { BaseComponent, css, IRenderFunction } from "office-ui-fabric-react/lib/Utilities";
 import * as React from "react";
 import { IVssComponentProperties } from "../Types";
-import { Table, ITableColumn, TableRow, ITableRowProps, SimpleTableCell } from "azure-devops-ui/Table";
+import { Table, ITableColumn, TableRow, ITableRowProps, SimpleTableCell, TwoLineTableCell } from "azure-devops-ui/Table";
 import { ITableRow, ITableRowDetails } from "azure-devops-ui/Components/Table/Table.Props";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
-import { Card, CardHeader, CardContent, CustomCard } from "azure-devops-ui/Card";
+import { CustomCard, CardContent } from "azure-devops-ui/Card";
+import {
+    HeaderDescription,
+    HeaderIcon,
+    CustomHeader,
+    HeaderTitle,
+    HeaderTitleArea,
+    HeaderTitleRow,
+    TitleSize
+} from "azure-devops-ui/Header";
+import { IStatusProps } from "azure-devops-ui/Status";
 import "./BaseKubeTable.scss";
 
 export interface ITableComponentProperties<T> extends IVssComponentProperties {
-    headingText?: string;
-    headingContent?: JSX.Element;
+    headingText?: string | JSX.Element;
+    headingDescription?: string;
+    headingStatus?: IStatusProps
     items: T[];
     columns: ITableColumn<T>[];
     onItemActivated?: (event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>, selectedItem: any) => void;
@@ -26,9 +37,28 @@ export class BaseKubeTable<T> extends BaseComponent<ITableComponentProperties<T>
     public render(): React.ReactNode {
         return (
             <CustomCard className={css("flex-grow", "bolt-card-no-vertical-padding", "item-top-padding", "kube-list-content")}>
-                <CardHeader>
-                    {this._getComponentHeadingContent()}
-                </CardHeader>
+                {
+                    this.props.headingText &&
+                    <CustomHeader>
+                        <HeaderTitleArea>
+                            <HeaderTitleRow className="kube-flex-row">
+                                {
+                                    (typeof this.props.headingText === 'string') ?
+                                        <HeaderTitle className="text-ellipsis" titleSize={TitleSize.Medium} >
+                                            {this.props.headingText}
+                                        </HeaderTitle> :
+                                        <HeaderTitle className="text-ellipsis" titleSize={TitleSize.Medium} children={this.props.headingText} />
+                                }
+                            </HeaderTitleRow>
+                            {
+                                this.props.headingDescription &&
+                                <HeaderDescription className={css("text-ellipsis", "secondary-text")}>
+                                    {this.props.headingDescription}
+                                </HeaderDescription>
+                            }
+                        </HeaderTitleArea>
+                    </CustomHeader>
+                }
                 <CardContent className="item-no-padding">
                     {this.props.items && this.props.items.length > 0 && this._getComponent()}
                 </CardContent>
@@ -74,20 +104,21 @@ export class BaseKubeTable<T> extends BaseComponent<ITableComponentProperties<T>
             </SimpleTableCell>);
     }
 
-    public static renderTwoLineColumn(primaryText: string, subText: string, className?: string, primaryTextClassName?: string, secondaryTextClassName?: string): React.ReactNode {
+    public static renderTwoLineColumn(columnIndex: number, tableColumn: ITableColumn<any>, primaryText: string, subText: string, className?: string, primaryTextClassName?: string, secondaryTextClassName?: string): JSX.Element {
         return (
-            <div className={css("kube-list-col-data overflow-ellipsis", className)}>
+            <TwoLineTableCell className={className} columnIndex={columnIndex} tableColumn={tableColumn} line1={
                 <div className={css("kube-list-col-data overflow-ellipsis", primaryTextClassName)}>
                     <TooltipHost content={primaryText} overflowMode={TooltipOverflowMode.Parent}>
                         {primaryText}
                     </TooltipHost>
                 </div>
+            } line2={
                 <div className={css("list-secondary-text overflow-ellipsis", secondaryTextClassName)}>
                     <TooltipHost content={subText} overflowMode={TooltipOverflowMode.Parent}>
                         {subText}
                     </TooltipHost>
                 </div>
-            </div>
+            } />
         );
     }
 
@@ -103,17 +134,17 @@ export class BaseKubeTable<T> extends BaseComponent<ITableComponentProperties<T>
         }
     }
 
-    private _getComponentHeadingContent(): JSX.Element | null {
-        if (!this.props.headingText && !this.props.headingContent) {
-            return null;
-        }
+    // private _getComponentHeadingContent(): JSX.Element | null {
+    //     if (!this.props.headingText && !this.props.headingContent) {
+    //         return null;
+    //     }
 
-        return (
-            <div className={"kube-list-heading heading"}>
-                {this.props.headingText
-                    ? <h3 className={"heading-title"}>{this.props.headingText}</h3>
-                    : this.props.headingContent}
-            </div>
-        );
-    }
+    //     return (
+    //         <div className={"kube-list-heading heading"}>
+    //             {this.props.headingText
+    //                 ? <h3 className={"heading-title"}>{this.props.headingText}</h3>
+    //                 : this.props.headingContent}
+    //         </div>
+    //     );
+    // }
 }

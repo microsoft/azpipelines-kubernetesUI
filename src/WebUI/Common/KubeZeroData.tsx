@@ -25,7 +25,7 @@ export class KubeZeroData extends BaseComponent<IKubeZeroDataProps> {
 
     public render(): JSX.Element {
         return (
-            <Card title={this.props.title} className={css("flex-grow", "item-top-padding", "kube-list-content", this.props.className)}>
+            <Card titleProps={{text: this.props.title}} className={css("flex-grow", "item-top-padding", "kube-list-content", this.props.className)}>
                 <ZeroData
                     className="flex-grow"
                     imageAltText={this.props.imageAltText || ""}

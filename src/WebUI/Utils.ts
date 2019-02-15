@@ -8,6 +8,7 @@ import { format } from "@uifabric/utilities/lib";
 import { ObservableArray } from "azure-devops-ui/Core/Observable";
 import { ILabelModel } from "azure-devops-ui/Label";
 import { IStatusProps, Statuses } from "azure-devops-ui/Status";
+import { localeFormat } from "azure-devops-ui/Core/Util/String";
 
 const pipelineNameAnnotationKey: string = "pipeline-name";
 const pipelineIdAnnotationKey: string = "pipeline-id";
@@ -103,5 +104,25 @@ export class Utils {
         }
 
         return null;
+    }
+
+    public static getImageText(containers: V1Container[]): string {
+        let imageCountMap: { [key: string]: number } = {};
+        let imageString: string = "";
+        containers.forEach(container => {
+            if (imageCountMap[container.image] == undefined) {
+                imageCountMap[container.image] = 1;
+            } else {
+                imageCountMap[container.image] += 1;
+            }
+        });
+
+        const keys = Object.keys(imageCountMap);
+        if (keys.length > 1) {
+            imageString = localeFormat("{0} and {1} more", keys[0], keys.length - 1);
+        } else {
+            imageString = keys[0];
+        }
+        return imageString;
     }
 }

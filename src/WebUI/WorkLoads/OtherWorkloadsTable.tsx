@@ -20,6 +20,7 @@ import { SelectionStore } from "../Selection/SelectionStore";
 import { SelectionActions } from "../Selection/SelectionActions";
 import { ActionsHubManager } from "../FluxCommon/ActionsHubManager";
 import { KubeResourceType } from '../../Contracts/KubeServiceBase';
+import { Link } from "azure-devops-ui/Link";
 
 const setNameKey = "otherwrkld-name-key";
 const imageKey = "otherwrkld-image-key";
@@ -62,18 +63,13 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
             return Utils.filterByName(set.name, this.props.nameFilter);
         });
         if (filteredSet.length > 0) {
-            const heading: JSX.Element = (
-                <div className="kube-flex-row" >
-                    <h3>{Resources.OtherWorkloadsText}</h3>
-                </div >
-            );
             return (
                 <BaseKubeTable
                     className={css("list-content", "top-padding", "depth-16")}
                     items={filteredSet}
                     columns={OtherWorkloads._getColumns()}
                     onItemActivated={this._openStatefulSetItem}
-                    headingContent={heading}
+                    headingText={Resources.OtherWorkloadsText}
                 />
             );
         }
@@ -164,8 +160,8 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
     }
 
     private static _renderSetNameCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<ISetWorkloadTypeItem>, statefulSet: ISetWorkloadTypeItem): JSX.Element {
-        const itemToRender = BaseKubeTable.renderTwoLineColumn(statefulSet.name, OtherWorkloads._getSetType(statefulSet.kind), colDataClassName, "primary-text", "secondary-text");
-        return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
+        return BaseKubeTable.renderTwoLineColumn(columnIndex, tableColumn, statefulSet.name, OtherWorkloads._getSetType(statefulSet.kind), css(colDataClassName,"two-lines"), "primary-text", "secondary-text");
+        //return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
     private static _renderImageCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<ISetWorkloadTypeItem>, statefulSet: ISetWorkloadTypeItem): JSX.Element {
@@ -182,10 +178,16 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
         }
 
         const itemToRender = (
-            <ResourceStatus
-                statusProps={statusProps}
-                statusDescription={podString}
-            />
+            <Link
+                className="fontSizeM text-ellipsis bolt-table-link bolt-table-inline-link"
+                excludeTabStop
+                href="#"
+            >
+                <ResourceStatus
+                    statusProps={statusProps}
+                    statusDescription={podString}
+                />
+            </Link>
         );
         return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
@@ -202,7 +204,7 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
                 name: set.metadata.name,
                 kind: SelectedItemKeys.StatefulSetKey,
                 creationTimeStamp: set.metadata.creationTimestamp,
-                image: set.spec.template.spec.containers[0].image,
+                image: Utils.getImageText(set.spec.template.spec.containers),
                 desiredPodCount: set.status.replicas,
                 currentPodCount: set.status.currentReplicas,
                 payload: set
@@ -214,7 +216,7 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
                 name: set.metadata.name,
                 kind: SelectedItemKeys.DaemonSetKey,
                 creationTimeStamp: set.metadata.creationTimestamp,
-                image: set.spec.template.spec.containers[0].image,
+                image: Utils.getImageText(set.spec.template.spec.containers),
                 desiredPodCount: set.status.desiredNumberScheduled,
                 currentPodCount: set.status.currentNumberScheduled,
                 payload: set,
@@ -226,7 +228,7 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
                 name: set.metadata.name,
                 kind: SelectedItemKeys.ReplicaSetKey,
                 creationTimeStamp: set.metadata.creationTimestamp,
-                image: set.spec.template.spec.containers[0].image,
+                image: Utils.getImageText(set.spec.template.spec.containers),
                 desiredPodCount: set.status.replicas,
                 currentPodCount: set.status.availableReplicas,
                 payload: set,

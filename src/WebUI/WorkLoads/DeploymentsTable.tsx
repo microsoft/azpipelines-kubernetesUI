@@ -26,6 +26,7 @@ import { WorkloadsEvents, SelectedItemKeys } from "../Constants";
 import { SelectionStore } from "../Selection/SelectionStore";
 import { SelectionActions } from "../Selection/SelectionActions";
 import { ActionsHubManager } from "../FluxCommon/ActionsHubManager";
+import { Link } from "azure-devops-ui/Link";
 
 const replicaSetNameKey: string = "replicaSet-col";
 const podsKey: string = "pods-col";
@@ -91,7 +92,8 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
             renderList.push(<BaseKubeTable
                 key={format("dep-{0}", index)}
                 className={columnClassName}
-                headingContent={DeploymentsTable._getHeadingContent(entry.deployment)}
+                headingText={DeploymentsTable._getHeadingContent(entry.deployment)}
+                headingDescription={Resources.DeploymentText}
                 items={DeploymentsTable._getDeploymentReplicaSetItems(entry.deployment, entry.replicaSets)}
                 columns={DeploymentsTable._getColumns()}
                 onItemActivated={this._openDeploymentItem}
@@ -151,7 +153,7 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
             showRowBorder: (replicaSetLength === (index + 1)),
             deployment: deployment,
             //todo :: should we show all images of all containers in a replica set?
-            image: replica.spec.template.spec.containers[0].image,
+            image: Utils.getImageText(replica.spec.template.spec.containers),
             creationTimeStamp: replica.metadata.creationTimestamp,
             kind: replica.kind || "ReplicaSet"
         };
@@ -230,17 +232,23 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
     }
 
     private static _renderReplicaSetNameCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IDeploymentReplicaSetItem>, deployment: IDeploymentReplicaSetItem): JSX.Element {
-        const itemToRender = BaseKubeTable.renderTwoLineColumn(deployment.replicaSetName || "", deployment.pipeline || "", colDataClassName, "primary-text", "secondary-text");
-        return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
+        return BaseKubeTable.renderTwoLineColumn(columnIndex, tableColumn, deployment.replicaSetName || "", deployment.pipeline || "", css(colDataClassName,"two-lines"), "primary-text", "secondary-text");
+        //return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
     private static _renderPodsCountCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IDeploymentReplicaSetItem>, deployment: IDeploymentReplicaSetItem): JSX.Element {
         const itemToRender = (
-            <ResourceStatus
-                statusProps={deployment.statusProps}
-                statusDescription={deployment.pods}
-            />);
-
+            <Link
+                className="fontSizeM text-ellipsis bolt-table-link bolt-table-inline-link"
+                excludeTabStop
+                href="#"
+            >
+                <ResourceStatus
+                    statusProps={deployment.statusProps}
+                    statusDescription={deployment.pods}
+                />
+            </Link>
+        );
         return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
@@ -258,18 +266,16 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
 
     private static _getHeadingContent(deployment: V1Deployment): JSX.Element {
         return (
-            <div>
-                <span className="kube-flex-row">
-                    <h3>{deployment.metadata.name}</h3>
-                    <div className="heading-labels">
+                <span>
+                   {deployment.metadata.name}
+                    <div className="deployment-heading-labels">
+                        { 
                         <LabelGroup labelProps={Utils.getUILabelModelArray(deployment.metadata.labels)}
-                            wrappingBehavior={WrappingBehavior.OneLine}
+                            wrappingBehavior={WrappingBehavior.oneLine}
                             fadeOutOverflow={true}>
-                        </LabelGroup>
+                        </LabelGroup>}
                     </div>
                 </span>
-                <span className="secondary-text kind-tag"> {Resources.DeploymentText} </span>
-            </div>
         );
     }
 

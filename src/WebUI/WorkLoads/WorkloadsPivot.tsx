@@ -8,15 +8,13 @@ import { BaseComponent, format } from "@uifabric/utilities";
 import * as React from "react";
 import { IKubeService } from "../../Contracts/Contracts";
 import * as Resources from "../Resources";
-import { IVssComponentProperties, IServiceItem, IDeploymentReplicaSetItem } from "../Types";
+import { IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
 import { DeploymentsTable } from "../Workloads/DeploymentsTable";
 import "../Common/KubeSummary.scss";
-// todo :: work around till this issue is fixed in devops ui
-import "azure-devops-ui/Label.scss";
 import { OtherWorkloads } from "../WorkLoads/OtherWorkloadsTable";
 import { KubeZeroData } from "../Common//KubeZeroData";
-import { Filter, IFilterState, FILTER_CHANGE_EVENT, IFilterItemState } from "azure-devops-ui/Utilities/Filter";
+import { Filter, IFilterState, IFilterItemState } from "azure-devops-ui/Utilities/Filter";
 import { KubeResourceType } from "../../Contracts/KubeServiceBase";
 import { WorkloadsFilterBar } from "./WorkloadsFilterBar";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";

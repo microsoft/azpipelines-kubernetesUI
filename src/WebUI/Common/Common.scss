@@ -16,18 +16,22 @@
     line-height: 40px;
 
     &.two-lines {
-        display: inline-flex;
         line-height: 30px;
+        align-items: flex-start;
+        width:100%;
     }
     
 }
 
 .primary-text {
     font-weight: $fontWeightSemiBold;
+    font-size: $fontSizeM;
+    line-height: 20px;
 }
 .secondary-text {
     color: $secondary-text;
     font-size: $fontSizeMS;
+    line-height: 16px;
 }
 
 .kube-status-container {
