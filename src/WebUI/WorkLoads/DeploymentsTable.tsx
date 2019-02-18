@@ -262,7 +262,7 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
                 <div className="kube-flex-row">
                     <span className="secondary-text kind-tag"> {Resources.DeploymentText} </span>
                     <LabelGroup labelProps={Utils.getUILabelModelArray(deployment.metadata.labels)}
-                        wrappingBehavior={WrappingBehavior.OneLine}
+                        wrappingBehavior={WrappingBehavior.oneLine}
                         fadeOutOverflow={true}>
                     </LabelGroup>
                 </div>

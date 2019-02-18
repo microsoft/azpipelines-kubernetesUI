@@ -74,7 +74,7 @@ export class PodsLeftPanel extends BaseComponent<IPodsLeftPanelProperties> {
         ]);
 
         return (
-            <Card className="pods-left-pane-header-table" title={Resources.SummaryText}>
+            <Card className="pods-left-pane-header-table" titleProps={{ text: Resources.SummaryText }}>
                 <Table
                     className="s-full-details"
                     id={format("s-full-details-{0}", metadata.uid)}
@@ -82,7 +82,7 @@ export class PodsLeftPanel extends BaseComponent<IPodsLeftPanelProperties> {
                     showLines={false}
                     singleClickActivation={false}
                     itemProvider={tableItems}
-                    pageSize={tableItems.getCount()}
+                    pageSize={tableItems.length}
                     columns={columns}
                 />
             </Card>
@@ -132,7 +132,7 @@ export class PodsLeftPanel extends BaseComponent<IPodsLeftPanelProperties> {
             case Resources.LabelsText:
                 value = <LabelGroup
                     labelProps={Utils.getUILabelModelArray(value)}
-                    wrappingBehavior={WrappingBehavior.FreeFlow}
+                    wrappingBehavior={WrappingBehavior.freeFlow}
                     fadeOutOverflow={true}
                 />;
                 break;

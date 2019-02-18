@@ -12,8 +12,6 @@ import { IVssComponentProperties, IServiceItem } from "../Types";
 import { Utils } from "../Utils";
 import "../Common/KubeSummary.scss";
 import { ServicesTable } from "../Services/ServicesTable";
-// todo :: work around till this issue is fixed in devops ui
-import "azure-devops-ui/Label.scss";
 import { KubeZeroData } from "../Common//KubeZeroData";
 import { Filter, IFilterState, IFilterItemState } from "azure-devops-ui/Utilities/Filter";
 import { ServicesFilterBar } from "./ServicesFilterBar";
