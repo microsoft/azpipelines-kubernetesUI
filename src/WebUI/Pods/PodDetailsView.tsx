@@ -54,7 +54,7 @@ export class PodDetailsView extends BaseComponent<IPodDetailsProps> {
         ]);
 
         return (
-            <Card className="kube-list-content s-details depth-16" title={Resources.SummaryText}>
+            <Card className="kube-list-content s-details depth-16" titleProps={{ text: Resources.SummaryText }}>
                 <Table
                     className="s-full-details"
                     id={format("s-full-details-{0}", pod.metadata.uid)}
@@ -62,7 +62,7 @@ export class PodDetailsView extends BaseComponent<IPodDetailsProps> {
                     showLines={false}
                     singleClickActivation={false}
                     itemProvider={tableItems}
-                    pageSize={tableItems.getCount()}
+                    pageSize={tableItems.length}
                     columns={columns}
                 />
             </Card>
@@ -95,7 +95,7 @@ export class PodDetailsView extends BaseComponent<IPodDetailsProps> {
                     children:
                     <LabelGroup
                         labelProps={Utils.getUILabelModelArray(value)}
-                        wrappingBehavior={WrappingBehavior.FreeFlow}
+                        wrappingBehavior={WrappingBehavior.freeFlow}
                         fadeOutOverflow={true}
                     />,
                     tableColumn: tableColumn

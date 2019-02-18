@@ -182,7 +182,7 @@ export class ServiceDetailsView extends BaseComponent<IServiceDetailsViewPropert
                         showLines={false}
                         singleClickActivation={false}
                         itemProvider={tableItems}
-                        pageSize={tableItems.getCount()}
+                        pageSize={tableItems.length}
                         columns={ServiceDetailsView._getColumns()}
                     />
                 </div>

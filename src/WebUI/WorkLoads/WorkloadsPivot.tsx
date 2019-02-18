@@ -12,8 +12,6 @@ import { IVssComponentProperties, IServiceItem, IDeploymentReplicaSetItem } from
 import { Utils } from "../Utils";
 import { DeploymentsTable } from "../Workloads/DeploymentsTable";
 import "../Common/KubeSummary.scss";
-// todo :: work around till this issue is fixed in devops ui
-import "azure-devops-ui/Label.scss";
 import { DaemonSetTable } from "../Workloads/DaemonSetTable";
 import { StatefulSetTable } from "../Workloads/StatefulSetTable";
 import { PodsTable } from "../Pods/PodsTable";

@@ -12,8 +12,6 @@ import { IVssComponentProperties, IServiceItem } from "../Types";
 import "./KubeSummary.scss";
 import { WorkloadPodsView } from "../Workloads/WorkloadPodsView";
 import { ServiceDetailsView } from "../Services/ServiceDetailsView";
-// todo :: work around till this issue is fixed in devops ui
-import "azure-devops-ui/Label.scss";
 import { KubeZeroData } from "./KubeZeroData";
 import { Filter, IFilterState, FILTER_CHANGE_EVENT, IFilterItemState } from "azure-devops-ui/Utilities/Filter";
 import { Tab, TabBar, TabContent } from "azure-devops-ui/Tabs";
@@ -162,7 +160,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         return (
             <div className="content-with-pivot">
                 <TabBar
-                    onSelectedTabChanged={(key: string) => { this.setState({ selectedPivotKey: key }) }}
+                    onSelectedTabChanged={(key: string) => { this.setState({ selectedPivotKey: key }); }}
                     orientation={0}
                     selectedTabId={this.state.selectedPivotKey || workloadsPivotItemKey}
                     renderAdditionalContent={() => {

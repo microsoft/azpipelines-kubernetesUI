@@ -11,8 +11,6 @@ import * as Resources from "../Resources";
 import { IVssComponentProperties, IServiceItem, IDeploymentReplicaSetItem } from "../Types";
 import { Utils } from "../Utils";
 import "../Common/KubeSummary.scss";
-// todo :: work around till this issue is fixed in devops ui
-import "azure-devops-ui/Label.scss";
 import { Filter, IFilterState, FILTER_CHANGE_EVENT, IFilterItemState } from "azure-devops-ui/Utilities/Filter";
 import { KubeFilterBar, NameKey, TypeKey } from "../Common/KubeFilterBar";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
@@ -42,7 +40,7 @@ export class ServicesFilterBar extends BaseComponent<IWorkloadsFilterBarProps> {
     private _generateSvcTypes(): string[] {
         let svcTypes: string[] = [];
         this.props.serviceList && this.props.serviceList.items && this.props.serviceList.items.forEach((svc) => {
-            if (svcTypes.indexOf(svc.spec.type) == -1) {
+            if (svcTypes.indexOf(svc.spec.type) === -1) {
                 svcTypes.push(svc.spec.type);
             }
         });

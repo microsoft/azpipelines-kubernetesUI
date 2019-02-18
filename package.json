@@ -35,9 +35,9 @@
     "_bundles"
   ],
   "dependencies": {
-    "@kubernetes/client-node": "~0.7.1",
-    "azure-devops-ui": "~1.144.1",
-    "office-ui-fabric-react": "5.131.5",
+    "@kubernetes/client-node": "~0.8.1",
+    "azure-devops-ui": "^1.148.0",
+    "office-ui-fabric-react": "~5.131.5",
     "react": "~16.3.2",
     "react-dom": "~16.3.2"
   },
