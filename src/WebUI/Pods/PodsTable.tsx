@@ -156,9 +156,7 @@ export class PodsTable extends BaseComponent<IPodsTableProperties> {
     }
 
     private static _renderPodAgeCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod): JSX.Element {
-        const itemToRender = (
-            <Ago date={new Date(pod.status.startTime)} />
-        );
+        const itemToRender = pod.status && pod.status.startTime ? <Ago date={new Date(pod.status.startTime)} /> : null;
         return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
