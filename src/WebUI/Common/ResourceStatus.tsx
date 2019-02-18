@@ -3,6 +3,7 @@ import { BaseComponent } from "@uifabric/utilities/lib";
 import { IStatusProps, Status, StatusSize } from "azure-devops-ui/Status";
 import { IVssComponentProperties } from "../Types";
 import { TooltipHost } from "azure-devops-ui/Tooltip";
+import "./ResourceStatus.scss"
 
 export interface IResourceStatusProps extends IVssComponentProperties {
     statusProps: IStatusProps | undefined;
@@ -23,13 +24,15 @@ export class ResourceStatus extends BaseComponent<IResourceStatusProps, {}> {
                             {this._getStatus()}
                         </TooltipHost> : this._getStatus()
                 }
-                {
-                    this.props.statusDescription && 
-                    <span className="kube-status-desc">{this.props.statusDescription}</span>
-                }
-                {
-                    this.props.customDescription
-                }
+                <div className="description-padding">
+                    {
+                        this.props.statusDescription &&
+                        <span className="kube-status-desc">{this.props.statusDescription}</span>
+                    }
+                    {
+                        this.props.customDescription
+                    }
+                </div>
             </div>
         );
     }

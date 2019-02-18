@@ -1,4 +1,4 @@
-import { BaseComponent, css } from "@uifabric/utilities";
+import { BaseComponent, css, format } from "@uifabric/utilities";
 import { Ago } from "azure-devops-ui/Ago";
 import * as React from "react";
 import * as Resources from "../Resources";
@@ -15,9 +15,10 @@ import { ResourceStatus } from "../Common/ResourceStatus";
 import { ActionsHubManager } from "../FluxCommon/ActionsHubManager";
 import { SelectionActions } from "../Selection/SelectionActions";
 import { SelectedItemKeys } from "../Constants";
+import { Link } from "azure-devops-ui/Link";
 
 const podNameKey: string = "pl-name-key";
-const podImageKey: string = "pl-image-key";
+const podWorkloadsKey: string = "pl-wrkld-key";
 const podStatusKey: string = "pl-status-key";
 const podAgeKey: string = "pl-age-key";
 const colDataClassName: string = "list-col-content";
@@ -26,21 +27,36 @@ export interface IPodsTableProperties extends IVssComponentProperties {
     podsToRender: V1Pod[];
     headingText?: string;
     nameFilter?: string;
+    showWorkloads?: boolean;
 }
 
 export class PodsTable extends BaseComponent<IPodsTableProperties> {
+    private statusCount: { [key: string]: number } = {};
     public render(): React.ReactNode {
         const filteredPods: V1Pod[] = this.props.podsToRender.filter((pod) => {
             return Utils.filterByName(pod.metadata.name, this.props.nameFilter);
         });
 
         if (filteredPods.length > 0) {
+            filteredPods.forEach(pod => {
+                const key = (pod.status.message ? pod.status.reason : pod.status.phase).toLowerCase();
+                if (key in this.statusCount) {
+                    this.statusCount[key] += 1;
+                } else {
+                    this.statusCount[key] = 1;
+                }
+            });
             return (
                 <BaseKubeTable
-                    headingText={this.props.headingText}
+                    headingContent={
+                        <div>
+                            <h3 className={"heading-title"}>{this.props.headingText}</h3>
+                            <span className={"secondary-text"}>{this._generateHeadingSubText(this.statusCount)}</span>
+                        </div>
+                    }
                     className={css("list-content", "pl-details", "depth-16")}
                     items={this.props.podsToRender}
-                    columns={PodsTable._getColumns()}
+                    columns={PodsTable._getColumns(this.props.showWorkloads || false)}
                     onItemActivated={this._showPodDetails}
                 />
             );
@@ -49,7 +65,7 @@ export class PodsTable extends BaseComponent<IPodsTableProperties> {
         return null;
     }
 
-    private static _getColumns(): ITableColumn<V1Pod>[] {
+    private static _getColumns(showWorkloads: boolean): ITableColumn<V1Pod>[] {
         let columns: ITableColumn<V1Pod>[] = [];
         const headerColumnClassName: string = "kube-col-header";
         const columnContentClassName: string = css("list-col-content");
@@ -65,16 +81,6 @@ export class PodsTable extends BaseComponent<IPodsTableProperties> {
         });
 
         columns.push({
-            id: podImageKey,
-            name: Resources.ImageText,
-            minWidth: 250,
-            width: -100,
-            headerClassName: headerColumnClassName,
-            className: columnContentClassName,
-            renderCell: PodsTable._renderPodImageCell
-        });
-
-        columns.push({
             id: podStatusKey,
             name: Resources.StatusText,
             minWidth: 80,
@@ -83,6 +89,18 @@ export class PodsTable extends BaseComponent<IPodsTableProperties> {
             className: columnContentClassName,
             renderCell: PodsTable._renderPodStatusCell
         });
+
+        if (showWorkloads) {
+            columns.push({
+                id: podWorkloadsKey,
+                name: Resources.WorkloadText,
+                minWidth: 120,
+                width: -100,
+                headerClassName: headerColumnClassName,
+                className: columnContentClassName,
+                renderCell: PodsTable._renderPodWorkload
+            });
+        }
 
         columns.push({
             id: podAgeKey,
@@ -93,7 +111,6 @@ export class PodsTable extends BaseComponent<IPodsTableProperties> {
             className: columnContentClassName,
             renderCell: PodsTable._renderPodAgeCell
         });
-
         return columns;
     }
 
@@ -106,34 +123,35 @@ export class PodsTable extends BaseComponent<IPodsTableProperties> {
     private static _renderPodNameCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod): JSX.Element {
         const textToRender = pod.metadata.name;
         let colDataClass = css(colDataClassName, "primary-text");
-        const itemToRender = BaseKubeTable.renderColumn(textToRender || "", BaseKubeTable.defaultColumnRenderer, colDataClass);
+        const nameLabel = <span className={colDataClass}> {textToRender} </span>
+        const itemToRender = (
+            <ResourceStatus
+                statusProps={Utils.generatePodStatusProps(pod.status)}
+                customDescription={nameLabel}
+            />
+        );
         return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
-    private static _renderPodImageCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod): JSX.Element {
-        const textToRender = pod.spec.containers[0].image;
+    private static _renderPodWorkload(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod): JSX.Element {
+        const textToRender = pod.metadata.ownerReferences[0].name;
         const itemToRender = BaseKubeTable.renderColumn(textToRender || "", BaseKubeTable.defaultColumnRenderer, colDataClassName);
+        //could not change link color to black hence commenting for now.
+        // const itemToRender: React.ReactNode = (
+        //     <Link
+        //         className=""
+        //         excludeTabStop
+        //         href="#"
+        //     >
+        //         {textToRender}
+        //     </Link>
+        // );
         return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
     private static _renderPodStatusCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod): JSX.Element {
-        let statusDescription: string = "";
-        let customDescription: React.ReactNode = null;
-
-        if (pod.status.message) {
-            customDescription = <Tooltip showOnFocus={true} text={pod.status.message}>{pod.status.reason}</Tooltip>;
-        }
-        else {
-            statusDescription = pod.status.phase;
-        }
-
-        const itemToRender = (
-            <ResourceStatus
-                statusProps={Utils.generatePodStatusProps(pod.status)}
-                statusDescription={statusDescription}
-                customDescription={customDescription}
-            />
-        );
+        const textToRender: string = pod.status.message ? pod.status.reason : pod.status.phase;
+        const itemToRender = BaseKubeTable.renderColumn(textToRender, BaseKubeTable.defaultColumnRenderer, colDataClassName);
         return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
@@ -142,5 +160,19 @@ export class PodsTable extends BaseComponent<IPodsTableProperties> {
             <Ago date={new Date(pod.status.startTime)} />
         );
         return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
+    }
+
+    private _generateHeadingSubText(podStatuses: { [key: string]: number }): string {
+        let keys = Object.keys(podStatuses);
+        let subText: string = "";
+        let runningIndex = keys.indexOf("running");
+        if (runningIndex >= 0) {
+            subText = format("{0} {1}", podStatuses["running"], "running");
+            keys.splice(runningIndex, 1);
+        }
+        keys.forEach(key => {
+            subText = format("{0} {1} {2}", podStatuses[key], key, subText);
+        })
+        return subText;
     }
 }

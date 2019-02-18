@@ -60,3 +60,6 @@ export declare const YamlText: string;
 export declare const Ago: string;
 export declare const NoPodsFoundText: string;
 export declare const OtherWorkloadsText: string;
+export declare const CreatedAgo: string;
+export declare const ServiceDetails: string;
+export declare const WorkloadText: string;

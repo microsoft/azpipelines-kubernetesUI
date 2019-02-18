@@ -27,7 +27,7 @@ define("Environments/Providers/Kubernetes/Resources", ["require", "exports"], fu
     exports.AgoBy = " ago. Image: {0}";
     exports.Deployment = "Deployment: {0}";
     exports.ReplicaSet = "ReplicaSet: {0}";
-    exports.ServiceCreatedText = "Service created {0}"
+    exports.ServiceCreatedText = "Created {0} by {1}"
     exports.DetailsText = "Details";
     exports.LabelsText = "Labels";
     exports.SelectorText = "Selector";
@@ -61,4 +61,7 @@ define("Environments/Providers/Kubernetes/Resources", ["require", "exports"], fu
     exports.Ago = " ago";
     exports.NoPodsFoundText = "No pods are detected in this Kubernetes workload";
     exports.OtherWorkloadsText = "Other workloads";
+    exports.CreatedAgo = "Created {0}";
+    exports.ServiceDetails = "Service details";
+    exports.WorkloadText = "Workload";
 });

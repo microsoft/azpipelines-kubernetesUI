@@ -3,7 +3,7 @@
     Licensed under the MIT license.
 */
 
-import { BaseComponent } from "@uifabric/utilities";
+import { BaseComponent, css } from "@uifabric/utilities";
 import { localeFormat, format } from "azure-devops-ui/Core/Util/String";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { LabelGroup, WrappingBehavior } from "azure-devops-ui/Label";
@@ -29,6 +29,8 @@ import { ActionsHubManager } from "../FluxCommon/ActionsHubManager";
 import { PodsActionsCreator } from "../Pods/PodsActionsCreator";
 import { ServicesEvents } from "../Constants";
 import { ServicesStore } from "./ServicesStore";
+import { BaseKubeTable } from "../Common/BaseKubeTable";
+import { IStatusProps, Statuses, StatusSize } from "azure-devops-ui/Status";
 
 export interface IServiceDetailsViewProperties extends IVssComponentProperties {
     kubeService: IKubeService;
@@ -82,13 +84,16 @@ export class ServiceDetailsView extends BaseComponent<IServiceDetailsViewPropert
     private _getMainHeading(): JSX.Element | null {
         const item = this.props.service;
         if (item) {
-            const agoTime = Date_Utils.ago(new Date(item.creationTimestamp), Date_Utils.AgoFormat.Compact);
+            let statusProps: IStatusProps = Statuses.Success;
+            if (item.type === "LoadBalancer") {
+                if (!item.externalIP) {
+                    statusProps = Statuses.Running;
+                }
+            }
+            const headerItem: React.ReactNode = (<h2 className="title-heading">{item.package}</h2>);
             return (
                 <div className="content-main-heading">
-                    <h2 className="title-heading">{item.package}</h2>
-                    <div className="sub-heading">
-                        {localeFormat(Resources.ServiceCreatedText, agoTime)}
-                    </div>
+                    <ResourceStatus statusProps={statusProps} customDescription={headerItem} statusSize={StatusSize.l} />
                 </div>
             );
         }
@@ -96,83 +101,95 @@ export class ServiceDetailsView extends BaseComponent<IServiceDetailsViewPropert
         return null;
     }
 
+    private static _getColumns(): ITableColumn<IServiceItem>[] {
+        const columns: ITableColumn<any>[] = [
+            {
+                id: "type",
+                name: "type",
+                width: -100,
+                className: "s-key",
+                minWidth: 80,   
+                renderCell: ServiceDetailsView._renderTypeCell
+            },
+            {
+                id: "clusterIp",
+                name: "ClusterIP",
+                width: -100,
+                className: "s-key",
+                minWidth: 80,
+                renderCell: ServiceDetailsView._renderClusterIPCell
+            },
+            {
+                id: "externalIp",
+                name: "externalIp",
+                width: -100,
+                className: "s-key",
+                minWidth: 80,
+                renderCell: ServiceDetailsView._renderExternalIPCell
+            },
+            {
+                id: "port",
+                name: "port",
+                width: -100,
+                className: "s-key",
+                minWidth: 80,
+                renderCell: ServiceDetailsView._renderPortCell
+            },
+            {
+                id: "sessAffinity",
+                name: "sessAffinity",
+                width: -100,
+                className: "s-key",
+                minWidth: 80,
+                renderCell: ServiceDetailsView._renderSessionAffinityCell
+            },
+            {
+                id: "selector",
+                name: "selector",
+                width: -100,
+                className: "s-key",
+                minWidth: 200,
+                renderCell: ServiceDetailsView._renderSelctorCell
+            },
+            {
+                id: "labels",
+                name: "labels",
+                width: -100,
+                className: "s-key",
+                minWidth: 200,
+                renderCell: ServiceDetailsView._renderLabelsCell
+            }
+        ];
+        return columns;
+    }
+
     private _getServiceDetails(): JSX.Element | null {
         const item = this.props.service;
         if (item && item.service) {
-            const columns: ITableColumn<any>[] = [
-                {
-                    id: "key",
-                    name: "key",
-                    width: new ObservableValue(200),
-                    className: "s-key",
-                    minWidth: 180,
-                    renderCell: renderSimpleCell
-                },
-                {
-                    id: "value",
-                    name: "value",
-                    width: new ObservableValue(500),
-                    className: "s-value",
-                    minWidth: 400,
-                    renderCell: ServiceDetailsView._renderValueCell
-                },
-                ColumnFill
-            ];
-            const tableItems = new ArrayItemProvider<any>([
-                { key: Resources.LabelsText, value: item.service.metadata.labels || {} },
-                { key: Resources.SelectorText, value: item.service.spec.selector || {} },
-                { key: Resources.TypeText, value: item.type },
-                { key: Resources.ClusterIPText, value: item.clusterIP },
-                { key: Resources.ExternalIPText, value: item.externalIP },
-                { key: Resources.PortText, value: item.port },
-                { key: Resources.SessionAffinityText, value: item.service.spec.sessionAffinity || "" }
-            ]);
-
+            const tableItems = new ArrayItemProvider<any>([{}, item]);
+            const agoTime = Date_Utils.ago(new Date(item.creationTimestamp), Date_Utils.AgoFormat.Compact);
             return (
                 <div className="kube-list-content s-details depth-16">
-                    <h3 className="s-de-heading">{Resources.DetailsText}</h3>
+                    <div className="primary-text">{Resources.ServiceDetails}</div>
+                    <div className="secondary-text">
+                        {item.pipeline ? localeFormat(Resources.ServiceCreatedText, agoTime, item.pipeline) :
+                            localeFormat(Resources.CreatedAgo, agoTime)}
+                    </div>
                     <Table
-                        className="s-full-details"
-                        id={format("s-full-details-{0}", item.uid)}
+                        className="s-details"
+                        id={format("s-details-tbl-{0}", item.uid)}
                         showHeader={false}
-                        showLines={true}
+                        showLines={false}
                         singleClickActivation={false}
                         itemProvider={tableItems}
                         pageSize={tableItems.length}
-                        columns={columns}
+                        columns={ServiceDetailsView._getColumns()}
                     />
                 </div>
             );
         }
 
         return null;
-    }
-
-    private static _renderValueCell(
-        rowIndex: number,
-        columnIndex: number,
-        tableColumn: ITableColumn<any>,
-        tableItem: any): JSX.Element {
-        const { key, value } = tableItem;
-        switch (key) {
-            case Resources.LabelsText:
-            case Resources.SelectorText:
-                const props = {
-                    columnIndex: columnIndex,
-                    children:
-                    <LabelGroup
-                        labelProps={Utils.getUILabelModelArray(value)}
-                        wrappingBehavior={WrappingBehavior.freeFlow}
-                        fadeOutOverflow={true}
-                    />,
-                    tableColumn: tableColumn
-                };
-
-                return renderTableCell(props);
-
-            default:
-                return renderSimpleCell(rowIndex, columnIndex, tableColumn, tableItem);
-        }
     }
 
     private _onPodsFetched = (): void => {
@@ -193,6 +210,7 @@ export class ServiceDetailsView extends BaseComponent<IServiceDetailsViewPropert
                 podsToRender={this.state.pods}
                 headingText={Resources.AssociatedPodsText}
                 onItemActivated={this._onSelectedPodInvoked}
+                showWorkloads={true}
             />
         );
     }
@@ -206,4 +224,70 @@ export class ServiceDetailsView extends BaseComponent<IServiceDetailsViewPropert
 
     private _servicesStore: ServicesStore;
     private _podsActionsCreator: PodsActionsCreator
+
+    private static _renderTypeCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, service: IServiceItem): JSX.Element {
+        let text: string = service.type;
+        if (rowIndex == 0) {
+            text = Resources.TypeText;
+        }
+        const itemToRender = BaseKubeTable.renderColumn(text || "", BaseKubeTable.defaultColumnRenderer);
+        return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
+    }
+    private static _renderClusterIPCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, service: IServiceItem): JSX.Element {
+        let text: string = service.clusterIP;
+        if (rowIndex == 0) {
+            text = Resources.ClusterIPText;
+        }
+        const itemToRender = BaseKubeTable.renderColumn(text || "", BaseKubeTable.defaultColumnRenderer);
+        return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
+    }
+    private static _renderExternalIPCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, service: IServiceItem): JSX.Element {
+        let text: string = service.externalIP;
+        if (rowIndex == 0) {
+            text = Resources.ExternalIPText;
+        }
+        const itemToRender = BaseKubeTable.renderColumn(text || "", BaseKubeTable.defaultColumnRenderer);
+        return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
+    }
+    private static _renderPortCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, service: IServiceItem): JSX.Element {
+        let text: string = service.port;
+        if (rowIndex == 0) {
+            text = Resources.PortText;
+        }
+        const itemToRender = BaseKubeTable.renderColumn(text || "", BaseKubeTable.defaultColumnRenderer);
+        return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
+    }
+    private static _renderSessionAffinityCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, item: IServiceItem): JSX.Element {
+        let text: string = item.service ? item.service.spec.sessionAffinity : "";
+        if (rowIndex == 0) {
+            text = Resources.SessionAffinityText;
+        }
+        const itemToRender = BaseKubeTable.renderColumn(text || "", BaseKubeTable.defaultColumnRenderer);
+        return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
+    }
+    private static _renderSelctorCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, service: IServiceItem): JSX.Element {
+        let itemToRender: React.ReactNode = (
+            <LabelGroup
+                labelProps={Utils.getUILabelModelArray(service.service ? service.service.spec.selector : {})}
+                fadeOutOverflow={true}
+            />
+        );
+        if (rowIndex == 0) {
+            itemToRender = BaseKubeTable.renderColumn(Resources.SelectorText, BaseKubeTable.defaultColumnRenderer);
+        }
+        return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
+    }
+    private static _renderLabelsCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, service: IServiceItem): JSX.Element {
+        let itemToRender: React.ReactNode = (
+            <LabelGroup
+                labelProps={Utils.getUILabelModelArray(service.service ? service.service.metadata.labels : {})}
+                fadeOutOverflow={true}
+            />
+        );
+        if (rowIndex == 0) {
+            itemToRender = BaseKubeTable.renderColumn(Resources.LabelsText, BaseKubeTable.defaultColumnRenderer);
+        }
+        return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
+    }
+
 }
