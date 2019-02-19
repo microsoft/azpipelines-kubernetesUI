@@ -3,8 +3,8 @@
     Licensed under the MIT license.
 */
 
-import { BaseComponent, css } from "@uifabric/utilities";
-import { localeFormat, format } from "azure-devops-ui/Core/Util/String";
+import { BaseComponent } from "@uifabric/utilities";
+import { localeFormat } from "azure-devops-ui/Core/Util/String";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { LabelGroup, WrappingBehavior } from "azure-devops-ui/Label";
 import { ColumnFill, ITableColumn, renderSimpleCell, SimpleTableCell as renderTableCell, Table } from "azure-devops-ui/Table";
@@ -265,6 +265,7 @@ export class ServiceDetailsView extends BaseComponent<IServiceDetailsViewPropert
                 className="s-details-label"
                 labelProps={Utils.getUILabelModelArray(service.service ? service.service.spec.selector : {})}
                 fadeOutOverflow={true}
+                wrappingBehavior={WrappingBehavior.oneLine}
             />
         );
         if (rowIndex == 0) {
@@ -278,6 +279,7 @@ export class ServiceDetailsView extends BaseComponent<IServiceDetailsViewPropert
                 className="s-details-label"
                 labelProps={Utils.getUILabelModelArray(service.service ? service.service.metadata.labels : {})}
                 fadeOutOverflow={true}
+                wrappingBehavior={WrappingBehavior.oneLine}
             />
         );
         if (rowIndex == 0) {

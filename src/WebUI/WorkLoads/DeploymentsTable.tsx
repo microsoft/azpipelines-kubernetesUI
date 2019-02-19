@@ -5,7 +5,7 @@
 
 import { V1Deployment, V1DeploymentList, V1ObjectMeta, V1ReplicaSet, V1ReplicaSetList } from "@kubernetes/client-node";
 import { BaseComponent, css, format } from "@uifabric/utilities";
-import { IStatusProps, Status, Statuses, StatusSize } from "azure-devops-ui/Status";
+import { IStatusProps, Statuses } from "azure-devops-ui/Status";
 import * as React from "react";
 import * as Resources from "../Resources";
 import { IDeploymentReplicaSetItem, IVssComponentProperties, IDeploymentReplicaSetMap } from "../Types";
@@ -13,7 +13,7 @@ import "./DeploymentsTable.scss";
 import { BaseKubeTable } from "../Common/BaseKubeTable";
 import { LabelGroup, WrappingBehavior } from "azure-devops-ui/Label";
 import { Ago } from "azure-devops-ui/Ago";
-import { ITableColumn, SimpleTableCell } from "azure-devops-ui/Table";
+import { ITableColumn } from "azure-devops-ui/Table";
 import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
 import { Utils } from "../Utils";
 import { ResourceStatus } from "../Common/ResourceStatus";
@@ -265,8 +265,7 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
                 <span>
                    {deployment.metadata.name}
                     <div className="deployment-heading-labels">
-                        { 
-                        <LabelGroup labelProps={Utils.getUILabelModelArray(deployment.metadata.labels)}
+                        {<LabelGroup labelProps={Utils.getUILabelModelArray(deployment.metadata.labels)}
                             wrappingBehavior={WrappingBehavior.oneLine}
                             fadeOutOverflow={true}>
                         </LabelGroup>}

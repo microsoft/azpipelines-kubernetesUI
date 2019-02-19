@@ -166,7 +166,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         return (
             <div className="content-with-pivot">
                 <TabBar
-                    onSelectedTabChanged={(key: string) => { this.setState({ selectedPivotKey: key }) }}
+                    onSelectedTabChanged={(key: string) => { this.setState({ selectedPivotKey: key }); }}
                     orientation={0}
                     selectedTabId={this.state.selectedPivotKey || workloadsPivotItemKey}
                     renderAdditionalContent={() => { return this._getFiterHeaderBar(); }}>

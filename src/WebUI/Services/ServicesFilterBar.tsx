@@ -38,7 +38,7 @@ export class ServicesFilterBar extends BaseComponent<IWorkloadsFilterBarProps> {
     private _generateSvcTypes(): string[] {
         let svcTypes: string[] = [];
         this.props.serviceList && this.props.serviceList.items && this.props.serviceList.items.forEach((svc) => {
-            if (svcTypes.indexOf(svc.spec.type) == -1) {
+            if (svcTypes.indexOf(svc.spec.type) === -1) {
                 svcTypes.push(svc.spec.type);
             }
         });

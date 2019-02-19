@@ -1,4 +1,4 @@
-import { BaseComponent, format } from "@uifabric/utilities";
+import { BaseComponent } from "@uifabric/utilities";
 import * as React from "react";
 import * as Resources from "../Resources";
 import { IVssComponentProperties } from "../Types";
@@ -9,6 +9,7 @@ import { PickListFilterBarItem, IPickListItem } from "azure-devops-ui/PickList";
 import { Filter } from "azure-devops-ui/Utilities/Filter";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { ConditionalChildren } from "azure-devops-ui/ConditionalChildren";
+import { localeFormat } from "azure-devops-ui/Core/Util/String";
 
 export const NameKey: string = "nameKey";
 export const TypeKey: string = "typeKey";
@@ -28,7 +29,7 @@ export class KubeFilterBar extends BaseComponent<IFilterComponentProperties, {}>
         return (
             <ConditionalChildren renderChildren={this.props.filterToggled}>
                 <FilterBar filter={this.props.filter}>
-                    <KeywordFilterBarItem filterItemKey={NameKey} placeholder={format(Resources.FindByNameText, this.props.keywordPlaceHolder.toLowerCase())} />
+                    <KeywordFilterBarItem filterItemKey={NameKey} placeholder={localeFormat(Resources.FindByNameText, this.props.keywordPlaceHolder.toLowerCase())} />
                     <PickListFilterBarItem
                         placeholder={this.props.pickListPlaceHolder}
                         showPlaceholderAsLabel={true}

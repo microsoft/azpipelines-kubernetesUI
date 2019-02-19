@@ -3,13 +3,11 @@
     Licensed under the MIT license.
 */
 
-import { V1Pod } from "@kubernetes/client-node";
 import { BaseComponent, format } from "@uifabric/utilities";
 import * as React from "react";
 import { IKubeService } from "../../Contracts/Contracts";
 import * as Resources from "../Resources";
 import { IVssComponentProperties } from "../Types";
-import { Utils } from "../Utils";
 import { DeploymentsTable } from "../Workloads/DeploymentsTable";
 import "../Common/KubeSummary.scss";
 import { OtherWorkloads } from "../WorkLoads/OtherWorkloadsTable";
@@ -18,7 +16,6 @@ import { Filter, IFilterState, IFilterItemState } from "azure-devops-ui/Utilitie
 import { KubeResourceType } from "../../Contracts/KubeServiceBase";
 import { WorkloadsFilterBar } from "./WorkloadsFilterBar";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
-import { SelectedItemKeys } from "../Constants";
 import { WorkloadsActionsCreator } from "./WorkloadsActionsCreator";
 import { PodsActionsCreator } from "../Pods/PodsActionsCreator";
 import { WorkloadsStore } from "./WorkloadsStore";
