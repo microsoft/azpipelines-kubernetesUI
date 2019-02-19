@@ -228,8 +228,7 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
     }
 
     private static _renderReplicaSetNameCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IDeploymentReplicaSetItem>, deployment: IDeploymentReplicaSetItem): JSX.Element {
-        return BaseKubeTable.renderTwoLineColumn(columnIndex, tableColumn, deployment.replicaSetName || "", deployment.pipeline || "", css(colDataClassName,"two-lines"), "primary-text", "secondary-text");
-        //return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
+        return BaseKubeTable.renderTwoLineColumn(columnIndex, tableColumn, deployment.replicaSetName || "", deployment.pipeline || "", css(colDataClassName, "two-lines", "zero-left-padding"), "primary-text", "secondary-text");
     }
 
     private static _renderPodsCountCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IDeploymentReplicaSetItem>, deployment: IDeploymentReplicaSetItem): JSX.Element {

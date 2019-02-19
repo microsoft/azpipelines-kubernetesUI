@@ -20,6 +20,7 @@ import {
     TitleSize
 } from "azure-devops-ui/Header";
 import "./BaseKubeTable.scss";
+import { IResourceStatusProps, ResourceStatus } from "./ResourceStatus";
 
 export interface ITableComponentProperties<T> extends IVssComponentProperties {
     className?: string
@@ -97,14 +98,15 @@ export class BaseKubeTable<T> extends BaseComponent<ITableComponentProperties<T>
         );
     }
 
-    public static renderTableCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<any>, itemToRender: React.ReactNode): JSX.Element {
+    public static renderTableCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<any>, itemToRender: React.ReactNode, statusProps?:IResourceStatusProps): JSX.Element {
         return (
             <SimpleTableCell columnIndex={columnIndex} tableColumn={tableColumn} key={"col-" + columnIndex}>
+                {statusProps && <ResourceStatus {...statusProps} />}
                 {itemToRender}
             </SimpleTableCell>);
     }
 
-    public static renderTwoLineColumn(columnIndex: number, tableColumn: ITableColumn<any>, primaryText: string, subText: string, className?: string, primaryTextClassName?: string, secondaryTextClassName?: string): JSX.Element {
+    public static renderTwoLineColumn(columnIndex: number, tableColumn: ITableColumn<any>, primaryText: string, subText: string, className?: string, primaryTextClassName?: string, secondaryTextClassName?: string, statusProps?: IResourceStatusProps): JSX.Element {
         return (
             <TwoLineTableCell className={className} columnIndex={columnIndex} tableColumn={tableColumn} line1={
                 <div className={css("kube-list-col-data overflow-ellipsis", primaryTextClassName)} key={"col-primary-" + columnIndex}>
@@ -118,24 +120,9 @@ export class BaseKubeTable<T> extends BaseComponent<ITableComponentProperties<T>
                         {subText}
                     </TooltipHost>
                 </div>
-            } key={"col-" + columnIndex} />
-        );
-    }
-
-    public static renderCustomTwoLineColumn(className: string, primaryText: string, subText: string, primaryTextClassName?: string, secondaryTextClassName?: string): React.ReactNode {
-        return (
-            <div className={css("kube-list-col-data overflow-ellipsis", className)}>
-                <div className={css("kube-list-col-data overflow-ellipsis", primaryTextClassName)}>
-                    <TooltipHost content={primaryText} overflowMode={TooltipOverflowMode.Parent}>
-                        {primaryText}
-                    </TooltipHost>
-                </div>
-                <div className={css("list-secondary-text overflow-ellipsis", secondaryTextClassName)}>
-                    <TooltipHost content={subText} overflowMode={TooltipOverflowMode.Parent}>
-                        {subText}
-                    </TooltipHost>
-                </div>
-            </div>
+                }
+                iconProps={statusProps ? {render: (key:string | undefined) => <ResourceStatus {...statusProps} />} :{}}
+                key={"col-" + columnIndex} />
         );
     }
 

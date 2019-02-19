@@ -9,7 +9,7 @@ import { V1Pod } from "@kubernetes/client-node";
 import { Utils } from "../Utils";
 import { ITableColumn } from "azure-devops-ui/Table";
 import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
-import { ResourceStatus } from "../Common/ResourceStatus";
+import { ResourceStatus, IResourceStatusProps } from "../Common/ResourceStatus";
 import { ActionsHubManager } from "../FluxCommon/ActionsHubManager";
 import { SelectionActions } from "../Selection/SelectionActions";
 import { SelectedItemKeys } from "../Constants";
@@ -113,21 +113,13 @@ export class PodsTable extends BaseComponent<IPodsTableProperties> {
 
     private static _renderPodNameCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod): JSX.Element {
         const textToRender = pod.metadata.name;
-        let colDataClass = css(colDataClassName, "primary-text");
-        const nameLabel = <span className={colDataClass}> {textToRender} </span>
-        const itemToRender = (
-            <ResourceStatus
-                statusProps={Utils.generatePodStatusProps(pod.status)}
-                customDescription={nameLabel}
-            />
-        );
-        return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
+        const statusProps: IResourceStatusProps = { statusProps: Utils.generatePodStatusProps(pod.status) }
+        const itemToRender = BaseKubeTable.renderColumn(textToRender, BaseKubeTable.defaultColumnRenderer, css(colDataClassName, "primary-text"));
+        return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender, statusProps);
     }
 
     private static _renderPodWorkload(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod): JSX.Element {
         const textToRender = pod.metadata.ownerReferences[0].name;
-        //const itemToRender = BaseKubeTable.renderColumn(textToRender || "", BaseKubeTable.defaultColumnRenderer, colDataClassName);
-        //could not change link color to black hence commenting for now.
         const itemToRender: React.ReactNode = (
             <Link
                 className="fontSizeM text-ellipsis bolt-table-link bolt-table-inline-link"

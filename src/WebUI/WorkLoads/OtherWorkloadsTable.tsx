@@ -156,8 +156,7 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
     }
 
     private static _renderSetNameCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<ISetWorkloadTypeItem>, statefulSet: ISetWorkloadTypeItem): JSX.Element {
-        return BaseKubeTable.renderTwoLineColumn(columnIndex, tableColumn, statefulSet.name, OtherWorkloads._getSetType(statefulSet.kind), css(colDataClassName,"two-lines"), "primary-text", "secondary-text");
-        //return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
+        return BaseKubeTable.renderTwoLineColumn(columnIndex, tableColumn, statefulSet.name, OtherWorkloads._getSetType(statefulSet.kind), css(colDataClassName, "two-lines", "zero-left-padding"), "primary-text", "secondary-text");
     }
 
     private static _renderImageCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<ISetWorkloadTypeItem>, statefulSet: ISetWorkloadTypeItem): JSX.Element {

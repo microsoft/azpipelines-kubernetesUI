@@ -10,17 +10,15 @@ import * as React from "react";
 import * as Resources from "../Resources";
 import { IServiceItem, IVssComponentProperties } from "../Types";
 import { BaseKubeTable } from "../Common/BaseKubeTable";
-import { ITableColumn, SimpleTableCell } from "azure-devops-ui/Table";
+import { ITableColumn } from "azure-devops-ui/Table";
 import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
 import "./ServicesTable.scss";
 import { Utils } from "../Utils";
 import { IStatusProps, Statuses, StatusSize } from "azure-devops-ui/Status";
-import { ResourceStatus } from "../Common/ResourceStatus";
+import { IResourceStatusProps } from "../Common/ResourceStatus";
 import { ActionsHubManager } from "../FluxCommon/ActionsHubManager";
 import { SelectionActions } from "../Selection/SelectionActions";
-import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
-import { StoreManager } from "../FluxCommon/StoreManager";
-import { ServicesEvents, SelectedItemKeys } from "../Constants";
+import {  SelectedItemKeys } from "../Constants";
 import { ServicesStore } from "./ServicesStore";
 import { ServicesActionsCreator } from "./ServicesActionsCreator";
 
@@ -207,16 +205,14 @@ export class ServicesTable extends BaseComponent<IServicesComponentProperties> {
             }
         }
 
+        const resStatusProps: IResourceStatusProps = {
+            statusProps: statusProps,
+            toolTipText: tooltipText,
+            statusSize: StatusSize.l
+        }
+
         tableColumn.className = css(tableColumn.className, "stretch-full-width");
-        const itemToRender: JSX.Element = (
-                <ResourceStatus
-                    statusProps={statusProps}
-                    toolTipText={tooltipText}
-                    customDescription={BaseKubeTable.renderCustomTwoLineColumn(css(cssClassName, "two-lines", "kube-status-desc"), service.package, service.type, "primary-text", "secondary-text")}
-                    statusSize={StatusSize.l}
-                />
-        );
-        return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
+        return BaseKubeTable.renderTwoLineColumn(columnIndex, tableColumn, service.package, service.type, css(cssClassName, "two-lines"), "primary-text", "secondary-text", resStatusProps);
     }
 
     private _filterService(svc: V1Service): boolean {
