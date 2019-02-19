@@ -2,13 +2,11 @@
     Copyright (c) Microsoft Corporation. All rights reserved.
     Licensed under the MIT license.
 */
-
-import { TooltipHost, TooltipOverflowMode } from "azure-devops-ui/Tooltip";
-import { BaseComponent, css, IRenderFunction } from "office-ui-fabric-react/lib/Utilities";
+import { BaseComponent, css } from "office-ui-fabric-react/lib/Utilities";
 import * as React from "react";
 import { IVssComponentProperties } from "../Types";
-import { Table, ITableColumn, TableRow, ITableRowProps, SimpleTableCell, TwoLineTableCell } from "azure-devops-ui/Table";
-import { ITableRow, ITableRowDetails } from "azure-devops-ui/Components/Table/Table.Props";
+import { Table, ITableColumn, SimpleTableCell, TwoLineTableCell } from "azure-devops-ui/Table";
+import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import { CustomCard, CardContent } from "azure-devops-ui/Card";
 import {
@@ -21,6 +19,7 @@ import {
 } from "azure-devops-ui/Header";
 import "./BaseKubeTable.scss";
 import { IResourceStatusProps, ResourceStatus } from "./ResourceStatus";
+import { Tooltip } from "azure-devops-ui/TooltipEx";
 
 export interface ITableComponentProperties<T> extends IVssComponentProperties {
     className?: string
@@ -90,10 +89,10 @@ export class BaseKubeTable<T> extends BaseComponent<ITableComponentProperties<T>
 
     public static defaultColumnRenderer(text: string, className?: string): React.ReactNode {
         return (
-            <div className={css("kube-list-col-data overflow-ellipsis", className)}>
-                <TooltipHost content={text} overflowMode={TooltipOverflowMode.Parent}>
-                    {text}
-                </TooltipHost>
+            <div className={css("kube-list-col-data", className)}>
+                <Tooltip text={text} overflowOnly>
+                    <span className="overflow-ellipsis">{text}</span>
+                </Tooltip>
             </div>
         );
     }
@@ -109,16 +108,16 @@ export class BaseKubeTable<T> extends BaseComponent<ITableComponentProperties<T>
     public static renderTwoLineColumn(columnIndex: number, tableColumn: ITableColumn<any>, primaryText: string, subText: string, className?: string, primaryTextClassName?: string, secondaryTextClassName?: string, statusProps?: IResourceStatusProps): JSX.Element {
         return (
             <TwoLineTableCell className={className} columnIndex={columnIndex} tableColumn={tableColumn} line1={
-                <div className={css("kube-list-col-data overflow-ellipsis", primaryTextClassName)} key={"col-primary-" + columnIndex}>
-                    <TooltipHost content={primaryText} overflowMode={TooltipOverflowMode.Parent}>
-                        {primaryText}
-                    </TooltipHost>
+                <div className={css("kube-list-col-data", primaryTextClassName)} key={"col-primary-" + columnIndex}>
+                    <Tooltip text={primaryText} overflowOnly>
+                        <span className="overflow-ellipsis">{primaryText}</span>
+                    </Tooltip>
                 </div>
             } line2={
-                <div className={css("list-secondary-text overflow-ellipsis", secondaryTextClassName)} key={"col-secondary-" + columnIndex}>
-                    <TooltipHost content={subText} overflowMode={TooltipOverflowMode.Parent}>
-                        {subText}
-                    </TooltipHost>
+                <div className={css("list-secondary-text", secondaryTextClassName)} key={"col-secondary-" + columnIndex}>
+                    <Tooltip text={subText} overflowOnly>
+                        <span className="overflow-ellipsis">{subText}</span>
+                    </Tooltip>
                 </div>
                 }
                 iconProps={statusProps ? {render: (key:string | undefined) => <ResourceStatus {...statusProps} />} :{}}

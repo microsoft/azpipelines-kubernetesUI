@@ -2,7 +2,7 @@ import * as React from "react";
 import { BaseComponent } from "@uifabric/utilities/lib";
 import { IStatusProps, Status, StatusSize } from "azure-devops-ui/Status";
 import { IVssComponentProperties } from "../Types";
-import { TooltipHost } from "azure-devops-ui/Tooltip";
+import { Tooltip } from "azure-devops-ui/TooltipEx";
 import "./ResourceStatus.scss"
 
 export interface IResourceStatusProps extends IVssComponentProperties {
@@ -20,10 +20,19 @@ export class ResourceStatus extends BaseComponent<IResourceStatusProps, {}> {
             <div className="kube-status-container">
                 {
                     this.props.toolTipText ?
-                        <TooltipHost content={this.props.toolTipText} >
+                        <Tooltip text={this.props.toolTipText} overflowOnly={false} showOnFocus>
                             {this._getStatus()}
-                        </TooltipHost> : this._getStatus()
+                        </Tooltip> : this._getStatus()
                 }
+            </div>
+        );
+    }
+
+    private _getStatus(): JSX.Element {
+        return (
+            <span className="res-status">
+                {this.props.statusProps &&
+                    <Status {...this.props.statusProps} size={this.props.statusSize || StatusSize.m} />}
                 <div className="description-padding">
                     {
                         this.props.statusDescription &&
@@ -33,12 +42,7 @@ export class ResourceStatus extends BaseComponent<IResourceStatusProps, {}> {
                         this.props.customDescription
                     }
                 </div>
-            </div>
+            </span>
         );
-    }
-
-    private _getStatus(): React.ReactNode {
-        return this.props.statusProps &&
-            <Status {...this.props.statusProps} size={this.props.statusSize || StatusSize.m} />;
     }
 }
