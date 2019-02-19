@@ -1,9 +1,6 @@
 @import "../Common/Common.scss";
 
 .stretch-full-width {
+    box-sizing: border-box;
     width: 100%;
-}
-
-.bolt-table-two-line-cell{
-    width: 100% !important
 }

@@ -194,8 +194,7 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
         columns.push({
             id: replicaSetNameKey,
             name: Resources.ReplicaSetText,
-            minWidth: 250,
-            width: -100,
+            width: 348,
             headerClassName: headerColumnClassName,
             className: columnContentClassname,
             renderCell: DeploymentsTable._renderReplicaSetNameCell
@@ -203,8 +202,7 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
         columns.push({
             id: imageKey,
             name: Resources.ImageText,
-            minWidth: 250,
-            width: -100,
+            width: -72,
             headerClassName: headerColumnClassName,
             className: columnContentClassname,
             renderCell: DeploymentsTable._renderImageCell
@@ -212,8 +210,7 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
         columns.push({
             id: podsKey,
             name: Resources.PodsText,
-            minWidth: 80,
-            width: -100,
+            width: 140,
             headerClassName: headerColumnClassName,
             className: columnContentClassname,
             renderCell: DeploymentsTable._renderPodsCountCell
@@ -221,8 +218,7 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
         columns.push({
             id: ageKey,
             name: Resources.AgeText,
-            minWidth: 80,
-            width: -100,
+            width: -18,
             headerClassName: headerColumnClassName,
             className: columnContentClassname,
             renderCell: DeploymentsTable._renderAgeCell

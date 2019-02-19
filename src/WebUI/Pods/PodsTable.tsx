@@ -73,8 +73,7 @@ export class PodsTable extends BaseComponent<IPodsTableProperties> {
         columns.push({
             id: podNameKey,
             name: Resources.PodsDetailsText,
-            minWidth: 250,
-            width: -100,
+            width: showWorkloads?-54:362,
             headerClassName: css(headerColumnClassName, "first-col-header"),
             className: columnContentClassName,
             renderCell: PodsTable._renderPodNameCell
@@ -83,8 +82,7 @@ export class PodsTable extends BaseComponent<IPodsTableProperties> {
         columns.push({
             id: podStatusKey,
             name: Resources.StatusText,
-            minWidth: 80,
-            width: -100,
+            width: showWorkloads?256:220,
             headerClassName: headerColumnClassName,
             className: columnContentClassName,
             renderCell: PodsTable._renderPodStatusCell
@@ -94,8 +92,7 @@ export class PodsTable extends BaseComponent<IPodsTableProperties> {
             columns.push({
                 id: podWorkloadsKey,
                 name: Resources.WorkloadText,
-                minWidth: 120,
-                width: -100,
+                width: -24,
                 headerClassName: headerColumnClassName,
                 className: columnContentClassName,
                 renderCell: PodsTable._renderPodWorkload
@@ -105,8 +102,7 @@ export class PodsTable extends BaseComponent<IPodsTableProperties> {
         columns.push({
             id: podAgeKey,
             name: Resources.AgeText,
-            minWidth: 80,
-            width: -100,
+            width: showWorkloads?-18:-100,
             headerClassName: headerColumnClassName,
             className: columnContentClassName,
             renderCell: PodsTable._renderPodAgeCell
@@ -135,17 +131,17 @@ export class PodsTable extends BaseComponent<IPodsTableProperties> {
 
     private static _renderPodWorkload(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod): JSX.Element {
         const textToRender = pod.metadata.ownerReferences[0].name;
-        const itemToRender = BaseKubeTable.renderColumn(textToRender || "", BaseKubeTable.defaultColumnRenderer, colDataClassName);
+        //const itemToRender = BaseKubeTable.renderColumn(textToRender || "", BaseKubeTable.defaultColumnRenderer, colDataClassName);
         //could not change link color to black hence commenting for now.
-        // const itemToRender: React.ReactNode = (
-        //     <Link
-        //         className=""
-        //         excludeTabStop
-        //         href="#"
-        //     >
-        //         {textToRender}
-        //     </Link>
-        // );
+        const itemToRender: React.ReactNode = (
+            <Link
+                className="fontSizeM text-ellipsis bolt-table-link bolt-table-inline-link"
+                excludeTabStop
+                href="#"
+            >
+                {textToRender}
+            </Link>
+        );
         return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 

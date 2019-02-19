@@ -166,26 +166,20 @@ export class ServiceDetailsView extends BaseComponent<IServiceDetailsViewPropert
     private _getServiceDetails(): JSX.Element | null {
         const item = this.props.service;
         if (item && item.service) {
-            const tableItems = new ArrayItemProvider<any>([{}, item]);
+            const tableItems: IServiceItem[] = [{ package: '', type:'', clusterIP:'', externalIP:'', port:'', creationTimestamp: new Date(), uid:'', pipeline:''}, item];
             const agoTime = Date_Utils.ago(new Date(item.creationTimestamp), Date_Utils.AgoFormat.Compact);
             return (
-                <div className="kube-list-content s-details depth-16">
-                    <div className="primary-text">{Resources.ServiceDetails}</div>
-                    <div className="secondary-text">
-                        {item.pipeline ? localeFormat(Resources.ServiceCreatedText, agoTime, item.pipeline) :
+                <BaseKubeTable
+                    className={"s-details"}
+                    headingText={Resources.ServiceDetails}
+                    headingDescription={
+                        item.pipeline ? localeFormat(Resources.ServiceCreatedText, agoTime, item.pipeline) :
                             localeFormat(Resources.CreatedAgo, agoTime)}
-                    </div>
-                    <Table
-                        className="s-details"
-                        id={format("s-details-tbl-{0}", item.uid)}
-                        showHeader={false}
-                        showLines={false}
-                        singleClickActivation={false}
-                        itemProvider={tableItems}
-                        pageSize={tableItems.length}
-                        columns={ServiceDetailsView._getColumns()}
-                    />
-                </div>
+                    items={tableItems}
+                    columns={ServiceDetailsView._getColumns()}
+                    hideHeaders
+                    hideLines
+                />
             );
         }
 
@@ -268,6 +262,7 @@ export class ServiceDetailsView extends BaseComponent<IServiceDetailsViewPropert
     private static _renderSelctorCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, service: IServiceItem): JSX.Element {
         let itemToRender: React.ReactNode = (
             <LabelGroup
+                className="s-details-label"
                 labelProps={Utils.getUILabelModelArray(service.service ? service.service.spec.selector : {})}
                 fadeOutOverflow={true}
             />
@@ -280,6 +275,7 @@ export class ServiceDetailsView extends BaseComponent<IServiceDetailsViewPropert
     private static _renderLabelsCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, service: IServiceItem): JSX.Element {
         let itemToRender: React.ReactNode = (
             <LabelGroup
+                className="s-details-label"
                 labelProps={Utils.getUILabelModelArray(service.service ? service.service.metadata.labels : {})}
                 fadeOutOverflow={true}
             />

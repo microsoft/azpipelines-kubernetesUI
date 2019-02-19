@@ -119,8 +119,7 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
         columns.push({
             id: setNameKey,
             name: Resources.NameText,
-            minWidth: 250,
-            width: -100,
+            width: 348,
             headerClassName: css(headerColumnClassName),
             className: colDataClassName,
             renderCell: OtherWorkloads._renderSetNameCell
@@ -129,8 +128,7 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
         columns.push({
             id: imageKey,
             name: Resources.ImageText,
-            minWidth: 250,
-            width: -100,
+            width: -72,
             headerClassName: headerColumnClassName,
             className: colDataClassName,
             renderCell: OtherWorkloads._renderImageCell
@@ -139,8 +137,7 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
         columns.push({
             id: podsKey,
             name: Resources.PodsText,
-            minWidth: 80,
-            width: -100,
+            width: 140,
             headerClassName: headerColumnClassName,
             className: colDataClassName,
             renderCell: OtherWorkloads._renderPodsCountCell
@@ -149,8 +146,7 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
         columns.push({
             id: ageKey,
             name: Resources.AgeText,
-            minWidth: 80,
-            width: -100,
+            width: -18,
             headerClassName: headerColumnClassName,
             className: colDataClassName,
             renderCell: OtherWorkloads._renderAgeCell

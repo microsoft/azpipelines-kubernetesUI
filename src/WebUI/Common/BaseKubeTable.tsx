@@ -24,9 +24,12 @@ import { IStatusProps } from "azure-devops-ui/Status";
 import "./BaseKubeTable.scss";
 
 export interface ITableComponentProperties<T> extends IVssComponentProperties {
+    className?: string
     headingText?: string | JSX.Element;
     headingDescription?: string;
-    headingStatus?: IStatusProps
+    headingStatus?: IStatusProps;
+    hideHeaders?: boolean;
+    hideLines?:boolean;
     items: T[];
     columns: ITableColumn<T>[];
     onItemActivated?: (event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>, selectedItem: any) => void;
@@ -36,7 +39,7 @@ export interface ITableComponentProperties<T> extends IVssComponentProperties {
 export class BaseKubeTable<T> extends BaseComponent<ITableComponentProperties<T>> {
     public render(): React.ReactNode {
         return (
-            <CustomCard className={css("flex-grow", "bolt-card-no-vertical-padding", "item-top-padding", "kube-list-content")}>
+            <CustomCard className={css("flex-grow", "bolt-card-no-vertical-padding", "item-top-padding", "kube-list-content", this.props.className || "")}>
                 {
                     this.props.headingText &&
                     <CustomHeader>
@@ -72,8 +75,8 @@ export class BaseKubeTable<T> extends BaseComponent<ITableComponentProperties<T>
                 className={"kube-list"}
                 itemProvider={new ArrayItemProvider<T>(this.props.items)}
                 columns={this.props.columns}
-                showHeader={true}
-                showLines={true}
+                showHeader={!this.props.hideHeaders}
+                showLines={!this.props.hideLines}
                 singleClickActivation={false}
                 onActivate={this._onItemActivated}
                 onSelect={this._onItemSelected}
@@ -107,18 +110,35 @@ export class BaseKubeTable<T> extends BaseComponent<ITableComponentProperties<T>
     public static renderTwoLineColumn(columnIndex: number, tableColumn: ITableColumn<any>, primaryText: string, subText: string, className?: string, primaryTextClassName?: string, secondaryTextClassName?: string): JSX.Element {
         return (
             <TwoLineTableCell className={className} columnIndex={columnIndex} tableColumn={tableColumn} line1={
-                <div className={css("kube-list-col-data overflow-ellipsis", primaryTextClassName)}>
+                <div className={css("kube-list-col-data overflow-ellipsis", primaryTextClassName)} key={"col-primary-" + columnIndex}>
                     <TooltipHost content={primaryText} overflowMode={TooltipOverflowMode.Parent}>
                         {primaryText}
                     </TooltipHost>
                 </div>
             } line2={
+                <div className={css("list-secondary-text overflow-ellipsis", secondaryTextClassName)} key={"col-secondary-" + columnIndex}>
+                    <TooltipHost content={subText} overflowMode={TooltipOverflowMode.Parent}>
+                        {subText}
+                    </TooltipHost>
+                </div>
+            } key={"col-" + columnIndex} />
+        );
+    }
+
+    public static renderCustomTwoLineColumn(className: string, primaryText: string, subText: string, primaryTextClassName?: string, secondaryTextClassName?: string): React.ReactNode {
+        return (
+            <div className={css("kube-list-col-data overflow-ellipsis", className)}>
+                <div className={css("kube-list-col-data overflow-ellipsis", primaryTextClassName)}>
+                    <TooltipHost content={primaryText} overflowMode={TooltipOverflowMode.Parent}>
+                        {primaryText}
+                    </TooltipHost>
+                </div>
                 <div className={css("list-secondary-text overflow-ellipsis", secondaryTextClassName)}>
                     <TooltipHost content={subText} overflowMode={TooltipOverflowMode.Parent}>
                         {subText}
                     </TooltipHost>
                 </div>
-            } />
+            </div>
         );
     }
 
@@ -133,18 +153,4 @@ export class BaseKubeTable<T> extends BaseComponent<ITableComponentProperties<T>
             this.props.onItemSelected(event, tableRow, this.props.items[tableRow.index]);
         }
     }
-
-    // private _getComponentHeadingContent(): JSX.Element | null {
-    //     if (!this.props.headingText && !this.props.headingContent) {
-    //         return null;
-    //     }
-
-    //     return (
-    //         <div className={"kube-list-heading heading"}>
-    //             {this.props.headingText
-    //                 ? <h3 className={"heading-title"}>{this.props.headingText}</h3>
-    //                 : this.props.headingContent}
-    //         </div>
-    //     );
-    // }
 }
