@@ -1,4 +1,4 @@
-import { BaseComponent, css, format } from "@uifabric/utilities";
+import { BaseComponent, css } from "@uifabric/utilities";
 import { Ago } from "azure-devops-ui/Ago";
 import * as React from "react";
 import * as Resources from "../Resources";
@@ -7,8 +7,6 @@ import { IVssComponentProperties } from "../Types";
 import "./PodsTable.scss";
 import { V1Pod } from "@kubernetes/client-node";
 import { Utils } from "../Utils";
-import { Status } from "azure-devops-ui/Status";
-import { Tooltip } from "azure-devops-ui/TooltipEx";
 import { ITableColumn } from "azure-devops-ui/Table";
 import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
 import { ResourceStatus } from "../Common/ResourceStatus";
@@ -16,12 +14,14 @@ import { ActionsHubManager } from "../FluxCommon/ActionsHubManager";
 import { SelectionActions } from "../Selection/SelectionActions";
 import { SelectedItemKeys } from "../Constants";
 import { Link } from "azure-devops-ui/Link";
+import { localeFormat } from "azure-devops-ui/Core/Util/String";
 
 const podNameKey: string = "pl-name-key";
 const podWorkloadsKey: string = "pl-wrkld-key";
 const podStatusKey: string = "pl-status-key";
 const podAgeKey: string = "pl-age-key";
 const colDataClassName: string = "list-col-content";
+const RunningStatusKey: string = "running";
 
 export interface IPodsTableProperties extends IVssComponentProperties {
     podsToRender: V1Pod[];
@@ -31,7 +31,6 @@ export interface IPodsTableProperties extends IVssComponentProperties {
 }
 
 export class PodsTable extends BaseComponent<IPodsTableProperties> {
-    private statusCount: { [key: string]: number } = {};
     public render(): React.ReactNode {
         const filteredPods: V1Pod[] = this.props.podsToRender.filter((pod) => {
             return Utils.filterByName(pod.metadata.name, this.props.nameFilter);
@@ -40,20 +39,16 @@ export class PodsTable extends BaseComponent<IPodsTableProperties> {
         if (filteredPods.length > 0) {
             filteredPods.forEach(pod => {
                 const key = (pod.status.message ? pod.status.reason : pod.status.phase).toLowerCase();
-                if (key in this.statusCount) {
-                    this.statusCount[key] += 1;
+                if (key in this._statusCount) {
+                    this._statusCount[key] += 1;
                 } else {
-                    this.statusCount[key] = 1;
+                    this._statusCount[key] = 1;
                 }
             });
             return (
                 <BaseKubeTable
-                    headingContent={
-                        <div>
-                            <h3 className={"heading-title"}>{this.props.headingText}</h3>
-                            <span className={"secondary-text"}>{this._generateHeadingSubText(this.statusCount)}</span>
-                        </div>
-                    }
+                    headingText={this.props.headingText}
+                    headingDescription={this._generateHeadingSubText(this._statusCount)}
                     className={css("list-content", "pl-details", "depth-16")}
                     items={this.props.podsToRender}
                     columns={PodsTable._getColumns(this.props.showWorkloads || false)}
@@ -159,14 +154,16 @@ export class PodsTable extends BaseComponent<IPodsTableProperties> {
     private _generateHeadingSubText(podStatuses: { [key: string]: number }): string {
         let keys = Object.keys(podStatuses);
         let subText: string = "";
-        let runningIndex = keys.indexOf("running");
+        let runningIndex = keys.indexOf(RunningStatusKey);
         if (runningIndex >= 0) {
-            subText = format("{0} {1}", podStatuses["running"], "running");
+            subText = localeFormat("{0} {1}", podStatuses[RunningStatusKey], RunningStatusKey);
             keys.splice(runningIndex, 1);
         }
         keys.forEach(key => {
-            subText = format("{0} {1} {2}", podStatuses[key], key, subText);
+            subText = localeFormat("{0} {1} {2}", podStatuses[key], key, subText);
         })
         return subText;
     }
+
+    private _statusCount: { [key: string]: number } = {};
 }

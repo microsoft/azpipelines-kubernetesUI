@@ -218,7 +218,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
     private _getFiterHeaderBar(): JSX.Element {
         return (
             <div>
-                <ConditionalChildren renderChildren={this.state.selectedPivotKey === workloadsPivotItemKey || this.state.selectedPivotKey == undefined}>
+                <ConditionalChildren renderChildren={!this.state.selectedPivotKey || this.state.selectedPivotKey === workloadsPivotItemKey}>
                     <HeaderCommandBarWithFilter filter={this.state.workloadsFilter} filterToggled={workloadsFilterToggled} items={[]} />
                 </ConditionalChildren>
                 <ConditionalChildren renderChildren={this.state.selectedPivotKey === servicesPivotItemKey}>

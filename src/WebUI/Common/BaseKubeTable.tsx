@@ -13,21 +13,18 @@ import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import { CustomCard, CardContent } from "azure-devops-ui/Card";
 import {
     HeaderDescription,
-    HeaderIcon,
     CustomHeader,
     HeaderTitle,
     HeaderTitleArea,
     HeaderTitleRow,
     TitleSize
 } from "azure-devops-ui/Header";
-import { IStatusProps } from "azure-devops-ui/Status";
 import "./BaseKubeTable.scss";
 
 export interface ITableComponentProperties<T> extends IVssComponentProperties {
     className?: string
     headingText?: string | JSX.Element;
     headingDescription?: string;
-    headingStatus?: IStatusProps;
     hideHeaders?: boolean;
     hideLines?:boolean;
     items: T[];
