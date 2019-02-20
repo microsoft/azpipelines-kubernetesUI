@@ -3,25 +3,24 @@
     Licensed under the MIT license.
 */
 
-import { V1ServiceList, V1Service } from "@kubernetes/client-node";
-import { BaseComponent, format } from "@uifabric/utilities";
+import { V1ServiceList } from "@kubernetes/client-node";
+import { BaseComponent } from "@uifabric/utilities";
+import { ObservableValue } from "azure-devops-ui/Core/Observable";
+import { Filter, IFilterItemState, IFilterState } from "azure-devops-ui/Utilities/Filter";
 import * as React from "react";
 import { IKubeService } from "../../Contracts/Contracts";
-import * as Resources from "../Resources";
-import { IVssComponentProperties, IServiceItem } from "../Types";
-import { Utils } from "../Utils";
-import "../Common/KubeSummary.scss";
-import { ServicesTable } from "../Services/ServicesTable";
 import { KubeZeroData } from "../Common//KubeZeroData";
-import { Filter, IFilterState, IFilterItemState } from "azure-devops-ui/Utilities/Filter";
-import { ServicesFilterBar } from "./ServicesFilterBar";
-import { ObservableValue } from "azure-devops-ui/Core/Observable";
-import { ServicesActionsCreator } from "./ServicesActionsCreator";
-import { ServicesStore } from "./ServicesStore";
+import { NameKey, TypeKey } from "../Common/KubeFilterBar";
+import "../Common/KubeSummary.scss";
+import { ServicesEvents } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
-import { ServicesEvents } from "../Constants";
-import { NameKey, TypeKey } from "../Common/KubeFilterBar";
+import * as Resources from "../Resources";
+import { ServicesTable } from "../Services/ServicesTable";
+import { IVssComponentProperties } from "../Types";
+import { ServicesActionsCreator } from "./ServicesActionsCreator";
+import { ServicesFilterBar } from "./ServicesFilterBar";
+import { ServicesStore } from "./ServicesStore";
 
 export interface IServicesPivotState {
     serviceList?: V1ServiceList;

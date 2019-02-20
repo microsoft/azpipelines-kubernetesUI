@@ -1,21 +1,24 @@
-import { BaseComponent, css, format } from "@uifabric/utilities";
-import { Ago } from "azure-devops-ui/Ago";
-import * as React from "react";
-import * as Resources from "../Resources";
-import { BaseKubeTable } from "../Common/BaseKubeTable";
-import { IVssComponentProperties } from "../Types";
-import "./PodsTable.scss";
+/*
+    Copyright (c) Microsoft Corporation. All rights reserved.
+    Licensed under the MIT license.
+*/
+
 import { V1Pod } from "@kubernetes/client-node";
-import { Utils } from "../Utils";
-import { Status } from "azure-devops-ui/Status";
-import { Tooltip } from "azure-devops-ui/TooltipEx";
-import { ITableColumn } from "azure-devops-ui/Table";
+import { BaseComponent, css } from "@uifabric/utilities";
+import { Ago } from "azure-devops-ui/Ago";
 import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
+import { localeFormat } from "azure-devops-ui/Core/Util/String";
+import { ITableColumn } from "azure-devops-ui/Table";
+import * as React from "react";
+import { BaseKubeTable } from "../Common/BaseKubeTable";
 import { ResourceStatus } from "../Common/ResourceStatus";
-import { ActionsHubManager } from "../FluxCommon/ActionsHubManager";
-import { SelectionActions } from "../Selection/SelectionActions";
 import { SelectedItemKeys } from "../Constants";
-import { Link } from "azure-devops-ui/Link";
+import { ActionsHubManager } from "../FluxCommon/ActionsHubManager";
+import * as Resources from "../Resources";
+import { SelectionActions } from "../Selection/SelectionActions";
+import { IVssComponentProperties } from "../Types";
+import { Utils } from "../Utils";
+import "./PodsTable.scss";
 
 const podNameKey: string = "pl-name-key";
 const podWorkloadsKey: string = "pl-wrkld-key";
@@ -165,11 +168,11 @@ export class PodsTable extends BaseComponent<IPodsTableProperties> {
         let subText: string = "";
         let runningIndex = keys.indexOf("running");
         if (runningIndex >= 0) {
-            subText = format("{0} {1}", podStatuses["running"], "running");
+            subText = localeFormat("{0} {1}", podStatuses["running"], "running");
             keys.splice(runningIndex, 1);
         }
         keys.forEach(key => {
-            subText = format("{0} {1} {2}", podStatuses[key], key, subText);
+            subText = localeFormat("{0} {1} {2}", podStatuses[key], key, subText);
         })
         return subText;
     }
