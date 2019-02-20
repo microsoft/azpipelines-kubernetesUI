@@ -3,7 +3,6 @@
     Licensed under the MIT license.
 */
 
-import { V1Pod } from "@kubernetes/client-node";
 import { BaseComponent } from "@uifabric/utilities";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { format } from "azure-devops-ui/Core/Util/String";
@@ -19,18 +18,15 @@ import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
 import { PodsActionsCreator } from "../Pods/PodsActionsCreator";
 import { PodsStore } from "../Pods/PodsStore";
-import { PodsTable } from "../Pods/PodsTable";
 import * as Resources from "../Resources";
 import { IVssComponentProperties } from "../Types";
-import { DaemonSetTable } from "../Workloads/DaemonSetTable";
 import { DeploymentsTable } from "../Workloads/DeploymentsTable";
-import { StatefulSetTable } from "../Workloads/StatefulSetTable";
+import { OtherWorkloads } from "../Workloads/OtherWorkloadsTable";
 import { WorkloadsFilterBar } from "./WorkloadsFilterBar";
 import { WorkloadsStore } from "./WorkloadsStore";
 
 export interface IWorkloadsPivotState {
     workloadResourceSize: number;
-    orphanPodsList: V1Pod[];
 }
 
 export interface IWorkloadsPivotProps extends IVssComponentProperties {
@@ -50,11 +46,10 @@ export class WorkloadsPivot extends BaseComponent<IWorkloadsPivotProps, IWorkloa
         StoreManager.GetStore<PodsStore>(PodsStore);
 
         this.state = {
-            orphanPodsList: [],
             workloadResourceSize: 0
         };
 
-        // Fetch all pods in parent component as the podList is required in orphan set table as well as selected workload pods view
+        // Fetch all pods in parent component as the podList is required in selected workload pods view
         this._podsActionCreator.getPods(this.props.kubeService);
 
         this._workloadsStore.addListener(WorkloadsEvents.WorkloadPodsFetchedEvent, this._onPodsFetched);
@@ -76,8 +71,6 @@ export class WorkloadsPivot extends BaseComponent<IWorkloadsPivotProps, IWorkloa
     }
 
     private _onPodsFetched = (): void => {
-        const storeState = this._workloadsStore.getState();
-        this.setState({ orphanPodsList: storeState.orphanPodsList || [] });
     }
 
     private _onDataFound = (): void => {
@@ -94,10 +87,7 @@ export class WorkloadsPivot extends BaseComponent<IWorkloadsPivotProps, IWorkloa
             :
             <div>
                 {this._showComponent(KubeResourceType.Deployments) && this._getDeployments()}
-                {this._showComponent(KubeResourceType.DaemonSets) && this._getDaemonSetsComponent()}
-                {this._showComponent(KubeResourceType.StatefulSets) && this._getStatefulSetsComponent()}
-                {this.state.orphanPodsList && this.state.orphanPodsList.length > 0 &&
-                    this._showComponent(KubeResourceType.Pods) && this.getOrphanPods()}
+                {this._getOtherWorkloadsComponent()}
             </div>);
     }
 
@@ -107,29 +97,12 @@ export class WorkloadsPivot extends BaseComponent<IWorkloadsPivotProps, IWorkloa
         />);
     }
 
-    private getOrphanPods(): JSX.Element {
-        let pods: V1Pod[] | undefined = this._workloadsStore.getState().orphanPodsList || [];
-        // Since PodsTable is a common component between services and workloads, we are sending pods to render as a prop
-        return <PodsTable
-            key={format("orphan-pods-list-{0}", this.props.namespace || "")}
-            podsToRender={pods}
-            nameFilter={this._getNameFilterValue()}
-        />;
-    }
-
-    private _getDaemonSetsComponent(): JSX.Element {
-        return (<DaemonSetTable
-            key={format("ds-list-{0}", this.props.namespace || "")}
-            kubeService={this.props.kubeService}
-            nameFilter={this._getNameFilterValue()}
-        />);
-    }
-
-    private _getStatefulSetsComponent(): JSX.Element {
-        return (<StatefulSetTable
+    private _getOtherWorkloadsComponent(): JSX.Element {
+        return (<OtherWorkloads
             key={format("sts-list-{0}", this.props.namespace || "")}
             kubeService={this.props.kubeService}
             nameFilter={this._getNameFilterValue()}
+            typeFilter={this._getTypeFilterValue()}
         />);
     }
 

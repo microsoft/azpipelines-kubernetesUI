@@ -17,6 +17,7 @@ import * as Resources from "../Resources";
 import "../Services/ServiceDetailsView.scss";
 import { Utils } from "../Utils";
 import { IPodRightPanelProps } from "./PodsRightPanel";
+import { TitleSize } from "azure-devops-ui/Header";
 
 export interface IPodDetailsProps extends IPodRightPanelProps { }
 
@@ -55,7 +56,11 @@ export class PodDetailsView extends BaseComponent<IPodDetailsProps> {
         ]);
 
         return (
-            <Card className="kube-list-content s-details depth-16" titleProps={{ text: Resources.SummaryText }}>
+            <Card className="kube-list-content s-details depth-16"
+                titleProps={{
+                text: Resources.SummaryText,
+                size: TitleSize.Large
+            }}>
                 <Table
                     className="s-full-details"
                     id={format("s-full-details-{0}", pod.metadata.uid)}

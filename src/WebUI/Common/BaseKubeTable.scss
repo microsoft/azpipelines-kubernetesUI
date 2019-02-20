@@ -1,18 +1,10 @@
 @import "azure-devops-ui/Core/_platformCommon.scss";
 
 .kube-list-content {
-    padding: 16px;
-    border-radius: 4px;
-    /* todo :: use std colors */
-    background-color: white;
-    /* The Services table has more number of columns, we need a larger min width to ensure that the container can accomodate the content on resize */
-    min-width: 1000px;
-    /* todo :: use std colors */
-    border: 1px solid lightgray;
+    padding-top: 16px;
 
     .kube-list-heading.heading {
-        padding: 0px 8px 0px 12px;
-        margin-bottom: 8px;
+        padding: 0px 8px 0px 0px;
 
         .heading-title {
             margin-bottom: 0px;
@@ -27,6 +19,10 @@
 
         .kind-tag {
             margin-right: 8px;
+        }
+        
+        .bolt-card-header {
+            padding-bottom: 0px !important
         }
     }
 
@@ -45,4 +41,10 @@
             padding-left: 4px;
         }
     }
+
+    .bolt-header {
+        padding-top: 0px !important;
+        padding-bottom: 0px !important;
+    }
+
 }

@@ -12,20 +12,24 @@
 }
 
 .list-col-content {
-    align-items: center;
-    line-height: 30px;
 
     &.two-lines {
-        display: inline-flex;
+        line-height: 30px;
+        align-items: flex-start;
+        width:100%;
     }
     
 }
 
 .primary-text {
     font-weight: $fontWeightSemiBold;
+    font-size: $fontSizeM;
+    line-height: 20px;
 }
 .secondary-text {
     color: $secondary-text;
+    font-size: $fontSizeMS;
+    line-height: 16px;
 }
 
 .kube-status-container {
@@ -34,8 +38,17 @@
 
     .kube-status-desc {
         margin-left: 6px;
+        width: 100%;
     }
 }
 .item-top-padding {
     margin-top: 10px;
+}
+
+.item-no-padding {
+    padding: 0px 0px 0px 0px
+}
+
+.zero-left-padding {
+    padding-left: 0px;
 }

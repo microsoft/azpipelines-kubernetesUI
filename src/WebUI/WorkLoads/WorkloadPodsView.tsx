@@ -3,7 +3,7 @@
     Licensed under the MIT license.
 */
 
-import { V1Pod, V1PodList, V1ObjectMeta, V1PodTemplateSpec } from "@kubernetes/client-node";
+import { V1Pod, V1ObjectMeta, V1PodTemplateSpec } from "@kubernetes/client-node";
 import { BaseComponent } from "@uifabric/utilities";
 import { SplitterElementPosition, Splitter } from "azure-devops-ui/Splitter";
 import * as React from "react";

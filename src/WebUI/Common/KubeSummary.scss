@@ -10,8 +10,6 @@
 .kubernetes-container {
     width: 100%;
     padding: 20px;
-    /* todo :: use std colors */
-    background-color: white;
 
     .content-main-heading {
         padding: 10px 10px;
@@ -32,6 +30,6 @@
     }
 
     .content-with-pivot .item-padding {
-        padding: 10px 0px 0px 10px;
+        padding-top: 16px
     }
 }

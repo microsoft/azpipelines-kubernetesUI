@@ -7,8 +7,11 @@ import { V1DaemonSet, V1ObjectMeta, V1Pod, V1PodTemplateSpec, V1ReplicaSet, V1St
 import { BaseComponent } from "@uifabric/utilities";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { localeFormat } from "azure-devops-ui/Core/Util/String";
-import { HeaderCommandBarWithFilter } from 'azure-devops-ui/HeaderCommandBar';
+import { HeaderCommandBarWithFilter } from "azure-devops-ui/HeaderCommandBar";
 import { Tab, TabBar, TabContent } from "azure-devops-ui/Tabs";
+import { ConditionalChildren } from "azure-devops-ui/ConditionalChildren";
+import { Surface, SurfaceBackground } from "azure-devops-ui/Surface";
+import { Page } from "azure-devops-ui/Page"
 import { Filter, FILTER_CHANGE_EVENT, IFilterState } from "azure-devops-ui/Utilities/Filter";
 import * as React from "react";
 import { IKubeService } from "../../Contracts/Contracts";
@@ -31,7 +34,8 @@ import { KubeZeroData } from "./KubeZeroData";
 
 const workloadsPivotItemKey: string = "workloads";
 const servicesPivotItemKey: string = "services";
-const filterToggled = new ObservableValue<boolean>(false);
+const workloadsFilterToggled = new ObservableValue<boolean>(false);
+const servicesFilterToggled = new ObservableValue<boolean>(false);
 
 //todo: refactor filter properties to respective resource type components
 export interface IKubernetesContainerState {
@@ -93,13 +97,15 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
 
     public render(): React.ReactNode {
         return (
-            <div className={"kubernetes-container"}>
-                {
-                    this.state.showSelectedItem ?
-                        this._getSelectedItemPodsView() :
-                        this._getMainContent()
-                }
-            </div >
+            <Surface background={SurfaceBackground.neutral}>
+                <Page className={"kubernetes-container"}>
+                    {
+                        this.state.showSelectedItem ?
+                            this._getSelectedItemPodsView() :
+                            this._getMainContent()
+                    }
+                </Page>
+            </Surface>
         );
     }
 
@@ -163,20 +169,13 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
                     onSelectedTabChanged={(key: string) => { this.setState({ selectedPivotKey: key }); }}
                     orientation={0}
                     selectedTabId={this.state.selectedPivotKey || workloadsPivotItemKey}
-                    renderAdditionalContent={() => {
-                        return (<HeaderCommandBarWithFilter filter={this.state.selectedPivotKey === workloadsPivotItemKey ?
-                            this.state.workloadsFilter : this.state.svcFilter}
-                            filterToggled={filterToggled} items={[]} />);
-                    }}>
+                    renderAdditionalContent={() => { return this._getFiterHeaderBar(); }}>
                     <Tab name={Resources.PivotWorkloadsText} id={workloadsPivotItemKey} />
                     <Tab name={Resources.PivotServiceText} id={servicesPivotItemKey} />
                 </TabBar>
                 <TabContent>
-                    <div className="item-padding">
-                        {this.state.selectedPivotKey === servicesPivotItemKey && <ServicesPivot kubeService={this.props.kubeService} namespace={this.state.namespace} filter={this.state.svcFilter} filterToggled={filterToggled}/>}
-                        {this.state.selectedPivotKey === workloadsPivotItemKey && <WorkloadsPivot kubeService={this.props.kubeService} namespace={this.state.namespace} filter={this.state.workloadsFilter} filterToggled={filterToggled}/>}
-                    </div>
-
+                        {this.state.selectedPivotKey === servicesPivotItemKey && <ServicesPivot kubeService={this.props.kubeService} namespace={this.state.namespace} filter={this.state.svcFilter} filterToggled={servicesFilterToggled} />}
+                        {this.state.selectedPivotKey === workloadsPivotItemKey && <WorkloadsPivot kubeService={this.props.kubeService} namespace={this.state.namespace} filter={this.state.workloadsFilter} filterToggled={workloadsFilterToggled} />}
                 </TabContent>
             </div>
         );
@@ -214,6 +213,19 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         this._selectedItemViewMap[SelectedItemKeys.DaemonSetKey] = (item) => this._getWorkoadPodsViewComponent(item.metadata, item.spec && item.spec.template, item.kind || "DaemonSet");
         this._selectedItemViewMap[SelectedItemKeys.OrphanPodKey] = (item) => { return <PodDetailsView pod={item} />; }
         this._selectedItemViewMap[SelectedItemKeys.ReplicaSetKey] = (item) => this._getWorkoadPodsViewComponent(item.metadata, item.spec && item.spec.template, item.kind || "ReplicaSet");
+    }
+
+    private _getFiterHeaderBar(): JSX.Element {
+        return (
+            <div>
+                <ConditionalChildren renderChildren={!this.state.selectedPivotKey || this.state.selectedPivotKey === workloadsPivotItemKey}>
+                    <HeaderCommandBarWithFilter filter={this.state.workloadsFilter} filterToggled={workloadsFilterToggled} items={[]} />
+                </ConditionalChildren>
+                <ConditionalChildren renderChildren={this.state.selectedPivotKey === servicesPivotItemKey}>
+                    <HeaderCommandBarWithFilter filter={this.state.svcFilter} filterToggled={servicesFilterToggled} items={[]} />
+                </ConditionalChildren>
+            </div>
+        );
     }
 
     private _selectedItemViewMap: { [selectedItemKey: string]: (selectedItem: any) => JSX.Element | null } = {};

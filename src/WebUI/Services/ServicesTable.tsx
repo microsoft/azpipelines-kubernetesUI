@@ -12,7 +12,7 @@ import { IStatusProps, Statuses, StatusSize } from "azure-devops-ui/Status";
 import { ITableColumn } from "azure-devops-ui/Table";
 import * as React from "react";
 import { BaseKubeTable } from "../Common/BaseKubeTable";
-import { ResourceStatus } from "../Common/ResourceStatus";
+import { IResourceStatusProps } from "../Common/ResourceStatus";
 import { SelectedItemKeys } from "../Constants";
 import { ActionsHubManager } from "../FluxCommon/ActionsHubManager";
 import * as Resources from "../Resources";
@@ -24,7 +24,6 @@ import { ServicesStore } from "./ServicesStore";
 import "./ServicesTable.scss";
 
 const packageKey: string = "package-col";
-const typeKey: string = "type-col";
 const clusterIPKey: string = "cluster-ip-col";
 const externalIPKey: string = "external-ip-col";
 const portKey: string = "port-col";
@@ -123,8 +122,7 @@ export class ServicesTable extends BaseComponent<IServicesComponentProperties> {
         columns.push({
             id: packageKey,
             name: Resources.NameText,
-            minWidth: 250,
-            width: -100,
+            width: -70,
             headerClassName: css(headerColumnClassName, "first-col-header"),
             className: columnContentClassName,
             renderCell: ServicesTable._renderPackageKeyCell
@@ -133,8 +131,7 @@ export class ServicesTable extends BaseComponent<IServicesComponentProperties> {
         columns.push({
             id: clusterIPKey,
             name: Resources.ClusterIPText,
-            minWidth: 150,
-            width: -100,
+            width: -15,
             headerClassName: headerColumnClassName,
             className: columnContentClassName,
             renderCell: ServicesTable._renderClusterIpCell
@@ -143,8 +140,7 @@ export class ServicesTable extends BaseComponent<IServicesComponentProperties> {
         columns.push({
             id: externalIPKey,
             name: Resources.ExternalIPText,
-            minWidth: 150,
-            width: -100,
+            width: 172,
             headerClassName: headerColumnClassName,
             className: columnContentClassName,
             renderCell: ServicesTable._renderExternalIpCell
@@ -153,8 +149,7 @@ export class ServicesTable extends BaseComponent<IServicesComponentProperties> {
         columns.push({
             id: portKey,
             name: Resources.PortText,
-            minWidth: 150,
-            width: -100,
+            width: 200,
             headerClassName: headerColumnClassName,
             className: columnContentClassName,
             renderCell: ServicesTable._renderPortCell
@@ -163,8 +158,7 @@ export class ServicesTable extends BaseComponent<IServicesComponentProperties> {
         columns.push({
             id: ageKey,
             name: Resources.AgeText,
-            minWidth: 150,
-            width: -100,
+            width: -15,
             headerClassName: headerColumnClassName,
             className: columnContentClassName,
             renderCell: ServicesTable._renderAgeCell
@@ -174,8 +168,7 @@ export class ServicesTable extends BaseComponent<IServicesComponentProperties> {
     }
 
     private static _renderPackageKeyCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, service: IServiceItem): JSX.Element => {
-        const itemToRender = ServicesTable._getServiceStatusWithName(service, colDataClassName);
-        return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
+        return ServicesTable._getServiceStatusWithName(service, colDataClassName, columnIndex, tableColumn, rowIndex);
     }
 
     private static _renderClusterIpCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, service: IServiceItem): JSX.Element => {
@@ -201,7 +194,7 @@ export class ServicesTable extends BaseComponent<IServicesComponentProperties> {
         return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
-    private static _getServiceStatusWithName(service: IServiceItem, cssClassName: string): React.ReactNode {
+    private static _getServiceStatusWithName(service: IServiceItem, cssClassName: string, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, rowIndex: number): JSX.Element{
         let statusProps: IStatusProps = Statuses.Success;
         let tooltipText: string = "";
         if (service.type === loadBalancerKey) {
@@ -212,14 +205,14 @@ export class ServicesTable extends BaseComponent<IServicesComponentProperties> {
             }
         }
 
-        return (
-            <ResourceStatus
-                statusProps={statusProps}
-                customDescription={BaseKubeTable.renderTwoLineColumn(service.package, service.type, css(cssClassName, "kube-status-desc"), "primary-text", "secondary-text")}
-                toolTipText={tooltipText}
-                statusSize={StatusSize.l}
-            />
-        );
+        const resStatusProps: IResourceStatusProps = {
+            statusProps: statusProps,
+            toolTipText: tooltipText,
+            statusSize: StatusSize.l
+        }
+
+        tableColumn.className = css(tableColumn.className, "stretch-full-width");
+        return BaseKubeTable.renderTwoLineColumn(columnIndex, tableColumn, service.package, service.type, css(cssClassName, "two-lines"), "primary-text", "secondary-text", resStatusProps);
     }
 
     private _filterService(svc: V1Service): boolean {

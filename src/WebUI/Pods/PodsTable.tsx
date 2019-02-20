@@ -6,12 +6,13 @@
 import { V1Pod } from "@kubernetes/client-node";
 import { BaseComponent, css } from "@uifabric/utilities";
 import { Ago } from "azure-devops-ui/Ago";
+import { Link } from "azure-devops-ui/Link";
 import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
 import { localeFormat } from "azure-devops-ui/Core/Util/String";
 import { ITableColumn } from "azure-devops-ui/Table";
 import * as React from "react";
 import { BaseKubeTable } from "../Common/BaseKubeTable";
-import { ResourceStatus } from "../Common/ResourceStatus";
+import { IResourceStatusProps } from "../Common/ResourceStatus";
 import { SelectedItemKeys } from "../Constants";
 import { ActionsHubManager } from "../FluxCommon/ActionsHubManager";
 import * as Resources from "../Resources";
@@ -25,6 +26,7 @@ const podWorkloadsKey: string = "pl-wrkld-key";
 const podStatusKey: string = "pl-status-key";
 const podAgeKey: string = "pl-age-key";
 const colDataClassName: string = "list-col-content";
+const RunningStatusKey: string = "running";
 
 export interface IPodsTableProperties extends IVssComponentProperties {
     podsToRender: V1Pod[];
@@ -34,7 +36,6 @@ export interface IPodsTableProperties extends IVssComponentProperties {
 }
 
 export class PodsTable extends BaseComponent<IPodsTableProperties> {
-    private statusCount: { [key: string]: number } = {};
     public render(): React.ReactNode {
         const filteredPods: V1Pod[] = this.props.podsToRender.filter((pod) => {
             return Utils.filterByName(pod.metadata.name, this.props.nameFilter);
@@ -43,20 +44,16 @@ export class PodsTable extends BaseComponent<IPodsTableProperties> {
         if (filteredPods.length > 0) {
             filteredPods.forEach(pod => {
                 const key = (pod.status.message ? pod.status.reason : pod.status.phase).toLowerCase();
-                if (key in this.statusCount) {
-                    this.statusCount[key] += 1;
+                if (key in this._statusCount) {
+                    this._statusCount[key] += 1;
                 } else {
-                    this.statusCount[key] = 1;
+                    this._statusCount[key] = 1;
                 }
             });
             return (
                 <BaseKubeTable
-                    headingContent={
-                        <div>
-                            <h3 className={"heading-title"}>{this.props.headingText}</h3>
-                            <span className={"secondary-text"}>{this._generateHeadingSubText(this.statusCount)}</span>
-                        </div>
-                    }
+                    headingText={this.props.headingText}
+                    headingDescription={this._generateHeadingSubText(this._statusCount)}
                     className={css("list-content", "pl-details", "depth-16")}
                     items={this.props.podsToRender}
                     columns={PodsTable._getColumns(this.props.showWorkloads || false)}
@@ -76,8 +73,7 @@ export class PodsTable extends BaseComponent<IPodsTableProperties> {
         columns.push({
             id: podNameKey,
             name: Resources.PodsDetailsText,
-            minWidth: 250,
-            width: -100,
+            width: showWorkloads?-54:362,
             headerClassName: css(headerColumnClassName, "first-col-header"),
             className: columnContentClassName,
             renderCell: PodsTable._renderPodNameCell
@@ -86,8 +82,7 @@ export class PodsTable extends BaseComponent<IPodsTableProperties> {
         columns.push({
             id: podStatusKey,
             name: Resources.StatusText,
-            minWidth: 80,
-            width: -100,
+            width: showWorkloads?256:220,
             headerClassName: headerColumnClassName,
             className: columnContentClassName,
             renderCell: PodsTable._renderPodStatusCell
@@ -97,8 +92,7 @@ export class PodsTable extends BaseComponent<IPodsTableProperties> {
             columns.push({
                 id: podWorkloadsKey,
                 name: Resources.WorkloadText,
-                minWidth: 120,
-                width: -100,
+                width: -24,
                 headerClassName: headerColumnClassName,
                 className: columnContentClassName,
                 renderCell: PodsTable._renderPodWorkload
@@ -108,8 +102,7 @@ export class PodsTable extends BaseComponent<IPodsTableProperties> {
         columns.push({
             id: podAgeKey,
             name: Resources.AgeText,
-            minWidth: 80,
-            width: -100,
+            width: showWorkloads?-18:-100,
             headerClassName: headerColumnClassName,
             className: columnContentClassName,
             renderCell: PodsTable._renderPodAgeCell
@@ -125,30 +118,22 @@ export class PodsTable extends BaseComponent<IPodsTableProperties> {
 
     private static _renderPodNameCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod): JSX.Element {
         const textToRender = pod.metadata.name;
-        let colDataClass = css(colDataClassName, "primary-text");
-        const nameLabel = <span className={colDataClass}> {textToRender} </span>
-        const itemToRender = (
-            <ResourceStatus
-                statusProps={Utils.generatePodStatusProps(pod.status)}
-                customDescription={nameLabel}
-            />
-        );
-        return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
+        const statusProps: IResourceStatusProps = { statusProps: Utils.generatePodStatusProps(pod.status) }
+        const itemToRender = BaseKubeTable.renderColumn(textToRender, BaseKubeTable.defaultColumnRenderer, css(colDataClassName, "primary-text"));
+        return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender, statusProps);
     }
 
     private static _renderPodWorkload(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod): JSX.Element {
         const textToRender = pod.metadata.ownerReferences[0].name;
-        const itemToRender = BaseKubeTable.renderColumn(textToRender || "", BaseKubeTable.defaultColumnRenderer, colDataClassName);
-        //could not change link color to black hence commenting for now.
-        // const itemToRender: React.ReactNode = (
-        //     <Link
-        //         className=""
-        //         excludeTabStop
-        //         href="#"
-        //     >
-        //         {textToRender}
-        //     </Link>
-        // );
+        const itemToRender: React.ReactNode = (
+            <Link
+                className="fontSizeM text-ellipsis bolt-table-link bolt-table-inline-link"
+                excludeTabStop
+                href="#"
+            >
+                {textToRender}
+            </Link>
+        );
         return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
@@ -166,9 +151,9 @@ export class PodsTable extends BaseComponent<IPodsTableProperties> {
     private _generateHeadingSubText(podStatuses: { [key: string]: number }): string {
         let keys = Object.keys(podStatuses);
         let subText: string = "";
-        let runningIndex = keys.indexOf("running");
+        let runningIndex = keys.indexOf(RunningStatusKey);
         if (runningIndex >= 0) {
-            subText = localeFormat("{0} {1}", podStatuses["running"], "running");
+            subText = localeFormat("{0} {1}", podStatuses[RunningStatusKey], RunningStatusKey);
             keys.splice(runningIndex, 1);
         }
         keys.forEach(key => {
@@ -176,4 +161,6 @@ export class PodsTable extends BaseComponent<IPodsTableProperties> {
         })
         return subText;
     }
+
+    private _statusCount: { [key: string]: number } = {};
 }

@@ -9,6 +9,7 @@ import { Card } from "azure-devops-ui/Card";
 import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
 import { format } from "azure-devops-ui/Core/Util/String";
 import { Duration } from "azure-devops-ui/Duration";
+import { TitleSize } from "azure-devops-ui/Header";
 import { LabelGroup, WrappingBehavior } from "azure-devops-ui/Label";
 import { IStatusProps, Statuses } from "azure-devops-ui/Status";
 import { ITableColumn, Table } from "azure-devops-ui/Table";
@@ -75,7 +76,12 @@ export class PodsLeftPanel extends BaseComponent<IPodsLeftPanelProperties> {
         ]);
 
         return (
-            <Card className="pods-left-pane-header-table" titleProps={{ text: Resources.SummaryText }}>
+            <Card className="pods-left-pane-header-table"
+                titleProps={{
+                    text: Resources.SummaryText,
+                    size: TitleSize.Large
+                }}
+            >
                 <Table
                     className="s-full-details"
                     id={format("s-full-details-{0}", metadata.uid)}

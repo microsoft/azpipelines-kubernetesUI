@@ -13,12 +13,7 @@ describe("ListComponent component tests", () => {
         };
 
         const wrapper = shallow(<BaseKubeTable {...props} />);
-        const headingClass = ".kube-list-content .kube-list-heading.heading";
-        const heading = wrapper.find(headingClass);
+        const heading = wrapper.find("HeaderTitle");
         expect(!!heading && heading.length > 0).toBeTruthy();
-
-        const listClass = ".kube-list-content .kube-list";
-        const list = wrapper.find(headingClass);
-        expect(!!list && list.length > 0).toBeTruthy();
     });
 });

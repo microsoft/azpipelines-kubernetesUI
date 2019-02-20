@@ -83,19 +83,19 @@ describe("ServiceDetailsView component tests", () => {
         const headingContainer = wrapper.find(headingClass);
         expect(!!headingContainer && headingContainer.length > 0).toBeTruthy();
 
-        const heading = wrapper.find('ResourceStatus');
+        const heading = wrapper.find("ResourceStatus");
         expect(!!heading && heading.length > 0).toBeTruthy();
         //large status size
-        expect(heading.prop('statusSize')).toStrictEqual('24');
+        expect(heading.prop("statusSize")).toStrictEqual("24");
 
         const renderedHeading = heading.dive();
 
-        const status = renderedHeading.find('Status');
+        const status = renderedHeading.find("Status");
         expect(!!status && status.length > 0).toBeTruthy();
-        expect(status.prop('color')).toStrictEqual('success')
+        expect(status.prop("color")).toStrictEqual("success")
 
         //expecting the title to be of h2
-        const pageTitle = renderedHeading.find('h2');
+        const pageTitle = renderedHeading.find("h2");
         expect(!!pageTitle && pageTitle.length > 0).toBeTruthy();
         expect(pageTitle.text()).toStrictEqual(item.package);
     });

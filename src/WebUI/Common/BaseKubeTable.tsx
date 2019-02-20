@@ -5,16 +5,29 @@
 
 import { BaseComponent, css } from "@uifabric/utilities";
 import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
-import { ITableColumn, SimpleTableCell, Table } from "azure-devops-ui/Table";
-import { TooltipHost, TooltipOverflowMode } from "azure-devops-ui/Tooltip";
+import { ITableColumn, SimpleTableCell, Table, TwoLineTableCell } from "azure-devops-ui/Table";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
+import { CustomCard, CardContent } from "azure-devops-ui/Card";
+import {
+    HeaderDescription,
+    CustomHeader,
+    HeaderTitle,
+    HeaderTitleArea,
+    HeaderTitleRow,
+    TitleSize
+} from "azure-devops-ui/Header";
 import * as React from "react";
 import { IVssComponentProperties } from "../Types";
 import "./BaseKubeTable.scss";
+import { IResourceStatusProps, ResourceStatus } from "./ResourceStatus";
+import { Tooltip } from "azure-devops-ui/TooltipEx";
 
 export interface ITableComponentProperties<T> extends IVssComponentProperties {
-    headingText?: string;
-    headingContent?: JSX.Element;
+    className?: string
+    headingText?: string | JSX.Element;
+    headingDescription?: string;
+    hideHeaders?: boolean;
+    hideLines?:boolean;
     items: T[];
     columns: ITableColumn<T>[];
     onItemActivated?: (event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>, selectedItem: any) => void;
@@ -24,10 +37,33 @@ export interface ITableComponentProperties<T> extends IVssComponentProperties {
 export class BaseKubeTable<T> extends BaseComponent<ITableComponentProperties<T>> {
     public render(): React.ReactNode {
         return (
-            <div className={css("kube-list-content", this.props.className)}>
-                {this._getComponentHeadingContent()}
-                {this.props.items && this.props.items.length > 0 && this._getComponent()}
-            </div>
+            <CustomCard className={css("flex-grow", "bolt-card-no-vertical-padding", "item-top-padding", "kube-list-content", this.props.className || "")}>
+                {
+                    this.props.headingText &&
+                    <CustomHeader>
+                        <HeaderTitleArea>
+                            <HeaderTitleRow className="kube-flex-row">
+                                {
+                                    (typeof this.props.headingText === "string") ?
+                                        <HeaderTitle className="text-ellipsis" titleSize={TitleSize.Medium} >
+                                            {this.props.headingText}
+                                        </HeaderTitle> :
+                                        <HeaderTitle className="text-ellipsis" titleSize={TitleSize.Medium} children={this.props.headingText} />
+                                }
+                            </HeaderTitleRow>
+                            {
+                                this.props.headingDescription &&
+                                <HeaderDescription className={css("text-ellipsis", "secondary-text")}>
+                                    {this.props.headingDescription}
+                                </HeaderDescription>
+                            }
+                        </HeaderTitleArea>
+                    </CustomHeader>
+                }
+                <CardContent className="item-no-padding">
+                    {this.props.items && this.props.items.length > 0 && this._getComponent()}
+                </CardContent>
+            </CustomCard>
         );
     }
 
@@ -37,8 +73,8 @@ export class BaseKubeTable<T> extends BaseComponent<ITableComponentProperties<T>
                 className={"kube-list"}
                 itemProvider={new ArrayItemProvider<T>(this.props.items)}
                 columns={this.props.columns}
-                showHeader={true}
-                showLines={false}
+                showHeader={!this.props.hideHeaders}
+                showLines={!this.props.hideLines}
                 singleClickActivation={false}
                 onActivate={this._onItemActivated}
                 onSelect={this._onItemSelected}
@@ -54,35 +90,39 @@ export class BaseKubeTable<T> extends BaseComponent<ITableComponentProperties<T>
 
     public static defaultColumnRenderer(text: string, className?: string): React.ReactNode {
         return (
-            <div className={css("kube-list-col-data overflow-ellipsis", className)}>
-                <TooltipHost content={text} overflowMode={TooltipOverflowMode.Parent}>
-                    {text}
-                </TooltipHost>
+            <div className={css("kube-list-col-data", className)}>
+                <Tooltip text={text} overflowOnly>
+                    <span className="overflow-ellipsis">{text}</span>
+                </Tooltip>
             </div>
         );
     }
 
-    public static renderTableCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<any>, itemToRender: React.ReactNode): JSX.Element {
+    public static renderTableCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<any>, itemToRender: React.ReactNode, statusProps?:IResourceStatusProps): JSX.Element {
         return (
             <SimpleTableCell columnIndex={columnIndex} tableColumn={tableColumn} key={"col-" + columnIndex}>
+                {statusProps && <ResourceStatus {...statusProps} />}
                 {itemToRender}
             </SimpleTableCell>);
     }
 
-    public static renderTwoLineColumn(primaryText: string, subText: string, className?: string, primaryTextClassName?: string, secondaryTextClassName?: string): React.ReactNode {
+    public static renderTwoLineColumn(columnIndex: number, tableColumn: ITableColumn<any>, primaryText: string, subText: string, className?: string, primaryTextClassName?: string, secondaryTextClassName?: string, statusProps?: IResourceStatusProps): JSX.Element {
         return (
-            <div className={css("kube-list-col-data overflow-ellipsis", className)}>
-                <div className={css("kube-list-col-data overflow-ellipsis", primaryTextClassName)}>
-                    <TooltipHost content={primaryText} overflowMode={TooltipOverflowMode.Parent}>
-                        {primaryText}
-                    </TooltipHost>
+            <TwoLineTableCell className={className} columnIndex={columnIndex} tableColumn={tableColumn} line1={
+                <div className={css("kube-list-col-data", primaryTextClassName)} key={"col-primary-" + columnIndex}>
+                    <Tooltip text={primaryText} overflowOnly>
+                        <span className="overflow-ellipsis">{primaryText}</span>
+                    </Tooltip>
                 </div>
-                <div className={css("list-secondary-text overflow-ellipsis", secondaryTextClassName)}>
-                    <TooltipHost content={subText} overflowMode={TooltipOverflowMode.Parent}>
-                        {subText}
-                    </TooltipHost>
+            } line2={
+                <div className={css("list-secondary-text", secondaryTextClassName)} key={"col-secondary-" + columnIndex}>
+                    <Tooltip text={subText} overflowOnly>
+                        <span className="overflow-ellipsis">{subText}</span>
+                    </Tooltip>
                 </div>
-            </div>
+                }
+                iconProps={statusProps ? {render: (key:string | undefined) => <ResourceStatus {...statusProps} />} :{}}
+                key={"col-" + columnIndex} />
         );
     }
 
@@ -96,19 +136,5 @@ export class BaseKubeTable<T> extends BaseComponent<ITableComponentProperties<T>
         if (this.props.onItemSelected) {
             this.props.onItemSelected(event, tableRow, this.props.items[tableRow.index]);
         }
-    }
-
-    private _getComponentHeadingContent(): JSX.Element | null {
-        if (!this.props.headingText && !this.props.headingContent) {
-            return null;
-        }
-
-        return (
-            <div className={"kube-list-heading heading"}>
-                {this.props.headingText
-                    ? <h3 className={"heading-title"}>{this.props.headingText}</h3>
-                    : this.props.headingContent}
-            </div>
-        );
     }
 }

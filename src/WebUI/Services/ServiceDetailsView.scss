@@ -23,8 +23,16 @@
         padding-left: 16px;
         line-height: 40px;
     }
+
+    .s-details-label {
+        box-sizing: border-box;
+        width: 100%;
+    }
 }
 
 .s-de-heading {
     padding-left: 8px;
+    &.content {
+        padding: 0px;
+    }
 }

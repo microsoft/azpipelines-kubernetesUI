@@ -3,7 +3,7 @@
     Licensed under the MIT license.
 */
 
-import { V1ObjectMeta, V1PodStatus, V1PodTemplateSpec } from "@kubernetes/client-node";
+import { V1ObjectMeta, V1PodStatus, V1PodTemplateSpec, V1Container } from "@kubernetes/client-node";
 import { ObservableArray } from "azure-devops-ui/Core/Observable";
 import { format, localeFormat } from "azure-devops-ui/Core/Util/String";
 import { ILabelModel } from "azure-devops-ui/Label";
@@ -103,5 +103,25 @@ export class Utils {
         }
 
         return null;
+    }
+
+    public static getImageText(containers: V1Container[]): string {
+        let imageCountMap: { [key: string]: number } = {};
+        let imageString: string = "";
+        containers.forEach(container => {
+            if (imageCountMap[container.image] == undefined) {
+                imageCountMap[container.image] = 1;
+            } else {
+                imageCountMap[container.image] += 1;
+            }
+        });
+
+        const keys = Object.keys(imageCountMap);
+        if (keys.length > 1) {
+            imageString = localeFormat("{0} and {1} more", keys[0], keys.length - 1);
+        } else {
+            imageString = keys[0];
+        }
+        return imageString;
     }
 }

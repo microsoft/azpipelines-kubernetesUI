@@ -8,8 +8,8 @@ import * as React from "react";
 import * as Resources from "../Resources";
 import { IVssComponentProperties } from "../Types";
 import "../Common/KubeSummary.scss";
-import { Filter, IFilterState, FILTER_CHANGE_EVENT, IFilterItemState } from "azure-devops-ui/Utilities/Filter";
-import { KubeFilterBar, NameKey, TypeKey } from "../Common/KubeFilterBar";
+import { Filter } from "azure-devops-ui/Utilities/Filter";
+import { KubeFilterBar } from "../Common/KubeFilterBar";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { KubeResourceType } from "../../Contracts/KubeServiceBase";
 
@@ -33,8 +33,7 @@ export class WorkloadsFilterBar extends BaseComponent<IWorkloadsFilterBarProps> 
         return [KubeResourceType.Deployments,
         KubeResourceType.ReplicaSets,
         KubeResourceType.DaemonSets,
-        KubeResourceType.StatefulSets,
-        KubeResourceType.Pods];
+        KubeResourceType.StatefulSets];
     };
 
     private _listItems = (item: any) => {
@@ -51,9 +50,6 @@ export class WorkloadsFilterBar extends BaseComponent<IWorkloadsFilterBarProps> 
                 break;
             case KubeResourceType.StatefulSets:
                 name = Resources.StatefulSetText;
-                break;
-            case KubeResourceType.Pods:
-                name = Resources.PodsText;
                 break;
         };
         return {
