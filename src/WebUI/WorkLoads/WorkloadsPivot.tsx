@@ -3,32 +3,30 @@
     Licensed under the MIT license.
 */
 
-import { V1DeploymentList, V1ReplicaSet, V1ReplicaSetList, V1ServiceList, V1DaemonSetList, V1StatefulSetList, V1Service, V1PodList, V1Pod, V1DaemonSet, V1StatefulSet, V1PodTemplateSpec, V1ObjectMeta } from "@kubernetes/client-node";
-import { BaseComponent, format } from "@uifabric/utilities";
+import { V1Pod } from "@kubernetes/client-node";
+import { BaseComponent } from "@uifabric/utilities";
+import { ObservableValue } from "azure-devops-ui/Core/Observable";
+import { format } from "azure-devops-ui/Core/Util/String";
+import { Filter, IFilterItemState, IFilterState } from "azure-devops-ui/Utilities/Filter";
 import * as React from "react";
 import { IKubeService } from "../../Contracts/Contracts";
-import * as Resources from "../Resources";
-import { IVssComponentProperties, IServiceItem, IDeploymentReplicaSetItem } from "../Types";
-import { Utils } from "../Utils";
-import { DeploymentsTable } from "../Workloads/DeploymentsTable";
-import "../Common/KubeSummary.scss";
-import { DaemonSetTable } from "../Workloads/DaemonSetTable";
-import { StatefulSetTable } from "../Workloads/StatefulSetTable";
-import { PodsTable } from "../Pods/PodsTable";
-import { KubeZeroData } from "../Common//KubeZeroData";
-import { Filter, IFilterState, FILTER_CHANGE_EVENT, IFilterItemState } from "azure-devops-ui/Utilities/Filter";
 import { KubeResourceType } from "../../Contracts/KubeServiceBase";
-import { WorkloadsFilterBar } from "./WorkloadsFilterBar";
-import { ObservableValue } from "azure-devops-ui/Core/Observable";
-import { SelectedItemKeys } from "../Constants";
-import { WorkloadsActionsCreator } from "./WorkloadsActionsCreator";
-import { PodsActionsCreator } from "../Pods/PodsActionsCreator";
-import { WorkloadsStore } from "./WorkloadsStore";
+import { KubeZeroData } from "../Common//KubeZeroData";
+import { NameKey, TypeKey } from "../Common/KubeFilterBar";
+import "../Common/KubeSummary.scss";
+import { WorkloadsEvents } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
-import { WorkloadsEvents } from "../Constants";
+import { PodsActionsCreator } from "../Pods/PodsActionsCreator";
 import { PodsStore } from "../Pods/PodsStore";
-import { NameKey, TypeKey } from "../Common/KubeFilterBar";
+import { PodsTable } from "../Pods/PodsTable";
+import * as Resources from "../Resources";
+import { IVssComponentProperties } from "../Types";
+import { DaemonSetTable } from "../Workloads/DaemonSetTable";
+import { DeploymentsTable } from "../Workloads/DeploymentsTable";
+import { StatefulSetTable } from "../Workloads/StatefulSetTable";
+import { WorkloadsFilterBar } from "./WorkloadsFilterBar";
+import { WorkloadsStore } from "./WorkloadsStore";
 
 export interface IWorkloadsPivotState {
     workloadResourceSize: number;

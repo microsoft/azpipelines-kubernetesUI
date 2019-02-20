@@ -1,24 +1,29 @@
+/*
+    Copyright (c) Microsoft Corporation. All rights reserved.
+    Licensed under the MIT license.
+*/
+
 import { V1DaemonSet, V1DaemonSetList } from "@kubernetes/client-node";
-import { BaseComponent, css, format } from "@uifabric/utilities";
-import { IStatusProps, Status, Statuses, StatusSize } from "azure-devops-ui/Status";
-import * as React from "react";
-import * as Resources from "../Resources";
-import { BaseKubeTable } from "../Common/BaseKubeTable";
-import { IVssComponentProperties } from "../Types";
+import { BaseComponent, css } from "@uifabric/utilities";
 import { Ago } from "azure-devops-ui/Ago";
-import { ITableColumn, SimpleTableCell } from "azure-devops-ui/Table";
 import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
-import { Utils } from "../Utils";
-import { ResourceStatus } from "../Common/ResourceStatus";
+import { localeFormat } from "azure-devops-ui/Core/Util/String";
+import { IStatusProps } from "azure-devops-ui/Status";
+import { ITableColumn } from "azure-devops-ui/Table";
+import * as React from "react";
 import { IKubeService } from "../../Contracts/Contracts";
+import { BaseKubeTable } from "../Common/BaseKubeTable";
+import { ResourceStatus } from "../Common/ResourceStatus";
+import { SelectedItemKeys, WorkloadsEvents } from "../Constants";
+import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
+import { ActionsHubManager } from "../FluxCommon/ActionsHubManager";
+import { StoreManager } from "../FluxCommon/StoreManager";
+import * as Resources from "../Resources";
+import { SelectionActions } from "../Selection/SelectionActions";
+import { IVssComponentProperties } from "../Types";
+import { Utils } from "../Utils";
 import { WorkloadsActionsCreator } from "./WorkloadsActionsCreator";
 import { WorkloadsStore } from "./WorkloadsStore";
-import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
-import { StoreManager } from "../FluxCommon/StoreManager";
-import { WorkloadsEvents, SelectedItemKeys } from "../Constants";
-import { SelectionStore } from "../Selection/SelectionStore";
-import { SelectionActions } from "../Selection/SelectionActions";
-import { ActionsHubManager } from "../FluxCommon/ActionsHubManager";
 
 const setNameKey = "set-name-key";
 const imageKey = "image-key";
@@ -142,7 +147,7 @@ export class DaemonSetTable extends BaseComponent<IDaemonSetComponentProperties,
         let podString: string = "";
         if (daemonSet.status.desiredNumberScheduled > 0) {
             statusProps = Utils._getPodsStatusProps(daemonSet.status.currentNumberScheduled, daemonSet.status.desiredNumberScheduled);
-            podString = format("{0}/{1}", daemonSet.status.currentNumberScheduled, daemonSet.status.desiredNumberScheduled);
+            podString = localeFormat("{0}/{1}", daemonSet.status.currentNumberScheduled, daemonSet.status.desiredNumberScheduled);
         }
 
         const itemToRender = (

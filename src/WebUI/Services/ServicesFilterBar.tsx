@@ -3,17 +3,15 @@
     Licensed under the MIT license.
 */
 
-import { V1ServiceList, V1Service } from "@kubernetes/client-node";
-import { BaseComponent, format } from "@uifabric/utilities";
-import * as React from "react";
-import { IKubeService } from "../../Contracts/Contracts";
-import * as Resources from "../Resources";
-import { IVssComponentProperties, IServiceItem, IDeploymentReplicaSetItem } from "../Types";
-import { Utils } from "../Utils";
-import "../Common/KubeSummary.scss";
-import { Filter, IFilterState, FILTER_CHANGE_EVENT, IFilterItemState } from "azure-devops-ui/Utilities/Filter";
-import { KubeFilterBar, NameKey, TypeKey } from "../Common/KubeFilterBar";
+import { V1ServiceList } from "@kubernetes/client-node";
+import { BaseComponent } from "@uifabric/utilities";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
+import { Filter } from "azure-devops-ui/Utilities/Filter";
+import * as React from "react";
+import { KubeFilterBar } from "../Common/KubeFilterBar";
+import "../Common/KubeSummary.scss";
+import * as Resources from "../Resources";
+import { IVssComponentProperties } from "../Types";
 
 export interface IWorkloadsFilterBarProps extends IVssComponentProperties {
     filter: Filter;

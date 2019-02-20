@@ -3,13 +3,13 @@
     Licensed under the MIT license.
 */
 
+import { BaseComponent, css } from "@uifabric/utilities";
+import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
+import { ITableColumn, SimpleTableCell, Table } from "azure-devops-ui/Table";
 import { TooltipHost, TooltipOverflowMode } from "azure-devops-ui/Tooltip";
-import { BaseComponent, css, IRenderFunction } from "office-ui-fabric-react/lib/Utilities";
+import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
 import { IVssComponentProperties } from "../Types";
-import { Table, ITableColumn, TableRow, ITableRowProps, SimpleTableCell } from "azure-devops-ui/Table";
-import { ITableRow, ITableRowDetails } from "azure-devops-ui/Components/Table/Table.Props";
-import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import "./BaseKubeTable.scss";
 
 export interface ITableComponentProperties<T> extends IVssComponentProperties {

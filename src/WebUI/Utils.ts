@@ -4,8 +4,8 @@
 */
 
 import { V1ObjectMeta, V1PodStatus, V1PodTemplateSpec } from "@kubernetes/client-node";
-import { format } from "@uifabric/utilities/lib";
 import { ObservableArray } from "azure-devops-ui/Core/Observable";
+import { format, localeFormat } from "azure-devops-ui/Core/Util/String";
 import { ILabelModel } from "azure-devops-ui/Label";
 import { IStatusProps, Statuses } from "azure-devops-ui/Status";
 
@@ -56,7 +56,7 @@ export class Utils {
             return !!pipelineName && !!pipelineId;
         });
 
-        return pipelineName && pipelineId ? format("{0} / {1}", pipelineName, pipelineId) : "";
+        return pipelineName && pipelineId ? localeFormat("{0} / {1}", pipelineName, pipelineId) : "";
     }
 
     public static _getPodsStatusProps(currentScheduledPods: number, desiredPods: number): IStatusProps | undefined {

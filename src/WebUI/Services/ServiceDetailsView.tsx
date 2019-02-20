@@ -3,34 +3,30 @@
     Licensed under the MIT license.
 */
 
-import { BaseComponent, css } from "@uifabric/utilities";
-import { localeFormat, format } from "azure-devops-ui/Core/Util/String";
-import { ObservableValue } from "azure-devops-ui/Core/Observable";
-import { LabelGroup, WrappingBehavior } from "azure-devops-ui/Label";
-import { ColumnFill, ITableColumn, renderSimpleCell, SimpleTableCell as renderTableCell, Table } from "azure-devops-ui/Table";
+import { V1Pod } from "@kubernetes/client-node";
+import { BaseComponent } from "@uifabric/utilities";
+import { format, localeFormat } from "azure-devops-ui/Core/Util/String";
+import { LabelGroup } from "azure-devops-ui/Label";
+import { IStatusProps, Statuses, StatusSize } from "azure-devops-ui/Status";
+import { ITableColumn, Table } from "azure-devops-ui/Table";
 import * as Date_Utils from "azure-devops-ui/Utilities/Date";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
+import { IKubeService } from "../../Contracts/Contracts";
+import { BaseKubeTable } from "../Common/BaseKubeTable";
+import { KubeZeroData } from "../Common/KubeZeroData";
+import { ResourceStatus } from "../Common/ResourceStatus";
+import { ServicesEvents } from "../Constants";
+import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
+import { StoreManager } from "../FluxCommon/StoreManager";
+import { PodDetailsView } from "../Pods/PodDetailsView";
+import { PodsActionsCreator } from "../Pods/PodsActionsCreator";
+import { PodsTable } from "../Pods/PodsTable";
 import * as Resources from "../Resources";
 import { IServiceItem, IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
 import "./ServiceDetailsView.scss";
-import { V1Pod } from "@kubernetes/client-node";
-import { PodsTable } from "../Pods/PodsTable";
-import { PodDetailsView } from "../Pods/PodDetailsView";
-import { KubeZeroData } from "../Common/KubeZeroData";
-import { ResourceStatus } from "../Common/ResourceStatus";
-import { IKubeService } from "../../Contracts/Contracts";
-import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
-import { StoreManager } from "../FluxCommon/StoreManager";
-import { SelectionStore } from "../Selection/SelectionStore";
-import { SelectionActions } from "../Selection/SelectionActions";
-import { ActionsHubManager } from "../FluxCommon/ActionsHubManager";
-import { PodsActionsCreator } from "../Pods/PodsActionsCreator";
-import { ServicesEvents } from "../Constants";
 import { ServicesStore } from "./ServicesStore";
-import { BaseKubeTable } from "../Common/BaseKubeTable";
-import { IStatusProps, Statuses, StatusSize } from "azure-devops-ui/Status";
 
 export interface IServiceDetailsViewProperties extends IVssComponentProperties {
     kubeService: IKubeService;
