@@ -1,14 +1,11 @@
 @import "../Common/Common.scss";
 
 .pod-overview-key {
-    padding-left: 20px;
-    line-height: 30px;
+    padding-left: 8px;
+    color: $secondary-text;
 }
 
-.pod-overview-value {
-    line-height: 30px;
-}
-
-.kube-list-content .bolt-card-header {
+.kube-list-content .bolt-header.bolt-card-header {
     padding-left: 28px; // 20px padding in content and 8px width of bolt-table-cell-compact added by default in Tables
+    padding-bottom: 0px;
 }

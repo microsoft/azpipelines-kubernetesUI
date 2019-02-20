@@ -138,7 +138,7 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
                         showHeader={false}
                         singleClickActivation={false}
                         itemProvider={tableItems}
-                        pageSize={tableItems.getCount()}
+                        pageSize={tableItems.length}
                         columns={WorkloadDetails._getColumns()}
                     />
                 </div>
@@ -177,7 +177,7 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
             itemToRender = BaseKubeTable.defaultColumnRenderer(Resources.ImageText, "w-details-cell-header");
         }
         else {
-            itemToRender = <div className="kube-simple-cell">
+            itemToRender = <div className="w-details-cell-value">
                 {Utils.getPodImageName(tableItem.podTemplate)}
             </div>;
         }
@@ -193,8 +193,9 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
         else {
             itemToRender = (
                 <LabelGroup
+                    className="w-details-cell-value"
                     labelProps={Utils.getUILabelModelArray(tableItem.parentMetaData.labels || {})}
-                    wrappingBehavior={WrappingBehavior.FreeFlow}
+                    wrappingBehavior={WrappingBehavior.freeFlow}
                     fadeOutOverflow={true}
                 />);
         }

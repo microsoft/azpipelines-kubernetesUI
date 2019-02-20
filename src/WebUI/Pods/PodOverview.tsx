@@ -63,7 +63,8 @@ export class PodOverview extends BaseComponent<IPodOverviewProps> {
                 titleProps={{
                 text: Resources.PodDetailsHeader,
                 size: TitleSize.Large
-            }}>
+            }}
+contentProps={{ contentPadding: false }}>
                 <Table
                     className="s-full-details"
                     id={format("s-full-details-{0}", pod.metadata.uid)}
