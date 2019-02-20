@@ -4,7 +4,7 @@
 */
 
 import { V1ReplicaSet, V1Pod, V1DaemonSet, V1StatefulSet, V1PodTemplateSpec, V1ObjectMeta } from "@kubernetes/client-node";
-import { BaseComponent, format } from "@uifabric/utilities";
+import { BaseComponent } from "@uifabric/utilities";
 import * as React from "react";
 import { IKubeService } from "../../Contracts/Contracts";
 import * as Resources from "../Resources";
@@ -16,7 +16,7 @@ import { KubeZeroData } from "./KubeZeroData";
 import { Filter, IFilterState, FILTER_CHANGE_EVENT, IFilterItemState } from "azure-devops-ui/Utilities/Filter";
 import { Tab, TabBar, TabContent } from "azure-devops-ui/Tabs";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
-import { HeaderCommandBarWithFilter } from 'azure-devops-ui/HeaderCommandBar';
+import { HeaderCommandBarWithFilter } from "azure-devops-ui/HeaderCommandBar";
 import { SelectedItemKeys } from "../Constants";
 import { PodDetailsView } from "../Pods/PodDetailsView";
 import { SelectionStore } from "../Selection/SelectionStore";
@@ -31,6 +31,7 @@ import { WorkloadsEvents, ServicesEvents } from "../Constants";
 import { ConditionalChildren } from "azure-devops-ui/ConditionalChildren";
 import { Surface, SurfaceBackground } from "azure-devops-ui/Surface";
 import { Page } from "azure-devops-ui/Page"
+import { format } from "azure-devops-ui/Core/Util/String";
 
 const workloadsPivotItemKey: string = "workloads";
 const servicesPivotItemKey: string = "services";

@@ -4,11 +4,10 @@
 */
 
 import { V1ObjectMeta, V1PodStatus, V1PodTemplateSpec, V1Container } from "@kubernetes/client-node";
-import { format } from "@uifabric/utilities/lib";
 import { ObservableArray } from "azure-devops-ui/Core/Observable";
 import { ILabelModel } from "azure-devops-ui/Label";
 import { IStatusProps, Statuses } from "azure-devops-ui/Status";
-import { localeFormat } from "azure-devops-ui/Core/Util/String";
+import { localeFormat, format } from "azure-devops-ui/Core/Util/String";
 
 const pipelineNameAnnotationKey: string = "pipeline-name";
 const pipelineIdAnnotationKey: string = "pipeline-id";

@@ -163,7 +163,7 @@ export class ServiceDetailsView extends BaseComponent<IServiceDetailsViewPropert
     private _getServiceDetails(): JSX.Element | null {
         const item = this.props.service;
         if (item && item.service) {
-            const tableItems: IServiceItem[] = [{ package: '', type:'', clusterIP:'', externalIP:'', port:'', creationTimestamp: new Date(), uid:'', pipeline:''}, item];
+            const tableItems: IServiceItem[] = [{ package: "", type:"", clusterIP:"", externalIP:"", port:"", creationTimestamp: new Date(), uid:"", pipeline:""}, item];
             const agoTime = Date_Utils.ago(new Date(item.creationTimestamp), Date_Utils.AgoFormat.Compact);
             return (
                 <BaseKubeTable

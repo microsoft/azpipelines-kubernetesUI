@@ -4,7 +4,7 @@
 */
 
 import { V1Service, V1ServiceList, V1ServicePort } from "@kubernetes/client-node";
-import { BaseComponent, css, format } from "@uifabric/utilities";
+import { BaseComponent, css } from "@uifabric/utilities";
 import { Ago } from "azure-devops-ui/Ago";
 import * as React from "react";
 import * as Resources from "../Resources";
@@ -21,6 +21,7 @@ import { SelectionActions } from "../Selection/SelectionActions";
 import {  SelectedItemKeys } from "../Constants";
 import { ServicesStore } from "./ServicesStore";
 import { ServicesActionsCreator } from "./ServicesActionsCreator";
+import { format } from "azure-devops-ui/Core/Util/String";
 
 const packageKey: string = "package-col";
 const typeKey: string = "type-col";

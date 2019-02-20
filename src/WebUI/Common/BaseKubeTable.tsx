@@ -43,7 +43,7 @@ export class BaseKubeTable<T> extends BaseComponent<ITableComponentProperties<T>
                         <HeaderTitleArea>
                             <HeaderTitleRow className="kube-flex-row">
                                 {
-                                    (typeof this.props.headingText === 'string') ?
+                                    (typeof this.props.headingText === "string") ?
                                         <HeaderTitle className="text-ellipsis" titleSize={TitleSize.Medium} >
                                             {this.props.headingText}
                                         </HeaderTitle> :

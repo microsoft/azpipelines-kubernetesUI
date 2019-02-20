@@ -3,13 +3,12 @@
     Licensed under the MIT license.
 */
 
-import { V1ServiceList, V1Service } from "@kubernetes/client-node";
-import { BaseComponent, format } from "@uifabric/utilities";
+import { V1ServiceList } from "@kubernetes/client-node";
+import { BaseComponent } from "@uifabric/utilities";
 import * as React from "react";
 import { IKubeService } from "../../Contracts/Contracts";
 import * as Resources from "../Resources";
-import { IVssComponentProperties, IServiceItem } from "../Types";
-import { Utils } from "../Utils";
+import { IVssComponentProperties } from "../Types";
 import "../Common/KubeSummary.scss";
 import { ServicesTable } from "../Services/ServicesTable";
 import { KubeZeroData } from "../Common//KubeZeroData";

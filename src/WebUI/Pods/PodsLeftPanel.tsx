@@ -4,7 +4,7 @@
 */
 
 import { V1Pod, V1ObjectMeta, V1PodTemplateSpec } from "@kubernetes/client-node";
-import { autobind, BaseComponent, css, format } from "@uifabric/utilities";
+import { autobind, BaseComponent, css } from "@uifabric/utilities";
 import { Duration } from "azure-devops-ui/Duration";
 import { LabelGroup, WrappingBehavior } from "azure-devops-ui/Label";
 import { IStatusProps, Status, Statuses, StatusSize } from "azure-devops-ui/Status";
@@ -20,6 +20,7 @@ import { Card } from "azure-devops-ui/Card";
 import { TitleSize } from "azure-devops-ui/Header";
 import "./PodsLeftPanel.scss";
 import { ResourceStatus } from "../Common/ResourceStatus";
+import { format } from "azure-devops-ui/Core/Util/String";
 
 const podStatusDic: { [index: string]: IStatusProps } = {
     "Running": Statuses.Success,

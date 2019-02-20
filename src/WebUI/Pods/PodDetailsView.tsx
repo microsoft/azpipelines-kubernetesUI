@@ -4,7 +4,7 @@
 */
 
 import { V1Pod } from "@kubernetes/client-node";
-import { BaseComponent, format } from "@uifabric/utilities";
+import { BaseComponent } from "@uifabric/utilities";
 import { Duration } from "azure-devops-ui/Duration";
 import { LabelGroup, WrappingBehavior } from "azure-devops-ui/Label";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
@@ -17,6 +17,7 @@ import { Card } from "azure-devops-ui/Card";
 import "../Services/ServiceDetailsView.scss";
 import { IPodRightPanelProps } from "./PodsRightPanel";
 import { TitleSize } from "azure-devops-ui/Header";
+import { format } from "azure-devops-ui/Core/Util/String";
 
 export interface IPodDetailsProps extends IPodRightPanelProps { }
 

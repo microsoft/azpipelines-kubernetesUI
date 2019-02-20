@@ -4,7 +4,7 @@
 */
 
 import { V1Deployment, V1DeploymentList, V1ObjectMeta, V1ReplicaSet, V1ReplicaSetList } from "@kubernetes/client-node";
-import { BaseComponent, css, format } from "@uifabric/utilities";
+import { BaseComponent, css } from "@uifabric/utilities";
 import { IStatusProps, Statuses } from "azure-devops-ui/Status";
 import * as React from "react";
 import * as Resources from "../Resources";
@@ -27,6 +27,7 @@ import { SelectionStore } from "../Selection/SelectionStore";
 import { SelectionActions } from "../Selection/SelectionActions";
 import { ActionsHubManager } from "../FluxCommon/ActionsHubManager";
 import { Link } from "azure-devops-ui/Link";
+import { format } from "azure-devops-ui/Core/Util/String";
 
 const replicaSetNameKey: string = "replicaSet-col";
 const podsKey: string = "pods-col";

@@ -1,11 +1,11 @@
 import * as React from "react";
-import { ZeroData } from 'azure-devops-ui/ZeroData';
-import { Card } from 'azure-devops-ui/Card';
-import { IVssComponentProperties } from '../Types';
+import { ZeroData } from "azure-devops-ui/ZeroData";
+import { Card } from "azure-devops-ui/Card";
+import { IVssComponentProperties } from "../Types";
 import { BaseComponent, css } from "@uifabric/utilities/lib";
-import { Link } from 'azure-devops-ui/Link';
-import './Common.scss';
-import './BaseKubeTable.scss'
+import { Link } from "azure-devops-ui/Link";
+import "./Common.scss";
+import "./BaseKubeTable.scss"
 
 export interface IKubeZeroDataProps extends IVssComponentProperties {
     title?: string,

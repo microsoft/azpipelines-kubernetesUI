@@ -1,5 +1,5 @@
 import { V1StatefulSet, V1DaemonSet, V1ReplicaSet } from "@kubernetes/client-node";
-import { BaseComponent, css, format } from "@uifabric/utilities";
+import { BaseComponent, css } from "@uifabric/utilities";
 import { IStatusProps } from "azure-devops-ui/Status";
 import * as React from "react";
 import * as Resources from "../Resources";
@@ -19,8 +19,9 @@ import { WorkloadsEvents, SelectedItemKeys } from "../Constants";
 import { SelectionStore } from "../Selection/SelectionStore";
 import { SelectionActions } from "../Selection/SelectionActions";
 import { ActionsHubManager } from "../FluxCommon/ActionsHubManager";
-import { KubeResourceType } from '../../Contracts/KubeServiceBase';
+import { KubeResourceType } from "../../Contracts/KubeServiceBase";
 import { Link } from "azure-devops-ui/Link";
+import { format } from "azure-devops-ui/Core/Util/String";
 
 const setNameKey = "otherwrkld-name-key";
 const imageKey = "otherwrkld-image-key";

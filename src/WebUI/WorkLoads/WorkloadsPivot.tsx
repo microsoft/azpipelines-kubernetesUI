@@ -3,7 +3,7 @@
     Licensed under the MIT license.
 */
 
-import { BaseComponent, format } from "@uifabric/utilities";
+import { BaseComponent } from "@uifabric/utilities";
 import * as React from "react";
 import { IKubeService } from "../../Contracts/Contracts";
 import * as Resources from "../Resources";
@@ -24,6 +24,7 @@ import { StoreManager } from "../FluxCommon/StoreManager";
 import { WorkloadsEvents } from "../Constants";
 import { PodsStore } from "../Pods/PodsStore";
 import { NameKey, TypeKey } from "../Common/KubeFilterBar";
+import { format } from "azure-devops-ui/Core/Util/String";
 
 export interface IWorkloadsPivotState {
     workloadResourceSize: number;
