@@ -18,21 +18,21 @@ import { ResourceStatus } from "../Common/ResourceStatus";
 import { ServicesEvents } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
-import { PodDetailsView } from "../Pods/PodDetailsView";
+import { PodsDetails  } from "../Pods/PodsDetails ";
 import { PodsActionsCreator } from "../Pods/PodsActionsCreator";
 import { PodsTable } from "../Pods/PodsTable";
 import * as Resources from "../Resources";
 import { IServiceItem, IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
-import "./ServiceDetailsView.scss";
+import "./ServiceDetails.scss";
 import { ServicesStore } from "./ServicesStore";
 
-export interface IServiceDetailsViewProperties extends IVssComponentProperties {
+export interface IServiceDetailsProperties extends IVssComponentProperties {
     kubeService: IKubeService;
     service: IServiceItem;
 }
 
-export interface IServiceDetailsViewState {
+export interface IServiceDetailsState {
     pods: Array<V1Pod>;
     selectedPod: V1Pod | null;
     showSelectedPod: boolean;
@@ -40,8 +40,8 @@ export interface IServiceDetailsViewState {
 
 const LoadBalancerText: string = "LoadBalancer";
 
-export class ServiceDetailsView extends BaseComponent<IServiceDetailsViewProperties, IServiceDetailsViewState> {
-    constructor(props: IServiceDetailsViewProperties) {
+export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, IServiceDetailsState> {
+    constructor(props: IServiceDetailsProperties) {
         super(props, {});
         this.state = {
             pods: [],
@@ -60,8 +60,11 @@ export class ServiceDetailsView extends BaseComponent<IServiceDetailsViewPropert
 
     public render(): JSX.Element {
         if (this.state.selectedPod && this.state.showSelectedPod) {
-            return (<PodDetailsView
-                pod={this.state.selectedPod}
+            const service = this.props.service && this.props.service.service;
+            const serviceName = service && service.metadata ? service.metadata.name : "";
+            return (<PodsDetails
+                pods={this.state.pods}
+                parentName={serviceName}
             />);
         }
 
@@ -106,7 +109,7 @@ export class ServiceDetailsView extends BaseComponent<IServiceDetailsViewPropert
                 width: -100,
                 className: "s-key",
                 minWidth: 80,   
-                renderCell: ServiceDetailsView._renderTextCell
+                renderCell: ServiceDetails._renderTextCell
             },
             {
                 id: "clusterIp",
@@ -114,7 +117,7 @@ export class ServiceDetailsView extends BaseComponent<IServiceDetailsViewPropert
                 width: -100,
                 className: "s-key",
                 minWidth: 80,
-                renderCell: ServiceDetailsView._renderTextCell
+                renderCell: ServiceDetails._renderTextCell
             },
             {
                 id: "externalIp",
@@ -122,7 +125,7 @@ export class ServiceDetailsView extends BaseComponent<IServiceDetailsViewPropert
                 width: -100,
                 className: "s-key",
                 minWidth: 80,
-                renderCell: ServiceDetailsView._renderTextCell
+                renderCell: ServiceDetails._renderTextCell
             },
             {
                 id: "port",
@@ -130,7 +133,7 @@ export class ServiceDetailsView extends BaseComponent<IServiceDetailsViewPropert
                 width: -100,
                 className: "s-key",
                 minWidth: 80,
-                renderCell: ServiceDetailsView._renderTextCell
+                renderCell: ServiceDetails._renderTextCell
             },
             {
                 id: "sessAffinity",
@@ -138,7 +141,7 @@ export class ServiceDetailsView extends BaseComponent<IServiceDetailsViewPropert
                 width: -100,
                 className: "s-key",
                 minWidth: 80,
-                renderCell: ServiceDetailsView._renderTextCell
+                renderCell: ServiceDetails._renderTextCell
             },
             {
                 id: "selector",
@@ -154,7 +157,7 @@ export class ServiceDetailsView extends BaseComponent<IServiceDetailsViewPropert
                 width: -100,
                 className: "s-key",
                 minWidth: 200,
-                renderCell: ServiceDetailsView._renderLabelGroups
+                renderCell: ServiceDetails._renderLabelGroups
             }
         ];
         return columns;
@@ -201,7 +204,7 @@ export class ServiceDetailsView extends BaseComponent<IServiceDetailsViewPropert
                 podsToRender={this.state.pods}
                 headingText={Resources.AssociatedPodsText}
                 onItemActivated={this._onSelectedPodInvoked}
-                showWorkloads={true}
+                showWorkloadsColumn={true}
             />
         );
     }

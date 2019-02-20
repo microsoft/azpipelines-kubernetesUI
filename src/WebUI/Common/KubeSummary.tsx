@@ -18,19 +18,20 @@ import { IKubeService } from "../../Contracts/Contracts";
 import { SelectedItemKeys, ServicesEvents, WorkloadsEvents } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
-import { PodDetailsView } from "../Pods/PodDetailsView";
+import { PodOverview } from "../Pods/PodOverview";
 import * as Resources from "../Resources";
 import { SelectionStore } from "../Selection/SelectionStore";
-import { ServiceDetailsView } from "../Services/ServiceDetailsView";
+import { ServiceDetails  } from "../Services/ServiceDetails ";
 import { ServicesPivot } from "../Services/ServicesPivot";
 import { ServicesStore } from "../Services/ServicesStore";
 import { IServiceItem, IVssComponentProperties } from "../Types";
-import { WorkloadPodsView } from "../Workloads/WorkloadPodsView";
+import { WorkloadDetails  } from "../Workloads/WorkloadDetails ";
 import { WorkloadsActionsCreator } from "../Workloads/WorkloadsActionsCreator";
 import { WorkloadsPivot } from "../Workloads/WorkloadsPivot";
 import { WorkloadsStore } from "../Workloads/WorkloadsStore";
 import "./KubeSummary.scss";
 import { KubeZeroData } from "./KubeZeroData";
+import { Utils } from "../Utils";
 
 const workloadsPivotItemKey: string = "workloads";
 const servicesPivotItemKey: string = "services";
@@ -98,7 +99,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
     public render(): React.ReactNode {
         return (
             <Surface background={SurfaceBackground.neutral}>
-                <Page className={"kubernetes-container"}>
+                <Page className={"kubernetes-container flex flex-grow"}>
                     {
                         this.state.showSelectedItem ?
                             this._getSelectedItemPodsView() :
@@ -191,11 +192,14 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         return null;
     }
 
-    private _getWorkoadPodsViewComponent(parentMetaData: V1ObjectMeta, podTemplate: V1PodTemplateSpec, parentKind: string): JSX.Element | null {
-        return (<WorkloadPodsView
+    private _getWorkoadPodsViewComponent(parentMetaData: V1ObjectMeta, podTemplate: V1PodTemplateSpec, parentKind: string, currentScheduledPods: number, desiredPods: number): JSX.Element | null {
+        const statusProps = Utils._getPodsStatusProps(currentScheduledPods, desiredPods);
+
+        return (<WorkloadDetails
             parentMetaData={parentMetaData}
             podTemplate={podTemplate}
-            parentKind={parentKind} />);
+            parentKind={parentKind}
+            statusProps={statusProps} />);
     }
 
     private _onSelectionStoreChanged = () => {
@@ -208,11 +212,11 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
     }
 
     private _setSelectedKeyPodsViewMap() {
-        this._selectedItemViewMap[SelectedItemKeys.StatefulSetKey] = (item) => this._getWorkoadPodsViewComponent(item.metadata, item.spec && item.spec.template, item.kind || "StatefulSet");
-        this._selectedItemViewMap[SelectedItemKeys.ServiceItemKey] = (item) => { return <ServiceDetailsView kubeService={this.props.kubeService} service={item} /> };
-        this._selectedItemViewMap[SelectedItemKeys.DaemonSetKey] = (item) => this._getWorkoadPodsViewComponent(item.metadata, item.spec && item.spec.template, item.kind || "DaemonSet");
-        this._selectedItemViewMap[SelectedItemKeys.OrphanPodKey] = (item) => { return <PodDetailsView pod={item} />; }
-        this._selectedItemViewMap[SelectedItemKeys.ReplicaSetKey] = (item) => this._getWorkoadPodsViewComponent(item.metadata, item.spec && item.spec.template, item.kind || "ReplicaSet");
+        this._selectedItemViewMap[SelectedItemKeys.StatefulSetKey] = (item) => this._getWorkoadPodsViewComponent(item.metadata, item.spec && item.spec.template, item.kind || "StatefulSet", item.status.currentReplicas, item.status.replicas);
+        this._selectedItemViewMap[SelectedItemKeys.ServiceItemKey] = (item) => { return <ServiceDetails kubeService={this.props.kubeService} service={item} /> };
+        this._selectedItemViewMap[SelectedItemKeys.DaemonSetKey] = (item) => this._getWorkoadPodsViewComponent(item.metadata, item.spec && item.spec.template, item.kind || "DaemonSet", item.status.currentNumberScheduled, item.status.desiredNumberScheduled);
+        this._selectedItemViewMap[SelectedItemKeys.OrphanPodKey] = (item) => { return <PodOverview pod={item} />; }
+        this._selectedItemViewMap[SelectedItemKeys.ReplicaSetKey] = (item) => this._getWorkoadPodsViewComponent(item.metadata, item.spec && item.spec.template, item.kind || "ReplicaSet", item.status.availableReplicas, item.status.replicas);
     }
 
     private _getFiterHeaderBar(): JSX.Element {

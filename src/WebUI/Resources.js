@@ -28,7 +28,7 @@ define("Environments/Providers/Kubernetes/Resources", ["require", "exports"], fu
     exports.Deployment = "Deployment: {0}";
     exports.ReplicaSet = "ReplicaSet: {0}";
     exports.ServiceCreatedText = "Created {0} by {1}"
-    exports.DetailsText = "Details";
+    exports.OverviewText = "Overview";
     exports.LabelsText = "Labels";
     exports.SelectorText = "Selector";
     exports.SessionAffinityText = "Session affinity";
@@ -49,7 +49,7 @@ define("Environments/Providers/Kubernetes/Resources", ["require", "exports"], fu
     exports.FindByNameText = "Find by {0} name";
     exports.KindText = "Kind";
     exports.NoItemsText = "No Items found"
-    exports.SummaryText = "Summary";
+    exports.PodDetailsHeader = "Pod details";
     exports.KindText = "Kind";
     exports.AnnotationsText = "Annotations";
     exports.RestartPolicyText = "Restart policy";
@@ -64,4 +64,6 @@ define("Environments/Providers/Kubernetes/Resources", ["require", "exports"], fu
     exports.CreatedAgo = "Created {0}";
     exports.ServiceDetails = "Service details";
     exports.WorkloadText = "Workload";
+    exports.WorkloadDetails = "{0} details";
+    exports.PodStatusPending = "Pending"
 });

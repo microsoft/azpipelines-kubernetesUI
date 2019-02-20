@@ -3,3 +3,17 @@
 .pl-details {
     margin-top: 10px
 }
+
+.pods-table {
+    .bolt-table-header-cell .bolt-table-header-cell-content {
+        padding-left: 4px;
+    }
+
+    .pods-table-cell {
+        padding-left: 4px;
+    }
+
+    .pods-table-subtext {
+        font-weight: $fontWeightSemiBold;
+    }
+}

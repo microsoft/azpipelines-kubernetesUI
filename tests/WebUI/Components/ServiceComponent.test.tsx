@@ -3,14 +3,14 @@ import * as String_Utils from "azure-devops-ui/Core/Util/String";
 import * as Date_Utils from "azure-devops-ui/Utilities/Date";
 import * as React from "react";
 
-import { ServiceDetailsView } from "../../../src/WebUI/Services/ServiceDetailsView";
+import { ServiceDetails } from "../../../src/WebUI/Services/ServiceDetails";
 import * as Resources from "../../../src/WebUI/Resources";
 import { IServiceItem } from "../../../src/WebUI/Types";
 import { mount, shallow } from "../../TestCore";
 import { IKubeService } from "../../../src/Contracts/Contracts";
 import { KubeServiceBase, KubeResourceType } from "../../../src/Contracts/KubeServiceBase";
 
-describe("ServiceDetailsView component tests", () => {
+describe("ServiceDetails component tests", () => {
 
     const name = "some package name" + String_Utils.newGuid();
     const uid = "f32f9f29-ebed-11e8-ac56-829606b05f65";
@@ -75,7 +75,7 @@ describe("ServiceDetailsView component tests", () => {
     const kubeService = new MockKubeService();
 
     it("Check header of the component", () => {
-        const wrapper = shallow(<ServiceDetailsView service={item} kubeService={kubeService} />);
+        const wrapper = shallow(<ServiceDetails service={item} kubeService={kubeService} />);
         const agoText = Date_Utils.ago(new Date(item.creationTimestamp), Date_Utils.AgoFormat.Compact);
         const headingClass = ".service-main-content .content-main-heading";
 
@@ -102,7 +102,7 @@ describe("ServiceDetailsView component tests", () => {
 
     it("Check header when no service is available", () => {
         const itemLocal = { ...item, service: null };
-        const wrapper = shallow(<ServiceDetailsView service={itemLocal} kubeService={kubeService} />);
+        const wrapper = shallow(<ServiceDetails service={itemLocal} kubeService={kubeService} />);
         const headingClass = ".service-main-content .content-main-heading";
 
         // check header --> should exist
@@ -115,7 +115,7 @@ describe("ServiceDetailsView component tests", () => {
     });
 
     it("Check service component after mount", () => {
-        const wrapper = mount(<ServiceDetailsView service={item} kubeService={kubeService} />);
+        const wrapper = mount(<ServiceDetails service={item} kubeService={kubeService} />);
         const sTableKeys = wrapper.find(".kube-list-content");
         expect(!!sTableKeys && sTableKeys.length > 0).toBeTruthy();
     });

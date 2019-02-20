@@ -11,7 +11,7 @@ import * as Resources from "../Resources";
 import { PodsRightPanelTabsKeys } from "../Constants";
 import { IVssComponentProperties } from "../Types";
 import "./PodsRightPanel.scss";
-import { PodDetailsView } from "./PodDetailsView";
+import { PodOverview } from "./PodOverview";
 
 export interface IPodRightPanelProps extends IVssComponentProperties {
     pod: V1Pod;
@@ -32,6 +32,7 @@ export class PodsRightPanel extends BaseComponent<IPodRightPanelProps, IPodsRigh
     public render(): JSX.Element {
         return (
             <div className="pods-right-panel-container">
+                {this._getHeader()}
                 <TabBar
                     className={"pods-right-tab-bar"}
                     selectedTabId={this.state.selectedTab || PodsRightPanelTabsKeys.PodsDetailsKey}
@@ -40,7 +41,7 @@ export class PodsRightPanel extends BaseComponent<IPodRightPanelProps, IPodsRigh
                 >
 
                     <Tab
-                        name={Resources.DetailsText}
+                        name={Resources.OverviewText}
                         id={PodsRightPanelTabsKeys.PodsDetailsKey}
                     />
 
@@ -62,6 +63,10 @@ export class PodsRightPanel extends BaseComponent<IPodRightPanelProps, IPodsRigh
         );
     }
 
+    private _getHeader(): JSX.Element | null {
+        return (<h2 className="pod-right-panel-header">{(this.props.pod.metadata && this.props.pod.metadata.name) || ""}</h2>);
+    }
+
     private _onSelectedTabChanged = (selectedTab: string): void => {
         this.setState({
             selectedTab: selectedTab
@@ -79,7 +84,7 @@ export class PodsRightPanel extends BaseComponent<IPodRightPanelProps, IPodsRigh
                 <span>{"Pods YAML View coming soon..."}</span>
             );
 
-            default: return (<PodDetailsView
+            default: return (<PodOverview
                 pod={this.props.pod}
             />);
 

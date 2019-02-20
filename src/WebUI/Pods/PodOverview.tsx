@@ -14,51 +14,54 @@ import { ColumnFill, ITableColumn, renderSimpleCell, SimpleTableCell as renderTa
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
 import * as Resources from "../Resources";
-import "../Services/ServiceDetailsView.scss";
 import { Utils } from "../Utils";
+import { ColumnFill, ITableColumn, renderSimpleCell, SimpleTableCell as renderTableCell, Table } from "azure-devops-ui/Table";
+import { Card } from "azure-devops-ui/Card";
+import "./PodOverview.scss";
 import { IPodRightPanelProps } from "./PodsRightPanel";
 import { TitleSize } from "azure-devops-ui/Header";
 
-export interface IPodDetailsProps extends IPodRightPanelProps { }
+export interface IPodOverviewProps extends IPodRightPanelProps { }
 
-export class PodDetailsView extends BaseComponent<IPodDetailsProps> {
+export class PodOverview extends BaseComponent<IPodOverviewProps> {
     public render(): JSX.Element {
         const pod: V1Pod = this.props.pod;
         const columns: ITableColumn<any>[] = [
             {
                 id: "key",
                 name: "key",
-                width: new ObservableValue(200),
-                className: "s-key",
-                minWidth: 180,
+                width: new ObservableValue(150),
+                className: "pod-overview-key",
+                minWidth: 100,
                 renderCell: renderSimpleCell
             },
             {
                 id: "value",
                 name: "value",
                 width: new ObservableValue(500),
-                className: "s-value",
+                className: "pod-overview-value",
                 minWidth: 400,
-                renderCell: PodDetailsView._renderValueCell
+                renderCell: PodOverview._renderValueCell
             },
             ColumnFill
         ];
+
+        const image: string = pod.spec && pod.spec.containers && pod.spec.containers.length > 0 ? pod.spec.containers[0].image : "";
         const tableItems = new ArrayItemProvider<any>([
-            { key: Resources.NameText, value: pod.metadata.name },
-            { key: Resources.KindText, value: Resources.PodsDetailsText },
             { key: Resources.Created, value: pod.metadata.creationTimestamp ? new Date(pod.metadata.creationTimestamp) : new Date().getTime() },
-            { key: Resources.LabelsText, value: pod.metadata.labels || {} },
             { key: Resources.AnnotationsText, value: pod.metadata.annotations || {} },
             { key: Resources.RestartPolicyText, value: pod.spec.restartPolicy || "" },
             { key: Resources.QoSClassText, value: pod.status.qosClass || "" },
             { key: Resources.NodeText, value: pod.spec.nodeName || "" },
-            { key: Resources.ClusterIPText, value: "" }
+            { key: Resources.ClusterIPText, value: "" },
+            { key: Resources.ImageText, value: image },
+            { key: Resources.LabelsText, value: pod.metadata.labels || {} }
         ]);
 
         return (
             <Card className="kube-list-content s-details depth-16"
                 titleProps={{
-                text: Resources.SummaryText,
+                text: Resources.PodDetailsHeader,
                 size: TitleSize.Large
             }}>
                 <Table

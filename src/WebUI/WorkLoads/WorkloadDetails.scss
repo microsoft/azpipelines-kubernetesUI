@@ -1,0 +1,30 @@
+@import "../Common/Common.scss";
+
+.workload-details-column-header {
+    font-size: 14px;
+}
+
+.workload-details-primary-text {
+    font-size: 16px;
+    font-weight: $fontWeightSemiBold;
+    padding-left: 12px;
+}
+
+.workload-details-secondary-text {
+    padding-left: 12px;
+    color: $secondary-text;
+    font-weight: $fontWeightSemiBold;
+}
+
+.w-key {
+    padding-left: 4px;
+}
+
+.w-details {
+    margin-top: 10px;
+
+    .w-details-cell-header {
+        font-weight: $fontWeightSemiBold;
+        color: $secondary-text;
+    }
+}
