@@ -3,35 +3,34 @@
     Licensed under the MIT license.
 */
 
-import { V1ReplicaSet, V1Pod, V1DaemonSet, V1StatefulSet, V1PodTemplateSpec, V1ObjectMeta } from "@kubernetes/client-node";
+import { V1DaemonSet, V1ObjectMeta, V1Pod, V1PodTemplateSpec, V1ReplicaSet, V1StatefulSet } from "@kubernetes/client-node";
 import { BaseComponent } from "@uifabric/utilities";
-import * as React from "react";
-import { IKubeService } from "../../Contracts/Contracts";
-import * as Resources from "../Resources";
-import { IVssComponentProperties, IServiceItem } from "../Types";
-import "./KubeSummary.scss";
-import { WorkloadPodsView } from "../Workloads/WorkloadPodsView";
-import { ServiceDetailsView } from "../Services/ServiceDetailsView";
-import { KubeZeroData } from "./KubeZeroData";
-import { Filter, IFilterState, FILTER_CHANGE_EVENT, IFilterItemState } from "azure-devops-ui/Utilities/Filter";
-import { Tab, TabBar, TabContent } from "azure-devops-ui/Tabs";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
+import { localeFormat } from "azure-devops-ui/Core/Util/String";
 import { HeaderCommandBarWithFilter } from "azure-devops-ui/HeaderCommandBar";
-import { SelectedItemKeys } from "../Constants";
-import { PodDetailsView } from "../Pods/PodDetailsView";
-import { SelectionStore } from "../Selection/SelectionStore";
-import { StoreManager } from "../FluxCommon/StoreManager";
-import { WorkloadsActionsCreator } from "../Workloads/WorkloadsActionsCreator";
-import { WorkloadsPivot } from "../Workloads/WorkloadsPivot";
-import { WorkloadsStore } from "../Workloads/WorkloadsStore";
-import { ServicesStore } from "../Services/ServicesStore";
-import { ServicesPivot } from "../Services/ServicesPivot";
-import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
-import { WorkloadsEvents, ServicesEvents } from "../Constants";
+import { Tab, TabBar, TabContent } from "azure-devops-ui/Tabs";
 import { ConditionalChildren } from "azure-devops-ui/ConditionalChildren";
 import { Surface, SurfaceBackground } from "azure-devops-ui/Surface";
 import { Page } from "azure-devops-ui/Page"
-import { format } from "azure-devops-ui/Core/Util/String";
+import { Filter, FILTER_CHANGE_EVENT, IFilterState } from "azure-devops-ui/Utilities/Filter";
+import * as React from "react";
+import { IKubeService } from "../../Contracts/Contracts";
+import { SelectedItemKeys, ServicesEvents, WorkloadsEvents } from "../Constants";
+import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
+import { StoreManager } from "../FluxCommon/StoreManager";
+import { PodDetailsView } from "../Pods/PodDetailsView";
+import * as Resources from "../Resources";
+import { SelectionStore } from "../Selection/SelectionStore";
+import { ServiceDetailsView } from "../Services/ServiceDetailsView";
+import { ServicesPivot } from "../Services/ServicesPivot";
+import { ServicesStore } from "../Services/ServicesStore";
+import { IServiceItem, IVssComponentProperties } from "../Types";
+import { WorkloadPodsView } from "../Workloads/WorkloadPodsView";
+import { WorkloadsActionsCreator } from "../Workloads/WorkloadsActionsCreator";
+import { WorkloadsPivot } from "../Workloads/WorkloadsPivot";
+import { WorkloadsStore } from "../Workloads/WorkloadsStore";
+import "./KubeSummary.scss";
+import { KubeZeroData } from "./KubeZeroData";
 
 const workloadsPivotItemKey: string = "workloads";
 const servicesPivotItemKey: string = "services";
@@ -158,7 +157,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         return (
             <div className="content-main-heading">
                 <h2 className="title-heading">{this.props.title}</h2>
-                <div className={"sub-heading"}>{format(Resources.NamespaceHeadingText, this.state.namespace || "")}</div>
+                <div className={"sub-heading"}>{localeFormat(Resources.NamespaceHeadingText, this.state.namespace || "")}</div>
             </div>
         );
     }

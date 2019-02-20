@@ -1,20 +1,25 @@
+/*
+    Copyright (c) Microsoft Corporation. All rights reserved.
+    Licensed under the MIT license.
+*/
+
+import { V1Pod } from "@kubernetes/client-node";
 import { BaseComponent, css } from "@uifabric/utilities";
 import { Ago } from "azure-devops-ui/Ago";
-import * as React from "react";
-import * as Resources from "../Resources";
-import { BaseKubeTable } from "../Common/BaseKubeTable";
-import { IVssComponentProperties } from "../Types";
-import "./PodsTable.scss";
-import { V1Pod } from "@kubernetes/client-node";
-import { Utils } from "../Utils";
-import { ITableColumn } from "azure-devops-ui/Table";
-import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
-import { ResourceStatus, IResourceStatusProps } from "../Common/ResourceStatus";
-import { ActionsHubManager } from "../FluxCommon/ActionsHubManager";
-import { SelectionActions } from "../Selection/SelectionActions";
-import { SelectedItemKeys } from "../Constants";
 import { Link } from "azure-devops-ui/Link";
+import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
 import { localeFormat } from "azure-devops-ui/Core/Util/String";
+import { ITableColumn } from "azure-devops-ui/Table";
+import * as React from "react";
+import { BaseKubeTable } from "../Common/BaseKubeTable";
+import { IResourceStatusProps } from "../Common/ResourceStatus";
+import { SelectedItemKeys } from "../Constants";
+import { ActionsHubManager } from "../FluxCommon/ActionsHubManager";
+import * as Resources from "../Resources";
+import { SelectionActions } from "../Selection/SelectionActions";
+import { IVssComponentProperties } from "../Types";
+import { Utils } from "../Utils";
+import "./PodsTable.scss";
 
 const podNameKey: string = "pl-name-key";
 const podWorkloadsKey: string = "pl-wrkld-key";

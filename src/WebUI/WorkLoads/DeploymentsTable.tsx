@@ -5,29 +5,28 @@
 
 import { V1Deployment, V1DeploymentList, V1ObjectMeta, V1ReplicaSet, V1ReplicaSetList } from "@kubernetes/client-node";
 import { BaseComponent, css } from "@uifabric/utilities";
-import { IStatusProps, Statuses } from "azure-devops-ui/Status";
-import * as React from "react";
-import * as Resources from "../Resources";
-import { IDeploymentReplicaSetItem, IVssComponentProperties, IDeploymentReplicaSetMap } from "../Types";
-import "./DeploymentsTable.scss";
-import { BaseKubeTable } from "../Common/BaseKubeTable";
-import { LabelGroup, WrappingBehavior } from "azure-devops-ui/Label";
 import { Ago } from "azure-devops-ui/Ago";
-import { ITableColumn } from "azure-devops-ui/Table";
+import { Link } from "azure-devops-ui/Link"; 
 import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
-import { Utils } from "../Utils";
-import { ResourceStatus } from "../Common/ResourceStatus";
+import { format, localeFormat } from "azure-devops-ui/Core/Util/String";
+import { LabelGroup, WrappingBehavior } from "azure-devops-ui/Label";
+import { IStatusProps, Statuses } from "azure-devops-ui/Status";
+import { ITableColumn } from "azure-devops-ui/Table";
+import * as React from "react";
 import { IKubeService } from "../../Contracts/Contracts";
+import { BaseKubeTable } from "../Common/BaseKubeTable";
+import { ResourceStatus } from "../Common/ResourceStatus";
+import { SelectedItemKeys, WorkloadsEvents } from "../Constants";
+import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
+import { ActionsHubManager } from "../FluxCommon/ActionsHubManager";
+import { StoreManager } from "../FluxCommon/StoreManager";
+import * as Resources from "../Resources";
+import { SelectionActions } from "../Selection/SelectionActions";
+import { IDeploymentReplicaSetItem, IDeploymentReplicaSetMap, IVssComponentProperties } from "../Types";
+import { Utils } from "../Utils";
+import "./DeploymentsTable.scss";
 import { WorkloadsActionsCreator } from "./WorkloadsActionsCreator";
 import { WorkloadsStore } from "./WorkloadsStore";
-import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
-import { StoreManager } from "../FluxCommon/StoreManager";
-import { WorkloadsEvents, SelectedItemKeys } from "../Constants";
-import { SelectionStore } from "../Selection/SelectionStore";
-import { SelectionActions } from "../Selection/SelectionActions";
-import { ActionsHubManager } from "../FluxCommon/ActionsHubManager";
-import { Link } from "azure-devops-ui/Link";
-import { format } from "azure-devops-ui/Core/Util/String";
 
 const replicaSetNameKey: string = "replicaSet-col";
 const podsKey: string = "pods-col";
@@ -173,7 +172,7 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
 
     private static _getPodsText(availableReplicas: number, replicas: number): string {
         if (replicas != null && availableReplicas != null && replicas > 0) {
-            return format("{0}/{1}", availableReplicas, replicas);
+            return localeFormat("{0}/{1}", availableReplicas, replicas);
         }
 
         return "";

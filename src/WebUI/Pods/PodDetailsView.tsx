@@ -5,19 +5,19 @@
 
 import { V1Pod } from "@kubernetes/client-node";
 import { BaseComponent } from "@uifabric/utilities";
+import { Card } from "azure-devops-ui/Card";
+import { ObservableValue } from "azure-devops-ui/Core/Observable";
+import { format } from "azure-devops-ui/Core/Util/String";
 import { Duration } from "azure-devops-ui/Duration";
 import { LabelGroup, WrappingBehavior } from "azure-devops-ui/Label";
-import { ObservableValue } from "azure-devops-ui/Core/Observable";
+import { ColumnFill, ITableColumn, renderSimpleCell, SimpleTableCell as renderTableCell, Table } from "azure-devops-ui/Table";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
 import * as Resources from "../Resources";
-import { Utils } from "../Utils";
-import { ColumnFill, ITableColumn, renderSimpleCell, SimpleTableCell as renderTableCell, Table } from "azure-devops-ui/Table";
-import { Card } from "azure-devops-ui/Card";
 import "../Services/ServiceDetailsView.scss";
+import { Utils } from "../Utils";
 import { IPodRightPanelProps } from "./PodsRightPanel";
 import { TitleSize } from "azure-devops-ui/Header";
-import { format } from "azure-devops-ui/Core/Util/String";
 
 export interface IPodDetailsProps extends IPodRightPanelProps { }
 

@@ -6,25 +6,24 @@
 import { V1Service, V1ServiceList, V1ServicePort } from "@kubernetes/client-node";
 import { BaseComponent, css } from "@uifabric/utilities";
 import { Ago } from "azure-devops-ui/Ago";
-import * as React from "react";
-import * as Resources from "../Resources";
-import { IServiceItem, IVssComponentProperties } from "../Types";
-import { BaseKubeTable } from "../Common/BaseKubeTable";
-import { ITableColumn } from "azure-devops-ui/Table";
 import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
-import "./ServicesTable.scss";
-import { Utils } from "../Utils";
+import { localeFormat } from "azure-devops-ui/Core/Util/String";
 import { IStatusProps, Statuses, StatusSize } from "azure-devops-ui/Status";
+import { ITableColumn } from "azure-devops-ui/Table";
+import * as React from "react";
+import { BaseKubeTable } from "../Common/BaseKubeTable";
 import { IResourceStatusProps } from "../Common/ResourceStatus";
+import { SelectedItemKeys } from "../Constants";
 import { ActionsHubManager } from "../FluxCommon/ActionsHubManager";
+import * as Resources from "../Resources";
 import { SelectionActions } from "../Selection/SelectionActions";
-import {  SelectedItemKeys } from "../Constants";
-import { ServicesStore } from "./ServicesStore";
+import { IServiceItem, IVssComponentProperties } from "../Types";
+import { Utils } from "../Utils";
 import { ServicesActionsCreator } from "./ServicesActionsCreator";
-import { format } from "azure-devops-ui/Core/Util/String";
+import { ServicesStore } from "./ServicesStore";
+import "./ServicesTable.scss";
 
 const packageKey: string = "package-col";
-const typeKey: string = "type-col";
 const clusterIPKey: string = "cluster-ip-col";
 const externalIPKey: string = "external-ip-col";
 const portKey: string = "port-col";
@@ -111,7 +110,7 @@ export class ServicesTable extends BaseComponent<IServicesComponentProperties> {
     private static _formatPortString(servicePort: V1ServicePort): string {
         const nodePort = servicePort.nodePort ? ":" + servicePort.nodePort : "";
         // example: 80:2080/TCP, if nodeport. 80/TCP, if no nodeport
-        return format("{0}{1}/{2}", servicePort.port, nodePort, servicePort.protocol);
+        return localeFormat("{0}{1}/{2}", servicePort.port, nodePort, servicePort.protocol);
     }
 
     private static _getColumns(): ITableColumn<IServiceItem>[] {

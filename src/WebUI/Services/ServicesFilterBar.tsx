@@ -5,13 +5,13 @@
 
 import { V1ServiceList } from "@kubernetes/client-node";
 import { BaseComponent } from "@uifabric/utilities";
+import { ObservableValue } from "azure-devops-ui/Core/Observable";
+import { Filter } from "azure-devops-ui/Utilities/Filter";
 import * as React from "react";
+import { KubeFilterBar } from "../Common/KubeFilterBar";
+import "../Common/KubeSummary.scss";
 import * as Resources from "../Resources";
 import { IVssComponentProperties } from "../Types";
-import "../Common/KubeSummary.scss";
-import { Filter } from "azure-devops-ui/Utilities/Filter";
-import { KubeFilterBar } from "../Common/KubeFilterBar";
-import { ObservableValue } from "azure-devops-ui/Core/Observable";
 
 export interface IWorkloadsFilterBarProps extends IVssComponentProperties {
     filter: Filter;

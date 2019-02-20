@@ -3,24 +3,24 @@
     Licensed under the MIT license.
 */
 
-import { V1Pod, V1ObjectMeta, V1PodTemplateSpec } from "@kubernetes/client-node";
-import { autobind, BaseComponent, css } from "@uifabric/utilities";
+import { V1ObjectMeta, V1Pod, V1PodTemplateSpec } from "@kubernetes/client-node";
+import { BaseComponent } from "@uifabric/utilities";
+import { Card } from "azure-devops-ui/Card";
+import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
+import { format } from "azure-devops-ui/Core/Util/String";
 import { Duration } from "azure-devops-ui/Duration";
+import { TitleSize } from "azure-devops-ui/Header";
 import { LabelGroup, WrappingBehavior } from "azure-devops-ui/Label";
-import { IStatusProps, Status, Statuses, StatusSize } from "azure-devops-ui/Status";
+import { IStatusProps, Statuses } from "azure-devops-ui/Status";
+import { ITableColumn, Table } from "azure-devops-ui/Table";
+import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
+import { BaseKubeTable } from "../Common/BaseKubeTable";
+import { ResourceStatus } from "../Common/ResourceStatus";
 import * as Resources from "../Resources";
 import { IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
-import { BaseKubeTable } from "../Common/BaseKubeTable";
-import { ITableColumn, SimpleTableCell, Table, renderSimpleCell } from "azure-devops-ui/Table";
-import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
-import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
-import { Card } from "azure-devops-ui/Card";
-import { TitleSize } from "azure-devops-ui/Header";
 import "./PodsLeftPanel.scss";
-import { ResourceStatus } from "../Common/ResourceStatus";
-import { format } from "azure-devops-ui/Core/Util/String";
 
 const podStatusDic: { [index: string]: IStatusProps } = {
     "Running": Statuses.Success,

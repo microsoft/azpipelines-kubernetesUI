@@ -4,27 +4,26 @@
 */
 
 import { BaseComponent } from "@uifabric/utilities";
+import { ObservableValue } from "azure-devops-ui/Core/Observable";
+import { format } from "azure-devops-ui/Core/Util/String";
+import { Filter, IFilterItemState, IFilterState } from "azure-devops-ui/Utilities/Filter";
 import * as React from "react";
 import { IKubeService } from "../../Contracts/Contracts";
+import { KubeResourceType } from "../../Contracts/KubeServiceBase";
+import { KubeZeroData } from "../Common//KubeZeroData";
+import { NameKey, TypeKey } from "../Common/KubeFilterBar";
+import "../Common/KubeSummary.scss";
+import { WorkloadsEvents } from "../Constants";
+import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
+import { StoreManager } from "../FluxCommon/StoreManager";
+import { PodsActionsCreator } from "../Pods/PodsActionsCreator";
+import { PodsStore } from "../Pods/PodsStore";
 import * as Resources from "../Resources";
 import { IVssComponentProperties } from "../Types";
 import { DeploymentsTable } from "../Workloads/DeploymentsTable";
-import "../Common/KubeSummary.scss";
-import { OtherWorkloads } from "../WorkLoads/OtherWorkloadsTable";
-import { KubeZeroData } from "../Common//KubeZeroData";
-import { Filter, IFilterState, IFilterItemState } from "azure-devops-ui/Utilities/Filter";
-import { KubeResourceType } from "../../Contracts/KubeServiceBase";
+import { OtherWorkloads } from "../Workloads/OtherWorkloadsTable";
 import { WorkloadsFilterBar } from "./WorkloadsFilterBar";
-import { ObservableValue } from "azure-devops-ui/Core/Observable";
-import { WorkloadsActionsCreator } from "./WorkloadsActionsCreator";
-import { PodsActionsCreator } from "../Pods/PodsActionsCreator";
 import { WorkloadsStore } from "./WorkloadsStore";
-import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
-import { StoreManager } from "../FluxCommon/StoreManager";
-import { WorkloadsEvents } from "../Constants";
-import { PodsStore } from "../Pods/PodsStore";
-import { NameKey, TypeKey } from "../Common/KubeFilterBar";
-import { format } from "azure-devops-ui/Core/Util/String";
 
 export interface IWorkloadsPivotState {
     workloadResourceSize: number;

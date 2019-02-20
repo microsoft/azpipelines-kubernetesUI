@@ -1,3 +1,8 @@
+/*
+    Copyright (c) Microsoft Corporation. All rights reserved.
+    Licensed under the MIT license.
+*/
+
 import { V1StatefulSet, V1DaemonSet, V1ReplicaSet } from "@kubernetes/client-node";
 import { BaseComponent, css } from "@uifabric/utilities";
 import { IStatusProps } from "azure-devops-ui/Status";

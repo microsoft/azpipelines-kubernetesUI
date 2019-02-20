@@ -3,29 +3,29 @@
     Licensed under the MIT license.
 */
 
+import { V1Pod } from "@kubernetes/client-node";
 import { BaseComponent } from "@uifabric/utilities";
 import { localeFormat } from "azure-devops-ui/Core/Util/String";
 import { LabelGroup, WrappingBehavior } from "azure-devops-ui/Label";
-import { ITableColumn, TableColumnLayout } from "azure-devops-ui/Table";
+import { IStatusProps, Statuses, StatusSize } from "azure-devops-ui/Status";
+import { ITableColumn } from "azure-devops-ui/Table";
 import * as Date_Utils from "azure-devops-ui/Utilities/Date";
 import * as React from "react";
+import { IKubeService } from "../../Contracts/Contracts";
+import { BaseKubeTable } from "../Common/BaseKubeTable";
+import { KubeZeroData } from "../Common/KubeZeroData";
+import { ResourceStatus } from "../Common/ResourceStatus";
+import { ServicesEvents } from "../Constants";
+import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
+import { StoreManager } from "../FluxCommon/StoreManager";
+import { PodDetailsView } from "../Pods/PodDetailsView";
+import { PodsActionsCreator } from "../Pods/PodsActionsCreator";
+import { PodsTable } from "../Pods/PodsTable";
 import * as Resources from "../Resources";
 import { IServiceItem, IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
 import "./ServiceDetailsView.scss";
-import { V1Pod } from "@kubernetes/client-node";
-import { PodsTable } from "../Pods/PodsTable";
-import { PodDetailsView } from "../Pods/PodDetailsView";
-import { KubeZeroData } from "../Common/KubeZeroData";
-import { ResourceStatus } from "../Common/ResourceStatus";
-import { IKubeService } from "../../Contracts/Contracts";
-import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
-import { StoreManager } from "../FluxCommon/StoreManager";
-import { PodsActionsCreator } from "../Pods/PodsActionsCreator";
-import { ServicesEvents } from "../Constants";
 import { ServicesStore } from "./ServicesStore";
-import { BaseKubeTable } from "../Common/BaseKubeTable";
-import { IStatusProps, Statuses, StatusSize } from "azure-devops-ui/Status";
 
 export interface IServiceDetailsViewProperties extends IVssComponentProperties {
     kubeService: IKubeService;

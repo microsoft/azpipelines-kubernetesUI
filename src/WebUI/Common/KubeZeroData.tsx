@@ -1,3 +1,8 @@
+/*
+    Copyright (c) Microsoft Corporation. All rights reserved.
+    Licensed under the MIT license.
+*/
+
 import * as React from "react";
 import { ZeroData } from "azure-devops-ui/ZeroData";
 import { Card } from "azure-devops-ui/Card";

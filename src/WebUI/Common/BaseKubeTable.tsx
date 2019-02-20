@@ -2,11 +2,10 @@
     Copyright (c) Microsoft Corporation. All rights reserved.
     Licensed under the MIT license.
 */
-import { BaseComponent, css } from "office-ui-fabric-react/lib/Utilities";
-import * as React from "react";
-import { IVssComponentProperties } from "../Types";
-import { Table, ITableColumn, SimpleTableCell, TwoLineTableCell } from "azure-devops-ui/Table";
+
+import { BaseComponent, css } from "@uifabric/utilities";
 import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
+import { ITableColumn, SimpleTableCell, Table, TwoLineTableCell } from "azure-devops-ui/Table";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import { CustomCard, CardContent } from "azure-devops-ui/Card";
 import {
@@ -17,6 +16,8 @@ import {
     HeaderTitleRow,
     TitleSize
 } from "azure-devops-ui/Header";
+import * as React from "react";
+import { IVssComponentProperties } from "../Types";
 import "./BaseKubeTable.scss";
 import { IResourceStatusProps, ResourceStatus } from "./ResourceStatus";
 import { Tooltip } from "azure-devops-ui/TooltipEx";

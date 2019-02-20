@@ -1,3 +1,8 @@
+/*
+    Copyright (c) Microsoft Corporation. All rights reserved.
+    Licensed under the MIT license.
+*/
+
 import * as React from "react";
 import { BaseComponent } from "@uifabric/utilities/lib";
 import { IStatusProps, Status, StatusSize } from "azure-devops-ui/Status";

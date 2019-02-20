@@ -5,9 +5,9 @@
 
 import { V1ObjectMeta, V1PodStatus, V1PodTemplateSpec, V1Container } from "@kubernetes/client-node";
 import { ObservableArray } from "azure-devops-ui/Core/Observable";
+import { format, localeFormat } from "azure-devops-ui/Core/Util/String";
 import { ILabelModel } from "azure-devops-ui/Label";
 import { IStatusProps, Statuses } from "azure-devops-ui/Status";
-import { localeFormat, format } from "azure-devops-ui/Core/Util/String";
 
 const pipelineNameAnnotationKey: string = "pipeline-name";
 const pipelineIdAnnotationKey: string = "pipeline-id";
@@ -56,7 +56,7 @@ export class Utils {
             return !!pipelineName && !!pipelineId;
         });
 
-        return pipelineName && pipelineId ? format("{0} / {1}", pipelineName, pipelineId) : "";
+        return pipelineName && pipelineId ? localeFormat("{0} / {1}", pipelineName, pipelineId) : "";
     }
 
     public static _getPodsStatusProps(currentScheduledPods: number, desiredPods: number): IStatusProps | undefined {
