@@ -1,0 +1,11 @@
+@import "../Common/Common.scss";
+
+.pod-overview-card {
+    margin-top: 10px;
+    padding-top: 16px;
+
+    .pod-overview-key {
+        padding-left: 8px;
+        color: $secondary-text;
+    }
+}

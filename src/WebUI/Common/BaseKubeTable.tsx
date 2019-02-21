@@ -19,6 +19,7 @@ import {
 import * as React from "react";
 import { IVssComponentProperties } from "../Types";
 import "./BaseKubeTable.scss";
+import "./Webplatform.scss";
 import { IResourceStatusProps, ResourceStatus } from "./ResourceStatus";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
 
@@ -42,7 +43,7 @@ export class BaseKubeTable<T> extends BaseComponent<ITableComponentProperties<T>
                     this.props.headingText &&
                     <CustomHeader>
                         <HeaderTitleArea>
-                            <HeaderTitleRow className="kube-flex-row">
+                            <HeaderTitleRow className="kube-table-header">
                                 {
                                     (typeof this.props.headingText === "string") ?
                                         <HeaderTitle className="text-ellipsis" titleSize={TitleSize.Medium} >

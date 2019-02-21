@@ -1,0 +1,36 @@
+@import "../Common/Common.scss";
+
+.pod-overview-card .bolt-header.bolt-card-header {
+    padding-left: 28px; // 20px padding in content and 8px width of bolt-table-cell-compact added by default in Tables
+    padding-bottom: 0px;
+}
+
+.workload-details-card {
+    .bolt-table-cell-content {
+        padding-top: 0px;
+        padding-bottom: 0px;
+    }
+}
+
+.s-details {
+    .s-key {
+        &.bolt-table-cell {
+            padding-left: 0px;
+        }
+    }
+
+    .bolt-list-cell-content {
+        padding-left: 0px !important;
+
+        .bolt-list-cell-text {
+            padding: 0px !important;
+        }
+    }
+}
+
+.kube-list-content {
+    .bolt-header {
+        padding-top: 0px !important;
+        padding-bottom: 0px !important;
+    }
+}

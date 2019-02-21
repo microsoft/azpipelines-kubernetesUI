@@ -33,10 +33,8 @@ const podStatusKey = "pods-list-status-col";
 const colDataClassName: string = "list-col-content";
 
 export interface IPodsLeftPanelProperties extends IVssComponentProperties {
-    parentMetaData: V1ObjectMeta;
-    podTemplate: V1PodTemplateSpec;
-    parentKind: string;
     pods: V1Pod[];
+    parentName: string;
     onSelectionChange?: (event: React.SyntheticEvent<HTMLElement>, selectedItem: V1Pod) => void;
 }
 
@@ -44,7 +42,7 @@ export class PodsLeftPanel extends BaseComponent<IPodsLeftPanelProperties> {
     public render(): JSX.Element {
         return (
             <div className="pods-left-panel-container">
-                {this._getPanelHeaderContent()}
+                {this._getHeader()}
                 {this._getPodsList()}
             </div>
         );
@@ -56,49 +54,14 @@ export class PodsLeftPanel extends BaseComponent<IPodsLeftPanelProperties> {
         }
     }
 
-    private _getPanelHeaderContent(): JSX.Element {
-        const metadata: V1ObjectMeta = this.props.parentMetaData;
-        const columns: ITableColumn<any>[] = [
-            {
-                id: "PodsHeaderTable",
-                name: metadata.name,
-                width: -100,
-                className: "s-key",
-                minWidth: 180,
-                renderCell: PodsLeftPanel._renderValueCell
-            }
-        ];
-        const tableItems = new ArrayItemProvider<any>([
-            { key: Resources.KindText, value: this.props.parentKind },
-            { key: Resources.Created, value: metadata.creationTimestamp ? new Date(metadata.creationTimestamp) : new Date().getTime() },
-            { key: Resources.LabelsText, value: metadata.labels || {} },
-            { key: Resources.ImageText, value: Utils.getPodImageName(this.props.podTemplate) }
-        ]);
-
-        return (
-            <Card className="pods-left-pane-header-table"
-                titleProps={{
-                    text: Resources.SummaryText,
-                    size: TitleSize.Large
-                }}
-            >
-                <Table
-                    className="s-full-details"
-                    id={format("s-full-details-{0}", metadata.uid)}
-                    showHeader={false}
-                    showLines={false}
-                    singleClickActivation={false}
-                    itemProvider={tableItems}
-                    pageSize={tableItems.length}
-                    columns={columns}
-                />
-            </Card>
-        );
+    private _getHeader(): JSX.Element | null {
+        /* ToDo :: Add back button here when we have support for the same */
+        return (<h2 className="pod-left-panel-header">{this.props.parentName}</h2>);
     }
 
     private _getPodsList(): JSX.Element | null {
         let columns: ITableColumn<V1Pod>[] = [];
-        const headerColumnClassName = "kube-col-header";
+        const headerColumnClassName = "pod-left-panel-table-header";
         columns.push({
             id: podStatusKey,
             name: Resources.PodsListHeaderText,
@@ -109,17 +72,20 @@ export class PodsLeftPanel extends BaseComponent<IPodsLeftPanelProperties> {
             renderCell: PodsLeftPanel._renderPodNameCell
         });
 
-        return (this.props.pods && this.props.pods.length > 0 ?
-            <Card className="left-panel-pods-list">
-                <Table
-                    itemProvider={new ArrayItemProvider<V1Pod>(this.props.pods)}
-                    columns={columns}
-                    showHeader={true}
-                    showLines={false}
-                    singleClickActivation={false}
-                    onSelect={this._onSelectionChange}
-                />
-            </Card> : null
+        return (
+            this.props.pods && this.props.pods.length > 0 ?
+                <div>
+                    <div className="pod-left-panel-table-header">{Resources.PodsListHeaderText}</div>
+                    <Table
+                        itemProvider={new ArrayItemProvider<V1Pod>(this.props.pods)}
+                        columns={columns}
+                        showHeader={false}
+                        showLines={true}
+                        singleClickActivation={false}
+                        onSelect={this._onSelectionChange}
+                        //focuszoneProps={{focusOnMount: true}}
+                    />
+                </div> : null
         );
     }
 

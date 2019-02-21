@@ -7,60 +7,69 @@ import { V1Pod } from "@kubernetes/client-node";
 import { BaseComponent } from "@uifabric/utilities";
 import { Card } from "azure-devops-ui/Card";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
-import { format } from "azure-devops-ui/Core/Util/String";
+import { format, localeFormat } from "azure-devops-ui/Core/Util/String";
 import { Duration } from "azure-devops-ui/Duration";
 import { LabelGroup, WrappingBehavior } from "azure-devops-ui/Label";
 import { ColumnFill, ITableColumn, renderSimpleCell, SimpleTableCell as renderTableCell, Table } from "azure-devops-ui/Table";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
 import * as Resources from "../Resources";
-import "../Services/ServiceDetailsView.scss";
 import { Utils } from "../Utils";
+import "./PodOverview.scss";
+import "../Common/Webplatform.scss";
 import { IPodRightPanelProps } from "./PodsRightPanel";
 import { TitleSize } from "azure-devops-ui/Header";
 
-export interface IPodDetailsProps extends IPodRightPanelProps { }
+export interface IPodOverviewProps extends IPodRightPanelProps { }
 
-export class PodDetailsView extends BaseComponent<IPodDetailsProps> {
+export class PodOverview extends BaseComponent<IPodOverviewProps> {
     public render(): JSX.Element {
         const pod: V1Pod = this.props.pod;
         const columns: ITableColumn<any>[] = [
             {
                 id: "key",
                 name: "key",
-                width: new ObservableValue(200),
-                className: "s-key",
-                minWidth: 180,
+                width: new ObservableValue(150),
+                className: "pod-overview-key",
+                minWidth: 100,
                 renderCell: renderSimpleCell
             },
             {
                 id: "value",
                 name: "value",
                 width: new ObservableValue(500),
-                className: "s-value",
+                className: "pod-overview-value",
                 minWidth: 400,
-                renderCell: PodDetailsView._renderValueCell
+                renderCell: PodOverview._renderValueCell
             },
             ColumnFill
         ];
+
+        let image: string = "";
+        if (pod.spec && pod.spec.containers && pod.spec.containers.length > 0) {
+            const containersCount = pod.spec.containers.length;
+            const defaultImage = pod.spec.containers[0].image;
+            image = containersCount > 1 ? localeFormat(Resources.MoreImagesText, defaultImage, containersCount - 1) : defaultImage;
+        }
+
         const tableItems = new ArrayItemProvider<any>([
-            { key: Resources.NameText, value: pod.metadata.name },
-            { key: Resources.KindText, value: Resources.PodsDetailsText },
             { key: Resources.Created, value: pod.metadata.creationTimestamp ? new Date(pod.metadata.creationTimestamp) : new Date().getTime() },
-            { key: Resources.LabelsText, value: pod.metadata.labels || {} },
             { key: Resources.AnnotationsText, value: pod.metadata.annotations || {} },
             { key: Resources.RestartPolicyText, value: pod.spec.restartPolicy || "" },
             { key: Resources.QoSClassText, value: pod.status.qosClass || "" },
             { key: Resources.NodeText, value: pod.spec.nodeName || "" },
-            { key: Resources.ClusterIPText, value: "" }
+            { key: Resources.ClusterIPText, value: "" },
+            { key: Resources.ImageText, value: image },
+            { key: Resources.LabelsText, value: pod.metadata.labels || {} }
         ]);
 
         return (
-            <Card className="kube-list-content s-details depth-16"
+            <Card className="pod-overview-card depth-16"
                 titleProps={{
-                text: Resources.SummaryText,
-                size: TitleSize.Large
-            }}>
+                    text: Resources.PodDetailsHeader,
+                    size: TitleSize.Large
+                }}
+                contentProps={{ contentPadding: false }}>
                 <Table
                     className="s-full-details"
                     id={format("s-full-details-{0}", pod.metadata.uid)}

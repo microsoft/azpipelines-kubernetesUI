@@ -3,25 +3,9 @@
 .s-details {
     margin-top: 10px;
     width: auto;
-    .s-key {
-
-        &.bolt-table-cell {
-            padding-left: 0px;
-            line-height: 20px;
-        }
-    }
-
-    .bolt-list-cell-content {
-        padding-left: 0px !important;
-
-        .bolt-list-cell-text {
-            padding: 0px !important;
-        }
-    }
 
     .kube-simple-cell .s-value {
         padding-left: 16px;
-        line-height: 40px;
     }
 
     .s-details-label {

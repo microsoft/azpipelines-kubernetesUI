@@ -17,11 +17,6 @@ export const enum SelectedItemKeys {
     ServiceItemKey = "service-item"
 }
 
-export const enum SelectedItemKeys2 {
-    PodKey = "pod",
-    ServiceItemKey = "service-item"
-}
-
 export namespace WorkloadsEvents {
     export const DeploymentsFetchedEvent: string = "DEPLOYMENTS_FETCHED_EVENT";
     export const ReplicaSetsFetchedEvent: string = "REPLICA_SETS_FETCHED_EVENT";

@@ -32,7 +32,8 @@ export interface IPodsTableProperties extends IVssComponentProperties {
     podsToRender: V1Pod[];
     headingText?: string;
     nameFilter?: string;
-    showWorkloads?: boolean;
+    showWorkloadsColumn?: boolean;
+    onItemActivated?: (event: React.SyntheticEvent<HTMLElement>, selectedItem: V1Pod) => void;
 }
 
 export class PodsTable extends BaseComponent<IPodsTableProperties> {
@@ -56,8 +57,9 @@ export class PodsTable extends BaseComponent<IPodsTableProperties> {
                     headingDescription={this._generateHeadingSubText(this._statusCount)}
                     className={css("list-content", "pl-details", "depth-16")}
                     items={this.props.podsToRender}
-                    columns={PodsTable._getColumns(this.props.showWorkloads || false)}
+                    columns={PodsTable._getColumns(this.props.showWorkloadsColumn || false)}
                     onItemActivated={this._showPodDetails}
+                    showLines={true}
                 />
             );
         }
@@ -65,30 +67,24 @@ export class PodsTable extends BaseComponent<IPodsTableProperties> {
         return null;
     }
 
-    private static _getColumns(showWorkloads: boolean): ITableColumn<V1Pod>[] {
+    private static _getColumns(showWorkloadsColumn: boolean): ITableColumn<V1Pod>[] {
         let columns: ITableColumn<V1Pod>[] = [];
         const headerColumnClassName: string = "kube-col-header";
-        const columnContentClassName: string = css("list-col-content");
+        const columnContentClassName: string = css("list-col-content", "pods-table-cell");
+
+        let nameColumnWidth: number = 362;
+        let statusColWidth: number = 256;
 
         columns.push({
             id: podNameKey,
             name: Resources.PodsDetailsText,
-            width: showWorkloads?-54:362,
-            headerClassName: css(headerColumnClassName, "first-col-header"),
+            width: showWorkloadsColumn ? -54 : 362,
+            headerClassName: headerColumnClassName,
             className: columnContentClassName,
             renderCell: PodsTable._renderPodNameCell
         });
 
-        columns.push({
-            id: podStatusKey,
-            name: Resources.StatusText,
-            width: showWorkloads?256:220,
-            headerClassName: headerColumnClassName,
-            className: columnContentClassName,
-            renderCell: PodsTable._renderPodStatusCell
-        });
-
-        if (showWorkloads) {
+        if (showWorkloadsColumn) {
             columns.push({
                 id: podWorkloadsKey,
                 name: Resources.WorkloadText,
@@ -100,9 +96,18 @@ export class PodsTable extends BaseComponent<IPodsTableProperties> {
         }
 
         columns.push({
+            id: podStatusKey,
+            name: Resources.StatusText,
+            width: showWorkloadsColumn ? 220 : 256,
+            headerClassName: headerColumnClassName,
+            className: columnContentClassName,
+            renderCell: PodsTable._renderPodStatusCell
+        });
+
+        columns.push({
             id: podAgeKey,
             name: Resources.AgeText,
-            width: showWorkloads?-18:-100,
+            width: showWorkloadsColumn ? -18 : -100,
             headerClassName: headerColumnClassName,
             className: columnContentClassName,
             renderCell: PodsTable._renderPodAgeCell
@@ -111,7 +116,10 @@ export class PodsTable extends BaseComponent<IPodsTableProperties> {
     }
 
     private _showPodDetails = (event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>, selectedItem: V1Pod) => {
-        if (selectedItem) {
+        if (this.props.onItemActivated) {
+            this.props.onItemActivated(event, selectedItem);
+        }
+        else if (selectedItem) {
             ActionsHubManager.GetActionsHub<SelectionActions>(SelectionActions).selectItem.invoke({ item: selectedItem, showSelectedItem: true, selectedItemType: SelectedItemKeys.OrphanPodKey });
         }
     }
