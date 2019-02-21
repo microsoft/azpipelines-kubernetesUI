@@ -17,7 +17,7 @@ define("Environments/Providers/Kubernetes/Resources", ["require", "exports"], fu
     exports.ReplicaSetText = "ReplicaSet";
     exports.PackageText = "Package";
     exports.PipelineText = "Pipeline";
-    exports.PodsText = "Pods running";
+    exports.PodsText = "Pods";
     exports.PortText = "Port";
     exports.NamespaceHeadingText = "Namespace: {0}";
     exports.PivotServiceText = "Services";

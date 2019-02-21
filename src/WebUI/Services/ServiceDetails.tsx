@@ -18,13 +18,14 @@ import { ResourceStatus } from "../Common/ResourceStatus";
 import { ServicesEvents } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
-import { PodsDetails  } from "../Pods/PodsDetails ";
+import { PodsDetails  } from "../Pods/PodsDetails";
 import { PodsActionsCreator } from "../Pods/PodsActionsCreator";
 import { PodsTable } from "../Pods/PodsTable";
 import * as Resources from "../Resources";
 import { IServiceItem, IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
 import "./ServiceDetails.scss";
+import "../Common/Webplatform.scss";
 import { ServicesStore } from "./ServicesStore";
 
 export interface IServiceDetailsProperties extends IVssComponentProperties {
@@ -149,7 +150,7 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
                 width: -100,
                 className: "s-key",
                 minWidth: 200,
-                renderCell: ServiceDetailsView._renderLabelGroups
+                renderCell: ServiceDetails._renderLabelGroups
             },
             {
                 id: "labels",
@@ -176,7 +177,7 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
                         item.pipeline ? localeFormat(Resources.ServiceCreatedText, agoTime, item.pipeline) :
                             localeFormat(Resources.CreatedAgo, agoTime)}
                     items={tableItems}
-                    columns={ServiceDetailsView._getColumns()}
+                    columns={ServiceDetails._getColumns()}
                     hideHeaders
                     hideLines
                 />
@@ -220,7 +221,7 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
     private _podsActionsCreator: PodsActionsCreator
 
     private static _renderTextCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, service: IServiceItem): JSX.Element {
-        const itemToRender = BaseKubeTable.renderColumn(ServiceDetailsView._getCellText(tableColumn, rowIndex, service), BaseKubeTable.defaultColumnRenderer);
+        const itemToRender = BaseKubeTable.renderColumn(ServiceDetails._getCellText(tableColumn, rowIndex, service), BaseKubeTable.defaultColumnRenderer);
         return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 

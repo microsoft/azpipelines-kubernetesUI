@@ -21,11 +21,11 @@ import { StoreManager } from "../FluxCommon/StoreManager";
 import { PodOverview } from "../Pods/PodOverview";
 import * as Resources from "../Resources";
 import { SelectionStore } from "../Selection/SelectionStore";
-import { ServiceDetails  } from "../Services/ServiceDetails ";
+import { ServiceDetails } from "../Services/ServiceDetails";
 import { ServicesPivot } from "../Services/ServicesPivot";
 import { ServicesStore } from "../Services/ServicesStore";
 import { IServiceItem, IVssComponentProperties } from "../Types";
-import { WorkloadDetails  } from "../Workloads/WorkloadDetails ";
+import { WorkloadDetails } from "../Workloads/WorkloadDetails";
 import { WorkloadsActionsCreator } from "../Workloads/WorkloadsActionsCreator";
 import { WorkloadsPivot } from "../Workloads/WorkloadsPivot";
 import { WorkloadsStore } from "../Workloads/WorkloadsStore";
@@ -157,6 +157,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
     private _getMainHeading(): JSX.Element {
         return (
             <div className="content-main-heading">
+                {/* Todo :: Replace all html header elements with appropriate headers from platform*/}
                 <h2 className="title-heading">{this.props.title}</h2>
                 <div className={"sub-heading"}>{localeFormat(Resources.NamespaceHeadingText, this.state.namespace || "")}</div>
             </div>
@@ -175,8 +176,8 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
                     <Tab name={Resources.PivotServiceText} id={servicesPivotItemKey} />
                 </TabBar>
                 <TabContent>
-                        {this.state.selectedPivotKey === servicesPivotItemKey && <ServicesPivot kubeService={this.props.kubeService} namespace={this.state.namespace} filter={this.state.svcFilter} filterToggled={servicesFilterToggled} />}
-                        {this.state.selectedPivotKey === workloadsPivotItemKey && <WorkloadsPivot kubeService={this.props.kubeService} namespace={this.state.namespace} filter={this.state.workloadsFilter} filterToggled={workloadsFilterToggled} />}
+                    {this.state.selectedPivotKey === servicesPivotItemKey && <ServicesPivot kubeService={this.props.kubeService} namespace={this.state.namespace} filter={this.state.svcFilter} filterToggled={servicesFilterToggled} />}
+                    {this.state.selectedPivotKey === workloadsPivotItemKey && <WorkloadsPivot kubeService={this.props.kubeService} namespace={this.state.namespace} filter={this.state.workloadsFilter} filterToggled={workloadsFilterToggled} />}
                 </TabContent>
             </div>
         );

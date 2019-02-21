@@ -23,6 +23,7 @@ import { BaseKubeTable } from "../Common/BaseKubeTable";
 import { IStatusProps, Statuses, StatusSize } from "azure-devops-ui/Status";
 import { V1Pod, V1ObjectMeta, V1PodTemplateSpec } from "@kubernetes/client-node";
 import "./WorkloadDetails.scss";
+import "../Common/Webplatform.scss";
 import { PodsStore } from "../Pods/PodsStore";
 import { KubeZeroData } from "../Common/KubeZeroData";
 
@@ -76,7 +77,7 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
 
         this.setState({
             pods: pods,
-            selectedPod: pods[0]
+            selectedPod: pods && pods.length > 0 ? pods[0] : null
         });
     }
 
@@ -100,7 +101,7 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
                 id: "w-image",
                 name: Resources.ImageText,
                 width: new ObservableValue(360),
-                className: "w-key",
+                className: "workload-details-card",
                 minWidth: 250,
                 headerClassName: "workload-details-column-header",
                 renderCell: WorkloadDetails._renderImageCell
@@ -109,7 +110,7 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
                 id: "w-labels",
                 name: Resources.LabelsText,
                 width: -100,
-                className: "w-key",
+                className: "workload-details-card",
                 minWidth: 200,
                 headerClassName: "workload-details-column-header",
                 renderCell: WorkloadDetails._renderLabelsCell
@@ -122,26 +123,18 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
         const metadata = this.props.parentMetaData;
         if (metadata) {
             const pipeline = Utils.getPipelineText(metadata.annotations);
-            const tableItems = new ArrayItemProvider<any>([{}, { podTemplate: this.props.podTemplate, parentMetaData: metadata }]);
+            const tableItems = [{}, { podTemplate: this.props.podTemplate, parentMetaData: metadata }];
             const agoTime = Date_Utils.ago(new Date(metadata.creationTimestamp), Date_Utils.AgoFormat.Compact);
-            return (
-                <div className="kube-list-content s-details depth-16">
-                    <div className="workload-details-primary-text">{localeFormat(Resources.WorkloadDetails, this.props.parentKind)}</div>
-                    <div className="workload-details-secondary-text">
-                        {pipeline ? localeFormat(Resources.ServiceCreatedText, agoTime, pipeline) :
-                            localeFormat(Resources.CreatedAgo, agoTime)}
-                    </div>
-                    <Table
-                        className="w-details"
-                        id={format("workload-details-tbl-{0}", metadata.uid)}
-                        showLines={false}
-                        showHeader={false}
-                        singleClickActivation={false}
-                        itemProvider={tableItems}
-                        pageSize={tableItems.length}
-                        columns={WorkloadDetails._getColumns()}
-                    />
-                </div>
+            return (<BaseKubeTable
+                className={"w-details"}
+                headingText={localeFormat(Resources.WorkloadDetails, this.props.parentKind)}
+                headingDescription={pipeline ? localeFormat(Resources.ServiceCreatedText, agoTime, pipeline) :
+                    localeFormat(Resources.CreatedAgo, agoTime)}
+                items={tableItems}
+                columns={WorkloadDetails._getColumns()}
+                hideHeaders
+                hideLines
+            />
             );
         }
 

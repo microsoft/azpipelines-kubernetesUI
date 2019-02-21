@@ -55,7 +55,7 @@ export class PodsLeftPanel extends BaseComponent<IPodsLeftPanelProperties> {
     }
 
     private _getHeader(): JSX.Element | null {
-        /*Add back button here when we have support for the same*/
+        /* ToDo :: Add back button here when we have support for the same */
         return (<h2 className="pod-left-panel-header">{this.props.parentName}</h2>);
     }
 
@@ -83,6 +83,7 @@ export class PodsLeftPanel extends BaseComponent<IPodsLeftPanelProperties> {
                         showLines={true}
                         singleClickActivation={false}
                         onSelect={this._onSelectionChange}
+                        //focuszoneProps={{focusOnMount: true}}
                     />
                 </div> : null
         );

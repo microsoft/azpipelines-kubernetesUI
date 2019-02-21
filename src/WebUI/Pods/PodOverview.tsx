@@ -15,9 +15,8 @@ import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
 import * as Resources from "../Resources";
 import { Utils } from "../Utils";
-import { ColumnFill, ITableColumn, renderSimpleCell, SimpleTableCell as renderTableCell, Table } from "azure-devops-ui/Table";
-import { Card } from "azure-devops-ui/Card";
 import "./PodOverview.scss";
+import "../Common/Webplatform.scss";
 import { IPodRightPanelProps } from "./PodsRightPanel";
 import { TitleSize } from "azure-devops-ui/Header";
 
@@ -59,12 +58,12 @@ export class PodOverview extends BaseComponent<IPodOverviewProps> {
         ]);
 
         return (
-            <Card className="kube-list-content s-details depth-16"
+            <Card className="pod-overview-card depth-16"
                 titleProps={{
-                text: Resources.PodDetailsHeader,
-                size: TitleSize.Large
-            }}
-contentProps={{ contentPadding: false }}>
+                    text: Resources.PodDetailsHeader,
+                    size: TitleSize.Large
+                }}
+                contentProps={{ contentPadding: false }}>
                 <Table
                     className="s-full-details"
                     id={format("s-full-details-{0}", pod.metadata.uid)}

@@ -78,8 +78,8 @@ export class PodsTable extends BaseComponent<IPodsTableProperties> {
         columns.push({
             id: podNameKey,
             name: Resources.PodsDetailsText,
-            width: showWorkloads?-54:362,
-            headerClassName: css(headerColumnClassName, "first-col-header"),
+            width: showWorkloadsColumn ? -54 : 362,
+            headerClassName: headerColumnClassName,
             className: columnContentClassName,
             renderCell: PodsTable._renderPodNameCell
         });
@@ -107,7 +107,7 @@ export class PodsTable extends BaseComponent<IPodsTableProperties> {
         columns.push({
             id: podAgeKey,
             name: Resources.AgeText,
-            width: showWorkloads?-18:-100,
+            width: showWorkloadsColumn ? -18 : -100,
             headerClassName: headerColumnClassName,
             className: columnContentClassName,
             renderCell: PodsTable._renderPodAgeCell
