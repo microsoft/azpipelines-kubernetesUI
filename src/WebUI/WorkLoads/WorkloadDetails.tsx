@@ -170,6 +170,7 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
             itemToRender = BaseKubeTable.defaultColumnRenderer(Resources.ImageText, "w-details-cell-header");
         }
         else {
+            // Todo :: Add support for making Image a link to Image Details view
             itemToRender = <div className="w-details-cell-value">
                 {Utils.getPodImageName(tableItem.podTemplate)}
             </div>;

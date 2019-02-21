@@ -8,6 +8,7 @@ import { ObservableArray } from "azure-devops-ui/Core/Observable";
 import { format, localeFormat } from "azure-devops-ui/Core/Util/String";
 import { ILabelModel } from "azure-devops-ui/Label";
 import { IStatusProps, Statuses } from "azure-devops-ui/Status";
+import * as Resources from "./Resources";
 
 const pipelineNameAnnotationKey: string = "pipeline-name";
 const pipelineIdAnnotationKey: string = "pipeline-id";
@@ -43,7 +44,7 @@ export class Utils {
 
     public static getPipelineText(annotations: { [key: string]: string }): string {
         let pipelineName: string = "", pipelineId: string = "";
-        
+
         annotations && Object.keys(annotations).find(key => {
             const keyVal: string = key.toLowerCase();
             if (!pipelineName && keyVal === pipelineNameAnnotationKey) {
@@ -70,20 +71,20 @@ export class Utils {
     public static generateEqualsConditionLabelSelector(labels: { [key: string]: string }): string {
         console.log(labels);
         let labelSelector: string = "";
-        if(labels) {
+        if (labels) {
             const keySet = Object.keys(labels);
-            keySet.forEach((key,index) => {
+            keySet.forEach((key, index) => {
                 labelSelector = labelSelector.concat(format("{0}={1}", key, labels[key]))
-                if (index < keySet.length-1) labelSelector = labelSelector.concat(",");
+                if (index < keySet.length - 1) labelSelector = labelSelector.concat(",");
             });
         }
         return labelSelector;
     }
 
-    public static generatePodStatusProps(status:V1PodStatus): IStatusProps {
-        if(status.phase === PodPhase.Running|| status.phase === PodPhase.Succeeded){
-                return Statuses.Success;
-        } 
+    public static generatePodStatusProps(status: V1PodStatus): IStatusProps {
+        if (status.phase === PodPhase.Running || status.phase === PodPhase.Succeeded) {
+            return Statuses.Success;
+        }
         return Statuses.Failed;
     }
 
@@ -93,13 +94,16 @@ export class Utils {
         }
         return true;
     }
-    
+
     public static getPodImageName(podTemplate: V1PodTemplateSpec): string | null {
         if (podTemplate
             && podTemplate.spec
             && podTemplate.spec.containers
             && podTemplate.spec.containers.length > 0) {
-            return podTemplate.spec.containers[0].image;
+            const containersCount = podTemplate.spec.containers.length;
+            const defaultImage = podTemplate.spec.containers[0].image;
+            const imageText: string = containersCount > 1 ? localeFormat(Resources.MoreImagesText, defaultImage, containersCount - 1) : defaultImage;
+            return imageText;
         }
 
         return null;

@@ -65,5 +65,6 @@ define("Environments/Providers/Kubernetes/Resources", ["require", "exports"], fu
     exports.ServiceDetails = "Service details";
     exports.WorkloadText = "Workload";
     exports.WorkloadDetails = "{0} details";
-    exports.PodStatusPending = "Pending"
+    exports.PodStatusPending = "Pending";
+    exports.MoreImagesText = "{0} and {1} more"
 });

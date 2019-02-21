@@ -65,3 +65,4 @@ export declare const ServiceDetails: string;
 export declare const WorkloadText: string;
 export declare const WorkloadDetails: string;
 export declare const PodStatusPending: string;
+export declare const MoreImagesText: string;
