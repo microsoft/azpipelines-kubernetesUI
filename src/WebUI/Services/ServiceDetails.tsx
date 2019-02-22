@@ -198,7 +198,7 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
         if (this.state.pods.length === 0) {
             return KubeZeroData._getDefaultZeroData("https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/",
                 Resources.LearnMoreText, Resources.NoPodsForSvcText,
-                Resources.LinkSvcToPodsText, Resources.AssociatedPodsText);
+                Resources.LinkSvcToPodsText, Resources.AssociatedPodsText,  undefined, true);
         }
         return (
             <PodsTable

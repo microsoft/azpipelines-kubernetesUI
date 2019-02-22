@@ -7,7 +7,7 @@ import { V1Pod } from "@kubernetes/client-node";
 import { BaseComponent } from "@uifabric/utilities";
 import { Card } from "azure-devops-ui/Card";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
-import { format, localeFormat } from "azure-devops-ui/Core/Util/String";
+import { format } from "azure-devops-ui/Core/Util/String";
 import { Duration } from "azure-devops-ui/Duration";
 import { LabelGroup, WrappingBehavior } from "azure-devops-ui/Label";
 import { ColumnFill, ITableColumn, renderSimpleCell, SimpleTableCell as renderTableCell, Table } from "azure-devops-ui/Table";
@@ -49,7 +49,7 @@ export class PodOverview extends BaseComponent<IPodOverviewProps> {
         if (pod.spec && pod.spec.containers && pod.spec.containers.length > 0) {
             const containersCount = pod.spec.containers.length;
             const defaultImage = pod.spec.containers[0].image;
-            image = containersCount > 1 ? localeFormat(Resources.MoreImagesText, defaultImage, containersCount - 1) : defaultImage;
+            image = containersCount > 1 ? Utils.getImageText(pod.spec.containers): defaultImage;
         }
 
         const tableItems = new ArrayItemProvider<any>([

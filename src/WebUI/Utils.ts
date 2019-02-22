@@ -100,9 +100,7 @@ export class Utils {
             && podTemplate.spec
             && podTemplate.spec.containers
             && podTemplate.spec.containers.length > 0) {
-            const containersCount = podTemplate.spec.containers.length;
-            const defaultImage = podTemplate.spec.containers[0].image;
-            const imageText: string = containersCount > 1 ? localeFormat(Resources.MoreImagesText, defaultImage, containersCount - 1) : defaultImage;
+            const imageText: string = Utils.getImageText(podTemplate.spec.containers);
             return imageText;
         }
 
@@ -113,7 +111,7 @@ export class Utils {
         let imageCountMap: { [key: string]: number } = {};
         let imageString: string = "";
         containers.forEach(container => {
-            if (imageCountMap[container.image] == undefined) {
+            if (!imageCountMap[container.image]) {
                 imageCountMap[container.image] = 1;
             } else {
                 imageCountMap[container.image] += 1;
@@ -122,7 +120,7 @@ export class Utils {
 
         const keys = Object.keys(imageCountMap);
         if (keys.length > 1) {
-            imageString = localeFormat("{0} and {1} more", keys[0], keys.length - 1);
+            imageString = localeFormat(Resources.MoreImagesText, keys[0], keys.length - 1);
         } else {
             imageString = keys[0];
         }

@@ -34,3 +34,11 @@
         padding-bottom: 0px !important;
     }
 }
+
+//Needed override of ZeroDataItem css for side alignment since ZeroData component allows className only for the root container not child elements.
+.zerod-side-align-content {
+    .vss-ZeroDataItem {
+        flex-direction: row;
+        text-align: justify !important; //todo: verify if this override can be achieved in any other way
+    }
+}

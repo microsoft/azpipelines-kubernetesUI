@@ -148,7 +148,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
                 {this.state.resourceSize > 0 ?
                     this._getMainPivot() :
                     KubeZeroData._getDefaultZeroData("https://kubernetes.io/docs/concepts/workloads/pods/pod/",
-                        Resources.LearnMoreText, Resources.NoWorkLoadsText, Resources.CreateWorkLoadText)
+                        Resources.LearnMoreText, Resources.NoWorkLoadsText, Resources.CreateWorkLoadText, undefined,"zerod-side-align-content")
                 }
             </div>
         );

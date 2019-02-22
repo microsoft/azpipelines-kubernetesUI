@@ -83,7 +83,7 @@ export class WorkloadsPivot extends BaseComponent<IWorkloadsPivotProps, IWorkloa
     private _getContent(): JSX.Element {
         return (this.state.workloadResourceSize === 0 ?
             KubeZeroData._getDefaultZeroData("https://kubernetes.io/docs/concepts/workloads/pods/pod/", Resources.LearnMoreText,
-                Resources.NoWorkLoadsText, Resources.NoWorkLoadsText)
+                Resources.NoWorkLoadsText, Resources.CreateWorkLoadText, undefined, "zerod-side-align-content")
             :
             <div>
                 {this._showComponent(KubeResourceType.Deployments) && this._getDeployments()}
