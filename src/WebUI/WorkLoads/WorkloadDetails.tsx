@@ -57,6 +57,7 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
             return (<PodsDetails
                 pods={this.state.pods}
                 parentName={parentName}
+                onBackButtonClick={this._setSelectedPodStateFalse}
             />);
         }
 
@@ -93,6 +94,13 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
         }
 
         return null;
+    }
+
+    private _setSelectedPodStateFalse = () => {
+        this.setState({
+            showSelectedPod: false,
+            selectedPod: null
+        });
     }
 
     private static _getColumns(): ITableColumn<any>[] {

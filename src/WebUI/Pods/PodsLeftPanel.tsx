@@ -9,10 +9,12 @@ import { Card } from "azure-devops-ui/Card";
 import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
 import { format } from "azure-devops-ui/Core/Util/String";
 import { Duration } from "azure-devops-ui/Duration";
-import { TitleSize } from "azure-devops-ui/Header";
 import { LabelGroup, WrappingBehavior } from "azure-devops-ui/Label";
 import { IStatusProps, Statuses } from "azure-devops-ui/Status";
 import { ITableColumn, Table } from "azure-devops-ui/Table";
+import { ListSelection, IListSelection } from "azure-devops-ui/List";
+import { Button } from "azure-devops-ui/Button";
+import { Header, IHeaderProps, TitleSize } from "azure-devops-ui/Header";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
 import { BaseKubeTable } from "../Common/BaseKubeTable";
@@ -36,6 +38,7 @@ export interface IPodsLeftPanelProperties extends IVssComponentProperties {
     pods: V1Pod[];
     parentName: string;
     onSelectionChange?: (event: React.SyntheticEvent<HTMLElement>, selectedItem: V1Pod) => void;
+    onBackButtonClick?: () => void;
 }
 
 export class PodsLeftPanel extends BaseComponent<IPodsLeftPanelProperties> {
@@ -48,6 +51,11 @@ export class PodsLeftPanel extends BaseComponent<IPodsLeftPanelProperties> {
         );
     }
 
+    public componentDidMount() {
+        // Select the first pod in left panel by default
+        this._selection.select(0);
+    }
+
     private _onSelectionChange = (event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>) => {
         if (this.props.onSelectionChange) {
             this.props.onSelectionChange(event, this.props.pods[tableRow.index]);
@@ -55,8 +63,13 @@ export class PodsLeftPanel extends BaseComponent<IPodsLeftPanelProperties> {
     }
 
     private _getHeader(): JSX.Element | null {
-        /* ToDo :: Add back button here when we have support for the same */
-        return (<h2 className="pod-left-panel-header">{this.props.parentName}</h2>);
+        return (
+            <Header
+                title={this.props.parentName}
+                titleIconProps={{ iconName: "Back", onClick: this.props.onBackButtonClick, className: "pod-left-panel-back-button" }}
+                titleSize={TitleSize.Large}
+                className={"pod-left-panel-header"}
+            />);
     }
 
     private _getPodsList(): JSX.Element | null {
@@ -83,7 +96,7 @@ export class PodsLeftPanel extends BaseComponent<IPodsLeftPanelProperties> {
                         showLines={true}
                         singleClickActivation={false}
                         onSelect={this._onSelectionChange}
-                        //focuszoneProps={{focusOnMount: true}}
+                        selection={this._selection}
                     />
                 </div> : null
         );
@@ -125,6 +138,9 @@ export class PodsLeftPanel extends BaseComponent<IPodsLeftPanelProperties> {
                 statusDescription={pod.metadata.name}
             />
         );
+
         return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
+
+    private _selection: IListSelection = new ListSelection();
 }

@@ -12,6 +12,7 @@ import { PodsRightPanelTabsKeys } from "../Constants";
 import { IVssComponentProperties } from "../Types";
 import "./PodsRightPanel.scss";
 import { PodOverview } from "./PodOverview";
+import { Header, IHeaderProps, TitleSize } from "azure-devops-ui/Header";
 
 export interface IPodRightPanelProps extends IVssComponentProperties {
     pod: V1Pod;
@@ -64,7 +65,12 @@ export class PodsRightPanel extends BaseComponent<IPodRightPanelProps, IPodsRigh
     }
 
     private _getHeader(): JSX.Element | null {
-        return (<h2 className="pod-right-panel-header">{(this.props.pod.metadata && this.props.pod.metadata.name) || ""}</h2>);
+        return (
+            <Header
+                title={(this.props.pod.metadata && this.props.pod.metadata.name) || ""}
+                titleSize={TitleSize.Large}
+                className={"pod-right-panel-header"}
+            />);
     }
 
     private _onSelectedTabChanged = (selectedTab: string): void => {
