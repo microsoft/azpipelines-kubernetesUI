@@ -66,6 +66,7 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
             return (<PodsDetails
                 pods={this.state.pods}
                 parentName={serviceName}
+                onBackButtonClick={this._setSelectedPodStateFalse}
             />);
         }
 
@@ -221,6 +222,13 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
         this.setState({
             showSelectedPod: true,
             selectedPod: pod
+        });
+    }
+
+    private _setSelectedPodStateFalse = () => {
+        this.setState({
+            showSelectedPod: false,
+            selectedPod: null
         });
     }
 

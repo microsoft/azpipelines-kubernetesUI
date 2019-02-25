@@ -4,14 +4,16 @@
     margin-top: 15px;
 
     .pod-left-panel-header {
-        padding-left: 20px;
+        .pod-left-panel-back-button {
+            cursor: pointer;
+        }
     }
 
     .pod-left-panel-table-header {
         padding-left: 20px;
-        margin-top: 30px;
-        margin-bottom: 30px;
-        font-size: 14px;
+        margin-top: 15px;
+        margin-bottom: 20px;
+        font-size: $fontSizeM;
         font-weight: $fontWeightSemiBold;
     }
 }

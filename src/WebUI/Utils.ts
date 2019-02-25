@@ -110,6 +110,7 @@ export class Utils {
                 imageString = images[0];
             }
         }
+        
         return imageString;
     }
 }

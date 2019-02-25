@@ -28,7 +28,7 @@ export interface ITableComponentProperties<T> extends IVssComponentProperties {
     headingText?: string | JSX.Element;
     headingDescription?: string;
     hideHeaders?: boolean;
-    hideLines?:boolean;
+    hideLines?: boolean;
     items: T[];
     columns: ITableColumn<T>[];
     onItemActivated?: (event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>, selectedItem: any) => void;
@@ -99,7 +99,7 @@ export class BaseKubeTable<T> extends BaseComponent<ITableComponentProperties<T>
         );
     }
 
-    public static renderTableCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<any>, itemToRender: React.ReactNode, statusProps?:IResourceStatusProps): JSX.Element {
+    public static renderTableCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<any>, itemToRender: React.ReactNode, statusProps?: IResourceStatusProps): JSX.Element {
         return (
             <SimpleTableCell columnIndex={columnIndex} tableColumn={tableColumn} key={"col-" + columnIndex}>
                 {statusProps && <ResourceStatus {...statusProps} />}
@@ -121,8 +121,8 @@ export class BaseKubeTable<T> extends BaseComponent<ITableComponentProperties<T>
                         <span className="overflow-ellipsis">{subText}</span>
                     </Tooltip>
                 </div>
-                }
-                iconProps={statusProps ? {render: (key:string | undefined) => <ResourceStatus {...statusProps} />} :{}}
+            }
+                iconProps={statusProps ? { render: (key: string | undefined) => <ResourceStatus {...statusProps} /> } : {}}
                 key={"col-" + columnIndex} />
         );
     }

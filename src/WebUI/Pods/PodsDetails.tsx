@@ -15,6 +15,7 @@ import { PodsRightPanel } from "./PodsRightPanel";
 export interface IPodsDetailsProperties extends IVssComponentProperties {
     pods: V1Pod[];
     parentName: string;
+    onBackButtonClick?: () => void;
 }
 
 export interface IPodsDetailsState {
@@ -39,7 +40,8 @@ export class PodsDetails extends BaseComponent<IPodsDetailsProperties, IPodsDeta
             <PodsLeftPanel
                 pods={this.props.pods}
                 parentName={this.props.parentName}
-                onSelectionChange={this._onPodSelectionChange} />
+                onSelectionChange={this._onPodSelectionChange}
+                onBackButtonClick={this.props.onBackButtonClick} />
         );
 
         const rightPanel = (selectedPod ?
