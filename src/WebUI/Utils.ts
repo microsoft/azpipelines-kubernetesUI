@@ -3,7 +3,7 @@
     Licensed under the MIT license.
 */
 
-import { V1ObjectMeta, V1PodStatus, V1PodTemplateSpec, V1Container } from "@kubernetes/client-node";
+import { V1ObjectMeta, V1PodStatus, V1PodTemplateSpec, V1Container, V1PodSpec } from "@kubernetes/client-node";
 import { ObservableArray } from "azure-devops-ui/Core/Observable";
 import { format, localeFormat } from "azure-devops-ui/Core/Util/String";
 import { ILabelModel } from "azure-devops-ui/Label";
@@ -69,7 +69,6 @@ export class Utils {
         return undefined;
     }
     public static generateEqualsConditionLabelSelector(labels: { [key: string]: string }): string {
-        console.log(labels);
         let labelSelector: string = "";
         if (labels) {
             const keySet = Object.keys(labels);
@@ -95,34 +94,21 @@ export class Utils {
         return true;
     }
 
-    public static getPodImageName(podTemplate: V1PodTemplateSpec): string | null {
-        if (podTemplate
-            && podTemplate.spec
-            && podTemplate.spec.containers
-            && podTemplate.spec.containers.length > 0) {
-            const imageText: string = Utils.getImageText(podTemplate.spec.containers);
-            return imageText;
-        }
-
-        return null;
-    }
-
-    public static getImageText(containers: V1Container[]): string {
-        let imageCountMap: { [key: string]: number } = {};
+    public static getImageText(podSpec: V1PodSpec | undefined): string {
+        let images: string[] = [];
         let imageString: string = "";
-        containers.forEach(container => {
-            if (!imageCountMap[container.image]) {
-                imageCountMap[container.image] = 1;
-            } else {
-                imageCountMap[container.image] += 1;
-            }
-        });
+        if (podSpec && podSpec.containers && podSpec.containers.length > 0) {
+            podSpec.containers.forEach(container => {
+                if (images.indexOf(container.image) < 0) {
+                    images.push(container.image)
+                }
+            });
 
-        const keys = Object.keys(imageCountMap);
-        if (keys.length > 1) {
-            imageString = localeFormat(Resources.MoreImagesText, keys[0], keys.length - 1);
-        } else {
-            imageString = keys[0];
+            if (images.length > 1) {
+                imageString = localeFormat(Resources.MoreImagesText, images[0], images.length - 1);
+            } else {
+                imageString = images[0];
+            }
         }
         return imageString;
     }

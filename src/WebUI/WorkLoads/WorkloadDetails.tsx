@@ -175,7 +175,7 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
         else {
             // Todo :: Add support for making Image a link to Image Details view
             itemToRender = <div className="w-details-cell-value">
-                {Utils.getPodImageName(tableItem.podTemplate)}
+                {Utils.getImageText(tableItem.podTemplate.spec)}
             </div>;
         }
 

@@ -45,12 +45,7 @@ export class PodOverview extends BaseComponent<IPodOverviewProps> {
             ColumnFill
         ];
 
-        let image: string = "";
-        if (pod.spec && pod.spec.containers && pod.spec.containers.length > 0) {
-            const containersCount = pod.spec.containers.length;
-            const defaultImage = pod.spec.containers[0].image;
-            image = containersCount > 1 ? Utils.getImageText(pod.spec.containers): defaultImage;
-        }
+        const image: string = Utils.getImageText(pod.spec);
 
         const tableItems = new ArrayItemProvider<any>([
             { key: Resources.Created, value: pod.metadata.creationTimestamp ? new Date(pod.metadata.creationTimestamp) : new Date().getTime() },
