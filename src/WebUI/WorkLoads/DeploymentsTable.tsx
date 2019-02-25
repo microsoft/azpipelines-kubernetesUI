@@ -37,6 +37,7 @@ const colDataClassName: string = "dc-col-data";
 export interface IDeploymentsTableProperties extends IVssComponentProperties {
     kubeService: IKubeService;
     nameFilter?: string;
+    markTTI?: () => void;
 }
 
 export interface IDeploymentsTableState {
@@ -58,8 +59,8 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
         this._store.addListener(WorkloadsEvents.ReplicaSetsFetchedEvent, this._onReplicaSetsFetched);
     }
 
-    public componentWillUnmount(): void {
-        this._store.removeListener(WorkloadsEvents.ReplicaSetsFetchedEvent, this._onReplicaSetsFetched);
+    public componentDidUpdate(prevProps: IDeploymentsTableProperties, prevState: IDeploymentsTableState) {
+        this._markTTI(prevProps, prevState);
     }
 
     public render(): React.ReactNode {
@@ -74,6 +75,10 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
         }
 
         return null;
+    }
+
+    public componentWillUnmount(): void {
+        this._store.removeListener(WorkloadsEvents.ReplicaSetsFetchedEvent, this._onReplicaSetsFetched);
     }
 
     // Deployments have already been populated in store by KubeSummary parent component
@@ -295,6 +300,19 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
 
         return null;
     }
+
+    private _markTTI(prevProps: IDeploymentsTableProperties, prevState: IDeploymentsTableState): void {
+        if (!this._isTTIMarked && this.props.markTTI) {
+            // if previously replicaSet did not exist and is rendered just now
+            if ((!prevState.replicaSetList || !prevState.replicaSetList.items) && 
+                (this.state.replicaSetList && this.state.replicaSetList.items)) {
+                    this.props.markTTI();
+                    this._isTTIMarked = true;
+            }
+        }
+    }
+
+    private _isTTIMarked: boolean = false;
 
     private _store: WorkloadsStore;
     private _actionCreator: WorkloadsActionsCreator;
