@@ -54,6 +54,7 @@ export interface IKubeSummaryProps extends IVssComponentProperties {
     title: string;
     kubeService: IKubeService;
     namespace?: string;
+    markTTI?: () => void;
 }
 
 export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesContainerState> {
@@ -177,7 +178,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
                 </TabBar>
                 <TabContent>
                     {this.state.selectedPivotKey === servicesPivotItemKey && <ServicesPivot kubeService={this.props.kubeService} namespace={this.state.namespace} filter={this.state.svcFilter} filterToggled={servicesFilterToggled} />}
-                    {this.state.selectedPivotKey === workloadsPivotItemKey && <WorkloadsPivot kubeService={this.props.kubeService} namespace={this.state.namespace} filter={this.state.workloadsFilter} filterToggled={workloadsFilterToggled} />}
+                    {this.state.selectedPivotKey === workloadsPivotItemKey && <WorkloadsPivot kubeService={this.props.kubeService} namespace={this.state.namespace} filter={this.state.workloadsFilter} filterToggled={workloadsFilterToggled} markTTI={this.props.markTTI} />}
                 </TabContent>
             </div>
         );

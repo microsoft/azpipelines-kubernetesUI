@@ -34,6 +34,7 @@ export interface IWorkloadsPivotProps extends IVssComponentProperties {
     filter: Filter;
     namespace?: string;
     filterToggled: ObservableValue<boolean>;
+    markTTI?: () => void;
 }
 
 export class WorkloadsPivot extends BaseComponent<IWorkloadsPivotProps, IWorkloadsPivotState> {
@@ -111,6 +112,7 @@ export class WorkloadsPivot extends BaseComponent<IWorkloadsPivotProps, IWorkloa
             key={format("dc-{0}", this.props.namespace || "")}
             kubeService={this.props.kubeService}
             nameFilter={this._getNameFilterValue()}
+            markTTI={this.props.markTTI}
         />);
     }
 
