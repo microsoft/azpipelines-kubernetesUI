@@ -12,16 +12,18 @@ import { Link } from "azure-devops-ui/Link";
 import "./Common.scss";
 import "./BaseKubeTable.scss";
 import "./Webplatform.scss";
+import "./KubeZeroData.scss";
 
 export interface IKubeZeroDataProps extends IVssComponentProperties {
     title?: string;
     hyperLink?: string;
     descriptionText?: string;
     hyperLinkLabel?: string;
-    additionalHelpText?: string;
     imagePath?: string;
     imageAltText?: string;
     className?: string;
+    primaryText?: string;
+    primaryTextClassName?: string;
     //This prop is used when zero data needs to be a component rather than full page render
     renderOnCard?: boolean; 
 }
@@ -49,24 +51,18 @@ export class KubeZeroData extends BaseComponent<IKubeZeroDataProps> {
         );
     }
 
-    public static _getDefaultZeroData(hyperLink: string, hyperLinkLabel: string, description: string,
-                                    additionalText: string, title?: string, className?: string, renderOnCard?: boolean): JSX.Element{
+    public static _getDefaultZeroData(zeroDataProps: IKubeZeroDataProps): JSX.Element{
         return (
             <KubeZeroData
                 imagePath={require("../../img/zero_data.png")}
-                title={title}
-                hyperLink={hyperLink}
-                hyperLinkLabel={hyperLinkLabel}
-                descriptionText={description}
-                additionalHelpText={additionalText}
-                className={className}
-                renderOnCard={renderOnCard}
+                {...zeroDataProps}
             />
         );
     }
 
     private _getTextArea(): JSX.Element {
         return (<div>
+            {this.props.primaryText ? <span className={this.props.primaryTextClassName? this.props.primaryTextClassName: "zerod-primary-text"}>{this.props.primaryText}</span>: null}<br />
             {this._getDescription()}<br />
             {this._getHyperLink()}
         </div>);
@@ -82,9 +78,9 @@ export class KubeZeroData extends BaseComponent<IKubeZeroDataProps> {
     private _getHyperLink(): JSX.Element | null {
         if (this.props.hyperLink) {
             return (<span>
-                <Link href={this.props.hyperLink} target="_blank" rel="nofollow noopener" ariaDescribedBy={this.props.additionalHelpText}>
+                <Link href={this.props.hyperLink} target="_blank" rel="nofollow noopener" ariaDescribedBy={this.props.hyperLinkLabel}>
                     {this.props.hyperLinkLabel}
-                </Link>{" "}{this.props.additionalHelpText}
+                </Link>
             </span>);
         }
         return null;

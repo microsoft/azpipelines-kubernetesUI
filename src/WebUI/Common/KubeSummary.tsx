@@ -30,7 +30,7 @@ import { WorkloadsActionsCreator } from "../Workloads/WorkloadsActionsCreator";
 import { WorkloadsPivot } from "../Workloads/WorkloadsPivot";
 import { WorkloadsStore } from "../Workloads/WorkloadsStore";
 import "./KubeSummary.scss";
-import { KubeZeroData } from "./KubeZeroData";
+import { KubeZeroData, IKubeZeroDataProps } from "./KubeZeroData";
 import { Utils } from "../Utils";
 
 const workloadsPivotItemKey: string = "workloads";
@@ -145,11 +145,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         return (
             <div className="main-content">
                 {this._getMainHeading()}
-                {this.state.resourceSize > 0 ?
-                    this._getMainPivot() :
-                    KubeZeroData._getDefaultZeroData("https://kubernetes.io/docs/concepts/workloads/pods/pod/",
-                        Resources.LearnMoreText, Resources.NoWorkLoadsText, Resources.CreateWorkLoadText, undefined,"zerod-side-align-content")
-                }
+                {this.state.resourceSize > 0 ? this._getMainPivot() : this._getZeroData()}
             </div>
         );
     }
@@ -231,6 +227,17 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
                 </ConditionalChildren>
             </div>
         );
+    }
+
+    private _getZeroData(): JSX.Element {
+        const zeroDataProps: IKubeZeroDataProps = {
+            hyperLink: "https://kubernetes.io/docs/concepts/workloads/pods/pod/",
+            hyperLinkLabel: Resources.LearnMoreKubeResourceText,
+            descriptionText: Resources.DeployKubeResourceText,
+            primaryText: Resources.StartUsingKubeResourceText,
+            className: "zerod-side-align-content"
+        }
+        return (KubeZeroData._getDefaultZeroData(zeroDataProps));
     }
 
     private _selectedItemViewMap: { [selectedItemKey: string]: (selectedItem: any) => JSX.Element | null } = {};

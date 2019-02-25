@@ -10,7 +10,7 @@ import { Filter, IFilterItemState, IFilterState } from "azure-devops-ui/Utilitie
 import * as React from "react";
 import { IKubeService } from "../../Contracts/Contracts";
 import { KubeResourceType } from "../../Contracts/KubeServiceBase";
-import { KubeZeroData } from "../Common//KubeZeroData";
+import { KubeZeroData, IKubeZeroDataProps } from "../Common//KubeZeroData";
 import { NameKey, TypeKey } from "../Common/KubeFilterBar";
 import "../Common/KubeSummary.scss";
 import { WorkloadsEvents } from "../Constants";
@@ -81,10 +81,7 @@ export class WorkloadsPivot extends BaseComponent<IWorkloadsPivotProps, IWorkloa
     }
 
     private _getContent(): JSX.Element {
-        return (this.state.workloadResourceSize === 0 ?
-            KubeZeroData._getDefaultZeroData("https://kubernetes.io/docs/concepts/workloads/pods/pod/", Resources.LearnMoreText,
-                Resources.NoWorkLoadsText, Resources.CreateWorkLoadText, undefined, "zerod-side-align-content")
-            :
+        return (this.state.workloadResourceSize === 0 ? this._getZeroData() :
             <div>
                 {this._showComponent(KubeResourceType.Deployments) && this._getDeployments()}
                 {this._getOtherWorkloadsComponent()}
@@ -135,6 +132,17 @@ export class WorkloadsPivot extends BaseComponent<IWorkloadsPivotProps, IWorkloa
         }
 
         return true;
+    }
+
+    private _getZeroData(): JSX.Element {
+        const zeroDataProps: IKubeZeroDataProps = {
+            hyperLink: "https://kubernetes.io/docs/concepts/workloads/pods/pod/",
+            hyperLinkLabel: Resources.LearnMoreText,
+            descriptionText: Resources.WorkloadsZeroDataText,
+            primaryText: Resources.DeployWorkloads,
+            className: "zerod-side-align-content"
+        }
+        return (KubeZeroData._getDefaultZeroData(zeroDataProps));
     }
 
     private _workloadsStore: WorkloadsStore;

@@ -9,7 +9,7 @@ import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { Filter, IFilterItemState, IFilterState } from "azure-devops-ui/Utilities/Filter";
 import * as React from "react";
 import { IKubeService } from "../../Contracts/Contracts";
-import { KubeZeroData } from "../Common//KubeZeroData";
+import { KubeZeroData, IKubeZeroDataProps } from "../Common//KubeZeroData";
 import { NameKey, TypeKey } from "../Common/KubeFilterBar";
 import "../Common/KubeSummary.scss";
 import { ServicesEvents } from "../Constants";
@@ -68,10 +68,7 @@ export class ServicesPivot extends BaseComponent<IServicesPivotProps, IServicesP
 
     private _getContent(): JSX.Element {
         const serivceSize: number = this.state.serviceList && this.state.serviceList.items ? this.state.serviceList.items.length : 0;
-        return (serivceSize === 0 ?
-            KubeZeroData._getDefaultZeroData("https://kubernetes.io/docs/concepts/services-networking/service/",
-                Resources.LearnMoreText, Resources.NoServicesText, Resources.CreateServiceText)
-            :
+        return (serivceSize === 0 ? this._getZeroData() :
             <ServicesTable
                 serviceList={this.state.serviceList || {} as V1ServiceList}
                 nameFilter={this._getNameFilterValue()}
@@ -98,6 +95,17 @@ export class ServicesPivot extends BaseComponent<IServicesPivotProps, IServicesP
         const filterItem: IFilterItemState | null = filterState ? filterState[TypeKey] : null;
         const selections: any[] = filterItem ? filterItem.value : [];
         return selections;
+    }
+
+    private _getZeroData(): JSX.Element{
+        const zeroDataProps: IKubeZeroDataProps = {
+            hyperLink: "https://kubernetes.io/docs/concepts/services-networking/service/",
+            hyperLinkLabel: Resources.LearnMoreText,
+            primaryText: Resources.DeployServices,
+            descriptionText: Resources.StartingUsingServiceText,
+            className: "zerod-side-align-content"
+        }
+        return (KubeZeroData._getDefaultZeroData(zeroDataProps));
     }
 
     private _store: ServicesStore;

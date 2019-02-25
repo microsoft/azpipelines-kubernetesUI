@@ -25,7 +25,7 @@ import { V1Pod, V1ObjectMeta, V1PodTemplateSpec } from "@kubernetes/client-node"
 import "./WorkloadDetails.scss";
 import "../Common/Webplatform.scss";
 import { PodsStore } from "../Pods/PodsStore";
-import { KubeZeroData } from "../Common/KubeZeroData";
+import { KubeZeroData, IKubeZeroDataProps } from "../Common/KubeZeroData";
 
 export interface IWorkloadDetailsProperties extends IVssComponentProperties {
     parentMetaData: V1ObjectMeta;
@@ -143,9 +143,12 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
 
     private _getAssociatedPods(): JSX.Element | null {
         if (this.state.pods.length === 0) {
-            return KubeZeroData._getDefaultZeroData("https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/",
-                Resources.LearnMoreText, Resources.NoPodsFoundText,
-                Resources.LinkSvcToPodsText, Resources.PodsText);
+            const zeroDataProps: IKubeZeroDataProps = {
+                hyperLink: "https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/",
+                hyperLinkLabel: Resources.LearnMoreText,
+                descriptionText: Resources.NoPodsFoundText
+            }
+            return KubeZeroData._getDefaultZeroData(zeroDataProps);
         }
 
         return (
