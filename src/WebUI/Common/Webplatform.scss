@@ -5,6 +5,12 @@
     padding-bottom: 0px;
 }
 
+.pod-overview-key .bolt-table-cell-content,
+.pod-overview-value .bolt-table-cell-content{
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
 .workload-details-card {
     .bolt-table-cell-content {
         padding-top: 0px;

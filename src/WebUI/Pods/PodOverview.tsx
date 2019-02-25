@@ -47,9 +47,7 @@ export class PodOverview extends BaseComponent<IPodOverviewProps> {
 
         let image: string = "";
         if (pod.spec && pod.spec.containers && pod.spec.containers.length > 0) {
-            const containersCount = pod.spec.containers.length;
-            const defaultImage = pod.spec.containers[0].image;
-            image = containersCount > 1 ? localeFormat(Resources.MoreImagesText, defaultImage, containersCount - 1) : defaultImage;
+            image = Utils.getImageText(pod.spec.containers);
         }
 
         const tableItems = new ArrayItemProvider<any>([
