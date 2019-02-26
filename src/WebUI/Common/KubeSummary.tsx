@@ -15,7 +15,7 @@ import { Page } from "azure-devops-ui/Page"
 import { Filter, FILTER_CHANGE_EVENT, IFilterState } from "azure-devops-ui/Utilities/Filter";
 import * as React from "react";
 import { IKubeService } from "../../Contracts/Contracts";
-import { SelectedItemKeys, ServicesEvents, WorkloadsEvents } from "../Constants";
+import { SelectedItemKeys, ServicesEvents, WorkloadsEvents, HyperLinks } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
 import { PodOverview } from "../Pods/PodOverview";
@@ -30,7 +30,7 @@ import { WorkloadsActionsCreator } from "../Workloads/WorkloadsActionsCreator";
 import { WorkloadsPivot } from "../Workloads/WorkloadsPivot";
 import { WorkloadsStore } from "../Workloads/WorkloadsStore";
 import "./KubeSummary.scss";
-import { KubeZeroData } from "./KubeZeroData";
+import { KubeZeroData, IKubeZeroDataProps } from "./KubeZeroData";
 import { Utils } from "../Utils";
 
 const workloadsPivotItemKey: string = "workloads";
@@ -146,11 +146,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         return (
             <div className="main-content">
                 {this._getMainHeading()}
-                {this.state.resourceSize > 0 ?
-                    this._getMainPivot() :
-                    KubeZeroData._getDefaultZeroData("https://kubernetes.io/docs/concepts/workloads/pods/pod/",
-                        Resources.LearnMoreText, Resources.NoWorkLoadsText, Resources.CreateWorkLoadText)
-                }
+                {this.state.resourceSize > 0 ? this._getMainPivot() : this._getZeroData()}
             </div>
         );
     }
@@ -232,6 +228,17 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
                 </ConditionalChildren>
             </div>
         );
+    }
+
+    private _getZeroData(): JSX.Element {
+        const zeroDataProps: IKubeZeroDataProps = {
+            hyperLink: HyperLinks.WorkloadsLink,
+            hyperLinkLabel: Resources.LearnMoreKubeResourceText,
+            descriptionText: Resources.DeployKubeResourceText,
+            primaryText: Resources.StartUsingKubeResourceText,
+            className: "zerod-side-align-content"
+        }
+        return (KubeZeroData._getDefaultZeroData(zeroDataProps));
     }
 
     private _selectedItemViewMap: { [selectedItemKey: string]: (selectedItem: any) => JSX.Element | null } = {};

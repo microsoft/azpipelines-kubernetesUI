@@ -157,8 +157,7 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
             statusProps: DeploymentsTable._getPodsStatusProps(replica.status.availableReplicas, replica.status.replicas),
             showRowBorder: (replicaSetLength === (index + 1)),
             deployment: deployment,
-            //todo :: should we show all images of all containers in a replica set?
-            image: Utils.getImageText(replica.spec.template.spec.containers),
+            image: Utils.getImageText(replica.spec.template.spec),
             creationTimeStamp: replica.metadata.creationTimestamp,
             kind: replica.kind || "ReplicaSet"
         };

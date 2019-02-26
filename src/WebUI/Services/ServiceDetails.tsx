@@ -13,9 +13,9 @@ import * as Date_Utils from "azure-devops-ui/Utilities/Date";
 import * as React from "react";
 import { IKubeService } from "../../Contracts/Contracts";
 import { BaseKubeTable } from "../Common/BaseKubeTable";
-import { KubeZeroData } from "../Common/KubeZeroData";
+import { KubeZeroData, IKubeZeroDataProps } from "../Common/KubeZeroData";
 import { ResourceStatus } from "../Common/ResourceStatus";
-import { ServicesEvents } from "../Constants";
+import { ServicesEvents, HyperLinks } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
 import { PodsDetails  } from "../Pods/PodsDetails";
@@ -197,9 +197,16 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
 
     private _getAssociatedPods(): JSX.Element | null {
         if (this.state.pods.length === 0) {
-            return KubeZeroData._getDefaultZeroData("https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/",
-                Resources.LearnMoreText, Resources.NoPodsForSvcText,
-                Resources.LinkSvcToPodsText, Resources.AssociatedPodsText);
+            const zeroDataProps: IKubeZeroDataProps = {
+                hyperLink: HyperLinks.LinkToPodsUsingLabelsLink,
+                hyperLinkLabel: Resources.NoPodsForSvcLinkText,
+                descriptionText: Resources.NoPodsForSvcText,
+                title: Resources.AssociatedPodsText,
+                primaryText: Resources.NoPodsText,
+                primaryTextClassName: "primary-text",
+                renderOnCard: true
+            }
+            return KubeZeroData._getDefaultZeroData(zeroDataProps);
         }
         return (
             <PodsTable
