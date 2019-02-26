@@ -61,8 +61,10 @@ export class KubeZeroData extends BaseComponent<IKubeZeroDataProps> {
     }
 
     private _getTextArea(): JSX.Element {
+        const primaryText: string | undefined = this.props.primaryText;
+        const primaryTxtClass: string = this.props.primaryTextClassName ? this.props.primaryTextClassName : "zerod-primary-text";
         return (<div>
-            {this.props.primaryText ? <span className={this.props.primaryTextClassName? this.props.primaryTextClassName: "zerod-primary-text"}>{this.props.primaryText}</span>: null}<br />
+            {primaryText ? <span className={primaryTxtClass}>{primaryText}</span>: null}<br />
             {this._getDescription()}<br />
             {this._getHyperLink()}
         </div>);

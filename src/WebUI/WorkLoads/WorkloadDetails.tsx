@@ -4,12 +4,11 @@
 */
 
 import { BaseComponent } from "@uifabric/utilities";
-import { localeFormat, format } from "azure-devops-ui/Core/Util/String";
+import { localeFormat } from "azure-devops-ui/Core/Util/String";
 import { LabelGroup, WrappingBehavior } from "azure-devops-ui/Label";
-import { ITableColumn, SimpleTableCell as renderTableCell, Table } from "azure-devops-ui/Table";
+import { ITableColumn } from "azure-devops-ui/Table";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import * as Date_Utils from "azure-devops-ui/Utilities/Date";
-import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
 import * as Resources from "../Resources";
 import { IVssComponentProperties } from "../Types";
@@ -20,12 +19,13 @@ import { PodsDetails } from "../Pods/PodsDetails";
 import { ResourceStatus } from "../Common/ResourceStatus";
 import { StoreManager } from "../FluxCommon/StoreManager";
 import { BaseKubeTable } from "../Common/BaseKubeTable";
-import { IStatusProps, Statuses, StatusSize } from "azure-devops-ui/Status";
+import { IStatusProps, StatusSize } from "azure-devops-ui/Status";
 import { V1Pod, V1ObjectMeta, V1PodTemplateSpec } from "@kubernetes/client-node";
 import "./WorkloadDetails.scss";
 import "../Common/Webplatform.scss";
 import { PodsStore } from "../Pods/PodsStore";
 import { KubeZeroData, IKubeZeroDataProps } from "../Common/KubeZeroData";
+import { HyperLinks } from "../Constants";
 
 export interface IWorkloadDetailsProperties extends IVssComponentProperties {
     parentMetaData: V1ObjectMeta;
@@ -152,7 +152,7 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
     private _getAssociatedPods(): JSX.Element | null {
         if (this.state.pods.length === 0) {
             const zeroDataProps: IKubeZeroDataProps = {
-                hyperLink: "https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/",
+                hyperLink: HyperLinks.LinkToPodsUsingLabelsLink,
                 hyperLinkLabel: Resources.LearnMoreText,
                 descriptionText: Resources.NoPodsFoundText
             }

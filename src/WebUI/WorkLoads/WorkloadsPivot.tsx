@@ -24,6 +24,7 @@ import { DeploymentsTable } from "../Workloads/DeploymentsTable";
 import { OtherWorkloads } from "../Workloads/OtherWorkloadsTable";
 import { WorkloadsFilterBar } from "./WorkloadsFilterBar";
 import { WorkloadsStore } from "./WorkloadsStore";
+import { HyperLinks } from "../Constants";
 
 export interface IWorkloadsPivotState {
     workloadResourceSize: number;
@@ -136,7 +137,7 @@ export class WorkloadsPivot extends BaseComponent<IWorkloadsPivotProps, IWorkloa
 
     private _getZeroData(): JSX.Element {
         const zeroDataProps: IKubeZeroDataProps = {
-            hyperLink: "https://kubernetes.io/docs/concepts/workloads/pods/pod/",
+            hyperLink: HyperLinks.WorkloadsLink,
             hyperLinkLabel: Resources.LearnMoreText,
             descriptionText: Resources.WorkloadsZeroDataText,
             primaryText: Resources.DeployWorkloads,

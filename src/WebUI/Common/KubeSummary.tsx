@@ -15,7 +15,7 @@ import { Page } from "azure-devops-ui/Page"
 import { Filter, FILTER_CHANGE_EVENT, IFilterState } from "azure-devops-ui/Utilities/Filter";
 import * as React from "react";
 import { IKubeService } from "../../Contracts/Contracts";
-import { SelectedItemKeys, ServicesEvents, WorkloadsEvents } from "../Constants";
+import { SelectedItemKeys, ServicesEvents, WorkloadsEvents, HyperLinks } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
 import { PodOverview } from "../Pods/PodOverview";
@@ -231,7 +231,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
 
     private _getZeroData(): JSX.Element {
         const zeroDataProps: IKubeZeroDataProps = {
-            hyperLink: "https://kubernetes.io/docs/concepts/workloads/pods/pod/",
+            hyperLink: HyperLinks.WorkloadsLink,
             hyperLinkLabel: Resources.LearnMoreKubeResourceText,
             descriptionText: Resources.DeployKubeResourceText,
             primaryText: Resources.StartUsingKubeResourceText,

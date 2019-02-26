@@ -35,3 +35,9 @@ export namespace ServicesEvents {
 export namespace PodsEvents {
     export const PodsFetchedEvent: string = "ALL_PODS_FETCHED_EVENT";
 }
+
+export namespace HyperLinks {
+    export const WorkloadsLink: string = "https://kubernetes.io/docs/concepts/workloads/pods/pod/";
+    export const LinkToPodsUsingLabelsLink: string = "https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/";
+    export const ServicesLink: string = "https://kubernetes.io/docs/concepts/services-networking/service/";
+}

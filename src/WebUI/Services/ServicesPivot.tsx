@@ -12,7 +12,7 @@ import { IKubeService } from "../../Contracts/Contracts";
 import { KubeZeroData, IKubeZeroDataProps } from "../Common//KubeZeroData";
 import { NameKey, TypeKey } from "../Common/KubeFilterBar";
 import "../Common/KubeSummary.scss";
-import { ServicesEvents } from "../Constants";
+import { ServicesEvents, HyperLinks } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
 import * as Resources from "../Resources";
@@ -99,7 +99,7 @@ export class ServicesPivot extends BaseComponent<IServicesPivotProps, IServicesP
 
     private _getZeroData(): JSX.Element{
         const zeroDataProps: IKubeZeroDataProps = {
-            hyperLink: "https://kubernetes.io/docs/concepts/services-networking/service/",
+            hyperLink: HyperLinks.ServicesLink,
             hyperLinkLabel: Resources.LearnMoreText,
             primaryText: Resources.DeployServices,
             descriptionText: Resources.StartingUsingServiceText,

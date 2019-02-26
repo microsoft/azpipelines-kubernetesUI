@@ -132,7 +132,7 @@ export class PodsTable extends BaseComponent<IPodsTableProperties> {
     }
 
     private static _renderPodWorkload(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod): JSX.Element {
-        const textToRender = pod.metadata.ownerReferences[0].name;
+        const textToRender = pod.metadata.ownerReferences.length > 0 ? pod.metadata.ownerReferences[0].name : ""; 
         const itemToRender: React.ReactNode = (
             <Link
                 className="fontSizeM text-ellipsis bolt-table-link bolt-table-inline-link"

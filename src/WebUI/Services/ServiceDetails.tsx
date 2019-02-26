@@ -15,7 +15,7 @@ import { IKubeService } from "../../Contracts/Contracts";
 import { BaseKubeTable } from "../Common/BaseKubeTable";
 import { KubeZeroData, IKubeZeroDataProps } from "../Common/KubeZeroData";
 import { ResourceStatus } from "../Common/ResourceStatus";
-import { ServicesEvents } from "../Constants";
+import { ServicesEvents, HyperLinks } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
 import { PodsDetails  } from "../Pods/PodsDetails";
@@ -198,7 +198,7 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
     private _getAssociatedPods(): JSX.Element | null {
         if (this.state.pods.length === 0) {
             const zeroDataProps: IKubeZeroDataProps = {
-                hyperLink: "https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/",
+                hyperLink: HyperLinks.LinkToPodsUsingLabelsLink,
                 hyperLinkLabel: Resources.NoPodsForSvcLinkText,
                 descriptionText: Resources.NoPodsForSvcText,
                 title: Resources.AssociatedPodsText,
