@@ -46,5 +46,6 @@
     .vss-ZeroDataItem {
         flex-direction: row;
         text-align: justify !important; //todo: verify if this override can be achieved in any other way
+        max-width: unset !important;
     }
 }
