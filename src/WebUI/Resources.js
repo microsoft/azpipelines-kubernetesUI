@@ -39,11 +39,6 @@ define("Environments/Providers/Kubernetes/Resources", ["require", "exports"], fu
     exports.DeploymentText = "Deployment";
     exports.LearnMoreText = "Learn more";
     exports.NoPodsForSvcText = "This service currently does not map to any pods";
-    exports.NoWorkLoadsText = "No workloads are detected in this Kubernetes namespace";
-    exports.LinkSvcToPodsText = "about how labels and selectors can be used to map a service to pods";
-    exports.CreateWorkLoadText = "about how workloads can be added to the namespace";
-    exports.NoServicesText = "No services are detected in this Kubernetes namespace";
-    exports.CreateServiceText = "about how services can be added to the namespace";
     exports.ExternalIPAllocPending = "External IP allocation pending";
     exports.ExternalIPAllocated = "External IP allocated";
     exports.FindByNameText = "Find by {0} name";
@@ -66,5 +61,14 @@ define("Environments/Providers/Kubernetes/Resources", ["require", "exports"], fu
     exports.WorkloadText = "Workload";
     exports.WorkloadDetails = "{0} details";
     exports.PodStatusPending = "Pending";
-    exports.MoreImagesText = "{0} and {1} more"
+    exports.MoreImagesText = "{0} and {1} more";
+    exports.LearnMoreKubeResourceText = "Learn more about Kubernetes resource";
+    exports.DeployKubeResourceText = "Use this resource to deploy workloads and services";
+    exports.StartUsingKubeResourceText = "Start using resource!";
+    exports.StartingUsingServiceText = "You can also deploy services and track them in here";
+    exports.DeployServices = "Deploy services!";
+    exports.DeployWorkloads = "Deploy workloads!";
+    exports.WorkloadsZeroDataText = "You can also deploy all kinds of workloads like deployment, replicaset, daemonset etc., and track them in here";
+    exports.NoPodsForSvcLinkText = "Learn more about mapping a service";
+    exports.NoPodsText = "No pods";
 });
