@@ -18,6 +18,7 @@ import { Utils } from "../Utils";
 import "./PodOverview.scss";
 import "../Common/Webplatform.scss";
 import { IPodRightPanelProps } from "./PodsRightPanel";
+import { BaseKubeTable } from "../Common/BaseKubeTable";
 import { TitleSize } from "azure-devops-ui/Header";
 
 export interface IPodOverviewProps extends IPodRightPanelProps { }
@@ -49,13 +50,13 @@ export class PodOverview extends BaseComponent<IPodOverviewProps> {
 
         const tableItems = new ArrayItemProvider<any>([
             { key: Resources.Created, value: pod.metadata.creationTimestamp ? new Date(pod.metadata.creationTimestamp) : new Date().getTime() },
-            { key: Resources.AnnotationsText, value: pod.metadata.annotations || {} },
+            { key: Resources.AnnotationsText, value: pod.metadata.annotations || "" },
             { key: Resources.RestartPolicyText, value: pod.spec.restartPolicy || "" },
             { key: Resources.QoSClassText, value: pod.status.qosClass || "" },
             { key: Resources.NodeText, value: pod.spec.nodeName || "" },
             { key: Resources.ClusterIPText, value: "" },
             { key: Resources.ImageText, value: image },
-            { key: Resources.LabelsText, value: pod.metadata.labels || {} }
+            { key: Resources.LabelsText, value: pod.metadata.labels || "" }
         ]);
 
         return (
@@ -114,9 +115,8 @@ export class PodOverview extends BaseComponent<IPodOverviewProps> {
                 return renderTableCell(props);
 
             default:
-                return (<div className="kube-simple-cell">
-                    {renderSimpleCell(rowIndex, columnIndex, tableColumn, tableItem)}
-                </div>);
+                let itemToRender = <span className="pod-overview-value-cell">{value}</span>;
+                return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
         }
     }
 }

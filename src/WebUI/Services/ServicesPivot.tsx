@@ -21,6 +21,7 @@ import { IVssComponentProperties } from "../Types";
 import { ServicesActionsCreator } from "./ServicesActionsCreator";
 import { ServicesFilterBar } from "./ServicesFilterBar";
 import { ServicesStore } from "./ServicesStore";
+import "./ServicesPivot.scss";
 
 export interface IServicesPivotState {
     serviceList?: V1ServiceList;
@@ -50,7 +51,7 @@ export class ServicesPivot extends BaseComponent<IServicesPivotProps, IServicesP
 
     public render(): React.ReactNode {
         return (
-            <div className="item-padding">
+            <div className="item-padding services-pivot">
                 {this._getFilterBar()}
                 {this._getContent()}
             </div>
