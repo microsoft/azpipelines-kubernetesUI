@@ -25,6 +25,7 @@ import { OtherWorkloads } from "../Workloads/OtherWorkloadsTable";
 import { WorkloadsFilterBar } from "./WorkloadsFilterBar";
 import { WorkloadsStore } from "./WorkloadsStore";
 import { HyperLinks } from "../Constants";
+import "./WorkloadsPivot.scss";
 
 export interface IWorkloadsPivotState {
     workloadResourceSize: number;
@@ -60,7 +61,7 @@ export class WorkloadsPivot extends BaseComponent<IWorkloadsPivotProps, IWorkloa
 
     public render(): React.ReactNode {
         return (
-            <div className="item-padding">
+            <div className="item-padding workloads-pivot">
                 {this._getFilterBar()}
                 {this._getContent()}
             </div>
@@ -91,9 +92,13 @@ export class WorkloadsPivot extends BaseComponent<IWorkloadsPivotProps, IWorkloa
     }
 
     private _getFilterBar(): JSX.Element {
-        return (<WorkloadsFilterBar filter={this.props.filter}
-            filterToggled={this.props.filterToggled}
-        />);
+        return (
+            <WorkloadsFilterBar
+                filter={this.props.filter}
+                filterToggled={this.props.filterToggled}
+                className="workload-filter-margin"
+            />
+        );
     }
 
     private _getOtherWorkloadsComponent(): JSX.Element {

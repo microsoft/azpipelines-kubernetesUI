@@ -51,7 +51,7 @@ export class ServicesPivot extends BaseComponent<IServicesPivotProps, IServicesP
 
     public render(): React.ReactNode {
         return (
-            <div className="item-padding services-pivot">
+            <div className="services-pivot">
                 {this._getFilterBar()}
                 {this._getContent()}
             </div>
