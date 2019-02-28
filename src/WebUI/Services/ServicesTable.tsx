@@ -48,7 +48,7 @@ export class ServicesTable extends BaseComponent<IServicesComponentProperties> {
             return (
                 <div>{
                     <BaseKubeTable
-                        className={css("list-content", "depth-16")}
+                        className={css("list-content", "depth-16", "services-table")}
                         items={ServicesTable._getServiceItems(filteredSvc)}
                         columns={ServicesTable._getColumns()}
                         onItemActivated={this._openServiceItem}

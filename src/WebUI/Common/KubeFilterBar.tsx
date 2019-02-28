@@ -26,10 +26,10 @@ export const NameKey: string = "nameKey";
 export const TypeKey: string = "typeKey";
 
 export interface IFilterComponentProperties extends IVssComponentProperties {
-    filter: Filter,
-    keywordPlaceHolder: string,
-    pickListPlaceHolder: string,
-    filterToggled:ObservableValue<boolean>,
+    filter: Filter;
+    keywordPlaceHolder: string;
+    pickListPlaceHolder: string;
+    filterToggled: ObservableValue<boolean>;
     pickListItemsFn: () => any[];
     listItemsFn: (item:any) => IPickListItem;
 }
@@ -39,7 +39,7 @@ export class KubeFilterBar extends BaseComponent<IFilterComponentProperties, {}>
     public render(): React.ReactNode {
         return (
             <ConditionalChildren renderChildren={this.props.filterToggled}>
-                <FilterBar filter={this.props.filter}>
+                <FilterBar filter={this.props.filter} className={this.props.className || ""}>
                     <KeywordFilterBarItem filterItemKey={NameKey} placeholder={localeFormat(Resources.FindByNameText, this.props.keywordPlaceHolder.toLowerCase())} />
                     <PickListFilterBarItem
                         placeholder={this.props.pickListPlaceHolder}
