@@ -11,6 +11,7 @@ import * as Resources from "../Resources";
 import { PodsRightPanelTabsKeys } from "../Constants";
 import { IVssComponentProperties } from "../Types";
 import "./PodsRightPanel.scss";
+import "../Common/Webplatform.scss";
 import { PodOverview } from "./PodOverview";
 import { Header, IHeaderProps, TitleSize } from "azure-devops-ui/Header";
 

@@ -26,6 +26,7 @@ import "../Common/Webplatform.scss";
 import { PodsStore } from "../Pods/PodsStore";
 import { KubeZeroData, IKubeZeroDataProps } from "../Common/KubeZeroData";
 import { HyperLinks } from "../Constants";
+import { Header, TitleSize } from "azure-devops-ui/Header";
 
 export interface IWorkloadDetailsProperties extends IVssComponentProperties {
     parentMetaData: V1ObjectMeta;
@@ -85,10 +86,16 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
     private _getMainHeading(): JSX.Element | null {
         const metadata = this.props.parentMetaData;
         if (metadata) {
-            const headerItem: React.ReactNode = (<h2 className="title-heading">{metadata.name}</h2>);
+            const headerItem: React.ReactNode = (
+                <Header
+                    title={metadata.name}
+                    titleSize={TitleSize.Large}
+                    className={"w-details-heading"}
+                />);
+
             return (
                 <div className="content-main-heading">
-                    <ResourceStatus statusProps={this.props.statusProps} customDescription={headerItem} statusSize={StatusSize.l} />
+                    <ResourceStatus statusProps={this.props.statusProps} customDescription={headerItem} statusSize={StatusSize.l} className={"w-details-status-header"}/>
                 </div>
             );
         }

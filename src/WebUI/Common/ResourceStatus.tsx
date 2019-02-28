@@ -4,11 +4,11 @@
 */
 
 import * as React from "react";
-import { BaseComponent } from "@uifabric/utilities/lib";
+import { BaseComponent, css } from "@uifabric/utilities/lib";
 import { IStatusProps, Status, StatusSize } from "azure-devops-ui/Status";
 import { IVssComponentProperties } from "../Types";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
-import "./ResourceStatus.scss"
+import "./ResourceStatus.scss";
 
 export interface IResourceStatusProps extends IVssComponentProperties {
     statusProps: IStatusProps | undefined;
@@ -22,7 +22,7 @@ export class ResourceStatus extends BaseComponent<IResourceStatusProps, {}> {
 
     public render(): React.ReactNode {
         return (
-            <div className="kube-status-container">
+            <div className={css("kube-status-container", this.props.className)}>
                 {
                     this.props.toolTipText ?
                         <Tooltip text={this.props.toolTipText} overflowOnly={false} showOnFocus>

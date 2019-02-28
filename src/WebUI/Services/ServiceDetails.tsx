@@ -27,6 +27,7 @@ import { Utils } from "../Utils";
 import "./ServiceDetails.scss";
 import "../Common/Webplatform.scss";
 import { ServicesStore } from "./ServicesStore";
+import { Header, TitleSize } from "azure-devops-ui/Header";
 
 export interface IServiceDetailsProperties extends IVssComponentProperties {
     kubeService: IKubeService;
@@ -92,10 +93,15 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
                     statusProps = Statuses.Running;
                 }
             }
-            const headerItem: React.ReactNode = (<h2 className="title-heading">{item.package}</h2>);
+            const headerItem: React.ReactNode = (
+                <Header
+                    title={item.package}
+                    titleSize={TitleSize.Large}
+                    className={"s-details-heading"}
+                />);
             return (
                 <div className="content-main-heading">
-                    <ResourceStatus statusProps={statusProps} customDescription={headerItem} statusSize={StatusSize.l} />
+                    <ResourceStatus statusProps={statusProps} customDescription={headerItem} statusSize={StatusSize.l} className={"s-details-status-header"}/>
                 </div>
             );
         }

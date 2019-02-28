@@ -49,3 +49,10 @@
         max-width: unset !important;
     }
 }
+
+.s-details-heading, .w-details-heading {
+    &.bolt-header-with-commandbar.bolt-header{
+        padding-left: 0px;
+        padding-top: 0px;
+    }
+}
