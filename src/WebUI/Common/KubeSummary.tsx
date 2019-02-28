@@ -4,7 +4,7 @@
 */
 
 import { V1DaemonSet, V1ObjectMeta, V1Pod, V1PodTemplateSpec, V1ReplicaSet, V1StatefulSet } from "@kubernetes/client-node";
-import { BaseComponent } from "@uifabric/utilities";
+import { BaseComponent, css } from "@uifabric/utilities";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { localeFormat } from "azure-devops-ui/Core/Util/String";
 import { HeaderCommandBarWithFilter } from "azure-devops-ui/HeaderCommandBar";
@@ -32,6 +32,7 @@ import { WorkloadsStore } from "../Workloads/WorkloadsStore";
 import "./KubeSummary.scss";
 import { KubeZeroData, IKubeZeroDataProps } from "./KubeZeroData";
 import { Utils } from "../Utils";
+import { Header, TitleSize } from "azure-devops-ui/Header";
 
 const workloadsPivotItemKey: string = "workloads";
 const servicesPivotItemKey: string = "services";
@@ -151,14 +152,14 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         );
     }
 
-    private _getMainHeading(): JSX.Element {
+    private _getMainHeading(): JSX.Element | null {
         return (
-            <div className="content-main-heading">
-                {/* Todo :: Replace all html header elements with appropriate headers from platform*/}
-                <h2 className="title-heading">{this.props.title}</h2>
-                <div className={"sub-heading"}>{localeFormat(Resources.NamespaceHeadingText, this.state.namespace || "")}</div>
-            </div>
-        );
+            <Header
+                title={this.props.title}
+                titleSize={TitleSize.Large}
+                className={"content-main-heading"}
+                description={localeFormat(Resources.NamespaceHeadingText, this.state.namespace || "")}
+            />);
     }
 
     private _getMainPivot(): JSX.Element {

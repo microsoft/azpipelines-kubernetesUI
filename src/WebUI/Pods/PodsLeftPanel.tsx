@@ -102,35 +102,6 @@ export class PodsLeftPanel extends BaseComponent<IPodsLeftPanelProperties> {
         );
     }
 
-    private static _renderValueCell(
-        rowIndex: number,
-        columnIndex: number,
-        tableColumn: ITableColumn<any>,
-        tableItem: any): JSX.Element {
-        let { key, value } = tableItem;
-        switch (key) {
-            case Resources.Created:
-                value = (<span className="pods-left-panel-header-created-cell">
-                    <Duration startDate={value} endDate={new Date()} />
-                    {format("{0}", Resources.Ago)}
-                </span>);
-                break;
-            case Resources.LabelsText:
-                value = <LabelGroup
-                    labelProps={Utils.getUILabelModelArray(value)}
-                    wrappingBehavior={WrappingBehavior.freeFlow}
-                    fadeOutOverflow={true}
-                />;
-                break;
-        }
-
-        let itemToRender = <div className="kube-simple-cell">
-            <span className="pods-left-panel-header-key">{key + ": "}</span>
-            <span className="pods-left-panel-header-value">{value}</span>
-        </div>;
-        return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
-    }
-
     private static _renderPodNameCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod): JSX.Element {
         const itemToRender = (
             <ResourceStatus

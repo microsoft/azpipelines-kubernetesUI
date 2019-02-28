@@ -5,6 +5,14 @@
     margin-top: 15px;
 
     .pod-right-panel-header {
-        padding-left: 8px;
+        padding-left: 0px;
+    }
+
+    #tab-pod-details {
+        /* We require the first tab to be aligned with the card.
+          Since Tab element does not support className as a prop, we cannot set a particular class that applies only to first tab
+          Hence using id of first tab to set its padding
+        */
+        padding-left: 0px;
     }
 }
