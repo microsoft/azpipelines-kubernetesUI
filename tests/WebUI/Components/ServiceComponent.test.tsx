@@ -94,10 +94,9 @@ describe("ServiceDetails component tests", () => {
         expect(!!status && status.length > 0).toBeTruthy();
         expect(status.prop("color")).toStrictEqual("success")
 
-        //expecting the title to be of h2
-        const pageTitle = renderedHeading.find("h2");
+        const pageTitle = renderedHeading.find("Header");
         expect(!!pageTitle && pageTitle.length > 0).toBeTruthy();
-        expect(pageTitle.text()).toStrictEqual(item.package);
+        expect(pageTitle.prop("title")).toStrictEqual(item.package);
     });
 
     it("Check header when no service is available", () => {
