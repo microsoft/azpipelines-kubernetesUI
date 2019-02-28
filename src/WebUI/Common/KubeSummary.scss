@@ -12,11 +12,7 @@
     padding: 20px;
 
     .content-main-heading {
-        padding: 10px 10px;
-
-        .title-heading {
-            margin-bottom: 10px;
-        }
+        padding-left: 0px;
     }
 
     .sub-heading {
@@ -30,6 +26,14 @@
     }
 
     .content-with-pivot .item-padding {
-        padding-top: 16px
+        padding-top: 8px;
     }
+
+    /* We require the first tab to be aligned with the card.
+    Since Tab element does not support className as a prop, we cannot set a particular class that applies only to first tab
+    Hence using id of first tab to set its padding
+    */
+     #tab-workloads {
+         padding-left: 0px;
+     }
 }
