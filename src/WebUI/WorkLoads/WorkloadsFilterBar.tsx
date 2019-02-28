@@ -26,6 +26,7 @@ export class WorkloadsFilterBar extends BaseComponent<IWorkloadsFilterBarProps> 
             pickListItemsFn={this._pickListItems}
             listItemsFn={this._listItems}
             filterToggled={this.props.filterToggled}
+            className={this.props.className || ""}
         />);
     }
 

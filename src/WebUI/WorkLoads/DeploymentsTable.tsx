@@ -93,7 +93,7 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
     private _getDeploymentListView(filteredDeployments: V1Deployment[]) {
         let renderList: JSX.Element[] = [];
         DeploymentsTable._generateDeploymentReplicaSetMap(filteredDeployments, this.state.replicaSetList).forEach((entry, index) => {
-            let columnClassName = css("list-content", "depth-16", index > 0 ? "replica-with-pod-list" : "");
+            let columnClassName = css("list-content", "depth-16", "replica-with-pod-list", index > 0 ? "" : "first-deployment");
             renderList.push(<BaseKubeTable
                 key={format("dep-{0}", index)}
                 className={columnClassName}

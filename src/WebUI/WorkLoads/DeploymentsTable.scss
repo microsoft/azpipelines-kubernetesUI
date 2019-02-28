@@ -1,10 +1,8 @@
-@import "../Common/Common.scss";
-
 .replica-with-pod-list {
-    margin-top: 10px;
+    margin-top: 8px;
 
-    &.first-replica {
-        margin-top: 5px;
+    &.first-deployment {
+        margin-top: 0px;
     }
 }
 
