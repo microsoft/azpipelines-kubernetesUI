@@ -22,6 +22,7 @@ import { Utils } from "../Utils";
 import { ServicesActionsCreator } from "./ServicesActionsCreator";
 import { ServicesStore } from "./ServicesStore";
 import "./ServicesTable.scss";
+import { KubeZeroData } from "../Common/KubeZeroData";
 
 const packageKey: string = "package-col";
 const clusterIPKey: string = "cluster-ip-col";
@@ -56,9 +57,9 @@ export class ServicesTable extends BaseComponent<IServicesComponentProperties> {
                 }
                 </div>
             );
+        } else {
+            return KubeZeroData._getNoResultsZeroData();
         }
-
-        return null;
     }
 
     private _openServiceItem = (event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>, selectedItem: IServiceItem) => {

@@ -13,17 +13,17 @@ import "../Common/KubeSummary.scss";
 import * as Resources from "../Resources";
 import { IVssComponentProperties } from "../Types";
 
-export interface IWorkloadsFilterBarProps extends IVssComponentProperties {
+export interface IServiceFilterBarProps extends IVssComponentProperties {
     filter: Filter;
     filterToggled: ObservableValue<boolean>;
     serviceList: V1ServiceList;
 }
 
-export class ServicesFilterBar extends BaseComponent<IWorkloadsFilterBarProps> {
+export class ServicesFilterBar extends BaseComponent<IServiceFilterBarProps> {
     public render(): React.ReactNode {
         return (<KubeFilterBar filter={this.props.filter}
             pickListPlaceHolder={Resources.TypeText}
-            keywordPlaceHolder={Resources.PivotServiceText}
+            keywordPlaceHolder={Resources.ServiceText}
             filterToggled={this.props.filterToggled}
             pickListItemsFn={() => this._generateSvcTypes()}
             listItemsFn={(item: any) => {

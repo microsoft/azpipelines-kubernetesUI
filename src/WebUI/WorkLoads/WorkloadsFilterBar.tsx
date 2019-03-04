@@ -21,7 +21,7 @@ export interface IWorkloadsFilterBarProps extends IVssComponentProperties {
 export class WorkloadsFilterBar extends BaseComponent<IWorkloadsFilterBarProps> {
     public render(): React.ReactNode {
         return (<KubeFilterBar filter={this.props.filter}
-            keywordPlaceHolder={Resources.PivotWorkloadsText}
+            keywordPlaceHolder={Resources.WorkloadText}
             pickListPlaceHolder={Resources.KindText}
             pickListItemsFn={this._pickListItems}
             listItemsFn={this._listItems}

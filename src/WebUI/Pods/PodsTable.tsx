@@ -132,8 +132,8 @@ export class PodsTable extends BaseComponent<IPodsTableProperties> {
     }
 
     private static _renderPodWorkload(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod): JSX.Element {
-        const textToRender = pod.metadata.ownerReferences.length > 0 ? pod.metadata.ownerReferences[0].name : ""; 
-        const itemToRender: React.ReactNode = (
+        const textToRender = pod.metadata.ownerReferences && pod.metadata.ownerReferences.length > 0 ? pod.metadata.ownerReferences[0].name : ""; 
+        const itemToRender: React.ReactNode = textToRender.length > 0 ? (
             <Link
                 className="fontSizeM text-ellipsis bolt-table-link bolt-table-inline-link"
                 excludeTabStop
@@ -141,7 +141,7 @@ export class PodsTable extends BaseComponent<IPodsTableProperties> {
             >
                 {textToRender}
             </Link>
-        );
+        ): null;
         return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 

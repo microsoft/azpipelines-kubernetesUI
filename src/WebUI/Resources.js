@@ -41,7 +41,7 @@ define("Environments/Providers/Kubernetes/Resources", ["require", "exports"], fu
     exports.NoPodsForSvcText = "This service currently does not map to any pods";
     exports.ExternalIPAllocPending = "External IP allocation pending";
     exports.ExternalIPAllocated = "External IP allocated";
-    exports.FindByNameText = "Find by {0} name";
+    exports.FindByNameText = "Filter by {0} name";
     exports.KindText = "Kind";
     exports.NoItemsText = "No Items found"
     exports.PodDetailsHeader = "Pod details";
@@ -71,4 +71,6 @@ define("Environments/Providers/Kubernetes/Resources", ["require", "exports"], fu
     exports.WorkloadsZeroDataText = "You can also deploy all kinds of workloads like deployment, replicaset, daemonset etc., and track them in here";
     exports.NoPodsForSvcLinkText = "Learn more about mapping a service";
     exports.NoPodsText = "No pods";
+    exports.ServiceText = "Service";
+    exports.NoResultsFoundText = "No results found";
 });
