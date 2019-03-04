@@ -21,12 +21,11 @@ import { WorkloadsStore } from "./WorkloadsStore";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
 import { WorkloadsEvents, SelectedItemKeys } from "../Constants";
-import { SelectionStore } from "../Selection/SelectionStore";
-import { SelectionActions } from "../Selection/SelectionActions";
-import { ActionsHubManager } from "../FluxCommon/ActionsHubManager";
+import { ISelectionPayload } from "../Selection/SelectionActions";
 import { KubeResourceType } from "../../Contracts/KubeServiceBase";
 import { Link } from "azure-devops-ui/Link";
 import { format } from "azure-devops-ui/Core/Util/String";
+import { SelectionActionsCreator } from "../Selection/SelectionActionCreator";
 
 const setNameKey = "otherwrkld-name-key";
 const imageKey = "otherwrkld-image-key";
@@ -51,6 +50,7 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
         super(props, {});
 
         this._actionCreator = ActionsCreatorManager.GetActionCreator<WorkloadsActionsCreator>(WorkloadsActionsCreator);
+        this._selectionActionCreator = ActionsCreatorManager.GetActionCreator<SelectionActionsCreator>(SelectionActionsCreator);
         this._store = StoreManager.GetStore<WorkloadsStore>(WorkloadsStore);
 
         this.state = { statefulSetList:[], daemonSetList:[], replicaSets:[] };
@@ -115,7 +115,14 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
 
     private _openStatefulSetItem = (event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>, selectedItem: ISetWorkloadTypeItem) => {
         if (selectedItem) {
-            ActionsHubManager.GetActionsHub<SelectionActions>(SelectionActions).selectItem.invoke({ item: selectedItem.payload, showSelectedItem: true, selectedItemType: selectedItem.kind });
+            const payload: ISelectionPayload = { 
+                item: selectedItem.payload, 
+                itemUID: selectedItem.uid,
+                showSelectedItem: true, 
+                selectedItemType: selectedItem.kind
+            };
+
+            this._selectionActionCreator.selectItem(payload);
         }
     }
 
@@ -203,6 +210,7 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
         this._showType(KubeResourceType.StatefulSets) && this.state.statefulSetList.forEach((set) => {
             data.push({
                 name: set.metadata.name,
+                uid: set.metadata.uid,
                 kind: SelectedItemKeys.StatefulSetKey,
                 creationTimeStamp: set.metadata.creationTimestamp,
                 image: Utils.getImageText(set.spec.template.spec),
@@ -215,6 +223,7 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
         this._showType(KubeResourceType.DaemonSets) && this.state.daemonSetList.forEach((set) => {
             data.push({
                 name: set.metadata.name,
+                uid: set.metadata.uid,
                 kind: SelectedItemKeys.DaemonSetKey,
                 creationTimeStamp: set.metadata.creationTimestamp,
                 image: Utils.getImageText(set.spec.template.spec),
@@ -227,6 +236,7 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
         this._showType(KubeResourceType.ReplicaSets) && this.state.replicaSets.forEach((set) => {
             data.push({
                 name: set.metadata.name,
+                uid: set.metadata.uid,
                 kind: SelectedItemKeys.ReplicaSetKey,
                 creationTimeStamp: set.metadata.creationTimestamp,
                 image: Utils.getImageText(set.spec.template.spec),
@@ -256,4 +266,5 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
 
     private _store: WorkloadsStore;
     private _actionCreator: WorkloadsActionsCreator;
+    private _selectionActionCreator: SelectionActionsCreator;
 }
