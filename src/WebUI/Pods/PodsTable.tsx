@@ -120,7 +120,13 @@ export class PodsTable extends BaseComponent<IPodsTableProperties> {
             this.props.onItemActivated(event, selectedItem);
         }
         else if (selectedItem) {
-            ActionsHubManager.GetActionsHub<SelectionActions>(SelectionActions).selectItem.invoke({ item: selectedItem, showSelectedItem: true, selectedItemType: SelectedItemKeys.OrphanPodKey });
+            ActionsHubManager.GetActionsHub<SelectionActions>(SelectionActions).selectItem.invoke(
+                { 
+                    item: selectedItem, 
+                    itemUID: selectedItem.metadata.uid,
+                    showSelectedItem: true, 
+                    selectedItemType: SelectedItemKeys.OrphanPodKey 
+                });
         }
     }
 
