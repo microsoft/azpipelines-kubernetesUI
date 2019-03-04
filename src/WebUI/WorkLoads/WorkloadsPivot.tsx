@@ -25,6 +25,7 @@ import { OtherWorkloads } from "../Workloads/OtherWorkloadsTable";
 import { WorkloadsFilterBar } from "./WorkloadsFilterBar";
 import { WorkloadsStore } from "./WorkloadsStore";
 import { HyperLinks } from "../Constants";
+import { WorkloadsActionsCreator } from "./WorkloadsActionsCreator";
 import "./WorkloadsPivot.scss";
 
 export interface IWorkloadsPivotState {
@@ -43,6 +44,7 @@ export class WorkloadsPivot extends BaseComponent<IWorkloadsPivotProps, IWorkloa
     constructor(props: IWorkloadsPivotProps) {
         super(props, {});
 
+        this._workloadsActionCreator = ActionsCreatorManager.GetActionCreator<WorkloadsActionsCreator>(WorkloadsActionsCreator);
         this._podsActionCreator = ActionsCreatorManager.GetActionCreator<PodsActionsCreator>(PodsActionsCreator);
         this._workloadsStore = StoreManager.GetStore<WorkloadsStore>(WorkloadsStore);
         // Initialize pods store as pods list will be required in workloadPodsView on item selection
@@ -51,6 +53,8 @@ export class WorkloadsPivot extends BaseComponent<IWorkloadsPivotProps, IWorkloa
         this.state = {
             workloadResourceSize: 0
         };
+        
+        this._workloadsActionCreator.getDeployments(this.props.kubeService);
 
         // Fetch all pods in parent component as the podList is required in selected workload pods view
         this._podsActionCreator.getPods(this.props.kubeService);
@@ -134,7 +138,7 @@ export class WorkloadsPivot extends BaseComponent<IWorkloadsPivotProps, IWorkloa
 
     private _showComponent(resourceType: KubeResourceType): boolean {
         const selections: KubeResourceType[] = this._getTypeFilterValue();
-        // if no selections are made, show all components
+        // if no filter selections are made, show all components
         if (selections.length > 0) {
             return selections.indexOf(resourceType) != -1;
         }
@@ -154,5 +158,6 @@ export class WorkloadsPivot extends BaseComponent<IWorkloadsPivotProps, IWorkloa
     }
 
     private _workloadsStore: WorkloadsStore;
+    private _workloadsActionCreator: WorkloadsActionsCreator;
     private _podsActionCreator: PodsActionsCreator;
 }

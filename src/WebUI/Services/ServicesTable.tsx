@@ -14,14 +14,13 @@ import * as React from "react";
 import { BaseKubeTable } from "../Common/BaseKubeTable";
 import { IResourceStatusProps } from "../Common/ResourceStatus";
 import { SelectedItemKeys } from "../Constants";
-import { ActionsHubManager } from "../FluxCommon/ActionsHubManager";
 import * as Resources from "../Resources";
-import { SelectionActions } from "../Selection/SelectionActions";
+import { ISelectionPayload } from "../Selection/SelectionActions";
 import { IServiceItem, IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
-import { ServicesActionsCreator } from "./ServicesActionsCreator";
-import { ServicesStore } from "./ServicesStore";
 import "./ServicesTable.scss";
+import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
+import { SelectionActionsCreator } from "../Selection/SelectionActionCreator";
 
 const packageKey: string = "package-col";
 const clusterIPKey: string = "cluster-ip-col";
@@ -38,6 +37,12 @@ export interface IServicesComponentProperties extends IVssComponentProperties {
 }
 
 export class ServicesTable extends BaseComponent<IServicesComponentProperties> {
+    constructor(props: IServicesComponentProperties) {
+        super(props, {});
+
+        this._selectionActionCreator = ActionsCreatorManager.GetActionCreator<SelectionActionsCreator>(SelectionActionsCreator);
+    }
+
     public render(): React.ReactNode {
         const filteredSvc: V1Service[] = (this.props.serviceList && this.props.serviceList.items || [])
             .filter((svc) => {
@@ -49,7 +54,7 @@ export class ServicesTable extends BaseComponent<IServicesComponentProperties> {
                 <div>{
                     <BaseKubeTable
                         className={css("list-content", "depth-16", "services-table")}
-                        items={ServicesTable._getServiceItems(filteredSvc)}
+                        items={ServicesTable.getServiceItems(filteredSvc)}
                         columns={ServicesTable._getColumns()}
                         onItemActivated={this._openServiceItem}
                     />
@@ -61,13 +66,7 @@ export class ServicesTable extends BaseComponent<IServicesComponentProperties> {
         return null;
     }
 
-    private _openServiceItem = (event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>, selectedItem: IServiceItem) => {
-        if (selectedItem) {
-            ActionsHubManager.GetActionsHub<SelectionActions>(SelectionActions).selectItem.invoke({ item: selectedItem, showSelectedItem: true, selectedItemType: SelectedItemKeys.ServiceItemKey });
-        }
-    }
-
-    private static _getServiceItems(serviceList: V1Service[]): IServiceItem[] {
+    public static getServiceItems(serviceList: V1Service[]): IServiceItem[] {
         let items: IServiceItem[] = [];
         serviceList.forEach(service => {
             items.push({
@@ -85,6 +84,19 @@ export class ServicesTable extends BaseComponent<IServicesComponentProperties> {
         });
 
         return items;
+    }
+
+    private _openServiceItem = (event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>, selectedItem: IServiceItem) => {
+        if (selectedItem) {
+            const payload: ISelectionPayload = { 
+                item: selectedItem, 
+                itemUID: (selectedItem.service as V1Service).metadata.uid,
+                showSelectedItem: true, 
+                selectedItemType: SelectedItemKeys.ServiceItemKey 
+            };
+
+            this._selectionActionCreator.selectItem(payload);
+        }
     }
 
     private static _getExternalIP(service: V1Service): string {
@@ -168,7 +180,7 @@ export class ServicesTable extends BaseComponent<IServicesComponentProperties> {
     }
 
     private static _renderPackageKeyCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, service: IServiceItem): JSX.Element => {
-        return ServicesTable._getServiceStatusWithName(service, colDataClassName, columnIndex, tableColumn, rowIndex);
+        return ServicesTable._getServiceStatusWithName(service, colDataClassName, columnIndex, tableColumn);
     }
 
     private static _renderClusterIpCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, service: IServiceItem): JSX.Element => {
@@ -194,7 +206,7 @@ export class ServicesTable extends BaseComponent<IServicesComponentProperties> {
         return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
-    private static _getServiceStatusWithName(service: IServiceItem, cssClassName: string, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, rowIndex: number): JSX.Element{
+    private static _getServiceStatusWithName(service: IServiceItem, cssClassName: string, columnIndex: number, tableColumn: ITableColumn<IServiceItem>): JSX.Element{
         let statusProps: IStatusProps = Statuses.Success;
         let tooltipText: string = "";
         if (service.type === loadBalancerKey) {
@@ -222,6 +234,5 @@ export class ServicesTable extends BaseComponent<IServicesComponentProperties> {
         return nameMatches && typeMatches;
     }
 
-    private _store: ServicesStore;
-    private _actionCreator: ServicesActionsCreator;
+    private _selectionActionCreator: SelectionActionsCreator;
 }
