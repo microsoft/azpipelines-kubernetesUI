@@ -13,20 +13,20 @@ import { LabelGroup, WrappingBehavior } from "azure-devops-ui/Label";
 import { IStatusProps, Statuses } from "azure-devops-ui/Status";
 import { ITableColumn } from "azure-devops-ui/Table";
 import * as React from "react";
-import { IKubeService } from "../../Contracts/Contracts";
 import { BaseKubeTable } from "../Common/BaseKubeTable";
 import { ResourceStatus } from "../Common/ResourceStatus";
 import { SelectedItemKeys, WorkloadsEvents } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
-import { ActionsHubManager } from "../FluxCommon/ActionsHubManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
 import * as Resources from "../Resources";
-import { SelectionActions } from "../Selection/SelectionActions";
+import { ISelectionPayload } from "../Selection/SelectionActions";
 import { IDeploymentReplicaSetItem, IDeploymentReplicaSetMap, IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
 import "./DeploymentsTable.scss";
 import { WorkloadsActionsCreator } from "./WorkloadsActionsCreator";
 import { WorkloadsStore } from "./WorkloadsStore";
+import { IKubeService } from "../../Contracts/Contracts";
+import { SelectionActionsCreator } from "../Selection/SelectionActionCreator";
 
 const replicaSetNameKey: string = "replicaSet-col";
 const podsKey: string = "pods-col";
@@ -49,10 +49,11 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
     constructor(props: IDeploymentsTableProperties) {
         super(props, {});
 
-        this._actionCreator = ActionsCreatorManager.GetActionCreator<WorkloadsActionsCreator>(WorkloadsActionsCreator);
+        this._workloadsActionCreator = ActionsCreatorManager.GetActionCreator<WorkloadsActionsCreator>(WorkloadsActionsCreator);
+        this._selectionActionCreator = ActionsCreatorManager.GetActionCreator<SelectionActionsCreator>(SelectionActionsCreator);
         this._store = StoreManager.GetStore<WorkloadsStore>(WorkloadsStore);
 
-        this._actionCreator.getReplicaSets(this.props.kubeService);
+        this._workloadsActionCreator.getReplicaSets(this.props.kubeService);
 
         this.state = { deploymentList: undefined, replicaSetList: undefined };
 
@@ -280,7 +281,14 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
     private _openDeploymentItem = (event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>, selectedItem: IDeploymentReplicaSetItem) => {
         const selectedReplicaSet = this._getSelectedReplicaSet(selectedItem);
         if (selectedReplicaSet) {
-            ActionsHubManager.GetActionsHub<SelectionActions>(SelectionActions).selectItem.invoke({ item: selectedReplicaSet, showSelectedItem: true, selectedItemType: SelectedItemKeys.ReplicaSetKey });
+            const payload: ISelectionPayload = { 
+                item: selectedReplicaSet, 
+                itemUID: selectedReplicaSet.metadata.uid,
+                showSelectedItem: true, 
+                selectedItemType: SelectedItemKeys.ReplicaSetKey 
+            };
+
+            this._selectionActionCreator.selectItem(payload);
         }
     }
 
@@ -314,5 +322,6 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
     private _isTTIMarked: boolean = false;
 
     private _store: WorkloadsStore;
-    private _actionCreator: WorkloadsActionsCreator;
+    private _workloadsActionCreator: WorkloadsActionsCreator;
+    private _selectionActionCreator: SelectionActionsCreator;
 }

@@ -6,7 +6,6 @@
 import { ActionCreatorBase, Action } from "../FluxCommon/Actions";
 import { ActionsHubManager } from "../FluxCommon/ActionsHubManager";
 import { IKubeService } from "../../Contracts/Contracts";
-import { V1DeploymentList, V1ReplicaSet, V1ReplicaSetList, V1DaemonSetList, V1StatefulSetList, V1PodList, V1Pod, V1DaemonSet, V1StatefulSet, V1PodTemplateSpec, V1ObjectMeta } from "@kubernetes/client-node";
 import { WorkloadsActions } from "./WorkloadsActions";
 
 export class WorkloadsActionsCreator extends ActionCreatorBase {

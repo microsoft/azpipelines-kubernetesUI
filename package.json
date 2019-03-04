@@ -37,6 +37,8 @@
   "dependencies": {
     "@kubernetes/client-node": "~0.8.1",
     "azure-devops-ui": "^1.148.0",
+    "history": "^4.7.2",
+    "query-string": "^6.2.0",
     "react": "~16.3.2",
     "react-dom": "~16.3.2"
   },
@@ -44,7 +46,9 @@
     "@types/enzyme": "^3.1.15",
     "@types/enzyme-adapter-react-16": "^1.0.3",
     "@types/enzyme-to-json": "^1.5.2",
+    "@types/history": "^4.7.2",
     "@types/jest": "^23.3.10",
+    "@types/query-string": "^6.2.0",
     "@types/react": "^16.7.13",
     "@types/react-dom": "^16.0.11",
     "base64-inline-loader": "^1.1.1",

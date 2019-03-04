@@ -9,6 +9,7 @@ import { IServiceItem } from "../Types";
 
 export interface ISelectionPayload {
     item: V1ReplicaSet | V1DaemonSet | V1StatefulSet | IServiceItem | V1Pod;
+    itemUID: string;
     showSelectedItem: boolean;
     selectedItemType: string;
 }

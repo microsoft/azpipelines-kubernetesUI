@@ -4,7 +4,6 @@
 */
 
 import { StoreBase } from "../FluxCommon/Store";
-import { StoreManager } from "../FluxCommon/StoreManager";
 import { ActionsHubManager } from "../FluxCommon/ActionsHubManager";
 import { V1DeploymentList, V1ReplicaSetList, V1DaemonSetList, V1StatefulSetList, V1PodList, V1Pod } from "@kubernetes/client-node";
 import { WorkloadsActions } from "./WorkloadsActions";
