@@ -86,36 +86,39 @@ export class PodOverview extends BaseComponent<IPodOverviewProps> {
         tableColumn: ITableColumn<any>,
         tableItem: any): JSX.Element {
         const { key, value } = tableItem;
+        let props: any = {};
         switch (key) {
             case Resources.Created:
-                let props = {
+                props = {
                     columnIndex: columnIndex,
                     children:
-                    <span className="pod-details-created-cell">
-                        <Duration startDate={value} endDate={new Date()} />
-                        {format("{0}", Resources.Ago)}
-                    </span>,
+                        <span className="pod-details-created-cell">
+                            <Duration startDate={value} endDate={new Date()} />
+                            {format("{0}", Resources.Ago)}
+                        </span>,
                     tableColumn: tableColumn
                 };
 
                 return renderTableCell(props);
 
             case Resources.LabelsText:
+            case Resources.AnnotationsText:
                 props = {
                     columnIndex: columnIndex,
                     children:
-                    <LabelGroup
-                        labelProps={Utils.getUILabelModelArray(value)}
-                        wrappingBehavior={WrappingBehavior.freeFlow}
-                        fadeOutOverflow={true}
-                    />,
-                    tableColumn: tableColumn
+                        <LabelGroup
+                            labelProps={Utils.getUILabelModelArray(value)}
+                            wrappingBehavior={WrappingBehavior.oneLine}
+                            fadeOutOverflow={true}
+                        />,
+                    tableColumn: tableColumn,
+                    contentClassName: "pod-labelgroups"
                 };
 
                 return renderTableCell(props);
 
             default:
-                let itemToRender = <span className="pod-overview-value-cell">{value}</span>;
+                const itemToRender = <span className="pod-overview-value-cell">{value}</span>;
                 return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
         }
     }

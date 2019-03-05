@@ -99,31 +99,38 @@ export class BaseKubeTable<T> extends BaseComponent<ITableComponentProperties<T>
         );
     }
 
-    public static renderTableCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<any>, itemToRender: React.ReactNode, statusProps?: IResourceStatusProps): JSX.Element {
+    public static renderTableCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<any>, itemToRender: React.ReactNode, statusProps?: IResourceStatusProps, contentClassName?: string): JSX.Element {
         return (
-            <SimpleTableCell columnIndex={columnIndex} tableColumn={tableColumn} key={"col-" + columnIndex}>
+            <SimpleTableCell contentClassName={contentClassName || ""} columnIndex={columnIndex} tableColumn={tableColumn} key={"col-" + columnIndex}>
                 {statusProps && <ResourceStatus {...statusProps} />}
                 {itemToRender}
-            </SimpleTableCell>);
+            </SimpleTableCell>
+        );
     }
 
     public static renderTwoLineColumn(columnIndex: number, tableColumn: ITableColumn<any>, primaryText: string, subText: string, className?: string, primaryTextClassName?: string, secondaryTextClassName?: string, statusProps?: IResourceStatusProps): JSX.Element {
         return (
-            <TwoLineTableCell className={className} columnIndex={columnIndex} tableColumn={tableColumn} line1={
-                <div className={css("kube-list-col-data", primaryTextClassName)} key={"col-primary-" + columnIndex}>
-                    <Tooltip text={primaryText} overflowOnly>
-                        <span className="overflow-ellipsis">{primaryText}</span>
-                    </Tooltip>
-                </div>
-            } line2={
-                <div className={css("list-secondary-text", secondaryTextClassName)} key={"col-secondary-" + columnIndex}>
-                    <Tooltip text={subText} overflowOnly>
-                        <span className="overflow-ellipsis">{subText}</span>
-                    </Tooltip>
-                </div>
-            }
+            <TwoLineTableCell
+                className={className}
+                columnIndex={columnIndex}
+                tableColumn={tableColumn}
+                line1={
+                    <div className={css("kube-list-col-data", primaryTextClassName)} key={"col-primary-" + columnIndex}>
+                        <Tooltip text={primaryText} overflowOnly>
+                            <span className="overflow-ellipsis">{primaryText}</span>
+                        </Tooltip>
+                    </div>
+                }
+                line2={
+                    <div className={css("list-secondary-text", secondaryTextClassName)} key={"col-secondary-" + columnIndex}>
+                        <Tooltip text={subText} overflowOnly>
+                            <span className="overflow-ellipsis">{subText}</span>
+                        </Tooltip>
+                    </div>
+                }
                 iconProps={statusProps ? { render: (key: string | undefined) => <ResourceStatus {...statusProps} /> } : {}}
-                key={"col-" + columnIndex} />
+                key={"col-" + columnIndex}
+            />
         );
     }
 
