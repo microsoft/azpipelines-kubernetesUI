@@ -22,6 +22,7 @@ import { ServicesActionsCreator } from "./ServicesActionsCreator";
 import { ServicesFilterBar } from "./ServicesFilterBar";
 import { ServicesStore } from "./ServicesStore";
 import "./ServicesPivot.scss";
+import { KubeSummary } from "../Common/KubeSummary";
 
 export interface IServicesPivotState {
     serviceList?: V1ServiceList;
@@ -100,6 +101,7 @@ export class ServicesPivot extends BaseComponent<IServicesPivotProps, IServicesP
 
     private _getZeroData(): JSX.Element{
         const zeroDataProps: IKubeZeroDataProps = {
+            imagePath: KubeSummary.ImageLocations.zeroWorkloads,
             hyperLink: HyperLinks.ServicesLink,
             hyperLinkLabel: Resources.LearnMoreText,
             primaryText: Resources.DeployServices,

@@ -54,11 +54,18 @@ export interface IKubernetesContainerState {
     svcFilter: Filter;
 }
 
+export interface ImageLocations {
+    zeroData: string;
+    zeroResults: string;
+    zeroWorkloads: string;
+}
+
 export interface IKubeSummaryProps extends IVssComponentProperties {
     title: string;
     kubeService: IKubeService;
     namespace?: string;
     markTTI?: () => void;
+    imageLocations?: ImageLocations;
 }
 
 export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesContainerState> {
@@ -72,6 +79,8 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
 
         this._setSelectedKeyPodsViewMap();
         this._populateObjectFinder();
+
+        KubeSummary.ImageLocations = this.props.imageLocations || this._getDefaultImageLocations();
 
         // Take namespace from deployment store and rest from selection store
         this.state = {
@@ -276,6 +285,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
 
     private _getZeroData(): JSX.Element {
         const zeroDataProps: IKubeZeroDataProps = {
+            imagePath: KubeSummary.ImageLocations.zeroData,
             hyperLink: HyperLinks.WorkloadsLink,
             hyperLinkLabel: Resources.LearnMoreKubeResourceText,
             descriptionText: Resources.DeployKubeResourceText,
@@ -284,6 +294,16 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         }
         return (KubeZeroData.getDefaultZeroData(zeroDataProps));
     }
+
+    private _getDefaultImageLocations(): ImageLocations {
+        return {
+            zeroData: require("../../img/zero-data.svg"),
+            zeroResults: require("../../img/zero-results.svg"),
+            zeroWorkloads: require("../../img/zero-workloads.svg")
+        } as ImageLocations;
+    }
+
+    public static ImageLocations: ImageLocations = {} as ImageLocations;
 
     private _selectedItemViewMap: { [selectedItemKey: string]: (selectedItem: any) => JSX.Element | null } = {};
     private _objectFinder: { [selectedItemKey: string]: (name: string) => V1ReplicaSet | V1DaemonSet | V1StatefulSet | IServiceItem } = {};
