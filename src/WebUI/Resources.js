@@ -71,6 +71,7 @@ define("Environments/Providers/Kubernetes/Resources", ["require", "exports"], fu
     exports.WorkloadsZeroDataText = "You can also deploy all kinds of workloads like deployment, replicaset, daemonset etc., and track them in here";
     exports.NoPodsForSvcLinkText = "Learn more about mapping a service";
     exports.NoPodsText = "No pods";
-    exports.ServiceText = "Service";
+    exports.ServiceText = "service";
     exports.NoResultsFoundText = "No results found";
+    exports.WorkloadsFilterText = "workload"; // case sensitive
 });

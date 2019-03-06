@@ -239,7 +239,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
             primaryText: Resources.StartUsingKubeResourceText,
             className: "zerod-side-align-content"
         }
-        return (KubeZeroData._getDefaultZeroData(zeroDataProps));
+        return (KubeZeroData.getDefaultZeroData(zeroDataProps));
     }
 
     private _selectedItemViewMap: { [selectedItemKey: string]: (selectedItem: any) => JSX.Element | null } = {};

@@ -52,7 +52,7 @@ export class KubeZeroData extends BaseComponent<IKubeZeroDataProps> {
         );
     }
 
-    public static _getDefaultZeroData(zeroDataProps: IKubeZeroDataProps): JSX.Element{
+    public static getDefaultZeroData(zeroDataProps: IKubeZeroDataProps): JSX.Element{
         return (
             <KubeZeroData
                 imagePath={require("../../img/zero_data.png")}
@@ -61,7 +61,7 @@ export class KubeZeroData extends BaseComponent<IKubeZeroDataProps> {
         );
     }
 
-    public static _getNoResultsZeroData(): JSX.Element {
+    public static getNoResultsZeroData(): JSX.Element {
         return (
             <KubeZeroData imagePath={require("../../img/zero_data.png")} descriptionText={Resources.NoResultsFoundText} />
         );

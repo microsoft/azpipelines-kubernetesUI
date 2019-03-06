@@ -150,7 +150,7 @@ export class WorkloadsPivot extends BaseComponent<IWorkloadsPivotProps, IWorkloa
             primaryText: Resources.DeployWorkloads,
             className: "zerod-side-align-content"
         }
-        return (KubeZeroData._getDefaultZeroData(zeroDataProps));
+        return (KubeZeroData.getDefaultZeroData(zeroDataProps));
     }
 
     private _workloadsStore: WorkloadsStore;

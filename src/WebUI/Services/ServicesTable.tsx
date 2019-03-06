@@ -58,7 +58,7 @@ export class ServicesTable extends BaseComponent<IServicesComponentProperties> {
                 </div>
             );
         } else {
-            return KubeZeroData._getNoResultsZeroData();
+            return KubeZeroData.getNoResultsZeroData();
         }
     }
 
