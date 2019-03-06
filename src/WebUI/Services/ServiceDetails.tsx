@@ -212,7 +212,7 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
                 primaryTextClassName: "primary-text",
                 renderOnCard: true
             }
-            return KubeZeroData._getDefaultZeroData(zeroDataProps);
+            return KubeZeroData.getDefaultZeroData(zeroDataProps);
         }
         return (
             <PodsTable
