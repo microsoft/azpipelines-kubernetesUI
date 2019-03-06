@@ -21,6 +21,7 @@ import { Utils } from "../Utils";
 import "./ServicesTable.scss";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { SelectionActionsCreator } from "../Selection/SelectionActionCreator";
+import { KubeZeroData } from "../Common/KubeZeroData";
 
 const packageKey: string = "package-col";
 const clusterIPKey: string = "cluster-ip-col";
@@ -61,9 +62,9 @@ export class ServicesTable extends BaseComponent<IServicesComponentProperties> {
                 }
                 </div>
             );
+        } else {
+            return KubeZeroData.getNoResultsZeroData();
         }
-
-        return null;
     }
 
     public static getServiceItems(serviceList: V1Service[]): IServiceItem[] {

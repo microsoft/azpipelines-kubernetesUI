@@ -106,7 +106,7 @@ export class ServicesPivot extends BaseComponent<IServicesPivotProps, IServicesP
             descriptionText: Resources.StartingUsingServiceText,
             className: "zerod-side-align-content"
         }
-        return (KubeZeroData._getDefaultZeroData(zeroDataProps));
+        return (KubeZeroData.getDefaultZeroData(zeroDataProps));
     }
 
     private _store: ServicesStore;
