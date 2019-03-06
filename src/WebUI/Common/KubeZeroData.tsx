@@ -9,6 +9,7 @@ import { Card } from "azure-devops-ui/Card";
 import { IVssComponentProperties } from "../Types";
 import { BaseComponent, css } from "@uifabric/utilities/lib";
 import { Link } from "azure-devops-ui/Link";
+import * as Resources from "../Resources";
 import "./Common.scss";
 import "./BaseKubeTable.scss";
 import "./Webplatform.scss";
@@ -51,12 +52,18 @@ export class KubeZeroData extends BaseComponent<IKubeZeroDataProps> {
         );
     }
 
-    public static _getDefaultZeroData(zeroDataProps: IKubeZeroDataProps): JSX.Element{
+    public static getDefaultZeroData(zeroDataProps: IKubeZeroDataProps): JSX.Element{
         return (
             <KubeZeroData
                 imagePath={require("../../img/zero_data.png")}
                 {...zeroDataProps}
             />
+        );
+    }
+
+    public static getNoResultsZeroData(): JSX.Element {
+        return (
+            <KubeZeroData imagePath={require("../../img/zero_data.png")} descriptionText={Resources.NoResultsFoundText} />
         );
     }
 

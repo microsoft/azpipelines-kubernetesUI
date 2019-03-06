@@ -163,7 +163,7 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
                 hyperLinkLabel: Resources.LearnMoreText,
                 descriptionText: Resources.NoPodsFoundText
             }
-            return KubeZeroData._getDefaultZeroData(zeroDataProps);
+            return KubeZeroData.getDefaultZeroData(zeroDataProps);
         }
 
         return (
