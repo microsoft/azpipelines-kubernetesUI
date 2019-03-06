@@ -1,6 +1,6 @@
 {
   "name": "@azurepipelines/azdevops-kube-summary",
-  "version": "2.2.2",
+  "version": "2.3.2",
   "description": "Azure DevOps Kubernetes Summary",
   "engines": {
     "node": ">=8.4.0",
@@ -17,7 +17,7 @@
     "copy-all": "npm run copy-scss && npm run copy-resources && npm run copy-images",
     "copy-scss": "copyfiles -u 1 src/**/*.scss ./dist",
     "copy-resources": "copyfiles -u 1 src/**/Resources.js ./dist",
-    "copy-images": "copyfiles -u 1 src/**/*.png ./dist",
+    "copy-images": "copyfiles -u 1 src/**/*.svg ./dist",
     "compilesrc": "tsc -p ./src",
     "test": "npm run compiletest && npm run jesttests",
     "compiletest": "webpack --mode development --config ./tests/webpack.config.js",

@@ -28,6 +28,7 @@ import "./ServiceDetails.scss";
 import "../Common/Webplatform.scss";
 import { ServicesStore } from "./ServicesStore";
 import { Header, TitleSize } from "azure-devops-ui/Header";
+import { KubeSummary } from "../Common/KubeSummary";
 
 export interface IServiceDetailsProperties extends IVssComponentProperties {
     kubeService: IKubeService;
@@ -204,6 +205,7 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
     private _getAssociatedPods(): JSX.Element | null {
         if (this.state.pods.length === 0) {
             const zeroDataProps: IKubeZeroDataProps = {
+                imagePath: KubeSummary.ImageLocations.zeroWorkloads,
                 hyperLink: HyperLinks.LinkToPodsUsingLabelsLink,
                 hyperLinkLabel: Resources.NoPodsForSvcLinkText,
                 descriptionText: Resources.NoPodsForSvcText,
