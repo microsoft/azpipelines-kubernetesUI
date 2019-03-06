@@ -27,6 +27,7 @@ import { PodsStore } from "../Pods/PodsStore";
 import { KubeZeroData, IKubeZeroDataProps } from "../Common/KubeZeroData";
 import { HyperLinks } from "../Constants";
 import { Header, TitleSize } from "azure-devops-ui/Header";
+import { KubeSummary } from "../Common/KubeSummary";
 
 export interface IWorkloadDetailsProperties extends IVssComponentProperties {
     parentMetaData: V1ObjectMeta;
@@ -159,6 +160,7 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
     private _getAssociatedPods(): JSX.Element | null {
         if (this.state.pods.length === 0) {
             const zeroDataProps: IKubeZeroDataProps = {
+                imagePath: KubeSummary.ImageLocations.zeroWorkloads,
                 hyperLink: HyperLinks.LinkToPodsUsingLabelsLink,
                 hyperLinkLabel: Resources.LearnMoreText,
                 descriptionText: Resources.NoPodsFoundText

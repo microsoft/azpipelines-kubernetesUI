@@ -27,6 +27,7 @@ import { WorkloadsStore } from "./WorkloadsStore";
 import { HyperLinks } from "../Constants";
 import { WorkloadsActionsCreator } from "./WorkloadsActionsCreator";
 import "./WorkloadsPivot.scss";
+import { KubeSummary } from "../Common/KubeSummary";
 
 export interface IWorkloadsPivotState {
     workloadResourceSize: number;
@@ -148,6 +149,7 @@ export class WorkloadsPivot extends BaseComponent<IWorkloadsPivotProps, IWorkloa
 
     private _getZeroData(): JSX.Element {
         const zeroDataProps: IKubeZeroDataProps = {
+            imagePath: KubeSummary.ImageLocations.zeroResults,
             hyperLink: HyperLinks.WorkloadsLink,
             hyperLinkLabel: Resources.LearnMoreText,
             descriptionText: Resources.WorkloadsZeroDataText,
