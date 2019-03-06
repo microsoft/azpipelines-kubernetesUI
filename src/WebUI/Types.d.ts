@@ -53,6 +53,7 @@ export interface IDeploymentReplicaSetMap {
 
 export interface ISetWorkloadTypeItem {
     name: string;
+    uid: string;
     kind: string;
     image: string;
     desiredPodCount: number;
