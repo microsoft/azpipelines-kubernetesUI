@@ -18,3 +18,9 @@ export interface IKubeService {
 
     getStatefulSets(): Promise<K8sTypes.V1StatefulSetList>;
 }
+
+export enum KubeImage {
+    zeroData = "zeroData",
+    zeroResults = "zeroResults",
+    zeroWorkloads = "zeroWorkloads"
+}

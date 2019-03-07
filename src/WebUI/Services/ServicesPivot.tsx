@@ -8,7 +8,7 @@ import { BaseComponent } from "@uifabric/utilities";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { Filter, IFilterItemState, IFilterState } from "azure-devops-ui/Utilities/Filter";
 import * as React from "react";
-import { IKubeService } from "../../Contracts/Contracts";
+import { IKubeService, KubeImage } from "../../Contracts/Contracts";
 import { KubeZeroData, IKubeZeroDataProps } from "../Common//KubeZeroData";
 import { NameKey, TypeKey } from "../Common/KubeFilterBar";
 import "../Common/KubeSummary.scss";
@@ -22,7 +22,7 @@ import { ServicesActionsCreator } from "./ServicesActionsCreator";
 import { ServicesFilterBar } from "./ServicesFilterBar";
 import { ServicesStore } from "./ServicesStore";
 import "./ServicesPivot.scss";
-import { KubeSummary } from "../Common/KubeSummary";
+import { KubeFactory } from "../KubeFactory";
 
 export interface IServicesPivotState {
     serviceList?: V1ServiceList;
@@ -101,7 +101,7 @@ export class ServicesPivot extends BaseComponent<IServicesPivotProps, IServicesP
 
     private _getZeroData(): JSX.Element{
         const zeroDataProps: IKubeZeroDataProps = {
-            imagePath: KubeSummary.ImageLocations.zeroWorkloads,
+            imagePath: KubeFactory.getImageLocation(KubeImage.zeroWorkloads),
             hyperLink: HyperLinks.ServicesLink,
             hyperLinkLabel: Resources.LearnMoreText,
             primaryText: Resources.DeployServices,
