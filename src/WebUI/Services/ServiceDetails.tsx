@@ -11,7 +11,7 @@ import { IStatusProps, Statuses, StatusSize } from "azure-devops-ui/Status";
 import { ITableColumn } from "azure-devops-ui/Table";
 import * as Date_Utils from "azure-devops-ui/Utilities/Date";
 import * as React from "react";
-import { IKubeService } from "../../Contracts/Contracts";
+import { IKubeService, KubeImage } from "../../Contracts/Contracts";
 import { BaseKubeTable } from "../Common/BaseKubeTable";
 import { KubeZeroData, IKubeZeroDataProps } from "../Common/KubeZeroData";
 import { ResourceStatus } from "../Common/ResourceStatus";
@@ -28,7 +28,7 @@ import "./ServiceDetails.scss";
 import "../Common/Webplatform.scss";
 import { ServicesStore } from "./ServicesStore";
 import { Header, TitleSize } from "azure-devops-ui/Header";
-import { KubeSummary } from "../Common/KubeSummary";
+import { KubeFactory } from "../KubeFactory";
 
 export interface IServiceDetailsProperties extends IVssComponentProperties {
     kubeService: IKubeService;
@@ -205,7 +205,7 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
     private _getAssociatedPods(): JSX.Element | null {
         if (this.state.pods.length === 0) {
             const zeroDataProps: IKubeZeroDataProps = {
-                imagePath: KubeSummary.ImageLocations.zeroWorkloads,
+                imagePath: KubeFactory.getImageLocation(KubeImage.zeroWorkloads),
                 hyperLink: HyperLinks.LinkToPodsUsingLabelsLink,
                 hyperLinkLabel: Resources.NoPodsForSvcLinkText,
                 descriptionText: Resources.NoPodsForSvcText,

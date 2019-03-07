@@ -14,7 +14,8 @@ import "./Common.scss";
 import "./BaseKubeTable.scss";
 import "./Webplatform.scss";
 import "./KubeZeroData.scss";
-import { KubeSummary } from "./KubeSummary";
+import { KubeFactory } from "../KubeFactory";
+import { KubeImage } from "../../Contracts/Contracts";
 
 export interface IKubeZeroDataProps extends IVssComponentProperties {
     title?: string;
@@ -63,7 +64,10 @@ export class KubeZeroData extends BaseComponent<IKubeZeroDataProps> {
 
     public static getNoResultsZeroData(): JSX.Element {
         return (
-            <KubeZeroData imagePath={KubeSummary.ImageLocations.zeroResults} descriptionText={Resources.NoResultsFoundText} />
+            <KubeZeroData 
+                imagePath={KubeFactory.getImageLocation(KubeImage.zeroResults)} 
+                descriptionText={Resources.NoResultsFoundText} 
+            />
         );
     }
 

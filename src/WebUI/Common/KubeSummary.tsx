@@ -32,10 +32,12 @@ import "./KubeSummary.scss";
 import { KubeZeroData, IKubeZeroDataProps } from "./KubeZeroData";
 import { Utils } from "../Utils";
 import { Header, TitleSize } from "azure-devops-ui/Header";
-import { IKubeService } from "../../Contracts/Contracts";
+import { IKubeService, KubeImage } from "../../Contracts/Contracts";
 import { createBrowserHistory, History, UnregisterCallback, Action, Location } from "history";
 import * as queryString from "query-string";
 import { ServicesTable } from "../Services/ServicesTable";
+import { KubeFactory } from "../KubeFactory";
+import { Factory } from "../FluxCommon/Factory";
 
 const workloadsPivotItemKey: string = "workloads";
 const servicesPivotItemKey: string = "services";
@@ -54,24 +56,19 @@ export interface IKubernetesContainerState {
     svcFilter: Filter;
 }
 
-export interface ImageLocations {
-    zeroData: string;
-    zeroResults: string;
-    zeroWorkloads: string;
-}
-
 export interface IKubeSummaryProps extends IVssComponentProperties {
     title: string;
     kubeService: IKubeService;
     namespace?: string;
     markTTI?: () => void;
-    imageLocations?: ImageLocations;
+    getImageLocation?: (image: KubeImage) => string | undefined;
 }
 
 export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesContainerState> {
     constructor(props: IKubeSummaryProps) {
         super(props, {});
 
+        this._initializeFactorySettings();
         const workloadsFilter = new Filter();
         const servicesFilter = new Filter();
         workloadsFilter.subscribe(this._onWorkloadsFilterApplied, FILTER_CHANGE_EVENT);
@@ -79,8 +76,6 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
 
         this._setSelectedKeyPodsViewMap();
         this._populateObjectFinder();
-
-        KubeSummary.ImageLocations = this.props.imageLocations || this._getDefaultImageLocations();
 
         // Take namespace from deployment store and rest from selection store
         this.state = {
@@ -217,7 +212,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
                 </TabBar>
                 <TabContent>
                     {this.state.selectedPivotKey === servicesPivotItemKey && <ServicesPivot kubeService={this.props.kubeService} namespace={this.state.namespace} filter={this.state.svcFilter} filterToggled={servicesFilterToggled} />}
-                    {this.state.selectedPivotKey === workloadsPivotItemKey && <WorkloadsPivot kubeService={this.props.kubeService} namespace={this.state.namespace} filter={this.state.workloadsFilter} filterToggled={workloadsFilterToggled} markTTI={this.props.markTTI} />}
+                    {this.state.selectedPivotKey === workloadsPivotItemKey && <WorkloadsPivot kubeService={this.props.kubeService} namespace={this.state.namespace} filter={this.state.workloadsFilter} filterToggled={workloadsFilterToggled} />}
                 </TabContent>
             </div>
         );
@@ -285,7 +280,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
 
     private _getZeroData(): JSX.Element {
         const zeroDataProps: IKubeZeroDataProps = {
-            imagePath: KubeSummary.ImageLocations.zeroData,
+            imagePath: KubeFactory.getImageLocation(KubeImage.zeroData),
             hyperLink: HyperLinks.WorkloadsLink,
             hyperLinkLabel: Resources.LearnMoreKubeResourceText,
             descriptionText: Resources.DeployKubeResourceText,
@@ -295,15 +290,10 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         return (KubeZeroData.getDefaultZeroData(zeroDataProps));
     }
 
-    private _getDefaultImageLocations(): ImageLocations {
-        return {
-            zeroData: require("../../img/zero-data.svg"),
-            zeroResults: require("../../img/zero-results.svg"),
-            zeroWorkloads: require("../../img/zero-workloads.svg")
-        } as ImageLocations;
+    private _initializeFactorySettings() {
+        KubeFactory.markTTI = this.props.markTTI || KubeFactory.markTTI;
+        KubeFactory.getImageLocation = this.props.getImageLocation || KubeFactory.getImageLocation;
     }
-
-    public static ImageLocations: ImageLocations = {} as ImageLocations;
 
     private _selectedItemViewMap: { [selectedItemKey: string]: (selectedItem: any) => JSX.Element | null } = {};
     private _objectFinder: { [selectedItemKey: string]: (name: string) => V1ReplicaSet | V1DaemonSet | V1StatefulSet | IServiceItem } = {};
