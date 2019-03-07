@@ -27,6 +27,7 @@ import { WorkloadsActionsCreator } from "./WorkloadsActionsCreator";
 import { WorkloadsStore } from "./WorkloadsStore";
 import { IKubeService } from "../../Contracts/Contracts";
 import { SelectionActionsCreator } from "../Selection/SelectionActionCreator";
+import { KubeFactory } from "../KubeFactory";
 
 const replicaSetNameKey: string = "replicaSet-col";
 const podsKey: string = "pods-col";
@@ -37,7 +38,6 @@ const colDataClassName: string = "dc-col-data";
 export interface IDeploymentsTableProperties extends IVssComponentProperties {
     kubeService: IKubeService;
     nameFilter?: string;
-    markTTI?: () => void;
 }
 
 export interface IDeploymentsTableState {
@@ -309,11 +309,11 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
     }
 
     private _markTTI(prevProps: IDeploymentsTableProperties, prevState: IDeploymentsTableState): void {
-        if (!this._isTTIMarked && this.props.markTTI) {
+        if (!this._isTTIMarked) {
             // if previously replicaSet did not exist and is rendered just now
             if ((!prevState.replicaSetList || !prevState.replicaSetList.items) && 
                 (this.state.replicaSetList && this.state.replicaSetList.items)) {
-                    this.props.markTTI();
+                    KubeFactory.markTTI();
                     this._isTTIMarked = true;
             }
         }
