@@ -8,7 +8,7 @@ import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { format } from "azure-devops-ui/Core/Util/String";
 import { Filter, IFilterItemState, IFilterState } from "azure-devops-ui/Utilities/Filter";
 import * as React from "react";
-import { IKubeService } from "../../Contracts/Contracts";
+import { IKubeService, KubeImage } from "../../Contracts/Contracts";
 import { KubeResourceType } from "../../Contracts/KubeServiceBase";
 import { KubeZeroData, IKubeZeroDataProps } from "../Common//KubeZeroData";
 import { NameKey, TypeKey } from "../Common/KubeFilterBar";
@@ -27,7 +27,7 @@ import { WorkloadsStore } from "./WorkloadsStore";
 import { HyperLinks } from "../Constants";
 import { WorkloadsActionsCreator } from "./WorkloadsActionsCreator";
 import "./WorkloadsPivot.scss";
-import { KubeSummary } from "../Common/KubeSummary";
+import { KubeFactory } from "../KubeFactory";
 
 export interface IWorkloadsPivotState {
     workloadResourceSize: number;
@@ -38,7 +38,6 @@ export interface IWorkloadsPivotProps extends IVssComponentProperties {
     filter: Filter;
     namespace?: string;
     filterToggled: ObservableValue<boolean>;
-    markTTI?: () => void;
 }
 
 export class WorkloadsPivot extends BaseComponent<IWorkloadsPivotProps, IWorkloadsPivotState> {
@@ -120,7 +119,6 @@ export class WorkloadsPivot extends BaseComponent<IWorkloadsPivotProps, IWorkloa
             key={format("dc-{0}", this.props.namespace || "")}
             kubeService={this.props.kubeService}
             nameFilter={this._getNameFilterValue()}
-            markTTI={this.props.markTTI}
         />);
     }
 
@@ -149,7 +147,7 @@ export class WorkloadsPivot extends BaseComponent<IWorkloadsPivotProps, IWorkloa
 
     private _getZeroData(): JSX.Element {
         const zeroDataProps: IKubeZeroDataProps = {
-            imagePath: KubeSummary.ImageLocations.zeroResults,
+            imagePath: KubeFactory.getImageLocation(KubeImage.zeroResults),
             hyperLink: HyperLinks.WorkloadsLink,
             hyperLinkLabel: Resources.LearnMoreText,
             descriptionText: Resources.WorkloadsZeroDataText,
