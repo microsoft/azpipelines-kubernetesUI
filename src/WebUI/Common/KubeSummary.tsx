@@ -126,7 +126,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         // This needs to be called after the data is loaded so that we can decide which object is selected as per the URL
         setTimeout(() => {
             this._updateStateFromHistory(queryString.parse(this._historyService.location.search));
-            this._historyUnlisten = this._historyService.listen(this._onHistoryChanged);            
+            this._historyUnlisten = this._historyService.listen(this._onHistoryChanged);
         }, 100);
     }
 
@@ -139,19 +139,18 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
     }
 
     private _updateStateFromHistory = (routeValues: queryString.OutputParams): void => {
-        if (routeValues["type"] && routeValues["uid"])
-        {
+        if (routeValues["type"] && routeValues["uid"]) {
             const typeName: string = routeValues["type"] as string;
             const objectId: string = routeValues["uid"] as string;
             const selectedItem = this._objectFinder[typeName](objectId);
-            this.setState({selectedItemType: typeName, selectedItem: selectedItem, showSelectedItem: true});
+            this.setState({ selectedItemType: typeName, selectedItem: selectedItem, showSelectedItem: true });
         }
         else {
-            this.setState({selectedItemType: "", selectedItem: undefined, showSelectedItem: false});
+            this.setState({ selectedItemType: "", selectedItem: undefined, showSelectedItem: false });
         }
     };
 
-    private _onHistoryChanged = (location: Location, action: Action): void => {      
+    private _onHistoryChanged = (location: Location, action: Action): void => {
         let routeValues: queryString.OutputParams = queryString.parse(location.search);
         this._updateStateFromHistory(routeValues);
     }
@@ -181,40 +180,48 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
     }
 
     private _getMainContent(): JSX.Element {
+        const pageContent = this.state.resourceSize > 0 ? this._getMainPivot() : this._getZeroData();
+        // must be short syntax or React.Fragment, do not use div here to include heading and content.
         return (
-            <div className="main-content">
-                {this._getMainHeading()}
-                {this.state.resourceSize > 0 ? this._getMainPivot() : this._getZeroData()}
-            </div>
+            <>
+                <Header
+                    title={this.props.title}
+                    titleSize={TitleSize.Large}
+                    className={"content-main-heading"}
+                    description={localeFormat(Resources.NamespaceHeadingText, this.state.namespace || "")}
+                />
+                {pageContent}
+            </>
         );
     }
 
-    private _getMainHeading(): JSX.Element | null {
-        return (
-            <Header
-                title={this.props.title}
-                titleSize={TitleSize.Large}
-                className={"content-main-heading"}
-                description={localeFormat(Resources.NamespaceHeadingText, this.state.namespace || "")}
-            />);
-    }
-
     private _getMainPivot(): JSX.Element {
+        const commonProps = {
+            kubeService: this.props.kubeService,
+            namespace: this.state.namespace,
+            filterToggled: servicesFilterToggled
+        };
+
+        const tabContent = this.state.selectedPivotKey === servicesPivotItemKey
+            ? <ServicesPivot {...commonProps} filter={this.state.svcFilter} />
+            : <WorkloadsPivot {...commonProps} filter={this.state.workloadsFilter} />;
+
+        // must be short syntax or React.Fragment, do not use div here to include heading and content.
         return (
-            <div className="content-with-pivot">
+            <>
                 <TabBar
-                    onSelectedTabChanged={(key: string) => { this.setState({ selectedPivotKey: key }); }}
-                    orientation={0}
                     selectedTabId={this.state.selectedPivotKey || workloadsPivotItemKey}
-                    renderAdditionalContent={() => { return this._getFiterHeaderBar(); }}>
+                    onSelectedTabChanged={(key: string) => { this.setState({ selectedPivotKey: key }); }}
+                    renderAdditionalContent={() => { return this._getFilterHeaderBar(); }}
+                    disableSticky={false}
+                >
                     <Tab name={Resources.PivotWorkloadsText} id={workloadsPivotItemKey} />
                     <Tab name={Resources.PivotServiceText} id={servicesPivotItemKey} />
                 </TabBar>
-                <TabContent>
-                    {this.state.selectedPivotKey === servicesPivotItemKey && <ServicesPivot kubeService={this.props.kubeService} namespace={this.state.namespace} filter={this.state.svcFilter} filterToggled={servicesFilterToggled} />}
-                    {this.state.selectedPivotKey === workloadsPivotItemKey && <WorkloadsPivot kubeService={this.props.kubeService} namespace={this.state.namespace} filter={this.state.workloadsFilter} filterToggled={workloadsFilterToggled} />}
-                </TabContent>
-            </div>
+                <div className="page-content page-content-top content-with-pivot">
+                    {tabContent}
+                </div>
+            </>
         );
     }
 
@@ -265,7 +272,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         }
     }
 
-    private _getFiterHeaderBar(): JSX.Element {
+    private _getFilterHeaderBar(): JSX.Element {
         return (
             <div>
                 <ConditionalChildren renderChildren={!this.state.selectedPivotKey || this.state.selectedPivotKey === workloadsPivotItemKey}>

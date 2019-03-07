@@ -8,13 +8,6 @@
 }
 
 .kubernetes-container {
-    width: 100%;
-    padding: 20px;
-
-    .content-main-heading {
-        padding-left: 0px;
-    }
-
     .sub-heading {
         color: $secondary-text;
         font-size: $fontSizeM;
@@ -25,15 +18,7 @@
         font-size: $fontSizeMS;
     }
 
-    .content-with-pivot .item-padding {
-        padding-top: 8px;
+    .content-with-pivot .card-padding {
+        padding-top: 16px;
     }
-
-    /* We require the first tab to be aligned with the card.
-    Since Tab element does not support className as a prop, we cannot set a particular class that applies only to first tab
-    Hence using id of first tab to set its padding
-    */
-     #tab-workloads {
-         padding-left: 0px;
-     }
 }
