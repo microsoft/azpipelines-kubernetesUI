@@ -70,9 +70,7 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
         });
 
         if (filteredDeployments.length > 0) {
-            return (
-                <div>{this._getDeploymentListView(filteredDeployments)}</div>
-            );
+            return this._getDeploymentsListView(filteredDeployments);
         }
 
         return null;
@@ -91,10 +89,10 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
         });
     }
 
-    private _getDeploymentListView(filteredDeployments: V1Deployment[]) {
+    private _getDeploymentsListView(filteredDeployments: V1Deployment[]): JSX.Element[] {
         let renderList: JSX.Element[] = [];
         DeploymentsTable._generateDeploymentReplicaSetMap(filteredDeployments, this.state.replicaSetList).forEach((entry, index) => {
-            let columnClassName = css("list-content", "depth-16", "replica-with-pod-list", index > 0 ? "" : "first-deployment");
+            const columnClassName = css("replica-with-pod-list", "k8s-card-padding");
             renderList.push(<BaseKubeTable
                 key={format("dep-{0}", index)}
                 className={columnClassName}
@@ -105,6 +103,7 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
                 onItemActivated={this._openDeploymentItem}
             />);
         });
+
         return renderList;
     }
 

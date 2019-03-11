@@ -3,7 +3,7 @@
     Licensed under the MIT license.
 */
 
-import { BaseComponent } from "@uifabric/utilities";
+import { BaseComponent, css } from "@uifabric/utilities";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { format } from "azure-devops-ui/Core/Util/String";
 import { Filter, IFilterItemState, IFilterState } from "azure-devops-ui/Utilities/Filter";
@@ -53,7 +53,7 @@ export class WorkloadsPivot extends BaseComponent<IWorkloadsPivotProps, IWorkloa
         this.state = {
             workloadResourceSize: 0
         };
-        
+
         this._workloadsActionCreator.getDeployments(this.props.kubeService);
 
         // Fetch all pods in parent component as the podList is required in selected workload pods view
@@ -65,10 +65,12 @@ export class WorkloadsPivot extends BaseComponent<IWorkloadsPivotProps, IWorkloa
 
     public render(): React.ReactNode {
         return (
-            <div className="item-padding workloads-pivot">
+            <>
                 {this._getFilterBar()}
-                {this._getContent()}
-            </div>
+                <div className={css("workloads-pivot-data", "k8s-pivot-data")}>
+                    {this._getContent()}
+                </div>
+            </>
         );
     }
 
@@ -88,11 +90,14 @@ export class WorkloadsPivot extends BaseComponent<IWorkloadsPivotProps, IWorkloa
     }
 
     private _getContent(): JSX.Element {
-        return (this.state.workloadResourceSize === 0 ? this._getZeroData() :
-            <div>
-                {this._showComponent(KubeResourceType.Deployments) && this._getDeployments()}
-                {this._getOtherWorkloadsComponent()}
-            </div>);
+        return (
+            this.state.workloadResourceSize === 0
+                ? this._getZeroData()
+                : <>
+                    {this._showComponent(KubeResourceType.Deployments) && this._getDeployments()}
+                    {this._getOtherWorkloadsComponent()}
+                </>
+        );
     }
 
     private _getFilterBar(): JSX.Element {
@@ -100,7 +105,7 @@ export class WorkloadsPivot extends BaseComponent<IWorkloadsPivotProps, IWorkloa
             <WorkloadsFilterBar
                 filter={this.props.filter}
                 filterToggled={this.props.filterToggled}
-                className="workload-filter-margin"
+                className={css("workloads-pivot-filter", "k8s-pivot-filter")}
             />
         );
     }
@@ -154,7 +159,8 @@ export class WorkloadsPivot extends BaseComponent<IWorkloadsPivotProps, IWorkloa
             primaryText: Resources.DeployWorkloads,
             className: "zerod-side-align-content"
         }
-        return (KubeZeroData.getDefaultZeroData(zeroDataProps));
+
+        return KubeZeroData.getDefaultZeroData(zeroDataProps);
     }
 
     private _workloadsStore: WorkloadsStore;

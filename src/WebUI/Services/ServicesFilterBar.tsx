@@ -32,6 +32,7 @@ export class ServicesFilterBar extends BaseComponent<IServiceFilterBarProps> {
                     name: item
                 };
             }}
+            className={this.props.className || ""}
         />);
     }
 

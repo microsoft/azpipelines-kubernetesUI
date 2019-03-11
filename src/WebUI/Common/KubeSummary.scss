@@ -1,13 +1,23 @@
 @import "azure-devops-ui/Core/_platformCommon.scss";
-
-.overflow-ellipsis {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    word-wrap: normal;
-}
-
 .kubernetes-container {
+    // cards are sibling
+    .k8s-pivot-content {
+        // cards have margins
+        .k8s-card-padding+.k8s-card-padding {
+            margin-top: 16px;
+        }
+
+        // filter is immediate element
+        &> .k8s-pivot-filter {
+            margin-top: 0px;
+
+            // filter and data are sibling
+            &+ .k8s-pivot-data {
+                padding-top: 8px;
+            }
+        }
+    }
+
     .sub-heading {
         color: $secondary-text;
         font-size: $fontSizeM;
@@ -16,9 +26,5 @@
     .sub-heading2 {
         color: $secondary-text;
         font-size: $fontSizeMS;
-    }
-
-    .content-with-pivot .card-padding {
-        padding-top: 16px;
     }
 }

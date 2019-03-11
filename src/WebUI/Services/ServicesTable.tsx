@@ -52,15 +52,12 @@ export class ServicesTable extends BaseComponent<IServicesComponentProperties> {
 
         if (filteredSvc.length > 0) {
             return (
-                <div>{
-                    <BaseKubeTable
-                        className={css("list-content", "depth-16", "services-table")}
-                        items={ServicesTable.getServiceItems(filteredSvc)}
-                        columns={ServicesTable._getColumns()}
-                        onItemActivated={this._openServiceItem}
-                    />
-                }
-                </div>
+                <BaseKubeTable
+                    className={css("services-list", "k8s-card-padding")}
+                    items={ServicesTable.getServiceItems(filteredSvc)}
+                    columns={ServicesTable._getColumns()}
+                    onItemActivated={this._openServiceItem}
+                />
             );
         } else {
             return KubeZeroData.getNoResultsZeroData();

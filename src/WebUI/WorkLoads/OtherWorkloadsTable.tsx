@@ -71,7 +71,7 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
         if (filteredSet.length > 0) {
             return (
                 <BaseKubeTable
-                    className={css("list-content", "top-padding", "depth-16")}
+                    className={css("workloads-other-content", "k8s-card-padding")}
                     items={filteredSet}
                     columns={OtherWorkloads._getColumns()}
                     onItemActivated={this._openStatefulSetItem}

@@ -38,7 +38,7 @@ export interface ITableComponentProperties<T> extends IVssComponentProperties {
 export class BaseKubeTable<T> extends BaseComponent<ITableComponentProperties<T>> {
     public render(): React.ReactNode {
         return (
-            <CustomCard className={css("flex-grow", "bolt-card-no-vertical-padding", "item-top-padding", "kube-list-content", this.props.className || "")}>
+            <CustomCard className={css("flex-grow", "bolt-card-no-vertical-padding", this.props.className || "")}>
                 {
                     this.props.headingText &&
                     <CustomHeader>
@@ -93,7 +93,7 @@ export class BaseKubeTable<T> extends BaseComponent<ITableComponentProperties<T>
         return (
             <div className={css("kube-list-col-data", className)}>
                 <Tooltip text={text} overflowOnly>
-                    <span className="overflow-ellipsis">{text}</span>
+                    <span className="text-ellipsis">{text}</span>
                 </Tooltip>
             </div>
         );
@@ -117,14 +117,14 @@ export class BaseKubeTable<T> extends BaseComponent<ITableComponentProperties<T>
                 line1={
                     <div className={css("kube-list-col-data", primaryTextClassName)} key={"col-primary-" + columnIndex}>
                         <Tooltip text={primaryText} overflowOnly>
-                            <span className="overflow-ellipsis">{primaryText}</span>
+                            <span className="text-ellipsis">{primaryText}</span>
                         </Tooltip>
                     </div>
                 }
                 line2={
                     <div className={css("list-secondary-text", secondaryTextClassName)} key={"col-secondary-" + columnIndex}>
                         <Tooltip text={subText} overflowOnly>
-                            <span className="overflow-ellipsis">{subText}</span>
+                            <span className="text-ellipsis">{subText}</span>
                         </Tooltip>
                     </div>
                 }

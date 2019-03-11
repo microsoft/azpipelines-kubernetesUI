@@ -45,12 +45,15 @@ export class KubeZeroData extends BaseComponent<IKubeZeroDataProps> {
                 secondaryText={this._getTextArea()}
             />
         );
+
         return (
-            this.props.renderOnCard ?
-                <Card titleProps={{ text: this.props.title }} className={css("flex-grow", "item-top-padding", "kube-list-content")}>
-                    {zeroDataElm}
-                </Card> :
-                zeroDataElm
+            this.props.renderOnCard
+                ? (
+                    <Card titleProps={{ text: this.props.title }} className={css("flex-grow", "item-top-padding", "kube-list-content")}>
+                        {zeroDataElm}
+                    </Card>
+                )
+                : zeroDataElm
         );
     }
 
@@ -64,9 +67,9 @@ export class KubeZeroData extends BaseComponent<IKubeZeroDataProps> {
 
     public static getNoResultsZeroData(): JSX.Element {
         return (
-            <KubeZeroData 
-                imagePath={KubeFactory.getImageLocation(KubeImage.zeroResults)} 
-                descriptionText={Resources.NoResultsFoundText} 
+            <KubeZeroData
+                imagePath={KubeFactory.getImageLocation(KubeImage.zeroResults)}
+                descriptionText={Resources.NoResultsFoundText}
             />
         );
     }

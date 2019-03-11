@@ -4,7 +4,7 @@
 */
 
 import { V1ServiceList } from "@kubernetes/client-node";
-import { BaseComponent } from "@uifabric/utilities";
+import { BaseComponent, css } from "@uifabric/utilities";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { Filter, IFilterItemState, IFilterState } from "azure-devops-ui/Utilities/Filter";
 import * as React from "react";
@@ -52,10 +52,12 @@ export class ServicesPivot extends BaseComponent<IServicesPivotProps, IServicesP
 
     public render(): React.ReactNode {
         return (
-            <div className="services-pivot">
+            <>
                 {this._getFilterBar()}
-                {this._getContent()}
-            </div>
+                <div className={css("services-pivot-data", "k8s-pivot-data")}>
+                    {this._getContent()}
+                </div>
+            </>
         );
     }
 
@@ -69,8 +71,8 @@ export class ServicesPivot extends BaseComponent<IServicesPivotProps, IServicesP
     }
 
     private _getContent(): JSX.Element {
-        const serivceSize: number = this.state.serviceList && this.state.serviceList.items ? this.state.serviceList.items.length : 0;
-        return (serivceSize === 0 ? this._getZeroData() :
+        const serviceSize: number = this.state.serviceList && this.state.serviceList.items ? this.state.serviceList.items.length : 0;
+        return (serviceSize === 0 ? this._getZeroData() :
             <ServicesTable
                 serviceList={this.state.serviceList || {} as V1ServiceList}
                 nameFilter={this._getNameFilterValue()}
@@ -80,6 +82,7 @@ export class ServicesPivot extends BaseComponent<IServicesPivotProps, IServicesP
 
     private _getFilterBar(): JSX.Element {
         return (<ServicesFilterBar
+            className={css("services-pivot-filter", "k8s-pivot-filter")}
             serviceList={this.state.serviceList || {} as V1ServiceList}
             filter={this.props.filter}
             filterToggled={this.props.filterToggled}
@@ -107,8 +110,9 @@ export class ServicesPivot extends BaseComponent<IServicesPivotProps, IServicesP
             primaryText: Resources.DeployServices,
             descriptionText: Resources.StartingUsingServiceText,
             className: "zerod-side-align-content"
-        }
-        return (KubeZeroData.getDefaultZeroData(zeroDataProps));
+        };
+
+        return KubeZeroData.getDefaultZeroData(zeroDataProps);
     }
 
     private _store: ServicesStore;
