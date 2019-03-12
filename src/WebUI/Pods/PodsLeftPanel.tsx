@@ -3,25 +3,19 @@
     Licensed under the MIT license.
 */
 
-import { V1ObjectMeta, V1Pod, V1PodTemplateSpec } from "@kubernetes/client-node";
-import { BaseComponent } from "@uifabric/utilities";
-import { Card } from "azure-devops-ui/Card";
+import { V1Pod } from "@kubernetes/client-node";
+import { BaseComponent, css } from "@uifabric/utilities";
 import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
-import { format } from "azure-devops-ui/Core/Util/String";
-import { Duration } from "azure-devops-ui/Duration";
-import { LabelGroup, WrappingBehavior } from "azure-devops-ui/Label";
-import { IStatusProps, Statuses } from "azure-devops-ui/Status";
+import { Header, TitleSize } from "azure-devops-ui/Header";
+import { IListSelection, ListSelection } from "azure-devops-ui/List";
+import { IStatusProps, Status, Statuses, StatusSize } from "azure-devops-ui/Status";
 import { ITableColumn, Table } from "azure-devops-ui/Table";
-import { ListSelection, IListSelection } from "azure-devops-ui/List";
-import { Button } from "azure-devops-ui/Button";
-import { Header, IHeaderProps, TitleSize } from "azure-devops-ui/Header";
+import { Tooltip } from "azure-devops-ui/TooltipEx";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
 import { BaseKubeTable } from "../Common/BaseKubeTable";
-import { ResourceStatus } from "../Common/ResourceStatus";
 import * as Resources from "../Resources";
 import { IVssComponentProperties } from "../Types";
-import { Utils } from "../Utils";
 import "./PodsLeftPanel.scss";
 
 const podStatusDic: { [index: string]: IStatusProps } = {
@@ -36,7 +30,9 @@ const colDataClassName: string = "list-col-content";
 
 export interface IPodsLeftPanelProperties extends IVssComponentProperties {
     pods: V1Pod[];
+    selectedPodName?: string;
     parentName: string;
+    parentKind: string;
     onSelectionChange?: (event: React.SyntheticEvent<HTMLElement>, selectedItem: V1Pod) => void;
     onBackButtonClick?: () => void;
 }
@@ -44,19 +40,32 @@ export interface IPodsLeftPanelProperties extends IVssComponentProperties {
 export class PodsLeftPanel extends BaseComponent<IPodsLeftPanelProperties> {
     public render(): JSX.Element {
         return (
-            <div className="pods-left-panel-container">
+            <>
                 {this._getHeader()}
                 {this._getPodsList()}
-            </div>
+            </>
         );
     }
 
     public componentDidMount() {
-        // Select the first pod in left panel by default
-        this._selection.select(0);
+        const selectedPodName = this.props.selectedPodName;
+        if (!this._hasSelected) {
+            if (selectedPodName) {
+                this._selectedRow = (this.props.pods || []).findIndex(pod => pod.metadata.name === selectedPodName);
+            }
+
+            if (this._selectedRow === -1 || this._selectedRow >= (this.props.pods || []).length ) {
+                this._selectedRow = 0;
+            }
+
+            // Select the first pod in left panel by default
+            this._selection.select(this._selectedRow);
+            this._hasSelected = true;
+        }
     }
 
     private _onSelectionChange = (event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>) => {
+        this._selectedRow = tableRow.index;
         if (this.props.onSelectionChange) {
             this.props.onSelectionChange(event, this.props.pods[tableRow.index]);
         }
@@ -68,8 +77,10 @@ export class PodsLeftPanel extends BaseComponent<IPodsLeftPanelProperties> {
                 title={this.props.parentName}
                 titleIconProps={{ iconName: "Back", onClick: this.props.onBackButtonClick, className: "pod-left-panel-back-button" }}
                 titleSize={TitleSize.Large}
+                description={this.props.parentKind || ""}
                 className={"pod-left-panel-header"}
-            />);
+            />
+        );
     }
 
     private _getPodsList(): JSX.Element | null {
@@ -82,36 +93,47 @@ export class PodsLeftPanel extends BaseComponent<IPodsLeftPanelProperties> {
             width: -100,
             headerClassName: headerColumnClassName,
             className: colDataClassName,
-            renderCell: PodsLeftPanel._renderPodNameCell
+            renderCell: (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod) => {
+                return PodsLeftPanel._renderPodNameCell(rowIndex, columnIndex, tableColumn, pod, this._selectedRow);
+            }
         });
 
         return (
             this.props.pods && this.props.pods.length > 0 ?
-                <div>
-                    <div className="pod-left-panel-table-header">{Resources.PodsListHeaderText}</div>
+                <>
+                    <Header
+                        title={Resources.PodsListHeaderText}
+                        titleSize={TitleSize.Small}
+                        className={"pod-left-panel-table-header fontWeightSemiBold"}
+                    />
                     <Table
                         itemProvider={new ArrayItemProvider<V1Pod>(this.props.pods)}
                         columns={columns}
                         showHeader={false}
                         showLines={true}
-                        singleClickActivation={false}
                         onSelect={this._onSelectionChange}
                         selection={this._selection}
                     />
-                </div> : null
+                </> : null
         );
     }
 
-    private static _renderPodNameCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod): JSX.Element {
+    private static _renderPodNameCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod, selectedIndex: number): JSX.Element {
         const itemToRender = (
-            <ResourceStatus
-                statusProps={podStatusDic[pod.status.phase]}
-                statusDescription={pod.metadata.name}
-            />
+            <>
+                <Status {...podStatusDic[pod.status.phase]} className="icon-large-margin" size={StatusSize.m} />
+                <div className="flex-row scroll-hidden">
+                    <Tooltip overflowOnly text={pod.metadata.name}>
+                        <span className={css("text-ellipsis", rowIndex === selectedIndex ? "fontWeightSemiBold" : "")}>{pod.metadata.name}</span>
+                    </Tooltip>
+                </div>
+            </>
         );
 
         return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
     private _selection: IListSelection = new ListSelection();
+    private _hasSelected: boolean = false;
+    private _selectedRow: number = -1;
 }

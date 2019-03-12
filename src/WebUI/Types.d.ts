@@ -56,6 +56,7 @@ export interface ISetWorkloadTypeItem {
     uid: string;
     kind: string;
     image: string;
+    imageTooltip?: string;
     desiredPodCount: number;
     currentPodCount: number;
     creationTimeStamp: Date;

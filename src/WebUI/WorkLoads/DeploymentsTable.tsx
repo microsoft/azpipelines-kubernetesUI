@@ -157,7 +157,7 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
             statusProps: DeploymentsTable._getPodsStatusProps(replica.status.availableReplicas, replica.status.replicas),
             showRowBorder: (replicaSetLength === (index + 1)),
             deployment: deployment,
-            image: Utils.getImageText(replica.spec.template.spec),
+            image: Utils.getImageText(replica.spec.template.spec).imageText,
             creationTimeStamp: replica.metadata.creationTimestamp,
             kind: replica.kind || "ReplicaSet"
         };

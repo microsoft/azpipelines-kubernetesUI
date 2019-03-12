@@ -84,6 +84,7 @@ export class Utils {
         if (status.phase === PodPhase.Running || status.phase === PodPhase.Succeeded) {
             return Statuses.Success;
         }
+
         return Statuses.Failed;
     }
 
@@ -94,23 +95,25 @@ export class Utils {
         return true;
     }
 
-    public static getImageText(podSpec: V1PodSpec | undefined): string {
+    public static getImageText(podSpec: V1PodSpec | undefined): { imageText: string, imageTooltipText?: string} {
         let images: string[] = [];
-        let imageString: string = "";
+        let imageText: string = "";
+        let imageTooltipText: string = "";
         if (podSpec && podSpec.containers && podSpec.containers.length > 0) {
             podSpec.containers.forEach(container => {
                 if (images.indexOf(container.image) < 0) {
-                    images.push(container.image)
+                    images.push(container.image);
                 }
             });
 
             if (images.length > 1) {
-                imageString = localeFormat(Resources.MoreImagesText, images[0], images.length - 1);
+                imageText = localeFormat(Resources.MoreImagesText, images[0], images.length - 1);
+                imageTooltipText = images.join(", ");
             } else {
-                imageString = images[0];
+                imageText = images[0];
             }
         }
-        
-        return imageString;
+
+        return { imageText: imageText, imageTooltipText: imageTooltipText };
     }
 }

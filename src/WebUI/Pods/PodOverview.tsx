@@ -4,22 +4,22 @@
 */
 
 import { V1Pod } from "@kubernetes/client-node";
-import { BaseComponent } from "@uifabric/utilities";
-import { Card } from "azure-devops-ui/Card";
+import { BaseComponent, css } from "@uifabric/utilities";
+import { Ago } from "azure-devops-ui/Ago";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { format } from "azure-devops-ui/Core/Util/String";
-import { Duration } from "azure-devops-ui/Duration";
+import { CustomHeader, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
 import { LabelGroup, WrappingBehavior } from "azure-devops-ui/Label";
-import { ColumnFill, ITableColumn, renderSimpleCell, SimpleTableCell as renderTableCell, Table } from "azure-devops-ui/Table";
+import { ColumnFill, ITableColumn, SimpleTableCell as renderTableCell, Table } from "azure-devops-ui/Table";
+import { Tooltip } from "azure-devops-ui/TooltipEx";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
+import { BaseKubeTable } from "../Common/BaseKubeTable";
 import * as Resources from "../Resources";
 import { Utils } from "../Utils";
 import "./PodOverview.scss";
-import "../Common/Webplatform.scss";
 import { IPodRightPanelProps } from "./PodsRightPanel";
-import { BaseKubeTable } from "../Common/BaseKubeTable";
-import { TitleSize } from "azure-devops-ui/Header";
+import { CustomCard, CardContent } from "azure-devops-ui/Card";
 
 export interface IPodOverviewProps extends IPodRightPanelProps { }
 
@@ -31,53 +31,75 @@ export class PodOverview extends BaseComponent<IPodOverviewProps> {
                 id: "key",
                 name: "key",
                 width: new ObservableValue(150),
-                className: "pod-overview-key",
+                className: "pod-overview-key-col",
                 minWidth: 100,
-                renderCell: renderSimpleCell
+                renderCell: PodOverview._renderKeyCell
             },
             {
                 id: "value",
                 name: "value",
                 width: new ObservableValue(500),
-                className: "pod-overview-value",
+                className: "pod-overview-value-col",
                 minWidth: 400,
                 renderCell: PodOverview._renderValueCell
             },
             ColumnFill
         ];
 
-        const image: string = Utils.getImageText(pod.spec);
+        const { imageText, imageTooltipText } = Utils.getImageText(pod.spec);
 
-        const tableItems = new ArrayItemProvider<any>([
+        const tableRows = new ArrayItemProvider<any>([
             { key: Resources.Created, value: pod.metadata.creationTimestamp ? new Date(pod.metadata.creationTimestamp) : new Date().getTime() },
             { key: Resources.AnnotationsText, value: pod.metadata.annotations || "" },
             { key: Resources.RestartPolicyText, value: pod.spec.restartPolicy || "" },
             { key: Resources.QoSClassText, value: pod.status.qosClass || "" },
             { key: Resources.NodeText, value: pod.spec.nodeName || "" },
             { key: Resources.ClusterIPText, value: "" },
-            { key: Resources.ImageText, value: image },
+            { key: Resources.ImageText, value: imageText, valueTooltipText: imageTooltipText },
             { key: Resources.LabelsText, value: pod.metadata.labels || "" }
         ]);
 
         return (
-            <Card className="pod-overview-card depth-16"
-                titleProps={{
-                    text: Resources.PodDetailsHeader,
-                    size: TitleSize.Large
-                }}
-                contentProps={{ contentPadding: false }}>
-                <Table
-                    className="s-full-details"
-                    id={format("s-full-details-{0}", pod.metadata.uid)}
-                    showHeader={false}
-                    showLines={false}
-                    singleClickActivation={false}
-                    itemProvider={tableItems}
-                    pageSize={tableItems.length}
-                    columns={columns}
-                />
-            </Card>
+            <CustomCard className="pod-overview-card k8s-card-padding flex-grow bolt-card-no-vertical-padding">
+                <CustomHeader>
+                    <HeaderTitleArea>
+                        <HeaderTitleRow>
+                            <HeaderTitle className="text-ellipsis" titleSize={TitleSize.Medium} >
+                                {Resources.PodDetailsHeader}
+                            </HeaderTitle>
+                        </HeaderTitleRow>
+                    </HeaderTitleArea>
+                </CustomHeader>
+                <CardContent contentPadding={false}>
+                    <Table
+                        id={format("pod-overview-{0}", pod.metadata.uid)}
+                        showHeader={false}
+                        showLines={false}
+                        singleClickActivation={false}
+                        itemProvider={tableRows}
+                        pageSize={tableRows.length}
+                        columns={columns}
+                    />
+                </CardContent>
+            </CustomCard>
         );
+    }
+
+    private static _renderKeyCell(
+        rowIndex: number,
+        columnIndex: number,
+        tableColumn: ITableColumn<any>,
+        tableItem: any): JSX.Element {
+        const { key } = tableItem;
+        const contentClassName = "pod-o-k-col-content";
+
+        const itemToRender = (
+            <Tooltip text={key} overflowOnly>
+                <span className={css("text-ellipsis secondary-text")}>{key}</span>
+            </Tooltip>
+        );
+
+        return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender, undefined, contentClassName);
     }
 
     private static _renderValueCell(
@@ -85,18 +107,16 @@ export class PodOverview extends BaseComponent<IPodOverviewProps> {
         columnIndex: number,
         tableColumn: ITableColumn<any>,
         tableItem: any): JSX.Element {
-        const { key, value } = tableItem;
+        const { key, value, valueTooltipText } = tableItem;
         let props: any = {};
+        const contentClassName = "pod-o-v-col-content";
         switch (key) {
             case Resources.Created:
                 props = {
                     columnIndex: columnIndex,
-                    children:
-                        <span className="pod-details-created-cell">
-                            <Duration startDate={value} endDate={new Date()} />
-                            {format("{0}", Resources.Ago)}
-                        </span>,
-                    tableColumn: tableColumn
+                    children: <Ago date={new Date(value)} />,
+                    tableColumn: tableColumn,
+                    contentClassName: contentClassName
                 };
 
                 return renderTableCell(props);
@@ -108,18 +128,17 @@ export class PodOverview extends BaseComponent<IPodOverviewProps> {
                     children:
                         <LabelGroup
                             labelProps={Utils.getUILabelModelArray(value)}
-                            wrappingBehavior={WrappingBehavior.oneLine}
-                            fadeOutOverflow={true}
+                            wrappingBehavior={WrappingBehavior.freeFlow}
                         />,
                     tableColumn: tableColumn,
-                    contentClassName: "pod-labelgroups"
+                    contentClassName: css("pod-labels-pill", contentClassName)
                 };
 
                 return renderTableCell(props);
 
             default:
-                const itemToRender = <span className="pod-overview-value-cell">{value}</span>;
-                return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
+                const itemToRender = BaseKubeTable.defaultColumnRenderer(value, undefined, valueTooltipText);
+                return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender, undefined, contentClassName);
         }
     }
 }

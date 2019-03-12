@@ -26,7 +26,7 @@ export declare const Created: string;
 export declare const AgoBy: string;
 export declare const Deployment: string;
 export declare const ReplicaSet: string;
-export declare const ServiceCreatedText: string;
+export declare const CreatedTextWithPipelineText: string;
 export declare const OverviewText: string;
 export declare const LabelsText: string;
 export declare const SelectorText: string;

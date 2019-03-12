@@ -12,7 +12,6 @@ import { Link } from "azure-devops-ui/Link";
 import * as Resources from "../Resources";
 import "./Common.scss";
 import "./BaseKubeTable.scss";
-import "./Webplatform.scss";
 import "./KubeZeroData.scss";
 import { KubeFactory } from "../KubeFactory";
 import { KubeImage } from "../../Contracts/Contracts";

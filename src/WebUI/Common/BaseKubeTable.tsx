@@ -19,7 +19,6 @@ import {
 import * as React from "react";
 import { IVssComponentProperties } from "../Types";
 import "./BaseKubeTable.scss";
-import "./Webplatform.scss";
 import { IResourceStatusProps, ResourceStatus } from "./ResourceStatus";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
 
@@ -43,7 +42,7 @@ export class BaseKubeTable<T> extends BaseComponent<ITableComponentProperties<T>
                     this.props.headingText &&
                     <CustomHeader>
                         <HeaderTitleArea>
-                            <HeaderTitleRow className="kube-table-header">
+                            <HeaderTitleRow>
                                 {
                                     (typeof this.props.headingText === "string") ?
                                         <HeaderTitle className="text-ellipsis" titleSize={TitleSize.Medium} >
@@ -54,14 +53,14 @@ export class BaseKubeTable<T> extends BaseComponent<ITableComponentProperties<T>
                             </HeaderTitleRow>
                             {
                                 this.props.headingDescription &&
-                                <HeaderDescription className={css("text-ellipsis", "secondary-text")}>
+                                <HeaderDescription className="text-ellipsis">
                                     {this.props.headingDescription}
                                 </HeaderDescription>
                             }
                         </HeaderTitleArea>
                     </CustomHeader>
                 }
-                <CardContent className="item-no-padding">
+                <CardContent contentPadding={false}>
                     {this.props.items && this.props.items.length > 0 && this._getComponent()}
                 </CardContent>
             </CustomCard>
@@ -85,17 +84,16 @@ export class BaseKubeTable<T> extends BaseComponent<ITableComponentProperties<T>
 
     public static renderColumn(
         text: string,
-        renderer: (text: string, className?: string) => React.ReactNode, className?: string): React.ReactNode {
-        return text && renderer ? renderer(text, className) : null;
+        renderer: (text: string, contentClassName?: string) => React.ReactNode,
+        contentClassName?: string): React.ReactNode {
+        return text && renderer ? renderer(text, contentClassName) : null;
     }
 
-    public static defaultColumnRenderer(text: string, className?: string): React.ReactNode {
+    public static defaultColumnRenderer(text: string, contentClassName?: string, tooltipText?: string): React.ReactNode {
         return (
-            <div className={css("kube-list-col-data", className)}>
-                <Tooltip text={text} overflowOnly>
-                    <span className="text-ellipsis">{text}</span>
-                </Tooltip>
-            </div>
+            <Tooltip text={tooltipText || text} overflowOnly={!tooltipText}>
+                <span className={css("text-ellipsis", contentClassName || "")}>{text}</span>
+            </Tooltip>
         );
     }
 

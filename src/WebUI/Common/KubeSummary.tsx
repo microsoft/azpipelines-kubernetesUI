@@ -236,11 +236,14 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
     private _getWorkoadPodsViewComponent(parentMetaData: V1ObjectMeta, podTemplate: V1PodTemplateSpec, parentKind: string, currentScheduledPods: number, desiredPods: number): JSX.Element | null {
         const statusProps = Utils._getPodsStatusProps(currentScheduledPods, desiredPods);
 
-        return (<WorkloadDetails
-            parentMetaData={parentMetaData}
-            podTemplate={podTemplate}
-            parentKind={parentKind}
-            statusProps={statusProps} />);
+        return (
+            <WorkloadDetails
+                parentMetaData={parentMetaData}
+                podTemplate={podTemplate}
+                parentKind={parentKind}
+                statusProps={statusProps}
+            />
+        );
     }
 
     private _onSelectionStoreChanged = () => {
@@ -254,20 +257,26 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
 
     private _setSelectedKeyPodsViewMap() {
         this._selectedItemViewMap[SelectedItemKeys.StatefulSetKey] = (item) => this._getWorkoadPodsViewComponent(item.metadata, item.spec && item.spec.template, item.kind || "StatefulSet", item.status.currentReplicas, item.status.replicas);
-        this._selectedItemViewMap[SelectedItemKeys.ServiceItemKey] = (item) => { return <ServiceDetails kubeService={this.props.kubeService} service={item} /> };
+        this._selectedItemViewMap[SelectedItemKeys.ServiceItemKey] = (item) => { return <ServiceDetails kubeService={this.props.kubeService} service={item} parentKind={item.kind || "Service"} /> };
         this._selectedItemViewMap[SelectedItemKeys.DaemonSetKey] = (item) => this._getWorkoadPodsViewComponent(item.metadata, item.spec && item.spec.template, item.kind || "DaemonSet", item.status.currentNumberScheduled, item.status.desiredNumberScheduled);
         this._selectedItemViewMap[SelectedItemKeys.OrphanPodKey] = (item) => { return <PodOverview pod={item} />; }
         this._selectedItemViewMap[SelectedItemKeys.ReplicaSetKey] = (item) => this._getWorkoadPodsViewComponent(item.metadata, item.spec && item.spec.template, item.kind || "ReplicaSet", item.status.availableReplicas, item.status.replicas);
     }
 
     private _populateObjectFinder() {
-        this._objectFinder[SelectedItemKeys.ReplicaSetKey] = (uid) => (this._workloadsStore.getState().replicaSetList as V1ReplicaSetList).items.filter(r => r.metadata.uid == uid)[0];
-        this._objectFinder[SelectedItemKeys.StatefulSetKey] = (uid) => (this._workloadsStore.getState().statefulSetList as V1StatefulSetList).items.filter(r => r.metadata.uid == uid)[0];
-        this._objectFinder[SelectedItemKeys.DaemonSetKey] = (uid) => (this._workloadsStore.getState().daemonSetList as V1DaemonSetList).items.filter(r => r.metadata.uid == uid)[0];
+        this._objectFinder[SelectedItemKeys.ReplicaSetKey] = (uid) => KubeSummary._getFilteredFirstObject(this._workloadsStore.getState().replicaSetList, uid);
+        this._objectFinder[SelectedItemKeys.StatefulSetKey] = (uid) => KubeSummary._getFilteredFirstObject(this._workloadsStore.getState().statefulSetList, uid);
+        this._objectFinder[SelectedItemKeys.DaemonSetKey] = (uid) => KubeSummary._getFilteredFirstObject(this._workloadsStore.getState().daemonSetList, uid);
         this._objectFinder[SelectedItemKeys.ServiceItemKey] = (uid) => {
-            let filteredServices: V1Service[] = (this._servicesStore.getState().serviceList as V1ServiceList).items.filter(r => r.metadata.uid == uid);
+            const filteredServices = KubeSummary._getFilteredFirstObject(this._servicesStore.getState().serviceList, uid);
             return ServicesTable.getServiceItems(filteredServices)[0];
-        }
+        };
+    }
+
+    private static _getFilteredFirstObject(itemList: any, uid: string): any {
+        itemList = (itemList || {}) as any;
+        const filteredItems = (itemList.items || []).filter(r => r.metadata.uid === uid);
+        return filteredItems && filteredItems.length > 0 ? filteredItems[0] : {} as any;
     }
 
     private _getFilterHeaderBar(): JSX.Element {

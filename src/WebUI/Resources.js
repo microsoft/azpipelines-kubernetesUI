@@ -27,7 +27,7 @@ define("Environments/Providers/Kubernetes/Resources", ["require", "exports"], fu
     exports.AgoBy = " ago. Image: {0}";
     exports.Deployment = "Deployment: {0}";
     exports.ReplicaSet = "ReplicaSet: {0}";
-    exports.ServiceCreatedText = "Created {0} by {1}"
+    exports.CreatedTextWithPipelineText = "Created {0} by {1}"
     exports.OverviewText = "Overview";
     exports.LabelsText = "Labels";
     exports.SelectorText = "Selector";

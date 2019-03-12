@@ -21,19 +21,21 @@ export interface IServiceFilterBarProps extends IVssComponentProperties {
 
 export class ServicesFilterBar extends BaseComponent<IServiceFilterBarProps> {
     public render(): React.ReactNode {
-        return (<KubeFilterBar filter={this.props.filter}
-            pickListPlaceHolder={Resources.TypeText}
-            keywordPlaceHolder={Resources.ServiceText}
-            filterToggled={this.props.filterToggled}
-            pickListItemsFn={() => this._generateSvcTypes()}
-            listItemsFn={(item: any) => {
-                return {
-                    key: item,
-                    name: item
-                };
-            }}
-            className={this.props.className || ""}
-        />);
+        return (
+            <KubeFilterBar filter={this.props.filter}
+                pickListPlaceHolder={Resources.TypeText}
+                keywordPlaceHolder={Resources.ServiceText}
+                filterToggled={this.props.filterToggled}
+                pickListItemsFn={() => this._generateSvcTypes()}
+                listItemsFn={(item: any) => {
+                    return {
+                        key: item,
+                        name: item
+                    };
+                }}
+                className={this.props.className || ""}
+            />
+        );
     }
 
     private _generateSvcTypes(): string[] {
