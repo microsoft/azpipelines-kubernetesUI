@@ -196,7 +196,7 @@ export class PodsTable extends BaseComponent<IPodsTableProperties> {
         }
 
         keys.forEach(key => {
-            subText = localeFormat("{0} {1} . {3}", podStatuses[key], key, subText);
+            subText = localeFormat("{0} {1} . {2}", podStatuses[key], key, subText);
         });
 
         return subText;

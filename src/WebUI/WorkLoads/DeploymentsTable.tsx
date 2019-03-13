@@ -4,7 +4,7 @@
 */
 
 import { V1Deployment, V1DeploymentList, V1ObjectMeta, V1ReplicaSet, V1ReplicaSetList } from "@kubernetes/client-node";
-import { BaseComponent } from "@uifabric/utilities";
+import { BaseComponent, format } from "@uifabric/utilities";
 import { Ago } from "azure-devops-ui/Ago";
 import { CardContent, CustomCard } from "azure-devops-ui/Card";
 import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
@@ -94,8 +94,12 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
         let renderList: JSX.Element[] = [];
         DeploymentsTable._generateDeploymentReplicaSetMap(filteredDeployments, this.state.replicaSetList).forEach((entry, index) => {
             const items = DeploymentsTable._getDeploymentReplicaSetItems(entry.deployment, entry.replicaSets);
+            const key = format("workloads-deployment-table-{0}", index);
             const deploymentCard = (
-                <CustomCard className="deployment-replica-with-pod-list k8s-card-padding flex-grow bolt-card-no-vertical-padding">
+                <CustomCard
+                    className="deployment-replica-with-pod-list k8s-card-padding flex-grow bolt-card-no-vertical-padding"
+                    key={key}
+                >
                     <CustomHeader>
                         <HeaderTitleArea>
                             <HeaderTitleRow>
@@ -110,7 +114,7 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
                     </CustomHeader>
                     <CardContent contentPadding={false}>
                         <Table
-                            id="workloads-deployment-table"
+                            id={key}
                             showHeader={true}
                             showLines={false}
                             singleClickActivation={true}
@@ -179,15 +183,14 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
             replicaSetId: replica.metadata.uid,
             replicaSetName: replica.metadata.name,
             pipeline: Utils.getPipelineText(annotations),
-            // todo :: how to find error in replicaSet
-            pods: DeploymentsTable._getPodsText(replica.status.availableReplicas, replica.status.replicas),
-            statusProps: DeploymentsTable._getPodsStatusProps(replica.status.availableReplicas, replica.status.replicas),
             showRowBorder: (replicaSetLength === (index + 1)),
             deployment: deployment,
             creationTimeStamp: replica.metadata.creationTimestamp,
             kind: replica.kind || "ReplicaSet",
             image: imageText,
-            imageTooltip: imageTooltipText
+            imageTooltip: imageTooltipText,
+            // todo :: how to find error in replicaSet
+            ...DeploymentsTable._getPodsStatus(replica.status.availableReplicas, replica.status.replicas)
         };
     }
 
@@ -202,20 +205,17 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
             && replica.metadata.ownerReferences[0].uid.toLowerCase() === deployment.metadata.uid.toLowerCase();
     }
 
-    private static _getPodsText(availableReplicas: number, replicas: number): string {
-        if (replicas != null && availableReplicas != null && replicas > 0) {
-            return localeFormat("{0}/{1}", availableReplicas, replicas);
+    private static _getPodsStatus(availableReplicas: number, replicas: number): { statusProps: IStatusProps | undefined, pods: string } {
+        let statusProps: IStatusProps | undefined = undefined;
+        let pods = "";
+        if (replicas != null && replicas > 0) {
+            statusProps = availableReplicas == null
+                ? Statuses.Failed
+                : availableReplicas < replicas ? Statuses.Running : Statuses.Success;
+            pods = localeFormat("{0}/{1}", availableReplicas || 0, replicas);
         }
 
-        return "";
-    }
-
-    private static _getPodsStatusProps(availableReplicas: number, replicas: number): IStatusProps | undefined {
-        if (replicas != null && availableReplicas != null && replicas > 0) {
-            return availableReplicas < replicas ? Statuses.Running : Statuses.Success;
-        }
-
-        return undefined;
+        return { statusProps: statusProps, pods: pods };
     }
 
 

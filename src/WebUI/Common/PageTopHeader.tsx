@@ -17,22 +17,24 @@ export interface IPageTopHeader extends IVssComponentProperties {
 
 export class PageTopHeader extends BaseComponent<IPageTopHeader> {
     public render(): React.ReactNode {
-        const { title, statusProps = {} as IStatusProps } = this.props;
+        const statusProps = this.props.statusProps || {} as IStatusProps;
         return (
             <Header
-            title={title}
-            titleSize={TitleSize.Large}
-            titleClassName="k8s-top-header-title"
-            titleIconProps={{
-                render: (className?: string) => {
-                    return (
-                        <span className="flex-row">
-                            <Status {...statusProps} size={StatusSize.l} />
-                        </span>
-                    );
+                title={this.props.title || ""}
+                titleSize={TitleSize.Large}
+                titleClassName="k8s-top-header-title"
+                titleIconProps={
+                    this.props.statusProps ? {
+                        render: (className?: string) => {
+                            return (
+                                <span className="flex-row">
+                                    <Status {...statusProps} size={StatusSize.l} />
+                                </span>
+                            );
+                        }
+                    } : undefined
                 }
-            }}
-        />
+            />
         );
     }
 }

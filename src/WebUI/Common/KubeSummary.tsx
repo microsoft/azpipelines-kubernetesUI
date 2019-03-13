@@ -234,7 +234,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
     }
 
     private _getWorkoadPodsViewComponent(parentMetaData: V1ObjectMeta, podTemplate: V1PodTemplateSpec, parentKind: string, currentScheduledPods: number, desiredPods: number): JSX.Element | null {
-        const statusProps = Utils._getPodsStatusProps(currentScheduledPods, desiredPods);
+        const statusProps = Utils.getPodsStatusProps(currentScheduledPods, desiredPods);
 
         return (
             <WorkloadDetails
@@ -255,15 +255,15 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         });
     }
 
-    private _setSelectedKeyPodsViewMap() {
+    private _setSelectedKeyPodsViewMap(): void {
         this._selectedItemViewMap[SelectedItemKeys.StatefulSetKey] = (item) => this._getWorkoadPodsViewComponent(item.metadata, item.spec && item.spec.template, item.kind || "StatefulSet", item.status.currentReplicas, item.status.replicas);
         this._selectedItemViewMap[SelectedItemKeys.ServiceItemKey] = (item) => { return <ServiceDetails kubeService={this.props.kubeService} service={item} parentKind={item.kind || "Service"} /> };
         this._selectedItemViewMap[SelectedItemKeys.DaemonSetKey] = (item) => this._getWorkoadPodsViewComponent(item.metadata, item.spec && item.spec.template, item.kind || "DaemonSet", item.status.currentNumberScheduled, item.status.desiredNumberScheduled);
-        this._selectedItemViewMap[SelectedItemKeys.OrphanPodKey] = (item) => { return <PodOverview pod={item} />; }
+        this._selectedItemViewMap[SelectedItemKeys.OrphanPodKey] = (item) => { return <PodOverview pod={item} />; };
         this._selectedItemViewMap[SelectedItemKeys.ReplicaSetKey] = (item) => this._getWorkoadPodsViewComponent(item.metadata, item.spec && item.spec.template, item.kind || "ReplicaSet", item.status.availableReplicas, item.status.replicas);
     }
 
-    private _populateObjectFinder() {
+    private _populateObjectFinder(): void {
         this._objectFinder[SelectedItemKeys.ReplicaSetKey] = (uid) => KubeSummary._getFilteredFirstObject(this._workloadsStore.getState().replicaSetList, uid);
         this._objectFinder[SelectedItemKeys.StatefulSetKey] = (uid) => KubeSummary._getFilteredFirstObject(this._workloadsStore.getState().statefulSetList, uid);
         this._objectFinder[SelectedItemKeys.DaemonSetKey] = (uid) => KubeSummary._getFilteredFirstObject(this._workloadsStore.getState().daemonSetList, uid);

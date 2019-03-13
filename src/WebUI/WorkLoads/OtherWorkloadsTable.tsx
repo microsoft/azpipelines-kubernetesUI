@@ -255,7 +255,7 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
         let statusProps: IStatusProps | undefined;
         let podString: string = "";
         if (statefulSet.desiredPodCount > 0) {
-            statusProps = Utils._getPodsStatusProps(statefulSet.desiredPodCount, statefulSet.currentPodCount);
+            statusProps = Utils.getPodsStatusProps(statefulSet.desiredPodCount, statefulSet.currentPodCount);
             podString = format("{0}/{1}", statefulSet.desiredPodCount, statefulSet.currentPodCount);
         }
 

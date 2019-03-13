@@ -18,11 +18,18 @@ import * as Resources from "../Resources";
 import { IVssComponentProperties } from "../Types";
 import "./PodsLeftPanel.scss";
 
+/**
+ * https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-phase
+ */
+// todo :: pod status
 const podStatusDic: { [index: string]: IStatusProps } = {
     "Running": Statuses.Success,
-    "Pending": Statuses.Waiting,
     "Succeeded": Statuses.Success,
+    "Pending": Statuses.Failed,
     "Failed": Statuses.Failed,
+    "Completed": Statuses.Failed,
+    "Unknown": Statuses.Failed,
+    "CrashLoopBackOff": Statuses.Failed,
 };
 
 const podStatusKey = "pods-list-status-col";

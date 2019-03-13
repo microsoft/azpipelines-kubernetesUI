@@ -10,18 +10,21 @@ import { ILabelModel } from "azure-devops-ui/Label";
 import { IStatusProps, Statuses } from "azure-devops-ui/Status";
 import * as Resources from "./Resources";
 
-const pipelineNameAnnotationKey: string = "pipeline-name";
-const pipelineIdAnnotationKey: string = "pipeline-id";
+const pipelineNameAnnotationKey: string = "azure-pipelines/pipeline";
+const pipelineIdAnnotationKey: string = "azure-pipelines/execution";
 
 /**
  * https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-phase
  */
+// todo :: pod status
 enum PodPhase {
     Pending = "Pending",
     Running = "Running",
     Succeeded = "Succeeded",
     Failed = "Failed",
-    Unknown = "Unknown"
+    Unknown = "Unknown",
+    Completed = "Completed",
+    CrashLoopBackOff = "CrashLoopBackOff",
 }
 
 export class Utils {
@@ -60,10 +63,10 @@ export class Utils {
         return pipelineName && pipelineId ? localeFormat("{0} / {1}", pipelineName, pipelineId) : "";
     }
 
-    public static _getPodsStatusProps(currentScheduledPods: number, desiredPods: number): IStatusProps | undefined {
-        //todo modify logic to base on pod events so that we can distinguish between pending/failed pods
-        if (desiredPods != null && currentScheduledPods != null && desiredPods > 0) {
-            return currentScheduledPods < desiredPods ? Statuses.Failed : Statuses.Success;
+    public static getPodsStatusProps(currentScheduledPods: number, desiredPods: number): IStatusProps | undefined {
+        // todo:: modify logic to base on pod events so that we can distinguish between pending/failed pods
+        if (desiredPods != null && desiredPods > 0) {
+            return currentScheduledPods == null || currentScheduledPods < desiredPods ? Statuses.Failed : Statuses.Success;
         }
 
         return undefined;
