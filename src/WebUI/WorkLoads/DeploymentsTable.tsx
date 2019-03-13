@@ -116,7 +116,7 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
                         <Table
                             id={key}
                             showHeader={true}
-                            showLines={false}
+                            showLines={true}
                             singleClickActivation={true}
                             itemProvider={new ArrayItemProvider<IDeploymentReplicaSetItem>(items)}
                             pageSize={items.length}

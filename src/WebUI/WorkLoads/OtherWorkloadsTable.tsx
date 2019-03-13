@@ -86,7 +86,7 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
                         <Table
                             id="other-workloads-table"
                             showHeader={true}
-                            showLines={false}
+                            showLines={true}
                             singleClickActivation={true}
                             itemProvider={new ArrayItemProvider<ISetWorkloadTypeItem>(filteredSet)}
                             columns={OtherWorkloads._getColumns()}
