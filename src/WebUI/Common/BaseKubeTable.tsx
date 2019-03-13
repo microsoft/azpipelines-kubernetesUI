@@ -4,26 +4,21 @@
 */
 
 import { BaseComponent, css } from "@uifabric/utilities";
+import { CardContent, CustomCard } from "azure-devops-ui/Card";
 import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
+import { CustomHeader, HeaderDescription, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
+import { Link } from "azure-devops-ui/Link";
+import { IStatusProps, Status, StatusSize } from "azure-devops-ui/Status";
 import { ITableColumn, SimpleTableCell, Table, TwoLineTableCell } from "azure-devops-ui/Table";
+import { Tooltip } from "azure-devops-ui/TooltipEx";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
-import { CustomCard, CardContent } from "azure-devops-ui/Card";
-import {
-    HeaderDescription,
-    CustomHeader,
-    HeaderTitle,
-    HeaderTitleArea,
-    HeaderTitleRow,
-    TitleSize
-} from "azure-devops-ui/Header";
 import * as React from "react";
 import { IVssComponentProperties } from "../Types";
 import "./BaseKubeTable.scss";
 import { IResourceStatusProps, ResourceStatus } from "./ResourceStatus";
-import { Tooltip } from "azure-devops-ui/TooltipEx";
 
 export interface ITableComponentProperties<T> extends IVssComponentProperties {
-    className?: string
+    className?: string;
     headingText?: string | JSX.Element;
     headingDescription?: string;
     hideHeaders?: boolean;
@@ -48,14 +43,16 @@ export class BaseKubeTable<T> extends BaseComponent<ITableComponentProperties<T>
                                         <HeaderTitle className="text-ellipsis" titleSize={TitleSize.Medium} >
                                             {this.props.headingText}
                                         </HeaderTitle> :
-                                        <HeaderTitle className="text-ellipsis" titleSize={TitleSize.Medium} children={this.props.headingText} />
+                                        <HeaderTitle
+                                            className="text-ellipsis"
+                                            titleSize={TitleSize.Medium}
+                                            children={this.props.headingText}
+                                        />
                                 }
                             </HeaderTitleRow>
                             {
                                 this.props.headingDescription &&
-                                <HeaderDescription className="text-ellipsis">
-                                    {this.props.headingDescription}
-                                </HeaderDescription>
+                                <HeaderDescription className="text-ellipsis">{this.props.headingDescription}</HeaderDescription>
                             }
                         </HeaderTitleArea>
                     </CustomHeader>
@@ -75,7 +72,7 @@ export class BaseKubeTable<T> extends BaseComponent<ITableComponentProperties<T>
                 columns={this.props.columns}
                 showHeader={!this.props.hideHeaders}
                 showLines={!this.props.hideLines}
-                singleClickActivation={false}
+                singleClickActivation={!!this.props.onItemActivated}
                 onActivate={this._onItemActivated}
                 onSelect={this._onItemSelected}
             />
@@ -130,6 +127,23 @@ export class BaseKubeTable<T> extends BaseComponent<ITableComponentProperties<T>
                 key={"col-" + columnIndex}
             />
         );
+    }
+
+    public static renderPodsStatusTableCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<any>, podsCountString?: string, podsStatusProps?: IStatusProps): JSX.Element {
+        const itemToRender = podsCountString ? (
+            <Tooltip text={podsCountString} overflowOnly>
+                <Link
+                    className="fontSizeM flex-center flex-row text-ellipsis bolt-table-link bolt-table-inline-link"
+                    excludeTabStop
+                    href="#"
+                >
+                    {podsStatusProps && <Status {...podsStatusProps} size={StatusSize.m} />}
+                    <div className="k8s-pods-status-count">{podsCountString}</div>
+                </Link>
+            </Tooltip>
+        ) : null;
+
+        return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
     private _onItemActivated = (event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>) => {

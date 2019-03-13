@@ -3,7 +3,7 @@
     Licensed under the MIT license.
 */
 
-import { V1DaemonSet, V1DaemonSetList, V1ObjectMeta, V1Pod, V1PodTemplateSpec, V1ReplicaSet, V1ReplicaSetList, V1Service, V1ServiceList, V1StatefulSet, V1StatefulSetList } from "@kubernetes/client-node";
+import { V1DaemonSet, V1ObjectMeta, V1Pod, V1PodTemplateSpec, V1ReplicaSet, V1StatefulSet } from "@kubernetes/client-node";
 import { BaseComponent } from "@uifabric/utilities";
 import { ConditionalChildren } from "azure-devops-ui/ConditionalChildren";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
@@ -18,7 +18,7 @@ import { Action, createBrowserHistory, History, Location, UnregisterCallback } f
 import * as queryString from "query-string";
 import * as React from "react";
 import { IKubeService, KubeImage } from "../../Contracts/Contracts";
-import { HyperLinks, SelectedItemKeys, ServicesEvents, WorkloadsEvents } from "../Constants";
+import { SelectedItemKeys, ServicesEvents, WorkloadsEvents } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
 import { KubeFactory } from "../KubeFactory";
@@ -36,14 +36,14 @@ import { WorkloadsActionsCreator } from "../Workloads/WorkloadsActionsCreator";
 import { WorkloadsPivot } from "../Workloads/WorkloadsPivot";
 import { WorkloadsStore } from "../Workloads/WorkloadsStore";
 import "./KubeSummary.scss";
-import { IKubeZeroDataProps, KubeZeroData } from "./KubeZeroData";
+import { KubeZeroData } from "./KubeZeroData";
 
 const workloadsPivotItemKey: string = "workloads";
 const servicesPivotItemKey: string = "services";
 const workloadsFilterToggled = new ObservableValue<boolean>(false);
 const servicesFilterToggled = new ObservableValue<boolean>(false);
 
-//todo: refactor filter properties to respective resource type components
+// todo: refactor filter properties to respective resource type components
 export interface IKubernetesContainerState {
     namespace?: string;
     selectedPivotKey?: string;
@@ -122,7 +122,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
     }
 
     public componentDidMount(): void {
-        // This needs to be called after the data is loaded so that we can decide which object is selected as per the URL
+        // this needs to be called after the data is loaded so that we can decide which object is selected as per the URL
         setTimeout(() => {
             this._updateStateFromHistory(queryString.parse(this._historyService.location.search));
             this._historyUnlisten = this._historyService.listen(this._onHistoryChanged);
@@ -147,7 +147,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         else {
             this.setState({ selectedItemType: "", selectedItem: undefined, showSelectedItem: false });
         }
-    };
+    }
 
     private _onHistoryChanged = (location: Location, action: Action): void => {
         let routeValues: queryString.OutputParams = queryString.parse(location.search);
@@ -162,12 +162,12 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
     }
 
     private _onWorkloadsFilterApplied = (currentState: IFilterState) => {
-        this.setState({})
-    };
+        this.setState({});
+    }
 
     private _onSvcFilterApplied = (currentState: IFilterState) => {
-        this.setState({})
-    };
+        this.setState({});
+    }
 
     private _onDataFound = (): void => {
         const workloadSize = this._workloadsStore.getWorkloadSize();
@@ -293,18 +293,10 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
     }
 
     private _getZeroData(): JSX.Element {
-        const zeroDataProps: IKubeZeroDataProps = {
-            imagePath: KubeFactory.getImageLocation(KubeImage.zeroData),
-            hyperLink: HyperLinks.WorkloadsLink,
-            hyperLinkLabel: Resources.LearnMoreKubeResourceText,
-            descriptionText: Resources.DeployKubeResourceText,
-            primaryText: Resources.StartUsingKubeResourceText,
-            className: "zerod-side-align-content"
-        }
-        return (KubeZeroData.getDefaultZeroData(zeroDataProps));
+        return KubeZeroData.getDefaultZeroData();
     }
 
-    private _initializeFactorySettings() {
+    private _initializeFactorySettings(): void {
         KubeFactory.markTTI = this.props.markTTI || KubeFactory.markTTI;
         KubeFactory.getImageLocation = this.props.getImageLocation || KubeFactory.getImageLocation;
     }

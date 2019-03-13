@@ -3,12 +3,12 @@
     Licensed under the MIT license.
 */
 
-import { StoreBase } from "../FluxCommon/Store";
-import { ActionsHubManager } from "../FluxCommon/ActionsHubManager";
-import { V1DeploymentList, V1ReplicaSetList, V1DaemonSetList, V1StatefulSetList, V1PodList, V1Pod } from "@kubernetes/client-node";
-import { WorkloadsActions } from "./WorkloadsActions";
-import { PodsActions } from "../Pods/PodsActions";
+import { V1DaemonSetList, V1DeploymentList, V1Pod, V1PodList, V1ReplicaSetList, V1StatefulSetList } from "@kubernetes/client-node";
 import { WorkloadsEvents } from "../Constants";
+import { ActionsHubManager } from "../FluxCommon/ActionsHubManager";
+import { StoreBase } from "../FluxCommon/Store";
+import { PodsActions } from "../Pods/PodsActions";
+import { WorkloadsActions } from "./WorkloadsActions";
 
 export interface IWorkloadsStoreState {
     deploymentNamespace?: string;
@@ -52,11 +52,11 @@ export class WorkloadsStore extends StoreBase {
     }
 
     public getWorkloadSize(): number {
-        return (this._state.deploymentList ? this._state.deploymentList.items.length : 0) +
-            (this._state.replicaSetList ? this._state.replicaSetList.items.length : 0) +
-            (this._state.daemonSetList ? this._state.daemonSetList.items.length : 0) +
-            (this._state.statefulSetList ? this._state.statefulSetList.items.length : 0) +
-            (this._state.orphanPodsList ? this._state.orphanPodsList.length : 0);
+        return (this._state.deploymentList ? (this._state.deploymentList.items || []).length : 0) +
+            (this._state.replicaSetList ? (this._state.replicaSetList.items || []).length : 0) +
+            (this._state.daemonSetList ? (this._state.daemonSetList.items || []).length : 0) +
+            (this._state.statefulSetList ? (this._state.statefulSetList.items || []).length : 0) +
+            (this._state.orphanPodsList ? (this._state.orphanPodsList || []).length : 0);
     }
 
     private _setDeploymentsList = (deploymentsList: V1DeploymentList): void => {
@@ -101,7 +101,7 @@ export class WorkloadsStore extends StoreBase {
 
     private _setOrphanPodsList = (podsList: V1PodList): void => {
         let orphanPods: V1Pod[] = [];
-        podsList && podsList.items && podsList.items.forEach(pod => {
+        (podsList && podsList.items || []).forEach(pod => {
             if (!pod.metadata.ownerReferences) {
                 orphanPods.push(pod);
             }
@@ -109,7 +109,7 @@ export class WorkloadsStore extends StoreBase {
 
         this._state.orphanPodsList = orphanPods;
         this.emit(WorkloadsEvents.WorkloadPodsFetchedEvent, this);
-        
+
         if (this._state.orphanPodsList && this._state.orphanPodsList.length > 0) {
             this.emit(WorkloadsEvents.WorkloadsFoundEvent, this);
         }

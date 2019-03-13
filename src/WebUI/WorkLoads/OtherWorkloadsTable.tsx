@@ -10,8 +10,7 @@ import { CardContent, CustomCard } from "azure-devops-ui/Card";
 import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
 import { format } from "azure-devops-ui/Core/Util/String";
 import { CustomHeader, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
-import { Link } from "azure-devops-ui/Link";
-import { IStatusProps, Status, StatusSize } from "azure-devops-ui/Status";
+import { IStatusProps } from "azure-devops-ui/Status";
 import { ITableColumn, Table, TwoLineTableCell } from "azure-devops-ui/Table";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
@@ -29,7 +28,6 @@ import { ISetWorkloadTypeItem, IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
 import { WorkloadsActionsCreator } from "./WorkloadsActionsCreator";
 import { WorkloadsStore } from "./WorkloadsStore";
-import "./OtherWorkloadsTable.scss";
 
 const setNameKey = "otherwrkld-name-key";
 const imageKey = "otherwrkld-image-key";
@@ -261,20 +259,7 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
             podString = format("{0}/{1}", statefulSet.desiredPodCount, statefulSet.currentPodCount);
         }
 
-        const itemToRender = podString ? (
-            <Tooltip text={podString} overflowOnly>
-                <Link
-                    className="fontSizeM flex-center flex-row text-ellipsis bolt-table-link bolt-table-inline-link"
-                    excludeTabStop
-                    href="#"
-                >
-                    {statusProps && <Status {...statusProps} size={StatusSize.m} />}
-                    <div className="other-workload-pods-count">{podString}</div>
-                </Link>
-            </Tooltip>
-        ) : null;
-
-        return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
+        return BaseKubeTable.renderPodsStatusTableCell(rowIndex, columnIndex, tableColumn, podString, statusProps);
     }
 
     private static _renderAgeCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<ISetWorkloadTypeItem>, statefulSet: ISetWorkloadTypeItem): JSX.Element {

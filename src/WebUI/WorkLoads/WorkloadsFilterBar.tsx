@@ -7,7 +7,6 @@ import { BaseComponent } from "@uifabric/utilities";
 import * as React from "react";
 import * as Resources from "../Resources";
 import { IVssComponentProperties } from "../Types";
-import "../Common/KubeSummary.scss";
 import { Filter } from "azure-devops-ui/Utilities/Filter";
 import { KubeFilterBar } from "../Common/KubeFilterBar";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";

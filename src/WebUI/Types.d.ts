@@ -28,6 +28,7 @@ export interface IDeploymentReplicaSetItem {
     showRowBorder?: boolean;
     deployment?: V1Deployment;
     image: string;
+    imageTooltip?: string;
     creationTimeStamp: Date;
     kind?: string;
 }

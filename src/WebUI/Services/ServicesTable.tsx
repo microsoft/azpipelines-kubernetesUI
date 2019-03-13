@@ -23,7 +23,6 @@ import { SelectionActionsCreator } from "../Selection/SelectionActionCreator";
 import { ISelectionPayload } from "../Selection/SelectionActions";
 import { IServiceItem, IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
-import "./ServicesTable.scss";
 
 const packageKey: string = "package-col";
 const clusterIPKey: string = "cluster-ip-col";

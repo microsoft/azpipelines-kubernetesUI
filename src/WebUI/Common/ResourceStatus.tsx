@@ -8,7 +8,6 @@ import { BaseComponent, css } from "@uifabric/utilities/lib";
 import { IStatusProps, Status, StatusSize } from "azure-devops-ui/Status";
 import { IVssComponentProperties } from "../Types";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
-import "./ResourceStatus.scss";
 
 export interface IResourceStatusProps extends IVssComponentProperties {
     statusProps: IStatusProps | undefined;

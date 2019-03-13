@@ -8,28 +8,24 @@ import { BaseComponent } from "@uifabric/utilities";
 import { CardContent, CustomCard } from "azure-devops-ui/Card";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { localeFormat } from "azure-devops-ui/Core/Util/String";
-import { CustomHeader, Header, HeaderDescription, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
+import { CustomHeader, HeaderDescription, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
 import { LabelGroup, WrappingBehavior } from "azure-devops-ui/Label";
 import { Page } from "azure-devops-ui/Page";
-import { IStatusProps, Status, StatusSize } from "azure-devops-ui/Status";
+import { IStatusProps } from "azure-devops-ui/Status";
 import { ITableColumn, Table } from "azure-devops-ui/Table";
 import * as Date_Utils from "azure-devops-ui/Utilities/Date";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
-import { KubeImage } from "../../Contracts/Contracts";
 import { BaseKubeTable } from "../Common/BaseKubeTable";
-import { IKubeZeroDataProps, KubeZeroData } from "../Common/KubeZeroData";
-import { HyperLinks } from "../Constants";
+import { KubeZeroData } from "../Common/KubeZeroData";
+import { PageTopHeader } from "../Common/PageTopHeader";
 import { StoreManager } from "../FluxCommon/StoreManager";
-import { KubeFactory } from "../KubeFactory";
 import { PodsDetails } from "../Pods/PodsDetails";
 import { PodsStore } from "../Pods/PodsStore";
 import { PodsTable } from "../Pods/PodsTable";
 import * as Resources from "../Resources";
-import { IServiceItem, IVssComponentProperties } from "../Types";
+import { IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
-import "./WorkloadDetails.scss";
-import { PageTopHeader } from "../Common/PageTopHeader";
 
 export interface IWorkloadDetailsProperties extends IVssComponentProperties {
     parentMetaData: V1ObjectMeta;
@@ -169,13 +165,7 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
 
     private _getAssociatedPods(): JSX.Element | null {
         if (this.state.pods.length === 0) {
-            const zeroDataProps: IKubeZeroDataProps = {
-                imagePath: KubeFactory.getImageLocation(KubeImage.zeroWorkloads),
-                hyperLink: HyperLinks.LinkToPodsUsingLabelsLink,
-                hyperLinkLabel: Resources.LearnMoreText,
-                descriptionText: Resources.NoPodsFoundText
-            }
-            return KubeZeroData.getDefaultZeroData(zeroDataProps);
+            return KubeZeroData.getWorkloadAssociatedPodsZeroData();
         }
 
         return (

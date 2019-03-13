@@ -8,26 +8,21 @@ import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { format } from "azure-devops-ui/Core/Util/String";
 import { Filter, IFilterItemState, IFilterState } from "azure-devops-ui/Utilities/Filter";
 import * as React from "react";
-import { IKubeService, KubeImage } from "../../Contracts/Contracts";
+import { IKubeService } from "../../Contracts/Contracts";
 import { KubeResourceType } from "../../Contracts/KubeServiceBase";
-import { KubeZeroData, IKubeZeroDataProps } from "../Common//KubeZeroData";
+import { KubeZeroData } from "../Common//KubeZeroData";
 import { NameKey, TypeKey } from "../Common/KubeFilterBar";
-import "../Common/KubeSummary.scss";
 import { WorkloadsEvents } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
 import { PodsActionsCreator } from "../Pods/PodsActionsCreator";
 import { PodsStore } from "../Pods/PodsStore";
-import * as Resources from "../Resources";
 import { IVssComponentProperties } from "../Types";
 import { DeploymentsTable } from "../Workloads/DeploymentsTable";
 import { OtherWorkloads } from "../Workloads/OtherWorkloadsTable";
+import { WorkloadsActionsCreator } from "./WorkloadsActionsCreator";
 import { WorkloadsFilterBar } from "./WorkloadsFilterBar";
 import { WorkloadsStore } from "./WorkloadsStore";
-import { HyperLinks } from "../Constants";
-import { WorkloadsActionsCreator } from "./WorkloadsActionsCreator";
-import "./WorkloadsPivot.scss";
-import { KubeFactory } from "../KubeFactory";
 
 export interface IWorkloadsPivotState {
     workloadResourceSize: number;
@@ -151,16 +146,7 @@ export class WorkloadsPivot extends BaseComponent<IWorkloadsPivotProps, IWorkloa
     }
 
     private _getZeroData(): JSX.Element {
-        const zeroDataProps: IKubeZeroDataProps = {
-            imagePath: KubeFactory.getImageLocation(KubeImage.zeroResults),
-            hyperLink: HyperLinks.WorkloadsLink,
-            hyperLinkLabel: Resources.LearnMoreText,
-            descriptionText: Resources.WorkloadsZeroDataText,
-            primaryText: Resources.DeployWorkloads,
-            className: "zerod-side-align-content"
-        }
-
-        return KubeZeroData.getDefaultZeroData(zeroDataProps);
+        return KubeZeroData.getWorkloadsZeroData();
     }
 
     private _workloadsStore: WorkloadsStore;

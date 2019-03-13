@@ -6,6 +6,7 @@
 import { V1Pod } from "@kubernetes/client-node";
 import { BaseComponent, css } from "@uifabric/utilities";
 import { Ago } from "azure-devops-ui/Ago";
+import { CardContent, CustomCard } from "azure-devops-ui/Card";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { format } from "azure-devops-ui/Core/Util/String";
 import { CustomHeader, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
@@ -19,7 +20,6 @@ import * as Resources from "../Resources";
 import { Utils } from "../Utils";
 import "./PodOverview.scss";
 import { IPodRightPanelProps } from "./PodsRightPanel";
-import { CustomCard, CardContent } from "azure-devops-ui/Card";
 
 export interface IPodOverviewProps extends IPodRightPanelProps { }
 
@@ -64,7 +64,7 @@ export class PodOverview extends BaseComponent<IPodOverviewProps> {
                 <CustomHeader>
                     <HeaderTitleArea>
                         <HeaderTitleRow>
-                            <HeaderTitle className="text-ellipsis" titleSize={TitleSize.Medium} >
+                            <HeaderTitle className="text-ellipsis" titleSize={TitleSize.Medium}>
                                 {Resources.PodDetailsHeader}
                             </HeaderTitle>
                         </HeaderTitleRow>

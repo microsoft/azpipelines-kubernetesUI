@@ -19,7 +19,6 @@ import * as Resources from "../Resources";
 import { SelectionActions } from "../Selection/SelectionActions";
 import { IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
-import "./PodsTable.scss";
 import { CustomCard, CardContent } from "azure-devops-ui/Card";
 import { CustomHeader, HeaderTitleArea, HeaderTitleRow, HeaderTitle, HeaderDescription, TitleSize } from "azure-devops-ui/Header";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";

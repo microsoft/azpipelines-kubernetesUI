@@ -10,7 +10,6 @@ import * as React from "react";
 import * as Resources from "../Resources";
 import { PodsRightPanelTabsKeys } from "../Constants";
 import { IVssComponentProperties } from "../Types";
-import "./PodsRightPanel.scss";
 import { PodOverview } from "./PodOverview";
 import { Header, IHeaderProps, TitleSize } from "azure-devops-ui/Header";
 import { Page } from "azure-devops-ui/Page";

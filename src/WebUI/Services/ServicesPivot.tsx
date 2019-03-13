@@ -8,21 +8,17 @@ import { BaseComponent, css } from "@uifabric/utilities";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { Filter, IFilterItemState, IFilterState } from "azure-devops-ui/Utilities/Filter";
 import * as React from "react";
-import { IKubeService, KubeImage } from "../../Contracts/Contracts";
-import { KubeZeroData, IKubeZeroDataProps } from "../Common//KubeZeroData";
+import { IKubeService } from "../../Contracts/Contracts";
 import { NameKey, TypeKey } from "../Common/KubeFilterBar";
-import "../Common/KubeSummary.scss";
-import { ServicesEvents, HyperLinks } from "../Constants";
+import { KubeZeroData } from "../Common/KubeZeroData";
+import { ServicesEvents } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
-import * as Resources from "../Resources";
 import { ServicesTable } from "../Services/ServicesTable";
 import { IVssComponentProperties } from "../Types";
 import { ServicesActionsCreator } from "./ServicesActionsCreator";
 import { ServicesFilterBar } from "./ServicesFilterBar";
 import { ServicesStore } from "./ServicesStore";
-import "./ServicesPivot.scss";
-import { KubeFactory } from "../KubeFactory";
 
 export interface IServicesPivotState {
     serviceList?: V1ServiceList;
@@ -102,17 +98,8 @@ export class ServicesPivot extends BaseComponent<IServicesPivotProps, IServicesP
         return selections;
     }
 
-    private _getZeroData(): JSX.Element{
-        const zeroDataProps: IKubeZeroDataProps = {
-            imagePath: KubeFactory.getImageLocation(KubeImage.zeroWorkloads),
-            hyperLink: HyperLinks.ServicesLink,
-            hyperLinkLabel: Resources.LearnMoreText,
-            primaryText: Resources.DeployServices,
-            descriptionText: Resources.StartingUsingServiceText,
-            className: "zerod-side-align-content"
-        };
-
-        return KubeZeroData.getDefaultZeroData(zeroDataProps);
+    private _getZeroData(): JSX.Element {
+        return KubeZeroData.getServicesZeroData();
     }
 
     private _store: ServicesStore;

@@ -7,31 +7,29 @@ import { V1Pod } from "@kubernetes/client-node";
 import { BaseComponent } from "@uifabric/utilities";
 import { CardContent, CustomCard } from "azure-devops-ui/Card";
 import { localeFormat } from "azure-devops-ui/Core/Util/String";
-import { CustomHeader, Header, HeaderDescription, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
+import { CustomHeader, HeaderDescription, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
 import { LabelGroup, WrappingBehavior } from "azure-devops-ui/Label";
 import { Page } from "azure-devops-ui/Page";
-import { IStatusProps, Status, Statuses, StatusSize } from "azure-devops-ui/Status";
+import { Statuses } from "azure-devops-ui/Status";
 import { ITableColumn, Table } from "azure-devops-ui/Table";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
 import * as Date_Utils from "azure-devops-ui/Utilities/Date";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
-import { IKubeService, KubeImage } from "../../Contracts/Contracts";
+import { IKubeService } from "../../Contracts/Contracts";
 import { BaseKubeTable } from "../Common/BaseKubeTable";
-import { IKubeZeroDataProps, KubeZeroData } from "../Common/KubeZeroData";
-import { HyperLinks, ServicesEvents } from "../Constants";
+import { KubeZeroData } from "../Common/KubeZeroData";
+import { PageTopHeader } from "../Common/PageTopHeader";
+import { ServicesEvents } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
-import { KubeFactory } from "../KubeFactory";
 import { PodsActionsCreator } from "../Pods/PodsActionsCreator";
 import { PodsDetails } from "../Pods/PodsDetails";
 import { PodsTable } from "../Pods/PodsTable";
 import * as Resources from "../Resources";
 import { IServiceItem, IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
-import "./ServiceDetails.scss";
 import { ServicesStore } from "./ServicesStore";
-import { PageTopHeader } from "../Common/PageTopHeader";
 
 export interface IServiceDetailsProperties extends IVssComponentProperties {
     kubeService: IKubeService;
@@ -211,18 +209,7 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
 
     private _getAssociatedPods(): JSX.Element | null {
         if (!this.state.pods || this.state.pods.length === 0) {
-            const zeroDataProps: IKubeZeroDataProps = {
-                imagePath: KubeFactory.getImageLocation(KubeImage.zeroWorkloads),
-                hyperLink: HyperLinks.LinkToPodsUsingLabelsLink,
-                hyperLinkLabel: Resources.NoPodsForSvcLinkText,
-                descriptionText: Resources.NoPodsForSvcText,
-                title: Resources.AssociatedPodsText,
-                primaryText: Resources.NoPodsText,
-                primaryTextClassName: "primary-text",
-                renderOnCard: true
-            };
-
-            return KubeZeroData.getDefaultZeroData(zeroDataProps);
+            return KubeZeroData.getServiceAssociatedPodsZeroData();
         }
 
         return (
