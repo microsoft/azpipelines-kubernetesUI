@@ -164,16 +164,17 @@ export function renderPodNameWithStatusTableCell(
     tableColumn: ITableColumn<any>,
     podName?: string,
     podStatusProps?: IStatusProps,
-    tooltip?: string,
+    statusTooltip?: string,
     contentClassName?: string
 ): JSX.Element {
     const itemToRender = podName ? (
         <>
-            {podStatusProps && <Status {...podStatusProps} className="icon-large-margin" size={StatusSize.m} />}
+            <Tooltip overflowOnly={!statusTooltip} text={statusTooltip}>
+                {podStatusProps && <Status {...podStatusProps} className="icon-large-margin" size={StatusSize.m} />}
+            </Tooltip>
             <div className="flex-row scroll-hidden">
-                {/* show tooltip always if specified, otherwise show only when element overflows */}
-                <Tooltip overflowOnly={!tooltip} text={tooltip || podName || ""}>
-                    <span className={css("text-ellipsis", contentClassName || "")}>{podName}</span>
+                <Tooltip overflowOnly={true} text={podName}>
+                    <div className={css("text-ellipsis", contentClassName || "")}>{podName}</div>
                 </Tooltip>
             </div>
         </>

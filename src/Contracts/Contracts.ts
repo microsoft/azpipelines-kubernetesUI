@@ -4,6 +4,7 @@
 */
 
 import * as K8sTypes from "@kubernetes/client-node";
+import { IStatusProps, Statuses } from "azure-devops-ui/Status";
 
 export interface IKubeService {
     getPods(labelSelector?:string): Promise<K8sTypes.V1PodList>;
@@ -23,4 +24,27 @@ export enum KubeImage {
     zeroData = "zeroData",
     zeroResults = "zeroResults",
     zeroWorkloads = "zeroWorkloads"
+}
+
+/**
+ * https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-phase
+ **/
+export enum PodPhase {
+    Pending = "Pending",
+    Running = "Running",
+    Succeeded = "Succeeded",
+    Failed = "Failed",
+    Unknown = "Unknown",
+    Completed = "Completed",
+    CrashLoopBackOff = "CrashLoopBackOff",
+}
+
+export const PodPhaseToStatus: { [index: string]: IStatusProps } = {
+    "Running": Statuses.Success,
+    "Succeeded": Statuses.Success,
+    "Completed": Statuses.Success,
+    "Pending": Statuses.Failed,
+    "Failed": Statuses.Failed,
+    "Unknown": Statuses.Queued,
+    "CrashLoopBackOff": Statuses.Failed,
 }

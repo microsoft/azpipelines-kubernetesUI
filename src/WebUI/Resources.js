@@ -39,8 +39,8 @@ define("Environments/Providers/Kubernetes/Resources", ["require", "exports"], fu
     exports.DeploymentText = "Deployment";
     exports.LearnMoreText = "Learn more";
     exports.NoPodsForSvcText = "This service currently does not map to any pods";
-    exports.ExternalIPAllocPending = "External IP allocation pending";
-    exports.ExternalIPAllocated = "External IP allocated";
+    exports.ExternalIPAllocPending = "In progress";
+    exports.ExternalIPAllocated = "IP available";
     exports.FindByNameText = "Filter by {0} name";
     exports.KindText = "Kind";
     exports.NoItemsText = "No Items found"
@@ -73,5 +73,4 @@ define("Environments/Providers/Kubernetes/Resources", ["require", "exports"], fu
     exports.NoPodsText = "No pods";
     exports.ServiceText = "service";
     exports.NoResultsFoundText = "No results found";
-    exports.WorkloadsFilterText = "workload"; // case sensitive
 });

@@ -22,6 +22,7 @@ import * as Resources from "../Resources";
 import { SelectionActions } from "../Selection/SelectionActions";
 import { IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
+import { AgoFormat } from "azure-devops-ui/Utilities/Date";
 
 const podNameKey: string = "pl-name-key";
 const podWorkloadsKey: string = "pl-wrkld-key";
@@ -139,26 +140,27 @@ export class PodsTable extends BaseComponent<IPodsTableProperties> {
     }
 
     private static _renderPodNameCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod): JSX.Element {
-        return renderPodNameWithStatusTableCell(rowIndex, columnIndex, tableColumn, pod.metadata.name, Utils.generatePodStatusProps(pod.status));
+        return renderPodNameWithStatusTableCell(rowIndex, columnIndex, tableColumn, pod.metadata.name, Utils.generatePodStatusProps(pod.status), pod.status.message || pod.status.phase);
     }
 
     private static _renderPodWorkload(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod): JSX.Element {
-        const textToRender = pod.metadata && pod.metadata.ownerReferences && pod.metadata.ownerReferences.length > 0 ? pod.metadata.ownerReferences[0].name || "" : ""; 
+        const textToRender = pod.metadata && pod.metadata.ownerReferences && pod.metadata.ownerReferences.length > 0 ? pod.metadata.ownerReferences[0].name || "" : "";
+        const contentClassName = "bolt-table-cell-content-with-inline-link no-v-padding";
         const itemToRender: React.ReactNode = textToRender.length > 0 ? (
-            <span className="flex-row scroll-hidden">
+            <div className="bolt-table-two-line-cell-item flex-row scroll-hidden">
                 <Tooltip text={textToRender} overflowOnly>
                     <Link
-                        className="fontSizeM text-ellipsis bolt-table-link bolt-table-inline-link"
+                        className="fontSizeM text-ellipsis bolt-table-link bolt-table-inline-link bolt-link"
                         excludeTabStop
                         href="#"
                     >
                         {textToRender}
                     </Link>
                 </Tooltip>
-            </span>
-        ): null;
+            </div>
+        ) : null;
 
-        return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
+        return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender, undefined, contentClassName);
     }
 
     private static _renderPodStatusCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod): JSX.Element {
@@ -168,7 +170,9 @@ export class PodsTable extends BaseComponent<IPodsTableProperties> {
     }
 
     private static _renderPodAgeCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod): JSX.Element {
-        const itemToRender = pod.status && pod.status.startTime ? <Ago date={new Date(pod.status.startTime)} /> : null;
+        const itemToRender = pod.status && pod.status.startTime
+            ? <Ago date={new Date(pod.status.startTime)} format={AgoFormat.Extended} />
+            : null;
         return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 

@@ -72,4 +72,3 @@ export declare const NoPodsForSvcLinkText: string;
 export declare const NoPodsText: string;
 export declare const ServiceText: string;
 export declare const NoResultsFoundText: string;
-export declare const WorkloadsFilterText: string;

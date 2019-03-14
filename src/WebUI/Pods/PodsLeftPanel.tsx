@@ -8,14 +8,14 @@ import { BaseComponent } from "@uifabric/utilities";
 import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
 import { Header, TitleSize } from "azure-devops-ui/Header";
 import { IListSelection, ListSelection } from "azure-devops-ui/List";
-import { IStatusProps, Statuses } from "azure-devops-ui/Status";
 import { ITableColumn, Table } from "azure-devops-ui/Table";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
 import { renderPodNameWithStatusTableCell } from "../Common/KubeCardWithTable";
 import * as Resources from "../Resources";
-import { IVssComponentProperties, PodPhaseToStatus } from "../Types";
+import { IVssComponentProperties } from "../Types";
 import "./PodsLeftPanel.scss";
+import { PodPhaseToStatus } from "../../Contracts/Contracts";
 
 const podStatusKey = "pods-list-status-col";
 const colDataClassName: string = "list-col-content";
@@ -118,7 +118,7 @@ export class PodsLeftPanel extends BaseComponent<IPodsLeftPanelProperties> {
         selectedIndex: number
     ): JSX.Element {
         const contentClassName = rowIndex === selectedIndex ? "fontWeightSemiBold" : "";
-        return renderPodNameWithStatusTableCell(rowIndex, columnIndex, tableColumn, pod.metadata.name, PodPhaseToStatus[pod.status.phase], undefined, contentClassName);
+        return renderPodNameWithStatusTableCell(rowIndex, columnIndex, tableColumn, pod.metadata.name, PodPhaseToStatus[pod.status.phase], pod.status.message || pod.status.phase, contentClassName);
     }
 
     private _selection: IListSelection = new ListSelection();

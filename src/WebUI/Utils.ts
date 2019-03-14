@@ -9,7 +9,7 @@ import { format, localeFormat } from "azure-devops-ui/Core/Util/String";
 import { ILabelModel } from "azure-devops-ui/Label";
 import { IStatusProps, Statuses } from "azure-devops-ui/Status";
 import * as Resources from "./Resources";
-import { PodPhase } from "./Types";
+import { PodPhase } from "../Contracts/Contracts";
 
 const pipelineNameAnnotationKey: string = "azure-pipelines/pipeline";
 const pipelineExecutionIdAnnotationKey: string = "azure-pipelines/execution";
@@ -36,7 +36,7 @@ export class Utils {
         let pipelineName: string = "";
         let pipelineExecutionId: string = "";
 
-        (annotations && (Object.keys(annotations) || [])).find(key => {
+        annotations && Object.keys(annotations).find(key => {
             const keyVal: string = key.toLowerCase();
             if (!pipelineName && keyVal === pipelineNameAnnotationKey) {
                 pipelineName = annotations[key];

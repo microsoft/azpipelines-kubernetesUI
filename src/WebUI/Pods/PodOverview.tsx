@@ -8,7 +8,7 @@ import { BaseComponent, css } from "@uifabric/utilities";
 import { Ago } from "azure-devops-ui/Ago";
 import { CardContent, CustomCard } from "azure-devops-ui/Card";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
-import { format } from "azure-devops-ui/Core/Util/String";
+import { format, localeFormat } from "azure-devops-ui/Core/Util/String";
 import { CustomHeader, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
 import { LabelGroup, WrappingBehavior } from "azure-devops-ui/Label";
 import { ColumnFill, ITableColumn, SimpleTableCell as renderSimpleTableCell, Table } from "azure-devops-ui/Table";
@@ -20,6 +20,7 @@ import * as Resources from "../Resources";
 import { Utils } from "../Utils";
 import "./PodOverview.scss";
 import { IPodRightPanelProps } from "./PodsRightPanel";
+import { AgoFormat } from "azure-devops-ui/Utilities/Date";
 
 export interface IPodOverviewProps extends IPodRightPanelProps { }
 
@@ -49,6 +50,7 @@ export class PodOverview extends BaseComponent<IPodOverviewProps> {
         const { imageText, imageTooltipText } = Utils.getImageText(pod.spec);
 
         const tableRows = new ArrayItemProvider<any>([
+            { key: Resources.StatusText, value: localeFormat("{0}{1}", pod.status.phase, !pod.status.reason ? "" : localeFormat(" | {0}", pod.status.reason)) },
             { key: Resources.Created, value: pod.metadata.creationTimestamp ? new Date(pod.metadata.creationTimestamp) : new Date().getTime() },
             { key: Resources.AnnotationsText, value: pod.metadata.annotations || "" },
             { key: Resources.RestartPolicyText, value: pod.spec.restartPolicy || "" },
@@ -114,7 +116,7 @@ export class PodOverview extends BaseComponent<IPodOverviewProps> {
             case Resources.Created:
                 props = {
                     columnIndex: columnIndex,
-                    children: <Ago date={new Date(value)} />,
+                    children: <Ago date={new Date(value)} format={AgoFormat.Extended} />,
                     tableColumn: tableColumn,
                     contentClassName: contentClassName
                 };
