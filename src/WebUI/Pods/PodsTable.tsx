@@ -4,26 +4,24 @@
 */
 
 import { V1Pod } from "@kubernetes/client-node";
-import { BaseComponent, css } from "@uifabric/utilities";
+import { BaseComponent } from "@uifabric/utilities";
 import { Ago } from "azure-devops-ui/Ago";
-import { Link } from "azure-devops-ui/Link";
+import { CardContent, CustomCard } from "azure-devops-ui/Card";
 import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
 import { localeFormat } from "azure-devops-ui/Core/Util/String";
+import { CustomHeader, HeaderDescription, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
+import { Link } from "azure-devops-ui/Link";
 import { ITableColumn, Table } from "azure-devops-ui/Table";
+import { Tooltip } from "azure-devops-ui/TooltipEx";
+import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
-import { BaseKubeTable } from "../Common/BaseKubeTable";
-import { IResourceStatusProps } from "../Common/ResourceStatus";
+import { defaultColumnRenderer, renderPodNameWithStatusTableCell, renderTableCell } from "../Common/KubeCardWithTable";
 import { SelectedItemKeys } from "../Constants";
 import { ActionsHubManager } from "../FluxCommon/ActionsHubManager";
 import * as Resources from "../Resources";
 import { SelectionActions } from "../Selection/SelectionActions";
 import { IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
-import { CustomCard, CardContent } from "azure-devops-ui/Card";
-import { CustomHeader, HeaderTitleArea, HeaderTitleRow, HeaderTitle, HeaderDescription, TitleSize } from "azure-devops-ui/Header";
-import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
-import { Status, StatusSize } from "azure-devops-ui/Status";
-import { Tooltip } from "azure-devops-ui/TooltipEx";
 
 const podNameKey: string = "pl-name-key";
 const podWorkloadsKey: string = "pl-wrkld-key";
@@ -141,18 +139,7 @@ export class PodsTable extends BaseComponent<IPodsTableProperties> {
     }
 
     private static _renderPodNameCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod): JSX.Element {
-        const itemToRender = (
-            <>
-                <Status {...Utils.generatePodStatusProps(pod.status)} className="icon-large-margin" size={StatusSize.m} />
-                <div className="flex-row scroll-hidden">
-                    <Tooltip overflowOnly={true} text={pod.metadata.name}>
-                        <span className="text-ellipsis">{pod.metadata.name}</span>
-                    </Tooltip>
-                </div>
-            </>
-        );
-
-        return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
+        return renderPodNameWithStatusTableCell(rowIndex, columnIndex, tableColumn, pod.metadata.name, Utils.generatePodStatusProps(pod.status));
     }
 
     private static _renderPodWorkload(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod): JSX.Element {
@@ -171,18 +158,18 @@ export class PodsTable extends BaseComponent<IPodsTableProperties> {
             </span>
         ): null;
 
-        return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
+        return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
     private static _renderPodStatusCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod): JSX.Element {
         const textToRender: string = pod.status.message ? pod.status.reason : pod.status.phase;
-        const itemToRender = BaseKubeTable.renderColumn(textToRender, BaseKubeTable.defaultColumnRenderer);
-        return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
+        const itemToRender = defaultColumnRenderer(textToRender);
+        return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
     private static _renderPodAgeCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod): JSX.Element {
         const itemToRender = pod.status && pod.status.startTime ? <Ago date={new Date(pod.status.startTime)} /> : null;
-        return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
+        return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
     private _generateHeadingSubText(podStatuses: { [key: string]: number }): string {

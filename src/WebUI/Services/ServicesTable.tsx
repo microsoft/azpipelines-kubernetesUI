@@ -14,7 +14,7 @@ import { ITableColumn, Table, TwoLineTableCell } from "azure-devops-ui/Table";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
-import { BaseKubeTable } from "../Common/BaseKubeTable";
+import { defaultColumnRenderer, renderTableCell } from "../Common/KubeCardWithTable";
 import { KubeZeroData } from "../Common/KubeZeroData";
 import { SelectedItemKeys } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
@@ -193,13 +193,13 @@ export class ServicesTable extends BaseComponent<IServicesComponentProperties> {
     }
 
     private static _renderTextCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, text: string, defaultText: string): JSX.Element => {
-        const itemToRender = BaseKubeTable.renderColumn(text || defaultText || "", BaseKubeTable.defaultColumnRenderer);
-        return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
+        const itemToRender = defaultColumnRenderer(text || defaultText || "");
+        return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
     private static _renderAgeCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, service: IServiceItem): JSX.Element => {
         const itemToRender = <Ago date={new Date(service.creationTimestamp)} />;
-        return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
+        return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
     private static _getServiceStatusWithName(service: IServiceItem, columnIndex: number, tableColumn: ITableColumn<IServiceItem>): JSX.Element{

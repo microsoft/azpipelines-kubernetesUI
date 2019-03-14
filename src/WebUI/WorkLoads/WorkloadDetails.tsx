@@ -16,7 +16,7 @@ import { ITableColumn, Table } from "azure-devops-ui/Table";
 import * as Date_Utils from "azure-devops-ui/Utilities/Date";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
-import { BaseKubeTable } from "../Common/BaseKubeTable";
+import { defaultColumnRenderer, renderTableCell } from "../Common/KubeCardWithTable";
 import { KubeZeroData } from "../Common/KubeZeroData";
 import { PageTopHeader } from "../Common/PageTopHeader";
 import { StoreManager } from "../FluxCommon/StoreManager";
@@ -186,8 +186,8 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
 
     private static _renderImageCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<any>, tableItem: any): JSX.Element {
         const {imageText, imageTooltipText } = Utils.getImageText(tableItem.podTemplate.spec);
-        const itemToRender = BaseKubeTable.defaultColumnRenderer(imageText, undefined, imageTooltipText);
-        return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
+        const itemToRender = defaultColumnRenderer(imageText, undefined, imageTooltipText);
+        return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
     private static _renderLabelsCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<any>, tableItem: any): JSX.Element {
@@ -198,7 +198,7 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
             />
         );
 
-        return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
+        return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
     private _podsStore: PodsStore;

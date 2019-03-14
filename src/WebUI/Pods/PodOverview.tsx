@@ -11,11 +11,11 @@ import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { format } from "azure-devops-ui/Core/Util/String";
 import { CustomHeader, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
 import { LabelGroup, WrappingBehavior } from "azure-devops-ui/Label";
-import { ColumnFill, ITableColumn, SimpleTableCell as renderTableCell, Table } from "azure-devops-ui/Table";
+import { ColumnFill, ITableColumn, SimpleTableCell as renderSimpleTableCell, Table } from "azure-devops-ui/Table";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
-import { BaseKubeTable } from "../Common/BaseKubeTable";
+import { renderTableCell, defaultColumnRenderer } from "../Common/KubeCardWithTable";
 import * as Resources from "../Resources";
 import { Utils } from "../Utils";
 import "./PodOverview.scss";
@@ -99,7 +99,7 @@ export class PodOverview extends BaseComponent<IPodOverviewProps> {
             </Tooltip>
         );
 
-        return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender, undefined, contentClassName);
+        return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender, undefined, contentClassName);
     }
 
     private static _renderValueCell(
@@ -119,7 +119,7 @@ export class PodOverview extends BaseComponent<IPodOverviewProps> {
                     contentClassName: contentClassName
                 };
 
-                return renderTableCell(props);
+                return renderSimpleTableCell(props);
 
             case Resources.LabelsText:
             case Resources.AnnotationsText:
@@ -134,11 +134,11 @@ export class PodOverview extends BaseComponent<IPodOverviewProps> {
                     contentClassName: css("pod-labels-pill", contentClassName)
                 };
 
-                return renderTableCell(props);
+                return renderSimpleTableCell(props);
 
             default:
-                const itemToRender = BaseKubeTable.defaultColumnRenderer(value, undefined, valueTooltipText);
-                return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender, undefined, contentClassName);
+                const itemToRender = defaultColumnRenderer(value, undefined, valueTooltipText);
+                return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender, undefined, contentClassName);
         }
     }
 }

@@ -16,7 +16,7 @@ import { ITableColumn, Table } from "azure-devops-ui/Table";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
 import { IKubeService } from "../../Contracts/Contracts";
-import { BaseKubeTable } from "../Common/BaseKubeTable";
+import { defaultColumnRenderer, renderPodsStatusTableCell, renderTableCell } from "../Common/KubeCardWithTable";
 import { SelectedItemKeys, WorkloadsEvents } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
@@ -250,23 +250,23 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
     }
 
     private static _renderReplicaSetNameCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IDeploymentReplicaSetItem>, deployment: IDeploymentReplicaSetItem): JSX.Element {
-        const itemToRender = BaseKubeTable.defaultColumnRenderer(deployment.replicaSetName || "", "fontWeightSemiBold");
-        return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
+        const itemToRender = defaultColumnRenderer(deployment.replicaSetName || "", "fontWeightSemiBold");
+        return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
     private static _renderPodsCountCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IDeploymentReplicaSetItem>, deployment: IDeploymentReplicaSetItem): JSX.Element {
-        return BaseKubeTable.renderPodsStatusTableCell(rowIndex, columnIndex, tableColumn, deployment.pods, deployment.statusProps);
+        return renderPodsStatusTableCell(rowIndex, columnIndex, tableColumn, deployment.pods, deployment.statusProps);
     }
 
     private static _renderImageCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IDeploymentReplicaSetItem>, deployment: IDeploymentReplicaSetItem): JSX.Element {
-        const itemToRender = BaseKubeTable.defaultColumnRenderer(deployment.image, undefined, deployment.imageTooltip);
-        return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
+        const itemToRender = defaultColumnRenderer(deployment.image, undefined, deployment.imageTooltip);
+        return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
     private static _renderAgeCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IDeploymentReplicaSetItem>, deployment: IDeploymentReplicaSetItem): JSX.Element {
         const createdDate = deployment.creationTimeStamp ? deployment.creationTimeStamp : new Date();
         const itemToRender = <Ago date={new Date(createdDate)} />;
-        return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
+        return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
     private static _getHeadingContent(deployment: V1Deployment): JSX.Element {

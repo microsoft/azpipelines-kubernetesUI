@@ -9,23 +9,10 @@ import { format, localeFormat } from "azure-devops-ui/Core/Util/String";
 import { ILabelModel } from "azure-devops-ui/Label";
 import { IStatusProps, Statuses } from "azure-devops-ui/Status";
 import * as Resources from "./Resources";
+import { PodPhase } from "./Types";
 
 const pipelineNameAnnotationKey: string = "azure-pipelines/pipeline";
-const pipelineIdAnnotationKey: string = "azure-pipelines/execution";
-
-/**
- * https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-phase
- */
-// todo :: pod status
-enum PodPhase {
-    Pending = "Pending",
-    Running = "Running",
-    Succeeded = "Succeeded",
-    Failed = "Failed",
-    Unknown = "Unknown",
-    Completed = "Completed",
-    CrashLoopBackOff = "CrashLoopBackOff",
-}
+const pipelineExecutionIdAnnotationKey: string = "azure-pipelines/execution";
 
 export class Utils {
     public static isOwnerMatched(objectMeta: V1ObjectMeta, ownerUIdLowerCase: string): boolean {
@@ -46,21 +33,22 @@ export class Utils {
     }
 
     public static getPipelineText(annotations: { [key: string]: string }): string {
-        let pipelineName: string = "", pipelineId: string = "";
+        let pipelineName: string = "";
+        let pipelineExecutionId: string = "";
 
-        annotations && Object.keys(annotations).find(key => {
+        (annotations && (Object.keys(annotations) || [])).find(key => {
             const keyVal: string = key.toLowerCase();
             if (!pipelineName && keyVal === pipelineNameAnnotationKey) {
                 pipelineName = annotations[key];
             }
-            else if (!pipelineId && keyVal === pipelineIdAnnotationKey) {
-                pipelineId = annotations[key];
+            else if (!pipelineExecutionId && keyVal === pipelineExecutionIdAnnotationKey) {
+                pipelineExecutionId = annotations[key];
             }
 
-            return !!pipelineName && !!pipelineId;
+            return !!pipelineName && !!pipelineExecutionId;
         });
 
-        return pipelineName && pipelineId ? localeFormat("{0} / {1}", pipelineName, pipelineId) : "";
+        return pipelineName && pipelineExecutionId ? localeFormat("{0} / {1}", pipelineName, pipelineExecutionId) : "";
     }
 
     public static getPodsStatusProps(currentScheduledPods: number, desiredPods: number): IStatusProps | undefined {

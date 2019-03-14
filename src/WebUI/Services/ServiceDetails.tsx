@@ -17,7 +17,7 @@ import * as Date_Utils from "azure-devops-ui/Utilities/Date";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
 import { IKubeService } from "../../Contracts/Contracts";
-import { BaseKubeTable } from "../Common/BaseKubeTable";
+import { renderTableCell } from "../Common/KubeCardWithTable";
 import { KubeZeroData } from "../Common/KubeZeroData";
 import { PageTopHeader } from "../Common/PageTopHeader";
 import { ServicesEvents } from "../Constants";
@@ -244,7 +244,7 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
             </Tooltip>
         );
 
-        return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
+        return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
     private static _getCellText(tableColumn: ITableColumn<IServiceItem>, rowIndex: number, service:IServiceItem): string {
@@ -289,7 +289,7 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
             />
         );
 
-        return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
+        return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
     private _servicesStore: ServicesStore;

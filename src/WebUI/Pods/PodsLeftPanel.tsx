@@ -4,33 +4,18 @@
 */
 
 import { V1Pod } from "@kubernetes/client-node";
-import { BaseComponent, css } from "@uifabric/utilities";
+import { BaseComponent } from "@uifabric/utilities";
 import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
 import { Header, TitleSize } from "azure-devops-ui/Header";
 import { IListSelection, ListSelection } from "azure-devops-ui/List";
-import { IStatusProps, Status, Statuses, StatusSize } from "azure-devops-ui/Status";
+import { IStatusProps, Statuses } from "azure-devops-ui/Status";
 import { ITableColumn, Table } from "azure-devops-ui/Table";
-import { Tooltip } from "azure-devops-ui/TooltipEx";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
-import { BaseKubeTable } from "../Common/BaseKubeTable";
+import { renderPodNameWithStatusTableCell } from "../Common/KubeCardWithTable";
 import * as Resources from "../Resources";
-import { IVssComponentProperties } from "../Types";
+import { IVssComponentProperties, PodPhaseToStatus } from "../Types";
 import "./PodsLeftPanel.scss";
-
-/**
- * https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-phase
- */
-// todo :: pod status
-const podStatusDic: { [index: string]: IStatusProps } = {
-    "Running": Statuses.Success,
-    "Succeeded": Statuses.Success,
-    "Pending": Statuses.Failed,
-    "Failed": Statuses.Failed,
-    "Completed": Statuses.Failed,
-    "Unknown": Statuses.Failed,
-    "CrashLoopBackOff": Statuses.Failed,
-};
 
 const podStatusKey = "pods-list-status-col";
 const colDataClassName: string = "list-col-content";
@@ -125,19 +110,15 @@ export class PodsLeftPanel extends BaseComponent<IPodsLeftPanelProperties> {
         );
     }
 
-    private static _renderPodNameCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod, selectedIndex: number): JSX.Element {
-        const itemToRender = (
-            <>
-                <Status {...podStatusDic[pod.status.phase]} className="icon-large-margin" size={StatusSize.m} />
-                <div className="flex-row scroll-hidden">
-                    <Tooltip overflowOnly text={pod.metadata.name}>
-                        <span className={css("text-ellipsis", rowIndex === selectedIndex ? "fontWeightSemiBold" : "")}>{pod.metadata.name}</span>
-                    </Tooltip>
-                </div>
-            </>
-        );
-
-        return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
+    private static _renderPodNameCell(
+        rowIndex: number,
+        columnIndex: number,
+        tableColumn: ITableColumn<V1Pod>,
+        pod: V1Pod,
+        selectedIndex: number
+    ): JSX.Element {
+        const contentClassName = rowIndex === selectedIndex ? "fontWeightSemiBold" : "";
+        return renderPodNameWithStatusTableCell(rowIndex, columnIndex, tableColumn, pod.metadata.name, PodPhaseToStatus[pod.status.phase], undefined, contentClassName);
     }
 
     private _selection: IListSelection = new ListSelection();

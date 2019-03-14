@@ -17,7 +17,7 @@ import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
 import { IKubeService } from "../../Contracts/Contracts";
 import { KubeResourceType } from "../../Contracts/KubeServiceBase";
-import { BaseKubeTable } from "../Common/BaseKubeTable";
+import { defaultColumnRenderer, renderTableCell, renderPodsStatusTableCell } from "../Common/KubeCardWithTable";
 import { SelectedItemKeys, WorkloadsEvents } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
@@ -247,8 +247,8 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
     }
 
     private static _renderImageCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<ISetWorkloadTypeItem>, statefulSet: ISetWorkloadTypeItem): JSX.Element {
-        const itemToRender = BaseKubeTable.defaultColumnRenderer(statefulSet.image || "", undefined, statefulSet.imageTooltip || "");
-        return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
+        const itemToRender = defaultColumnRenderer(statefulSet.image || "", undefined, statefulSet.imageTooltip || "");
+        return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
     private static _renderPodsCountCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<ISetWorkloadTypeItem>, statefulSet: ISetWorkloadTypeItem): JSX.Element {
@@ -259,12 +259,12 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
             podString = format("{0}/{1}", statefulSet.desiredPodCount, statefulSet.currentPodCount);
         }
 
-        return BaseKubeTable.renderPodsStatusTableCell(rowIndex, columnIndex, tableColumn, podString, statusProps);
+        return renderPodsStatusTableCell(rowIndex, columnIndex, tableColumn, podString, statusProps);
     }
 
     private static _renderAgeCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<ISetWorkloadTypeItem>, statefulSet: ISetWorkloadTypeItem): JSX.Element {
         const itemToRender = <Ago date={new Date(statefulSet.creationTimeStamp)} />;
-        return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
+        return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
     private static _getSetType(selectedItem: string): string {
