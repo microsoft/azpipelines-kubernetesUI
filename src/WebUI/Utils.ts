@@ -3,13 +3,11 @@
     Licensed under the MIT license.
 */
 
-import { V1ObjectMeta, V1PodStatus, V1PodTemplateSpec, V1Container, V1PodSpec } from "@kubernetes/client-node";
-import { ObservableArray } from "azure-devops-ui/Core/Observable";
+import { V1ObjectMeta, V1PodSpec, V1PodStatus } from "@kubernetes/client-node";
 import { format, localeFormat } from "azure-devops-ui/Core/Util/String";
-import { ILabelModel } from "azure-devops-ui/Label";
 import { IStatusProps, Statuses } from "azure-devops-ui/Status";
-import * as Resources from "./Resources";
 import { PodPhase } from "../Contracts/Contracts";
+import * as Resources from "./Resources";
 
 const pipelineNameAnnotationKey: string = "azure-pipelines/pipeline";
 const pipelineExecutionIdAnnotationKey: string = "azure-pipelines/execution";
@@ -19,17 +17,6 @@ export class Utils {
         return objectMeta.ownerReferences
             && objectMeta.ownerReferences.length > 0
             && objectMeta.ownerReferences[0].uid.toLowerCase() === ownerUIdLowerCase;
-    }
-
-    public static getUILabelModelArray(items: { [key: string]: string }): ObservableArray<ILabelModel> {
-        let labelArray = new ObservableArray<ILabelModel>();
-        if (items) {
-            Object.keys(items).forEach((key: string) => {
-                labelArray.push({ content: format("{0}={1}", key, items[key]) });
-            });
-        }
-
-        return labelArray;
     }
 
     public static getPillTags(items: { [key: string]: string }): string[] {
@@ -46,8 +33,9 @@ export class Utils {
     public static getPipelineText(annotations: { [key: string]: string }): string {
         let pipelineName: string = "";
         let pipelineExecutionId: string = "";
+        const keys = annotations ? Object.keys(annotations) : [];
 
-        annotations && Object.keys(annotations).find(key => {
+        keys.find(key => {
             const keyVal: string = key.toLowerCase();
             if (!pipelineName && keyVal === pipelineNameAnnotationKey) {
                 pipelineName = annotations[key];

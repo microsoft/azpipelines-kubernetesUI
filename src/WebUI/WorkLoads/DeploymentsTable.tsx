@@ -273,7 +273,8 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
         return (
             <div className="flex-row flex-center">
                 <div>{deployment.metadata.name}</div>
-                <Tags className="deployment-tbl-heading-labels" items={deployment.metadata.labels} />
+                {/* todo :: body-s is needed as the parent is body-xl */}
+                <Tags className="deployment-tbl-heading-labels body-s" items={deployment.metadata.labels} />
             </div>
         );
     }

@@ -19,7 +19,7 @@ export class Tags extends BaseComponent<ITagsProperties> {
             <div className={css(this.props.className, "k8s-tags flex-row")}>
                 {
                     Utils.getPillTags(this.props.items)
-                        .map(tagText => <Pill className="k8s-tag-pill" size={PillSize.compact}>{tagText}</Pill>)
+                        .map((tagText, index) => <Pill key={index} className="k8s-tag-pill" size={PillSize.compact}>{tagText}</Pill>)
                 }
             </div>
         );

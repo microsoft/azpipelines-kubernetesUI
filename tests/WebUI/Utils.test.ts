@@ -49,8 +49,8 @@ describe("Utils isOwnerMatched Tests", () => {
     });
 });
 
-describe("Utils getUILabelModelArray Tests", () => {
-    const getUILabelModelArrayData = [
+describe("Utils getPillTags Tests", () => {
+    const getPillTagsData = [
         [
             "zeroLabels",
             {},
@@ -76,7 +76,7 @@ describe("Utils getUILabelModelArray Tests", () => {
         ]
     ];
 
-    it.each(getUILabelModelArrayData)("getUILabelModelArray checking for:: %s", (testName, items, labelCount) => {
-        expect(Utils.getUILabelModelArray(items).length).toStrictEqual(labelCount);
+    it.each(getPillTagsData)("getPillTags checking for:: %s", (testName, items, labelCount) => {
+        expect(Utils.getPillTags(items).length).toStrictEqual(labelCount);
     });
 });
