@@ -10,17 +10,18 @@ import { CardContent, CustomCard } from "azure-devops-ui/Card";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { format, localeFormat } from "azure-devops-ui/Core/Util/String";
 import { CustomHeader, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
-import { LabelGroup, WrappingBehavior } from "azure-devops-ui/Label";
+import { MessageCard, MessageCardSeverity } from "azure-devops-ui/MessageCard";
 import { ColumnFill, ITableColumn, SimpleTableCell as renderSimpleTableCell, Table } from "azure-devops-ui/Table";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
+import { AgoFormat } from "azure-devops-ui/Utilities/Date";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
-import { renderTableCell, defaultColumnRenderer } from "../Common/KubeCardWithTable";
+import { defaultColumnRenderer, renderTableCell } from "../Common/KubeCardWithTable";
+import { Tags } from "../Common/Tags";
 import * as Resources from "../Resources";
 import { Utils } from "../Utils";
 import "./PodOverview.scss";
 import { IPodRightPanelProps } from "./PodsRightPanel";
-import { AgoFormat } from "azure-devops-ui/Utilities/Date";
 
 export interface IPodOverviewProps extends IPodRightPanelProps { }
 
@@ -43,8 +44,7 @@ export class PodOverview extends BaseComponent<IPodOverviewProps> {
                 className: "pod-overview-value-col",
                 minWidth: 400,
                 renderCell: PodOverview._renderValueCell
-            },
-            ColumnFill
+            }
         ];
 
         const { imageText, imageTooltipText } = Utils.getImageText(pod.spec);
@@ -61,29 +61,35 @@ export class PodOverview extends BaseComponent<IPodOverviewProps> {
             { key: Resources.LabelsText, value: pod.metadata.labels || "" }
         ]);
 
+        const podErrorMessage = pod.status.message;
         return (
-            <CustomCard className="pod-overview-card k8s-card-padding flex-grow bolt-card-no-vertical-padding">
-                <CustomHeader>
-                    <HeaderTitleArea>
-                        <HeaderTitleRow>
-                            <HeaderTitle className="text-ellipsis" titleSize={TitleSize.Medium}>
-                                {Resources.PodDetailsHeader}
-                            </HeaderTitle>
-                        </HeaderTitleRow>
-                    </HeaderTitleArea>
-                </CustomHeader>
-                <CardContent contentPadding={false}>
-                    <Table
-                        id={format("pod-overview-{0}", pod.metadata.uid)}
-                        showHeader={false}
-                        showLines={false}
-                        singleClickActivation={false}
-                        itemProvider={tableRows}
-                        pageSize={tableRows.length}
-                        columns={columns}
-                    />
-                </CardContent>
-            </CustomCard>
+            <>
+                {podErrorMessage && <MessageCard severity={MessageCardSeverity.Error}>{pod.status.message}</MessageCard>}
+                <div className={podErrorMessage ? "page-content-top" : ""}>
+                    <CustomCard className="pod-overview-card k8s-card-padding flex-grow bolt-card-no-vertical-padding">
+                        <CustomHeader>
+                            <HeaderTitleArea>
+                                <HeaderTitleRow>
+                                    <HeaderTitle className="text-ellipsis" titleSize={TitleSize.Medium}>
+                                        {Resources.PodDetailsHeader}
+                                    </HeaderTitle>
+                                </HeaderTitleRow>
+                            </HeaderTitleArea>
+                        </CustomHeader>
+                        <CardContent contentPadding={false}>
+                            <Table
+                                id={format("pod-overview-{0}", pod.metadata.uid)}
+                                showHeader={false}
+                                showLines={false}
+                                singleClickActivation={false}
+                                itemProvider={tableRows}
+                                pageSize={tableRows.length}
+                                columns={columns}
+                            />
+                        </CardContent>
+                    </CustomCard>
+                </div>
+            </>
         );
     }
 
@@ -128,10 +134,7 @@ export class PodOverview extends BaseComponent<IPodOverviewProps> {
                 props = {
                     columnIndex: columnIndex,
                     children:
-                        <LabelGroup
-                            labelProps={Utils.getUILabelModelArray(value)}
-                            wrappingBehavior={WrappingBehavior.freeFlow}
-                        />,
+                        <Tags items={value} />,
                     tableColumn: tableColumn,
                     contentClassName: css("pod-labels-pill", contentClassName)
                 };

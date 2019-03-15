@@ -4,11 +4,10 @@
 */
 
 import { BaseComponent } from "@uifabric/utilities";
-import { Header, TitleSize } from "azure-devops-ui/Header";
+import { CustomHeader, HeaderIcon, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
 import { IStatusProps, Status, StatusSize } from "azure-devops-ui/Status";
 import * as React from "react";
 import { IVssComponentProperties } from "../Types";
-import "./PageTopHeader.scss";
 
 export interface IPageTopHeader extends IVssComponentProperties {
     title: string;
@@ -17,24 +16,33 @@ export interface IPageTopHeader extends IVssComponentProperties {
 
 export class PageTopHeader extends BaseComponent<IPageTopHeader> {
     public render(): React.ReactNode {
-        const statusProps = this.props.statusProps || {} as IStatusProps;
+        const { title, statusProps } = this.props;
         return (
-            <Header
-                title={this.props.title || ""}
-                titleSize={TitleSize.Large}
-                titleClassName="k8s-top-header-title"
-                titleIconProps={
-                    this.props.statusProps ? {
-                        render: (className?: string) => {
-                            return (
-                                <span className="flex-row">
-                                    <Status {...statusProps} size={StatusSize.l} />
-                                </span>
-                            );
-                        }
-                    } : undefined
+            <CustomHeader>
+                {
+                    statusProps &&
+                    <HeaderIcon
+                        className="bolt-table-status-icon-large"
+                        iconProps={{
+                            render: (className?: string) => {
+                                return (
+                                    <div className="flex-row">
+                                        {
+                                            statusProps &&
+                                            <Status {...statusProps} className={className} size={StatusSize.l} />
+                                        }
+                                    </div>
+                                );
+                            }
+                        }}
+                    />
                 }
-            />
+                <HeaderTitleArea>
+                    <HeaderTitleRow>
+                        <HeaderTitle titleSize={TitleSize.Large}>{title || ""}</HeaderTitle>
+                    </HeaderTitleRow>
+                </HeaderTitleArea>
+            </CustomHeader>
         );
     }
 }

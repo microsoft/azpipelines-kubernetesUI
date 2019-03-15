@@ -32,6 +32,17 @@ export class Utils {
         return labelArray;
     }
 
+    public static getPillTags(items: { [key: string]: string }): string[] {
+        let tags: string[] = [];
+        if (items) {
+            Object.keys(items).forEach((key: string) => {
+                tags.push(format("{0}={1}", key, items[key]));
+            });
+        }
+
+        return tags;
+    }
+
     public static getPipelineText(annotations: { [key: string]: string }): string {
         let pipelineName: string = "";
         let pipelineExecutionId: string = "";

@@ -9,13 +9,14 @@ import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
 import { Header, TitleSize } from "azure-devops-ui/Header";
 import { IListSelection, ListSelection } from "azure-devops-ui/List";
 import { ITableColumn, Table } from "azure-devops-ui/Table";
+import { Tooltip } from "azure-devops-ui/TooltipEx";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
+import { PodPhaseToStatus } from "../../Contracts/Contracts";
 import { renderPodNameWithStatusTableCell } from "../Common/KubeCardWithTable";
 import * as Resources from "../Resources";
 import { IVssComponentProperties } from "../Types";
 import "./PodsLeftPanel.scss";
-import { PodPhaseToStatus } from "../../Contracts/Contracts";
 
 const podStatusKey = "pods-list-status-col";
 const colDataClassName: string = "list-col-content";
@@ -50,7 +51,7 @@ export class PodsLeftPanel extends BaseComponent<IPodsLeftPanelProperties> {
                 this._selectedRow = 0;
             }
 
-            // Select the first pod in left panel by default
+            // select the first pod in left panel by default
             this._selection.select(this._selectedRow);
             this._hasSelected = true;
         }
@@ -64,9 +65,15 @@ export class PodsLeftPanel extends BaseComponent<IPodsLeftPanelProperties> {
     }
 
     private _getHeader(): JSX.Element | null {
+        // todo :: use m150 header for back button
         return (
             <Header
-                title={this.props.parentName}
+                title={
+                    <Tooltip overflowOnly={true} text={this.props.parentName}>
+                        <div className="text-ellipsis">{this.props.parentName}</div>
+                    </Tooltip>
+                }
+                titleClassName="text-ellipsis"
                 titleIconProps={{ iconName: "Back", onClick: this.props.onBackButtonClick, className: "pod-left-panel-back-button" }}
                 titleSize={TitleSize.Large}
                 description={this.props.parentKind || ""}

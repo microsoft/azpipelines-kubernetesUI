@@ -220,19 +220,19 @@ export class ServicesTable extends BaseComponent<IServicesComponentProperties> {
                 tableColumn={tableColumn}
                 line1={
                     <Tooltip overflowOnly={true} text={service.package}>
-                        <span className="fontWeightSemiBold text-ellipsis">{service.package}</span>
+                        <div className="fontWeightSemiBold text-ellipsis">{service.package}</div>
                     </Tooltip>
                 }
                 line2={
-                    <span className="fontSize secondary-text text-ellipsis">{service.type}</span>
+                    <div className="fontSize secondary-text text-ellipsis">{service.type}</div>
                 }
                 iconProps={{
                     render: (className?: string) => {
                         return (
                             <Tooltip text={tooltipText}>
-                                <span className="flex-row">
+                                <div className="flex-row">
                                     <Status {...statusProps} className="icon-large-margin" size={StatusSize.l} />
-                                </span>
+                                </div>
                             </Tooltip>
                         );
                     }

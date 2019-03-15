@@ -10,13 +10,13 @@ import { CardContent, CustomCard } from "azure-devops-ui/Card";
 import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
 import { localeFormat } from "azure-devops-ui/Core/Util/String";
 import { CustomHeader, HeaderDescription, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
-import { LabelGroup, WrappingBehavior } from "azure-devops-ui/Label";
 import { IStatusProps, Statuses } from "azure-devops-ui/Status";
 import { ITableColumn, Table } from "azure-devops-ui/Table";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
 import { IKubeService } from "../../Contracts/Contracts";
 import { defaultColumnRenderer, renderPodsStatusTableCell, renderTableCell } from "../Common/KubeCardWithTable";
+import { Tags } from "../Common/Tags";
 import { SelectedItemKeys, WorkloadsEvents } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
@@ -273,12 +273,7 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
         return (
             <div className="flex-row flex-center">
                 <div>{deployment.metadata.name}</div>
-                <LabelGroup
-                    className="deployment-tbl-heading-labels"
-                    labelProps={Utils.getUILabelModelArray(deployment.metadata.labels)}
-                    wrappingBehavior={WrappingBehavior.oneLine}
-                    fadeOutOverflow={true}>
-                </LabelGroup>
+                <Tags className="deployment-tbl-heading-labels" items={deployment.metadata.labels} />
             </div>
         );
     }

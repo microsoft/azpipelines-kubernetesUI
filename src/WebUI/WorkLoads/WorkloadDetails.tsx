@@ -9,7 +9,6 @@ import { CardContent, CustomCard } from "azure-devops-ui/Card";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { localeFormat } from "azure-devops-ui/Core/Util/String";
 import { CustomHeader, HeaderDescription, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
-import { LabelGroup, WrappingBehavior } from "azure-devops-ui/Label";
 import { Page } from "azure-devops-ui/Page";
 import { IStatusProps } from "azure-devops-ui/Status";
 import { ITableColumn, Table } from "azure-devops-ui/Table";
@@ -19,6 +18,7 @@ import * as React from "react";
 import { defaultColumnRenderer, renderTableCell } from "../Common/KubeCardWithTable";
 import { KubeZeroData } from "../Common/KubeZeroData";
 import { PageTopHeader } from "../Common/PageTopHeader";
+import { Tags } from "../Common/Tags";
 import { StoreManager } from "../FluxCommon/StoreManager";
 import { PodsDetails } from "../Pods/PodsDetails";
 import { PodsStore } from "../Pods/PodsStore";
@@ -185,19 +185,13 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
     }
 
     private static _renderImageCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<any>, tableItem: any): JSX.Element {
-        const {imageText, imageTooltipText } = Utils.getImageText(tableItem.podTemplate.spec);
+        const { imageText, imageTooltipText } = Utils.getImageText(tableItem.podTemplate.spec);
         const itemToRender = defaultColumnRenderer(imageText, undefined, imageTooltipText);
         return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
     private static _renderLabelsCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<any>, tableItem: any): JSX.Element {
-        const itemToRender: React.ReactNode = (
-            <LabelGroup
-                labelProps={Utils.getUILabelModelArray(tableItem.parentMetaData.labels || {})}
-                wrappingBehavior={WrappingBehavior.freeFlow}
-            />
-        );
-
+        const itemToRender: React.ReactNode = <Tags items={tableItem.parentMetaData.labels} />;
         return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 

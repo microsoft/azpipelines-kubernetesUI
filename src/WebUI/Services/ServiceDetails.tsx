@@ -8,7 +8,6 @@ import { BaseComponent } from "@uifabric/utilities";
 import { CardContent, CustomCard } from "azure-devops-ui/Card";
 import { localeFormat } from "azure-devops-ui/Core/Util/String";
 import { CustomHeader, HeaderDescription, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
-import { LabelGroup, WrappingBehavior } from "azure-devops-ui/Label";
 import { Page } from "azure-devops-ui/Page";
 import { Statuses } from "azure-devops-ui/Status";
 import { ITableColumn, Table } from "azure-devops-ui/Table";
@@ -20,6 +19,7 @@ import { IKubeService } from "../../Contracts/Contracts";
 import { renderTableCell } from "../Common/KubeCardWithTable";
 import { KubeZeroData } from "../Common/KubeZeroData";
 import { PageTopHeader } from "../Common/PageTopHeader";
+import { Tags } from "../Common/Tags";
 import { ServicesEvents } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
@@ -282,13 +282,7 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
                 break;
         }
 
-        const itemToRender: React.ReactNode = (
-            <LabelGroup
-                labelProps={Utils.getUILabelModelArray(labelsArray)}
-                wrappingBehavior={WrappingBehavior.freeFlow}
-            />
-        );
-
+        const itemToRender: React.ReactNode = <Tags items={labelsArray} />;
         return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
