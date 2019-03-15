@@ -61,7 +61,8 @@ export class WorkloadsStore extends StoreBase {
 
     private _setDeploymentsList = (deploymentsList: V1DeploymentList): void => {
         this._state.deploymentList = deploymentsList;
-        for (const deployment of (deploymentsList && deploymentsList.items || [])) {
+        const deploymentItems = deploymentsList ? deploymentsList.items || [] : [];
+        for (const deployment of deploymentItems) {
             if (deployment && deployment.metadata.namespace) {
                 this._state.deploymentNamespace = deployment.metadata.namespace;
                 break;
@@ -101,7 +102,8 @@ export class WorkloadsStore extends StoreBase {
 
     private _setOrphanPodsList = (podsList: V1PodList): void => {
         let orphanPods: V1Pod[] = [];
-        (podsList && podsList.items || []).forEach(pod => {
+        const podItems = podsList ? podsList.items || [] : [];
+        podItems.forEach(pod => {
             if (!pod.metadata.ownerReferences) {
                 orphanPods.push(pod);
             }

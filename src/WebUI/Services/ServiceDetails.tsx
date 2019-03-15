@@ -177,7 +177,7 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
                             <HeaderDescription className={"text-ellipsis"}>
                                 {
                                     item.pipeline
-                                        ? localeFormat(Resources.CreatedTextWithPipelineText, agoTime, item.pipeline)
+                                        ? localeFormat(Resources.ServiceCreatedWithPipelineText, agoTime, item.pipeline)
                                         : localeFormat(Resources.CreatedAgo, agoTime)
                                 }
                             </HeaderDescription>

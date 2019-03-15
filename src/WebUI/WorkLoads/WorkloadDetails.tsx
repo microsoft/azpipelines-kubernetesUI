@@ -140,7 +140,7 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
                             <HeaderDescription className={"text-ellipsis"}>
                                 {
                                     pipeline
-                                        ? localeFormat(Resources.CreatedTextWithPipelineText, agoTime, pipeline)
+                                        ? localeFormat(Resources.ServiceCreatedWithPipelineText, agoTime, pipeline)
                                         : localeFormat(Resources.CreatedAgo, agoTime)
                                 }
                             </HeaderDescription>
