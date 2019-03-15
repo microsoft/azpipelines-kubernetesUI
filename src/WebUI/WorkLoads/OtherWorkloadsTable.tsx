@@ -254,8 +254,7 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
                 imageDisplayText: Utils.getImageText(set.spec.template.spec),
                 desiredPodCount: set.status.replicas,
                 currentPodCount: set.status.currentReplicas,
-                payload: set,
-                imageService: this.props.imageService
+                payload: set
             });
         });
 
@@ -274,8 +273,7 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
                 imageDisplayText: Utils.getImageText(set.spec.template.spec),
                 desiredPodCount: set.status.desiredNumberScheduled,
                 currentPodCount: set.status.currentNumberScheduled,
-                payload: set,
-                imageService: this.props.imageService
+                payload: set
             });
         });
 
@@ -294,8 +292,7 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
                 imageDisplayText: Utils.getImageText(set.spec.template.spec),
                 desiredPodCount: set.status.replicas,
                 currentPodCount: set.status.availableReplicas,
-                payload: set,
-                imageService: this.props.imageService
+                payload: set
             });
         });
 
