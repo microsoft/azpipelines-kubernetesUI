@@ -8,7 +8,7 @@ import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { format } from "azure-devops-ui/Core/Util/String";
 import { Filter, IFilterItemState, IFilterState } from "azure-devops-ui/Utilities/Filter";
 import * as React from "react";
-import { IKubeService, KubeImage } from "../../Contracts/Contracts";
+import { IKubeService, KubeImage, IImageService } from "../../Contracts/Contracts";
 import { KubeResourceType } from "../../Contracts/KubeServiceBase";
 import { KubeZeroData, IKubeZeroDataProps } from "../Common//KubeZeroData";
 import { NameKey, TypeKey } from "../Common/KubeFilterBar";
@@ -35,6 +35,7 @@ export interface IWorkloadsPivotState {
 
 export interface IWorkloadsPivotProps extends IVssComponentProperties {
     kubeService: IKubeService;
+    imageService?: IImageService;
     filter: Filter;
     namespace?: string;
     filterToggled: ObservableValue<boolean>;
@@ -109,6 +110,7 @@ export class WorkloadsPivot extends BaseComponent<IWorkloadsPivotProps, IWorkloa
         return (<OtherWorkloads
             key={format("sts-list-{0}", this.props.namespace || "")}
             kubeService={this.props.kubeService}
+            imageService={this.props.imageService}
             nameFilter={this._getNameFilterValue()}
             typeFilter={this._getTypeFilterValue()}
         />);
@@ -118,6 +120,7 @@ export class WorkloadsPivot extends BaseComponent<IWorkloadsPivotProps, IWorkloa
         return (<DeploymentsTable
             key={format("dc-{0}", this.props.namespace || "")}
             kubeService={this.props.kubeService}
+            imageService={this.props.imageService}
             nameFilter={this._getNameFilterValue()}
         />);
     }

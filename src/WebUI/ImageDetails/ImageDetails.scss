@@ -1,0 +1,12 @@
+@import "../Common/Common.scss";
+
+.image-details-content {
+    .image-details-header {
+        padding-left: 0;
+        padding-bottom: 16px;
+
+        .image-details-back-button {
+            cursor: pointer;
+        }
+    }
+}

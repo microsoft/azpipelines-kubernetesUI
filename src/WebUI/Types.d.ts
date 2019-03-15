@@ -6,6 +6,7 @@ import { V1Deployment, V1DeploymentList, V1PodList, V1ReplicaSetList, V1Service,
 import { IObservable } from "azure-devops-ui/Core/Observable";
 import { IStatusProps } from "azure-devops-ui/Status";
 import { IBaseProps } from "@uifabric/utilities";
+import { IImageService } from "../../Contracts/Contracts";
 
 export interface IKubernetesSummary {
     namespace?: string;
@@ -27,7 +28,8 @@ export interface IDeploymentReplicaSetItem {
     statusProps?: IStatusProps;
     showRowBorder?: boolean;
     deployment?: V1Deployment;
-    image: string;
+    imageId: string;
+    imageDisplayText: string;
     creationTimeStamp: Date;
     kind?: string;
 }
@@ -55,7 +57,8 @@ export interface ISetWorkloadTypeItem {
     name: string;
     uid: string;
     kind: string;
-    image: string;
+    imageId: string;
+    imageDisplayText: string;
     desiredPodCount: number;
     currentPodCount: number;
     creationTimeStamp: Date;
