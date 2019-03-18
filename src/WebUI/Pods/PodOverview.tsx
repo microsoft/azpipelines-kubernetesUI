@@ -76,7 +76,7 @@ export class PodOverview extends BaseComponent<IPodOverviewProps> {
                                 </HeaderTitleRow>
                             </HeaderTitleArea>
                         </CustomHeader>
-                        <CardContent contentPadding={false}>
+                        <CardContent className="pod-full-details-table" contentPadding={false}>
                             <Table
                                 id={format("pod-overview-{0}", pod.metadata.uid)}
                                 showHeader={false}

@@ -4,7 +4,7 @@
 */
 
 import { V1Pod } from "@kubernetes/client-node";
-import { BaseComponent } from "@uifabric/utilities";
+import { BaseComponent, css } from "@uifabric/utilities";
 import { Ago } from "azure-devops-ui/Ago";
 import { CardContent, CustomCard } from "azure-devops-ui/Card";
 import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
@@ -23,6 +23,7 @@ import { SelectionActions } from "../Selection/SelectionActions";
 import { IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
 import { AgoFormat } from "azure-devops-ui/Utilities/Date";
+import "./PodsTable.scss";
 
 const podNameKey: string = "pl-name-key";
 const podWorkloadsKey: string = "pl-wrkld-key";
@@ -36,6 +37,7 @@ export interface IPodsTableProperties extends IVssComponentProperties {
     nameFilter?: string;
     showWorkloadsColumn?: boolean;
     onItemActivated?: (event: React.SyntheticEvent<HTMLElement>, selectedItem: V1Pod) => void;
+    contentClassName?: string;
 }
 
 export class PodsTable extends BaseComponent<IPodsTableProperties> {
@@ -68,7 +70,7 @@ export class PodsTable extends BaseComponent<IPodsTableProperties> {
                             </HeaderDescription>
                         </HeaderTitleArea>
                     </CustomHeader>
-                    <CardContent contentPadding={false}>
+                    <CardContent className={css(this.props.contentClassName || "", "pod-associated-table")} contentPadding={false}>
                         <Table
                             id="pods-table"
                             showHeader={true}
@@ -94,7 +96,7 @@ export class PodsTable extends BaseComponent<IPodsTableProperties> {
         columns.push({
             id: podNameKey,
             name: Resources.PodsDetailsText,
-            width: showWorkloadsColumn ? -54 : 362,
+            width: showWorkloadsColumn ? -58 : 362,
             renderCell: PodsTable._renderPodNameCell
         });
 
@@ -187,7 +189,8 @@ export class PodsTable extends BaseComponent<IPodsTableProperties> {
         }
 
         keys.forEach(key => {
-            subText = localeFormat("{0} {1} . {2}", podStatuses[key], key, subText);
+            const suffix = subText ? localeFormat(" . {0}", subText) : "";
+            subText = localeFormat("{0} {1}{2}", podStatuses[key], key, suffix);
         });
 
         return subText;

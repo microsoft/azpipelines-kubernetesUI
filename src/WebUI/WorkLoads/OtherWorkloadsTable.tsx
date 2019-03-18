@@ -28,6 +28,7 @@ import { ISetWorkloadTypeItem, IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
 import { WorkloadsActionsCreator } from "./WorkloadsActionsCreator";
 import { WorkloadsStore } from "./WorkloadsStore";
+import "./OtherWorkloadsTable.scss";
 
 const setNameKey = "otherwrkld-name-key";
 const imageKey = "otherwrkld-image-key";
@@ -82,7 +83,7 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
                             </HeaderTitleRow>
                         </HeaderTitleArea>
                     </CustomHeader>
-                    <CardContent contentPadding={false}>
+                    <CardContent className="workload-other-sets-table" contentPadding={false}>
                         <Table
                             id="other-workloads-table"
                             showHeader={true}
@@ -170,7 +171,7 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
         columns.push({
             id: ageKey,
             name: Resources.AgeText,
-            width: -18,
+            width: -28,
             renderCell: OtherWorkloads._renderAgeCell
         });
 

@@ -112,7 +112,7 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
                             <HeaderDescription className="text-ellipsis">{Resources.DeploymentText}</HeaderDescription>
                         </HeaderTitleArea>
                     </CustomHeader>
-                    <CardContent contentPadding={false}>
+                    <CardContent className="deployment-replicaset-table" contentPadding={false}>
                         <Table
                             id={key}
                             showHeader={true}
@@ -242,7 +242,7 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
         columns.push({
             id: ageKey,
             name: Resources.AgeText,
-            width: -18,
+            width: -28,
             renderCell: DeploymentsTable._renderAgeCell
         });
 

@@ -30,6 +30,7 @@ import * as Resources from "../Resources";
 import { IServiceItem, IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
 import { ServicesStore } from "./ServicesStore";
+import "./ServiceDetails.scss";
 
 export interface IServiceDetailsProperties extends IVssComponentProperties {
     kubeService: IKubeService;
@@ -144,7 +145,7 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
                 id: "selector",
                 name: Resources.SelectorText,
                 width: -100,
-                minWidth: 200,
+                minWidth: 150,
                 renderCell: ServiceDetails._renderTags
             },
             {
@@ -183,7 +184,7 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
                             </HeaderDescription>
                         </HeaderTitleArea>
                     </CustomHeader>
-                    <CardContent contentPadding={false}>
+                    <CardContent className="service-full-details-table" contentPadding={false}>
                         <Table
                             id="service-full-details-table"
                             showHeader={true}
@@ -214,6 +215,7 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
 
         return (
             <PodsTable
+                contentClassName="service-pods-table"
                 podsToRender={this.state.pods}
                 headingText={Resources.AssociatedPodsText}
                 onItemActivated={this._onSelectedPodInvoked}

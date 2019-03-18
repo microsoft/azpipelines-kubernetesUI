@@ -26,6 +26,7 @@ import { PodsTable } from "../Pods/PodsTable";
 import * as Resources from "../Resources";
 import { IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
+import "./WorkloadDetails.scss";
 
 export interface IWorkloadDetailsProperties extends IVssComponentProperties {
     parentMetaData: V1ObjectMeta;
@@ -144,7 +145,7 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
                             </HeaderDescription>
                         </HeaderTitleArea>
                     </CustomHeader>
-                    <CardContent contentPadding={false}>
+                    <CardContent className="workload-full-details-table" contentPadding={false}>
                         <Table
                             id="workload-full-details-table"
                             showHeader={true}
@@ -168,6 +169,7 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
 
         return (
             <PodsTable
+                contentClassName="workload-pods-table"
                 podsToRender={this.state.pods}
                 headingText={Resources.PodsText}
                 onItemActivated={this._onSelectedPodInvoked}
