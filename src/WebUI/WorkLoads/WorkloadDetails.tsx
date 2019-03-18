@@ -226,7 +226,7 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
             const imageId = Utils.getImageId(Utils.getFirstImageName(tableItem.podTemplate.spec), tableItem.podTemplate.metadata, pods);
             const imageName: string = Utils.getImageText(tableItem.podTemplate.spec);
             // Todo :: HardCoding hasImageDetails true for the time being, Should change it once we integrate with ImageService
-             // ToDo :: Revisit link paddings
+            // ToDo :: Revisit link paddings
             //const hasImageDetails: boolean = this._imageDetailsStore.hasImageDetails(imageName);
             const hasImageDetails = true;
             return (<div className="bolt-table-two-line-cell-item flex-row scroll-hidden">

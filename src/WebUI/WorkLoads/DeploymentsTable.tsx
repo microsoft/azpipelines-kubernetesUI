@@ -33,6 +33,7 @@ import { ImageDetailsStore } from "../ImageDetails/ImageDetailsStore";
 import { IImageDetails } from "../../Contracts/Types";
 import { PodsStore } from "../Pods/PodsStore";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
+import { KubeSummary } from "../Common/KubeSummary";
 
 const replicaSetNameKey: string = "replicaSet-col";
 const podsKey: string = "pods-col";
@@ -41,8 +42,6 @@ const ageKey: string = "age-key";
 const colDataClassName: string = "dc-col-data";
 
 export interface IDeploymentsTableProperties extends IVssComponentProperties {
-    kubeService: IKubeService;
-    imageService?: IImageService;
     nameFilter?: string;
 }
 
@@ -61,7 +60,7 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
         this._imageDetailsStore = StoreManager.GetStore<ImageDetailsStore>(ImageDetailsStore);
         this._store = StoreManager.GetStore<WorkloadsStore>(WorkloadsStore);
 
-        this._workloadsActionCreator.getReplicaSets(this.props.kubeService);
+        this._workloadsActionCreator.getReplicaSets(KubeSummary.getKubeService());
 
         this.state = { deploymentList: undefined, replicaSetList: undefined };
 
@@ -71,7 +70,8 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
 
     public componentDidUpdate(prevProps: IDeploymentsTableProperties, prevState: IDeploymentsTableState) {
         this._markTTI(prevProps, prevState);
-        this.props.imageService && this._imageActionsCreator.setHasImageDetails(this.props.imageService, DeploymentsTable._imageList);
+        const imageService = KubeSummary.getImageService();
+        imageService && this._imageActionsCreator.setHasImageDetails(imageService, DeploymentsTable._imageList);
     }
 
     public render(): React.ReactNode {
@@ -117,7 +117,7 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
                 className={columnClassName}
                 headingText={DeploymentsTable._getHeadingContent(entry.deployment)}
                 headingDescription={Resources.DeploymentText}
-                items={DeploymentsTable._getDeploymentReplicaSetItems(entry.deployment, entry.replicaSets, this.props.imageService)}
+                items={DeploymentsTable._getDeploymentReplicaSetItems(entry.deployment, entry.replicaSets)}
                 columns={this._getColumns()}
                 onItemActivated={this._openDeploymentItem}
             />);
@@ -142,12 +142,12 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
         return deploymentReplicaSetMap;
     }
 
-    private static _getDeploymentReplicaSetItems(deployment: V1Deployment, replicaSets: V1ReplicaSet[], imageService: IImageService | undefined):
+    private static _getDeploymentReplicaSetItems(deployment: V1Deployment, replicaSets: V1ReplicaSet[]):
         IDeploymentReplicaSetItem[] {
         let items: IDeploymentReplicaSetItem[] = [];
         replicaSets.forEach((replicaSet, index) => {
             if (replicaSet.spec.replicas > 0) {
-                items.push(DeploymentsTable._getDeploymentReplicaSetItem(deployment, replicaSet, index, replicaSets.length, imageService));
+                items.push(DeploymentsTable._getDeploymentReplicaSetItem(deployment, replicaSet, index, replicaSets.length));
             }
         });
 
@@ -158,8 +158,7 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
         deployment: V1Deployment,
         replica: V1ReplicaSet,
         index: number,
-        replicaSetLength: number,
-        imageService: IImageService | undefined): IDeploymentReplicaSetItem {
+        replicaSetLength: number): IDeploymentReplicaSetItem {
         // todo :: annotations are taken from deployment for the first replica, rest of the replicas from respective replicas
         const annotations: {
             [key: string]: string;
@@ -288,7 +287,7 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
             <Tooltip text={textToRender} overflowOnly>
                 <Link
                     className="fontSizeM text-ellipsis bolt-table-link bolt-table-inline-link bolt-link"
-                    onClick={() => hasImageDetails && this._onImageClick(this.props.imageService, imageId)}>
+                    onClick={() => hasImageDetails && this._onImageClick(KubeSummary.getImageService(), imageId)}>
                     {textToRender || ""}
                 </Link>
             </Tooltip>;

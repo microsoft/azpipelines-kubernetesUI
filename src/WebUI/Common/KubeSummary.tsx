@@ -72,6 +72,8 @@ export interface IKubeSummaryProps extends IVssComponentProperties {
 export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesContainerState> {
     constructor(props: IKubeSummaryProps) {
         super(props, {});
+        KubeSummary._imageService = this.props.imageService;
+        KubeSummary._kubeservice = this.props.kubeService;
 
         this._initializeFactorySettings();
         const workloadsFilter = new Filter();
@@ -105,7 +107,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         this._workloadsStore = StoreManager.GetStore<WorkloadsStore>(WorkloadsStore);
 
         // Fetch deployments in parent component we need to show nameSpace in heading and namespace is obtained from deployment metadata
-        this._workloadsActionCreator.getDeployments(this.props.kubeService);
+        this._workloadsActionCreator.getDeployments(KubeSummary._kubeservice);
         this._workloadsStore.addListener(WorkloadsEvents.DeploymentsFetchedEvent, this._setNamespaceOnDeploymentsFetched);
 
         this._workloadsStore.addListener(WorkloadsEvents.WorkloadsFoundEvent, this._onDataFound);
@@ -142,6 +144,14 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         this._workloadsStore.removeListener(WorkloadsEvents.WorkloadsFoundEvent, this._onDataFound);
         this._servicesStore.removeListener(ServicesEvents.ServicesFoundEvent, this._onDataFound);
         this._historyUnlisten();
+    }
+
+    public static getImageService(): IImageService | undefined {
+        return KubeSummary._imageService;
+    }
+
+    public static getKubeService(): IKubeService {
+        return KubeSummary._kubeservice;
     }
 
     private _updateStateFromHistory = (routeValues: queryString.OutputParams): void => {
@@ -216,8 +226,8 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
                     <Tab name={Resources.PivotServiceText} id={servicesPivotItemKey} />
                 </TabBar>
                 <TabContent>
-                    {this.state.selectedPivotKey === servicesPivotItemKey && <ServicesPivot kubeService={this.props.kubeService} namespace={this.state.namespace} filter={this.state.svcFilter} filterToggled={servicesFilterToggled} />}
-                    {this.state.selectedPivotKey === workloadsPivotItemKey && <WorkloadsPivot kubeService={this.props.kubeService} imageService={this.props.imageService} namespace={this.state.namespace} filter={this.state.workloadsFilter} filterToggled={workloadsFilterToggled} />}
+                    {this.state.selectedPivotKey === servicesPivotItemKey && <ServicesPivot namespace={this.state.namespace} filter={this.state.svcFilter} filterToggled={servicesFilterToggled} />}
+                    {this.state.selectedPivotKey === workloadsPivotItemKey && <WorkloadsPivot namespace={this.state.namespace} filter={this.state.workloadsFilter} filterToggled={workloadsFilterToggled} />}
                 </TabContent>
             </div>
         );
@@ -255,7 +265,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
 
     private _setSelectedKeyPodsViewMap = () => {
         this._selectedItemViewMap[SelectedItemKeys.StatefulSetKey] = (item) => this._getWorkoadPodsViewComponent(item.metadata, item.spec && item.spec.template, item.kind || "StatefulSet", item.status.currentReplicas, item.status.replicas);
-        this._selectedItemViewMap[SelectedItemKeys.ServiceItemKey] = (item) => { return <ServiceDetails kubeService={this.props.kubeService} service={item} /> };
+        this._selectedItemViewMap[SelectedItemKeys.ServiceItemKey] = (item) => { return <ServiceDetails service={item} /> };
         this._selectedItemViewMap[SelectedItemKeys.DaemonSetKey] = (item) => this._getWorkoadPodsViewComponent(item.metadata, item.spec && item.spec.template, item.kind || "DaemonSet", item.status.currentNumberScheduled, item.status.desiredNumberScheduled);
         this._selectedItemViewMap[SelectedItemKeys.OrphanPodKey] = (item) => { return <PodOverview pod={item} />; }
         this._selectedItemViewMap[SelectedItemKeys.ReplicaSetKey] = (item) => this._getWorkoadPodsViewComponent(item.metadata, item.spec && item.spec.template, item.kind || "ReplicaSet", item.status.availableReplicas, item.status.replicas);
@@ -321,4 +331,6 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
     private _historyService: History;
     private _historyUnlisten: UnregisterCallback;
     private _selectionActionCreator: SelectionActionsCreator;
+    private static _imageService: IImageService | undefined;
+    private static _kubeservice: IKubeService;
 }

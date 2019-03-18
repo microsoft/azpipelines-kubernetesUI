@@ -28,13 +28,13 @@ import { HyperLinks } from "../Constants";
 import { WorkloadsActionsCreator } from "./WorkloadsActionsCreator";
 import "./WorkloadsPivot.scss";
 import { KubeFactory } from "../KubeFactory";
+import { KubeSummary } from "../Common/KubeSummary";
 
 export interface IWorkloadsPivotState {
     workloadResourceSize: number;
 }
 
 export interface IWorkloadsPivotProps extends IVssComponentProperties {
-    kubeService: IKubeService;
     imageService?: IImageService;
     filter: Filter;
     namespace?: string;
@@ -55,10 +55,10 @@ export class WorkloadsPivot extends BaseComponent<IWorkloadsPivotProps, IWorkloa
             workloadResourceSize: 0
         };
         
-        this._workloadsActionCreator.getDeployments(this.props.kubeService);
+        this._workloadsActionCreator.getDeployments(KubeSummary.getKubeService());
 
         // Fetch all pods in parent component as the podList is required in selected workload pods view
-        this._podsActionCreator.getPods(this.props.kubeService);
+        this._podsActionCreator.getPods(KubeSummary.getKubeService());
 
         this._workloadsStore.addListener(WorkloadsEvents.WorkloadPodsFetchedEvent, this._onPodsFetched);
         this._workloadsStore.addListener(WorkloadsEvents.WorkloadsFoundEvent, this._onDataFound);
@@ -109,8 +109,6 @@ export class WorkloadsPivot extends BaseComponent<IWorkloadsPivotProps, IWorkloa
     private _getOtherWorkloadsComponent(): JSX.Element {
         return (<OtherWorkloads
             key={format("sts-list-{0}", this.props.namespace || "")}
-            kubeService={this.props.kubeService}
-            imageService={this.props.imageService}
             nameFilter={this._getNameFilterValue()}
             typeFilter={this._getTypeFilterValue()}
         />);
@@ -119,8 +117,6 @@ export class WorkloadsPivot extends BaseComponent<IWorkloadsPivotProps, IWorkloa
     private _getDeployments(): JSX.Element {
         return (<DeploymentsTable
             key={format("dc-{0}", this.props.namespace || "")}
-            kubeService={this.props.kubeService}
-            imageService={this.props.imageService}
             nameFilter={this._getNameFilterValue()}
         />);
     }

@@ -31,6 +31,7 @@ import { ImageDetailsActionsCreator } from "../ImageDetails/ImageDetailsActionsC
 import { ImageDetailsStore } from "../ImageDetails/ImageDetailsStore";
 import { IImageDetails } from "../../Contracts/Types";
 import { PodsStore } from "../Pods/PodsStore";
+import { KubeSummary } from "../Common/KubeSummary";
 
 const setNameKey = "otherwrkld-name-key";
 const imageKey = "otherwrkld-image-key";
@@ -39,8 +40,6 @@ const ageKey = "otherwrkld-age-key";
 const colDataClassName: string = "list-col-content";
 
 export interface IOtherWorkloadsProperties extends IVssComponentProperties {
-    kubeService: IKubeService;
-    imageService?: IImageService;
     nameFilter?: string;
     typeFilter: KubeResourceType[];
 }
@@ -68,9 +67,9 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
         this._store.addListener(WorkloadsEvents.ReplicaSetsFetchedEvent, this._onReplicaSetsFetched);
         this._imageDetailsStore.addListener(ImageDetailsEvents.HasImageDetailsEvent, this._setHasImageDetails);
 
-        this._actionCreator.getStatefulSets(this.props.kubeService);
-        this._actionCreator.getDaemonSets(this.props.kubeService);
-        this._actionCreator.getReplicaSets(this.props.kubeService);
+        this._actionCreator.getStatefulSets(KubeSummary.getKubeService());
+        this._actionCreator.getDaemonSets(KubeSummary.getKubeService());
+        this._actionCreator.getReplicaSets(KubeSummary.getKubeService());
     }
 
     public render(): React.ReactNode {
@@ -92,7 +91,8 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
     }
 
     public componentDidUpdate(): void {
-        this.props.imageService && this._imageActionsCreator.setHasImageDetails(this.props.imageService, this._imageList);
+        const imageService = KubeSummary.getImageService();
+        imageService && this._imageActionsCreator.setHasImageDetails(imageService, this._imageList);
     }
 
     public componentWillUnmount(): void {
@@ -215,7 +215,7 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
             <Tooltip text={imageText} overflowOnly>
                 <Link
                     className="fontSizeM text-ellipsis bolt-table-link bolt-table-inline-link bolt-link"
-                    onClick={() => hasImageDetails && this._onImageClick(this.props.imageService, imageId, workload.uid)}>
+                    onClick={() => hasImageDetails && this._onImageClick(KubeSummary.getImageService(), imageId, workload.uid)}>
                     {imageText || ""}
                 </Link>
             </Tooltip>;
