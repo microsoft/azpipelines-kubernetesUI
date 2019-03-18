@@ -6,9 +6,10 @@
 import { ActionsHubBase, Action } from "../FluxCommon/Actions";
 import { V1ReplicaSet, V1Pod, V1DaemonSet, V1StatefulSet } from "@kubernetes/client-node";
 import { IServiceItem } from "../Types";
+import { IImageDetails } from "../../Contracts/Types";
 
 export interface ISelectionPayload {
-    item: V1ReplicaSet | V1DaemonSet | V1StatefulSet | IServiceItem | V1Pod;
+    item: V1ReplicaSet | V1DaemonSet | V1StatefulSet | IServiceItem | V1Pod | IImageDetails | undefined;
     itemUID: string;
     showSelectedItem: boolean;
     selectedItemType: string;

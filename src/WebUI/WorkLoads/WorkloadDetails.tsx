@@ -29,6 +29,11 @@ import { HyperLinks } from "../Constants";
 import { Header, TitleSize } from "azure-devops-ui/Header";
 import { KubeFactory } from "../KubeFactory";
 import { KubeImage } from "../../Contracts/Contracts";
+import { ImageDetailsStore } from "../ImageDetails/ImageDetailsStore";
+import { ImageDetails } from "../ImageDetails/ImageDetails";
+import { IImageDetails } from "../../Contracts/Types";
+import { Link } from "azure-devops-ui/Link";
+import { Tooltip } from "azure-devops-ui/TooltipEx";
 
 export interface IWorkloadDetailsProperties extends IVssComponentProperties {
     parentMetaData: V1ObjectMeta;
@@ -41,6 +46,8 @@ export interface IWorkloadDetailsState {
     pods: Array<V1Pod>;
     selectedPod: V1Pod | null;
     showSelectedPod: boolean;
+    showImageDetails: boolean;
+    selectedImageDetails: IImageDetails | undefined;
 }
 
 export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, IWorkloadDetailsState> {
@@ -49,9 +56,12 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
         this.state = {
             pods: [],
             selectedPod: null,
-            showSelectedPod: false
+            showSelectedPod: false,
+            showImageDetails: false,
+            selectedImageDetails: undefined
         };
         this._podsStore = StoreManager.GetStore<PodsStore>(PodsStore);
+        this._imageDetailsStore = StoreManager.GetStore<ImageDetailsStore>(ImageDetailsStore);
     }
 
     public render(): JSX.Element {
@@ -62,6 +72,11 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
                 parentName={parentName}
                 onBackButtonClick={this._setSelectedPodStateFalse}
             />);
+        }
+        else if (this.state.showImageDetails) {
+            return <ImageDetails
+                imageDetails={this.state.selectedImageDetails}
+                onBackButtonClick={this._hideImageDetails} />;
         }
 
         return (
@@ -97,7 +112,7 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
 
             return (
                 <div className="content-main-heading">
-                    <ResourceStatus statusProps={this.props.statusProps} customDescription={headerItem} statusSize={StatusSize.l} className={"w-details-status-header"}/>
+                    <ResourceStatus statusProps={this.props.statusProps} customDescription={headerItem} statusSize={StatusSize.l} className={"w-details-status-header"} />
                 </div>
             );
         }
@@ -112,7 +127,22 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
         });
     }
 
-    private static _getColumns(): ITableColumn<any>[] {
+    private _showImageDetails = (imageId: string) => {
+        const imageDetails = this._imageDetailsStore.getImageDetails(imageId);
+        this.setState({
+            showImageDetails: true,
+            selectedImageDetails: imageDetails
+        });
+    }
+
+    private _hideImageDetails = () => {
+        this.setState({
+            showImageDetails: false,
+            selectedImageDetails: undefined
+        });
+    }
+
+    private _getColumns = (): ITableColumn<any>[] => {
         const columns: ITableColumn<any>[] = [
             {
                 id: "w-image",
@@ -121,7 +151,7 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
                 className: "workload-details-card",
                 minWidth: 250,
                 headerClassName: "workload-details-column-header",
-                renderCell: WorkloadDetails._renderImageCell
+                renderCell: this._renderImageCell
             },
             {
                 id: "w-labels",
@@ -130,7 +160,7 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
                 className: "workload-details-card",
                 minWidth: 200,
                 headerClassName: "workload-details-column-header",
-                renderCell: WorkloadDetails._renderLabelsCell
+                renderCell: this._renderLabelsCell
             }
         ];
         return columns;
@@ -148,7 +178,7 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
                 headingDescription={pipeline ? localeFormat(Resources.ServiceCreatedText, agoTime, pipeline) :
                     localeFormat(Resources.CreatedAgo, agoTime)}
                 items={tableItems}
-                columns={WorkloadDetails._getColumns()}
+                columns={this._getColumns()}
                 hideHeaders
                 hideLines
             />
@@ -185,22 +215,43 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
         });
     }
 
-    private static _renderImageCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<any>, tableItem: any): JSX.Element {
+    private _renderImageCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<any>, tableItem: any): JSX.Element => {
         let itemToRender: React.ReactNode;
         if (rowIndex == 0) {
             itemToRender = BaseKubeTable.defaultColumnRenderer(Resources.ImageText, "w-details-cell-header");
         }
         else {
-            // Todo :: Add support for making Image a link to Image Details view
-            itemToRender = <div className="w-details-cell-value">
-                {Utils.getImageText(tableItem.podTemplate.spec)}
-            </div>;
+            const podslist = this._podsStore.getState().podsList;
+            const pods: V1Pod[] = podslist && podslist.items || [];
+            const imageId = Utils.getImageId(Utils.getFirstImageName(tableItem.podTemplate.spec), tableItem.podTemplate.metadata, pods);
+            const imageName: string = Utils.getImageText(tableItem.podTemplate.spec);
+            // Todo :: HardCoding hasImageDetails true for the time being, Should change it once we integrate with ImageService
+            // ToDo :: Revisit link paddings
+            //const hasImageDetails: boolean = this._imageDetailsStore.hasImageDetails(imageName);
+            const hasImageDetails = true;
+            return (<div className="bolt-table-two-line-cell-item flex-row scroll-hidden">
+                <Tooltip text={imageName} overflowOnly>
+                    <Link
+                        className="fontSizeM text-ellipsis bolt-table-link bolt-table-inline-link bolt-link w-details-cell-value"
+                        onClick={() => hasImageDetails && this._showImageDetails(imageId)}>
+                        {imageName || ""}
+                    </Link>
+                </Tooltip>
+            </div>);
+            itemToRender =
+                <Tooltip text={imageName} overflowOnly>
+                    <Link
+                        className="fontSizeM text-ellipsis bolt-table-link bolt-table-inline-link bolt-link w-details-cell-value"
+                        onClick={() => hasImageDetails && this._showImageDetails(imageId)}>
+                        {imageName || ""}
+                    </Link>
+                </Tooltip>;
         }
 
         return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
-    private static _renderLabelsCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<any>, tableItem: any): JSX.Element {
+    private _renderLabelsCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<any>, tableItem: any): JSX.Element {
         let itemToRender: React.ReactNode;
         if (rowIndex == 0) {
             itemToRender = BaseKubeTable.defaultColumnRenderer(Resources.LabelsText, "w-details-cell-header");
@@ -219,4 +270,5 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
     }
 
     private _podsStore: PodsStore;
+    private _imageDetailsStore: ImageDetailsStore;
 }

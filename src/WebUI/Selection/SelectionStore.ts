@@ -8,9 +8,10 @@ import { ActionsHubManager } from "../FluxCommon/ActionsHubManager";
 import { V1DeploymentList, V1ReplicaSet, V1Pod, V1DaemonSet, V1StatefulSet } from "@kubernetes/client-node";
 import { SelectionActions, ISelectionPayload } from "./SelectionActions";
 import { IServiceItem } from "../Types";
+import { IImageDetails } from "../../Contracts/Types";
 
 export interface ISelectionStoreState {
-    selectedItem: V1ReplicaSet | V1DaemonSet | V1StatefulSet | IServiceItem | V1Pod | undefined;
+    selectedItem: V1ReplicaSet | V1DaemonSet | V1StatefulSet | IServiceItem | V1Pod | IImageDetails | undefined;
     showSelectedItem: boolean;
     selectedItemType: string;
 }

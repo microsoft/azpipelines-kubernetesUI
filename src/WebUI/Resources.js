@@ -74,4 +74,14 @@ define("Environments/Providers/Kubernetes/Resources", ["require", "exports"], fu
     exports.ServiceText = "service";
     exports.NoResultsFoundText = "No results found";
     exports.WorkloadsFilterText = "workload"; // case sensitive
+    exports.DigestText = "Digest";
+    exports.TarIdText = "Tar ID";
+    exports.ImageTypeText = "Image type";
+    exports.MediaTypeText = "Media type";
+    exports.RegistryText = "Registry";
+    exports.ImageSizeText = "Image size";
+    exports.ImageDetailsHeaderText = "Image details";
+    exports.LayersText = "Layers";
+    exports.CommandText = "Command";
+    exports.SizeText = "Size";
 });

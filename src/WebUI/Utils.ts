@@ -3,9 +3,9 @@
     Licensed under the MIT license.
 */
 
-import { V1ObjectMeta, V1PodStatus, V1PodTemplateSpec, V1Container, V1PodSpec } from "@kubernetes/client-node";
+import { V1ObjectMeta, V1PodStatus, V1PodTemplateSpec, V1Container, V1PodSpec, V1Pod } from "@kubernetes/client-node";
 import { ObservableArray } from "azure-devops-ui/Core/Observable";
-import { format, localeFormat } from "azure-devops-ui/Core/Util/String";
+import { format, localeFormat, equals } from "azure-devops-ui/Core/Util/String";
 import { ILabelModel } from "azure-devops-ui/Label";
 import { IStatusProps, Statuses } from "azure-devops-ui/Status";
 import * as Resources from "./Resources";
@@ -110,7 +110,33 @@ export class Utils {
                 imageString = images[0];
             }
         }
-        
+
         return imageString;
+    }
+
+    public static getFirstImageName(podSpec: V1PodSpec | undefined): string {
+        if (podSpec && podSpec.containers && podSpec.containers.length > 0) {
+            return podSpec.containers[0].image;
+        }
+
+        return "";
+    }
+
+    public static getImageId(imageName: string, podMetadata: V1ObjectMeta, pods: V1Pod[]): string {
+        let imageId: string = "";
+        if (pods.length > 0) {
+            const matchingPod: V1Pod | undefined = pods.find(pod => { return pod.metadata && podMetadata && equals(pod.metadata.uid, podMetadata.uid, true) });
+            if (matchingPod) {
+                const podStatus = matchingPod.status;
+                if (podStatus.containerStatuses && podStatus.containerStatuses.length > 0) {
+                    const containerStatusForGivenImage = podStatus.containerStatuses.find(status => equals(status.image, imageName, true));
+                    if (containerStatusForGivenImage) {
+                        imageId = containerStatusForGivenImage.imageID;
+                    }
+                }
+            }
+        }
+
+        return imageId;
     }
 }

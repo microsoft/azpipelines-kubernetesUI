@@ -23,13 +23,13 @@ import { ServicesFilterBar } from "./ServicesFilterBar";
 import { ServicesStore } from "./ServicesStore";
 import "./ServicesPivot.scss";
 import { KubeFactory } from "../KubeFactory";
+import { KubeSummary } from "../Common/KubeSummary";
 
 export interface IServicesPivotState {
     serviceList?: V1ServiceList;
 }
 
 export interface IServicesPivotProps extends IVssComponentProperties {
-    kubeService: IKubeService;
     filter: Filter;
     namespace?: string;
     filterToggled: ObservableValue<boolean>;
@@ -46,7 +46,7 @@ export class ServicesPivot extends BaseComponent<IServicesPivotProps, IServicesP
             serviceList: undefined
         };
 
-        this._actionCreator.getServices(this.props.kubeService);
+        this._actionCreator.getServices(KubeSummary.getKubeService());
         this._store.addListener(ServicesEvents.ServicesFetchedEvent, this._onServicesFetched);
     }
 

@@ -14,7 +14,8 @@ export const enum SelectedItemKeys {
     DaemonSetKey = "daemon-set",
     StatefulSetKey = "stateful-set",
     OrphanPodKey = "orphan-pod",
-    ServiceItemKey = "service-item"
+    ServiceItemKey = "service-item",
+    ImageDetailsKey = "image-details"
 }
 
 export namespace WorkloadsEvents {
@@ -34,6 +35,11 @@ export namespace ServicesEvents {
 
 export namespace PodsEvents {
     export const PodsFetchedEvent: string = "ALL_PODS_FETCHED_EVENT";
+}
+
+export namespace ImageDetailsEvents {
+    export const HasImageDetailsEvent: string = "HAS_IMAGE_DETAILS_EVENT";
+    export const GetImageDetailsEvent: string = "GET_IMAGE_DETAILS_EVENT";
 }
 
 export namespace HyperLinks {

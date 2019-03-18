@@ -8,7 +8,7 @@ import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { format } from "azure-devops-ui/Core/Util/String";
 import { Filter, IFilterItemState, IFilterState } from "azure-devops-ui/Utilities/Filter";
 import * as React from "react";
-import { IKubeService, KubeImage } from "../../Contracts/Contracts";
+import { IKubeService, KubeImage, IImageService } from "../../Contracts/Contracts";
 import { KubeResourceType } from "../../Contracts/KubeServiceBase";
 import { KubeZeroData, IKubeZeroDataProps } from "../Common//KubeZeroData";
 import { NameKey, TypeKey } from "../Common/KubeFilterBar";
@@ -28,13 +28,14 @@ import { HyperLinks } from "../Constants";
 import { WorkloadsActionsCreator } from "./WorkloadsActionsCreator";
 import "./WorkloadsPivot.scss";
 import { KubeFactory } from "../KubeFactory";
+import { KubeSummary } from "../Common/KubeSummary";
 
 export interface IWorkloadsPivotState {
     workloadResourceSize: number;
 }
 
 export interface IWorkloadsPivotProps extends IVssComponentProperties {
-    kubeService: IKubeService;
+    imageService?: IImageService;
     filter: Filter;
     namespace?: string;
     filterToggled: ObservableValue<boolean>;
@@ -54,10 +55,10 @@ export class WorkloadsPivot extends BaseComponent<IWorkloadsPivotProps, IWorkloa
             workloadResourceSize: 0
         };
         
-        this._workloadsActionCreator.getDeployments(this.props.kubeService);
+        this._workloadsActionCreator.getDeployments(KubeSummary.getKubeService());
 
         // Fetch all pods in parent component as the podList is required in selected workload pods view
-        this._podsActionCreator.getPods(this.props.kubeService);
+        this._podsActionCreator.getPods(KubeSummary.getKubeService());
 
         this._workloadsStore.addListener(WorkloadsEvents.WorkloadPodsFetchedEvent, this._onPodsFetched);
         this._workloadsStore.addListener(WorkloadsEvents.WorkloadsFoundEvent, this._onDataFound);
@@ -108,7 +109,6 @@ export class WorkloadsPivot extends BaseComponent<IWorkloadsPivotProps, IWorkloa
     private _getOtherWorkloadsComponent(): JSX.Element {
         return (<OtherWorkloads
             key={format("sts-list-{0}", this.props.namespace || "")}
-            kubeService={this.props.kubeService}
             nameFilter={this._getNameFilterValue()}
             typeFilter={this._getTypeFilterValue()}
         />);
@@ -117,7 +117,6 @@ export class WorkloadsPivot extends BaseComponent<IWorkloadsPivotProps, IWorkloa
     private _getDeployments(): JSX.Element {
         return (<DeploymentsTable
             key={format("dc-{0}", this.props.namespace || "")}
-            kubeService={this.props.kubeService}
             nameFilter={this._getNameFilterValue()}
         />);
     }

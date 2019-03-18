@@ -29,9 +29,9 @@ import "../Common/Webplatform.scss";
 import { ServicesStore } from "./ServicesStore";
 import { Header, TitleSize } from "azure-devops-ui/Header";
 import { KubeFactory } from "../KubeFactory";
+import { KubeSummary } from "../Common/KubeSummary";
 
 export interface IServiceDetailsProperties extends IVssComponentProperties {
-    kubeService: IKubeService;
     service: IServiceItem;
 }
 
@@ -57,7 +57,7 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
         const svc = this.props.service && this.props.service.service;
         //service currently only supports equals with "and" operator. The generator generates that condition.
         const labelSelector: string = Utils.generateEqualsConditionLabelSelector(svc && svc.spec && svc.spec.selector || {});
-        this._podsActionsCreator.getPods(this.props.kubeService, labelSelector);
+        this._podsActionsCreator.getPods(KubeSummary.getKubeService(), labelSelector);
         this._servicesStore.addListener(ServicesEvents.ServicePodsFetchedEvent, this._onPodsFetched);
     }
 

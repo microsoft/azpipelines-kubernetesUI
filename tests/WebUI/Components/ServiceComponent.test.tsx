@@ -75,7 +75,7 @@ describe("ServiceDetails component tests", () => {
     const kubeService = new MockKubeService();
 
     it("Check header of the component", () => {
-        const wrapper = shallow(<ServiceDetails service={item} kubeService={kubeService} />);
+        const wrapper = shallow(<ServiceDetails service={item} />);
         const agoText = Date_Utils.ago(new Date(item.creationTimestamp), Date_Utils.AgoFormat.Compact);
         const headingClass = ".service-main-content .content-main-heading";
 
@@ -101,7 +101,7 @@ describe("ServiceDetails component tests", () => {
 
     it("Check header when no service is available", () => {
         const itemLocal = { ...item, service: null };
-        const wrapper = shallow(<ServiceDetails service={itemLocal} kubeService={kubeService} />);
+        const wrapper = shallow(<ServiceDetails service={itemLocal} />);
         const headingClass = ".service-main-content .content-main-heading";
 
         // check header --> should exist
@@ -114,7 +114,7 @@ describe("ServiceDetails component tests", () => {
     });
 
     it("Check service component after mount", () => {
-        const wrapper = mount(<ServiceDetails service={item} kubeService={kubeService} />);
+        const wrapper = mount(<ServiceDetails service={item} />);
         const sTableKeys = wrapper.find(".kube-list-content");
         expect(!!sTableKeys && sTableKeys.length > 0).toBeTruthy();
     });
