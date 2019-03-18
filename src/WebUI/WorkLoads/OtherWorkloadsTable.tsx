@@ -66,7 +66,7 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
     }
 
     public render(): React.ReactNode {
-        const filteredSet: ISetWorkloadTypeItem[] = this._generateRenderData().filter((set) => {
+        const filteredSet: ISetWorkloadTypeItem[] = this._generateRenderData().filter(set => {
             return Utils.filterByName(set.name, this.props.nameFilter);
         });
 
@@ -125,7 +125,7 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
     private _onReplicaSetsFetched = (): void => {
         const storeState = this._store.getState();
         const allReplicaSets = storeState.replicaSetList && storeState.replicaSetList.items || [];
-        const standAloneReplicaSets = allReplicaSets.filter((set) => set.metadata.ownerReferences.length === 0);
+        const standAloneReplicaSets = allReplicaSets.filter(set => set.metadata.ownerReferences.length === 0);
         this.setState({
             replicaSets: standAloneReplicaSets
         })
@@ -142,59 +142,6 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
 
             this._selectionActionCreator.selectItem(payload);
         }
-    }
-
-    private _generateRenderData(): ISetWorkloadTypeItem[] {
-        let data: ISetWorkloadTypeItem[] = [];
-        this._showType(KubeResourceType.StatefulSets) && this.state.statefulSetList.forEach((set) => {
-            data.push({
-                name: set.metadata.name,
-                uid: set.metadata.uid,
-                kind: SelectedItemKeys.StatefulSetKey,
-                creationTimeStamp: set.metadata.creationTimestamp,
-                desiredPodCount: set.status.replicas,
-                currentPodCount: set.status.currentReplicas,
-                payload: set,
-                ...OtherWorkloads._getImageText(set.spec.template.spec)
-            });
-        });
-
-        this._showType(KubeResourceType.DaemonSets) && this.state.daemonSetList.forEach((set) => {
-            data.push({
-                name: set.metadata.name,
-                uid: set.metadata.uid,
-                kind: SelectedItemKeys.DaemonSetKey,
-                creationTimeStamp: set.metadata.creationTimestamp,
-                desiredPodCount: set.status.desiredNumberScheduled,
-                currentPodCount: set.status.currentNumberScheduled,
-                payload: set,
-                ...OtherWorkloads._getImageText(set.spec.template.spec)
-            });
-        });
-
-        this._showType(KubeResourceType.ReplicaSets) && this.state.replicaSets.forEach((set) => {
-            data.push({
-                name: set.metadata.name,
-                uid: set.metadata.uid,
-                kind: SelectedItemKeys.ReplicaSetKey,
-                creationTimeStamp: set.metadata.creationTimestamp,
-                desiredPodCount: set.status.replicas,
-                currentPodCount: set.status.availableReplicas,
-                payload: set,
-                ...OtherWorkloads._getImageText(set.spec.template.spec)
-            });
-        });
-
-        return data;
-    }
-
-    private _showType(type: KubeResourceType): boolean {
-        return (this.props.typeFilter.length == 0 || this.props.typeFilter.indexOf(type) >= 0);
-    }
-
-    private static _getImageText(spec: V1PodSpec): { image: string, imageTooltip?: string } {
-        const { imageText, imageTooltipText } = Utils.getImageText(spec);
-        return { image: imageText, imageTooltip: imageTooltipText };
     }
 
     private static _getColumns(): ITableColumn<ISetWorkloadTypeItem>[] {
@@ -265,6 +212,59 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
     private static _renderAgeCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<ISetWorkloadTypeItem>, statefulSet: ISetWorkloadTypeItem): JSX.Element {
         const itemToRender = <Ago date={new Date(statefulSet.creationTimeStamp)} />;
         return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
+    }
+
+    private _generateRenderData(): ISetWorkloadTypeItem[] {
+        let data: ISetWorkloadTypeItem[] = [];
+        this._showType(KubeResourceType.StatefulSets) && this.state.statefulSetList.forEach(set => {
+            data.push({
+                name: set.metadata.name,
+                uid: set.metadata.uid,
+                kind: SelectedItemKeys.StatefulSetKey,
+                creationTimeStamp: set.metadata.creationTimestamp,
+                desiredPodCount: set.status.replicas,
+                currentPodCount: set.status.currentReplicas,
+                payload: set,
+                ...OtherWorkloads._getImageText(set.spec.template.spec)
+            });
+        });
+
+        this._showType(KubeResourceType.DaemonSets) && this.state.daemonSetList.forEach(set => {
+            data.push({
+                name: set.metadata.name,
+                uid: set.metadata.uid,
+                kind: SelectedItemKeys.DaemonSetKey,
+                creationTimeStamp: set.metadata.creationTimestamp,
+                desiredPodCount: set.status.desiredNumberScheduled,
+                currentPodCount: set.status.currentNumberScheduled,
+                payload: set,
+                ...OtherWorkloads._getImageText(set.spec.template.spec)
+            });
+        });
+
+        this._showType(KubeResourceType.ReplicaSets) && this.state.replicaSets.forEach(set => {
+            data.push({
+                name: set.metadata.name,
+                uid: set.metadata.uid,
+                kind: SelectedItemKeys.ReplicaSetKey,
+                creationTimeStamp: set.metadata.creationTimestamp,
+                desiredPodCount: set.status.replicas,
+                currentPodCount: set.status.availableReplicas,
+                payload: set,
+                ...OtherWorkloads._getImageText(set.spec.template.spec)
+            });
+        });
+
+        return data;
+    }
+
+    private _showType(type: KubeResourceType): boolean {
+        return (this.props.typeFilter.length == 0 || this.props.typeFilter.indexOf(type) >= 0);
+    }
+
+    private static _getImageText(spec: V1PodSpec): { image: string, imageTooltip?: string } {
+        const { imageText, imageTooltipText } = Utils.getImageText(spec);
+        return { image: imageText, imageTooltip: imageTooltipText };
     }
 
     private static _getSetType(selectedItem: string): string {

@@ -23,8 +23,8 @@ const colDataClassName: string = "list-col-content";
 
 export interface IPodsLeftPanelProperties extends IVssComponentProperties {
     pods: V1Pod[];
-    selectedPodName?: string;
     parentName: string;
+    selectedPodName?: string;
     parentKind: string;
     onSelectionChange?: (event: React.SyntheticEvent<HTMLElement>, selectedItem: V1Pod) => void;
     onBackButtonClick?: () => void;

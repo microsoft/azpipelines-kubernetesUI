@@ -14,8 +14,8 @@ import { PodsRightPanel } from "./PodsRightPanel";
 
 export interface IPodsDetailsProperties extends IVssComponentProperties {
     pods: V1Pod[];
-    selectedPod?: V1Pod;
     parentName: string;
+    selectedPod?: V1Pod;
     parentKind: string;
     onBackButtonClick?: () => void;
 }

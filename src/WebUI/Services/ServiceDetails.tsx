@@ -70,8 +70,8 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
             return (
                 <PodsDetails
                     pods={this.state.pods}
-                    selectedPod={this.state.selectedPod}
                     parentName={serviceName}
+                    selectedPod={this.state.selectedPod}
                     parentKind={this.props.parentKind}
                     onBackButtonClick={this._setSelectedPodStateFalse}
                 />

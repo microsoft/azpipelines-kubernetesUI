@@ -102,8 +102,7 @@ export class WorkloadsStore extends StoreBase {
 
     private _setOrphanPodsList = (podsList: V1PodList): void => {
         let orphanPods: V1Pod[] = [];
-        const podItems = podsList ? podsList.items || [] : [];
-        podItems.forEach(pod => {
+        podsList && podsList.items && podsList.items.forEach(pod => {
             if (!pod.metadata.ownerReferences) {
                 orphanPods.push(pod);
             }

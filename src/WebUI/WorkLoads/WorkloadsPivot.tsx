@@ -85,14 +85,11 @@ export class WorkloadsPivot extends BaseComponent<IWorkloadsPivotProps, IWorkloa
     }
 
     private _getContent(): JSX.Element {
-        return (
-            this.state.workloadResourceSize === 0
-                ? this._getZeroData()
-                : <>
-                    {this._showComponent(KubeResourceType.Deployments) && this._getDeployments()}
-                    {this._getOtherWorkloadsComponent()}
-                </>
-        );
+        return (this.state.workloadResourceSize === 0 ? this._getZeroData() :
+            <>
+                {this._showComponent(KubeResourceType.Deployments) && this._getDeployments()}
+                {this._getOtherWorkloadsComponent()}
+            </>);
     }
 
     private _getFilterBar(): JSX.Element {

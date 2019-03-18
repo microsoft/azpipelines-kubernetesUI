@@ -54,15 +54,13 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
     public render(): JSX.Element {
         if (this.state.selectedPod && this.state.showSelectedPod) {
             const parentName = this.props.parentMetaData.name || "";
-            return (
-                <PodsDetails
-                    pods={this.state.pods}
-                    parentName={parentName}
-                    parentKind={this.props.parentKind}
-                    selectedPod={this.state.selectedPod}
-                    onBackButtonClick={this._setSelectedPodStateFalse}
-                />
-            );
+            return (<PodsDetails
+                pods={this.state.pods}
+                parentName={parentName}
+                parentKind={this.props.parentKind}
+                selectedPod={this.state.selectedPod}
+                onBackButtonClick={this._setSelectedPodStateFalse}
+            />);
         }
 
         return (
