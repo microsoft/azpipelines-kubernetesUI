@@ -107,7 +107,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         this._workloadsStore = StoreManager.GetStore<WorkloadsStore>(WorkloadsStore);
 
         // Fetch deployments in parent component we need to show nameSpace in heading and namespace is obtained from deployment metadata
-        this._workloadsActionCreator.getDeployments(KubeSummary._kubeservice);
+        this._workloadsActionCreator.getDeployments(KubeSummary.getKubeService());
         this._workloadsStore.addListener(WorkloadsEvents.DeploymentsFetchedEvent, this._setNamespaceOnDeploymentsFetched);
 
         this._workloadsStore.addListener(WorkloadsEvents.WorkloadsFoundEvent, this._onDataFound);

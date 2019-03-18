@@ -19,12 +19,12 @@ export class PodsActionsCreator extends ActionCreatorBase {
 
     public getPods(kubeService: IKubeService, labelSelector?: string): void {
         if (labelSelector) {
-            kubeService.getPods(labelSelector).then(podsList => {
+            kubeService && kubeService.getPods(labelSelector).then(podsList => {
                 this._actions.podsFetchedByLabel.invoke(podsList);
             });
         }
         else {
-            kubeService.getPods().then(podsList => {
+            kubeService && kubeService.getPods().then(podsList => {
                 this._actions.podsFetched.invoke(podsList);
             });
         }
