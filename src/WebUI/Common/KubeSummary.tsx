@@ -226,7 +226,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
     private _getSelectedItemPodsView(): JSX.Element | null {
         const selectedItem = this.state.selectedItem;
         const selectedItemType = this.state.selectedItemType;
-        // Currently for imageDetails type, the selected item will be undefined, hence adding below check. Remove this once we have data from imageService
+        // ToDo :: Currently for imageDetails type, the selected item will be undefined, hence adding below check. Remove this once we have data from imageService
         if (selectedItemType && (selectedItem || selectedItemType === SelectedItemKeys.ImageDetailsKey) && this._selectedItemViewMap.hasOwnProperty(selectedItemType)) {
             return this._selectedItemViewMap[selectedItemType](selectedItem);
         }

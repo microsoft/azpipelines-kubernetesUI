@@ -11,7 +11,8 @@ import * as Resources from "../Resources";
 import { BaseKubeTable } from "../Common/BaseKubeTable";
 import { IVssComponentProperties, ISetWorkloadTypeItem } from "../Types";
 import { Ago } from "azure-devops-ui/Ago";
-import { ITableColumn } from "azure-devops-ui/Table";
+import { ITableColumn, TwoLineTableCell } from "azure-devops-ui/Table";
+import { Tooltip } from "azure-devops-ui/TooltipEx";
 import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
 import { Utils } from "../Utils";
 import { ResourceStatus } from "../Common/ResourceStatus";
@@ -188,22 +189,36 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
     }
 
     private static _renderSetNameCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<ISetWorkloadTypeItem>, workload: ISetWorkloadTypeItem): JSX.Element {
-        return BaseKubeTable.renderTwoLineColumn(columnIndex, tableColumn, workload.name, OtherWorkloads._getSetType(workload.kind), css(colDataClassName, "two-lines", "zero-left-padding"), "primary-text", "secondary-text");
+        return (
+            <TwoLineTableCell
+                key={"col-" + columnIndex}
+                columnIndex={columnIndex}
+                tableColumn={tableColumn}
+                line1={
+                    <Tooltip overflowOnly={true} text={workload.name}>
+                        <span className="fontWeightSemiBold text-ellipsis">{workload.name}</span>
+                    </Tooltip>
+                }
+                line2={<span className="fontSize secondary-text text-ellipsis">{OtherWorkloads._getSetType(workload.kind)}</span>}
+            />
+        );
     }
 
     private _renderImageCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<ISetWorkloadTypeItem>, workload: ISetWorkloadTypeItem): JSX.Element => {
         const imageId = workload.imageId;
         const imageText = workload.imageDisplayText;
-        // HardCoding hasImageDetails true for the time being, Should change it once we integrate with ImageService
+        // ToDo :: HardCoding hasImageDetails true for the time being, Should change it once we integrate with ImageService
+        // ToDo :: Revisit link paddings
         //const hasImageDetails: boolean = this._hasImageDetails && this._hasImageDetails.hasOwnProperty(imageId) ? this._hasImageDetails[imageId] : false;
         const hasImageDetails = true;
-        const itemToRender = hasImageDetails ?
-            (<Link
-                className="fontSizeM text-ellipsis bolt-table-link bolt-table-inline-link"
-                onClick={() => this._onImageClick(this.props.imageService, imageId, workload.uid)}>
-                {imageText || ""}
-            </Link>) :
-            BaseKubeTable.renderColumn(imageText || "", BaseKubeTable.defaultColumnRenderer, colDataClassName);
+        const itemToRender =
+            <Tooltip text={imageText} overflowOnly>
+                <Link
+                    className="fontSizeM text-ellipsis bolt-table-link bolt-table-inline-link bolt-link"
+                    onClick={() => hasImageDetails && this._onImageClick(this.props.imageService, imageId, workload.uid)}>
+                    {imageText || ""}
+                </Link>
+            </Tooltip>;
 
         return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
@@ -241,7 +256,7 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
         let imageId: string = "";
         this._showType(KubeResourceType.StatefulSets) && this.state.statefulSetList.forEach((set) => {
             imageId = this._getImageId(set);
-            if (this._imageList.length <= 0 || this._imageList.findIndex(img => equals(img, imageId)) < 0) {
+            if (this._imageList.length <= 0 || this._imageList.findIndex(img => equals(img, imageId, true)) < 0) {
                 this._imageList.push(imageId);
             }
 
@@ -260,7 +275,7 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
 
         this._showType(KubeResourceType.DaemonSets) && this.state.daemonSetList.forEach((set) => {
             imageId = this._getImageId(set);
-            if (this._imageList.length <= 0 || this._imageList.findIndex(img => equals(img, imageId)) < 0) {
+            if (this._imageList.length <= 0 || this._imageList.findIndex(img => equals(img, imageId, true)) < 0) {
                 this._imageList.push(imageId);
             }
 
@@ -279,7 +294,7 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
 
         this._showType(KubeResourceType.ReplicaSets) && this.state.replicaSets.forEach((set) => {
             imageId = this._getImageId(set);
-            if (this._imageList.length <= 0 || this._imageList.findIndex(img => equals(img, imageId)) < 0) {
+            if (this._imageList.length <= 0 || this._imageList.findIndex(img => equals(img, imageId, true)) < 0) {
                 this._imageList.push(imageId);
             }
 
@@ -299,7 +314,7 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
         return data;
     }
 
-    private _getImageId(set :V1ReplicaSet | V1DaemonSet | V1StatefulSet): string {
+    private _getImageId(set: V1ReplicaSet | V1DaemonSet | V1StatefulSet): string {
         const podslist = StoreManager.GetStore<PodsStore>(PodsStore).getState().podsList;
         const pods: V1Pod[] = podslist && podslist.items || [];
         return Utils.getImageId(Utils.getFirstImageName(set.spec.template.spec), set.spec.template.metadata, pods);

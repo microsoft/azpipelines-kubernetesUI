@@ -33,6 +33,7 @@ import { ImageDetailsStore } from "../ImageDetails/ImageDetailsStore";
 import { ImageDetails } from "../ImageDetails/ImageDetails";
 import { IImageDetails } from "../../Contracts/Types";
 import { Link } from "azure-devops-ui/Link";
+import { Tooltip } from "azure-devops-ui/TooltipEx";
 
 export interface IWorkloadDetailsProperties extends IVssComponentProperties {
     parentMetaData: V1ObjectMeta;
@@ -224,18 +225,27 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
             const pods: V1Pod[] = podslist && podslist.items || [];
             const imageId = Utils.getImageId(Utils.getFirstImageName(tableItem.podTemplate.spec), tableItem.podTemplate.metadata, pods);
             const imageName: string = Utils.getImageText(tableItem.podTemplate.spec);
-            // HardCoding hasImageDetails true for the time being, Should change it once we integrate with ImageService
+            // Todo :: HardCoding hasImageDetails true for the time being, Should change it once we integrate with ImageService
+             // ToDo :: Revisit link paddings
             //const hasImageDetails: boolean = this._imageDetailsStore.hasImageDetails(imageName);
             const hasImageDetails = true;
-            itemToRender = hasImageDetails ?
-                (<Link
-                    className="fontSizeM text-ellipsis bolt-table-link bolt-table-inline-link w-details-cell-value"
-                    onClick={() => this._showImageDetails(imageId)}>
-                    {imageName || ""}
-                </Link>) :
-                (<div className="w-details-cell-value">
-                    {imageName}
-                </div>);
+            return (<div className="bolt-table-two-line-cell-item flex-row scroll-hidden">
+                <Tooltip text={imageName} overflowOnly>
+                    <Link
+                        className="fontSizeM text-ellipsis bolt-table-link bolt-table-inline-link bolt-link w-details-cell-value"
+                        onClick={() => hasImageDetails && this._showImageDetails(imageId)}>
+                        {imageName || ""}
+                    </Link>
+                </Tooltip>
+            </div>);
+            itemToRender =
+                <Tooltip text={imageName} overflowOnly>
+                    <Link
+                        className="fontSizeM text-ellipsis bolt-table-link bolt-table-inline-link bolt-link w-details-cell-value"
+                        onClick={() => hasImageDetails && this._showImageDetails(imageId)}>
+                        {imageName || ""}
+                    </Link>
+                </Tooltip>;
         }
 
         return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);

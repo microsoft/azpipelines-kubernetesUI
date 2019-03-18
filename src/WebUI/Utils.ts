@@ -125,11 +125,11 @@ export class Utils {
     public static getImageId(imageName: string, podMetadata: V1ObjectMeta, pods: V1Pod[]): string {
         let imageId: string = "";
         if (pods.length > 0) {
-            const matchingPod: V1Pod | undefined = pods.find(pod => { return pod.metadata && podMetadata && equals(pod.metadata.uid, podMetadata.uid) });
+            const matchingPod: V1Pod | undefined = pods.find(pod => { return pod.metadata && podMetadata && equals(pod.metadata.uid, podMetadata.uid, true) });
             if (matchingPod) {
                 const podStatus = matchingPod.status;
                 if (podStatus.containerStatuses && podStatus.containerStatuses.length > 0) {
-                    const containerStatusForGivenImage = podStatus.containerStatuses.find(status => equals(status.image, imageName));
+                    const containerStatusForGivenImage = podStatus.containerStatuses.find(status => equals(status.image, imageName, true));
                     if (containerStatusForGivenImage) {
                         imageId = containerStatusForGivenImage.imageID;
                     }

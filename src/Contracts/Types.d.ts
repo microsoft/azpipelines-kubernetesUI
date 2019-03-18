@@ -13,10 +13,10 @@ export interface IImageDetails {
     mediaType: string;
     tags: Array<string>;
     layerInfo: Array<IImageLayer>;
-    buildId: number;
+    runId: number;
     buildVersion: string;
-    buildDefinitionName: string;
-    buildDefinitionId: string;
+    pipelineName: string;
+    pipelineId: string;
 }
 
 export interface IImageLayer {

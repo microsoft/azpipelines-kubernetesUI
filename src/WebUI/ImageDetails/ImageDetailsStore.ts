@@ -48,14 +48,14 @@ export class ImageDetailsStore extends StoreBase {
     }
 
     private _setHasImageDetailsData = (payload: { [key: string]: boolean } | undefined): void => {
-        if (payload) {
+        if (payload && Object.keys(this._hasImageDetails).length === 0) {
             this._hasImageDetails = payload;
             this.emit(ImageDetailsEvents.HasImageDetailsEvent, this);
         }
     }
 
     private _setImageDetailsData = (payload: IImageDetails | undefined): void => {
-        if (payload) {
+        if (payload && !this._imageDetails.hasOwnProperty(payload.imageName)) {
             this._imageDetails[payload.imageName] = payload;
             this.emit(ImageDetailsEvents.GetImageDetailsEvent, this);
         }

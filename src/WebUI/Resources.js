@@ -82,7 +82,6 @@ define("Environments/Providers/Kubernetes/Resources", ["require", "exports"], fu
     exports.ImageSizeText = "Image size";
     exports.ImageDetailsHeaderText = "Image details";
     exports.LayersText = "Layers";
-    exports.DirectiveText = "Directive";
-    exports.ArgumentsText = "Arguments";
+    exports.CommandText = "Command";
     exports.SizeText = "Size";
 });

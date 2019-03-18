@@ -3,10 +3,25 @@
 .image-details-content {
     .image-details-header {
         padding-left: 0;
-        padding-bottom: 16px;
+        margin-left: 0;
 
         .image-details-back-button {
             cursor: pointer;
+        }
+    }
+
+    .image-details-card {
+        margin-top: 16px;
+        .image-details-card-header {
+            font-weight: $fontWeightSemiBold;
+        }
+    }
+
+    .image-layers-card {
+        margin-top: 16px;
+
+        .image-layers-card-header {
+            font-weight: $fontWeightSemiBold;
         }
     }
 }

@@ -4,13 +4,22 @@
 */
 
 import { BaseComponent, css } from "@uifabric/utilities";
-import { format } from "azure-devops-ui/Core/Util/String";
+import { format, localeFormat } from "azure-devops-ui/Core/Util/String";
 import { Ago } from "azure-devops-ui/Ago";
 import { LabelGroup, WrappingBehavior } from "azure-devops-ui/Label";
 import { ColumnFill, ITableColumn, renderSimpleCell, SimpleTableCell as renderTableCell, Table } from "azure-devops-ui/Table";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { Link } from "azure-devops-ui/Link";
-import { Card } from "azure-devops-ui/Card";
+import { CustomCard, CardContent } from "azure-devops-ui/Card";
+import { Page } from "azure-devops-ui/Page";
+import {
+    CustomHeader,
+    HeaderTitle,
+    HeaderTitleArea,
+    HeaderTitleRow,
+    TitleSize,
+    HeaderIcon
+} from "azure-devops-ui/Header";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
 import * as Resources from "../Resources";
@@ -19,7 +28,6 @@ import { Utils } from "../Utils";
 import { StoreManager } from "../FluxCommon/StoreManager";
 import { BaseKubeTable } from "../Common/BaseKubeTable";
 import "./ImageDetails.scss";
-import { Header, TitleSize } from "azure-devops-ui/Header";
 import { ImageDetailsStore } from "../ImageDetails/ImageDetailsStore";
 import { IImageDetails, IImageLayer } from "../../Contracts/Types";
 
@@ -35,23 +43,30 @@ export interface IImageDetailsState {
 export class ImageDetails extends BaseComponent<IImageDetailsProperties, IImageDetailsState> {
     public render(): JSX.Element {
         return (
-            <div className="image-details-content">
+            <Page className="image-details-content flex flex-grow">
                 {this._getMainHeading()}
                 {this._getImageDetails()}
                 {this._getImageLayers()}
-            </div>
+            </Page>
         );
     }
 
     private _getMainHeading(): JSX.Element | null {
         const imageDetails = this.props.imageDetails || this._getDummyDataForImageDetails(); // Hard coding till we link data from image service
         return (
-            <Header
-                title={imageDetails.imageName}
-                titleIconProps={{ iconName: "Back", onClick: this.props.onBackButtonClick, className: "image-details-back-button" }}
-                titleSize={TitleSize.Large}
-                className={"image-details-header"}
-            />);
+            <CustomHeader className="image-details-header">
+                <HeaderIcon iconProps={{ iconName: "Back", onClick: this.props.onBackButtonClick, className: "image-details-back-button" }} titleSize={TitleSize.Large} />
+                <HeaderTitleArea>
+                    <HeaderTitleRow>
+                        {
+                            <HeaderTitle className="text-ellipsis" titleSize={TitleSize.Large} >
+                                {imageDetails.imageName}
+                            </HeaderTitle>
+                        }
+                    </HeaderTitleRow>
+                </HeaderTitleArea>
+            </CustomHeader>
+        );
     }
 
     private _getImageDetails(): JSX.Element | null {
@@ -60,15 +75,14 @@ export class ImageDetails extends BaseComponent<IImageDetailsProperties, IImageD
             {
                 id: "key",
                 name: "key",
-                width: new ObservableValue(150),
+                width: 150,
                 className: "image-details-key",
-                minWidth: 100,
                 renderCell: renderSimpleCell
             },
             {
                 id: "value",
                 name: "value",
-                width: new ObservableValue(500),
+                width: -100,
                 className: "image-details-value",
                 minWidth: 400,
                 renderCell: ImageDetails._renderValueCell
@@ -87,23 +101,29 @@ export class ImageDetails extends BaseComponent<IImageDetailsProperties, IImageD
         ]);
 
         return (
-            <Card className="image-details-card depth-16"
-                titleProps={{
-                    text: Resources.ImageDetailsHeaderText,
-                    size: TitleSize.Large
-                }}
-                contentProps={{ contentPadding: false }}>
-                <Table
-                    className="image-details-table"
-                    id={format("image-details-{0}", imageDetails.hash)}
-                    showHeader={false}
-                    showLines={false}
-                    singleClickActivation={false}
-                    itemProvider={tableItems}
-                    pageSize={tableItems.length}
-                    columns={columns}
-                />
-            </Card>
+            <CustomCard className="image-details-card k8s-card-padding flex-grow bolt-card-no-vertical-padding">
+                <CustomHeader>
+                    <HeaderTitleArea>
+                        <HeaderTitleRow>
+                            <HeaderTitle className="image-details-card-header text-ellipsis" titleSize={TitleSize.Medium} >
+                                {Resources.ImageDetailsHeaderText}
+                            </HeaderTitle>
+                        </HeaderTitleRow>
+                    </HeaderTitleArea>
+                </CustomHeader>
+                <CardContent contentPadding={false}>
+                    <Table
+                        className="image-details-table"
+                        id={format("image-details-{0}", imageDetails.hash)}
+                        showHeader={false}
+                        showLines={false}
+                        singleClickActivation={false}
+                        itemProvider={tableItems}
+                        pageSize={tableItems.length}
+                        columns={columns}
+                    />
+                </CardContent>
+            </CustomCard>
         );
     }
 
@@ -139,13 +159,26 @@ export class ImageDetails extends BaseComponent<IImageDetailsProperties, IImageD
     private _getImageLayers(): JSX.Element | null {
         const imageDetails = this.props.imageDetails || this._getDummyDataForImageDetails();
         return (
-            <BaseKubeTable
-                headingText={Resources.LayersText}
-                className={css("list-content", "pl-details", "depth-16")}
-                items={imageDetails.layerInfo}
-                columns={ImageDetails._getImageLayersColumns()}
-                showLines={true}
-            />
+            <CustomCard className="image-layers-card k8s-card-padding flex-grow bolt-card-no-vertical-padding">
+                <CustomHeader>
+                    <HeaderTitleArea>
+                        <HeaderTitleRow>
+                            <HeaderTitle className="image-layers-card-header text-ellipsis" titleSize={TitleSize.Medium} >
+                                {Resources.LayersText}
+                            </HeaderTitle>
+                        </HeaderTitleRow>
+                    </HeaderTitleArea>
+                </CustomHeader>
+                <CardContent contentPadding={false}>
+                    <Table
+                        id="image-layers-table"
+                        itemProvider={new ArrayItemProvider<IImageLayer>(imageDetails.layerInfo)}
+                        columns={ImageDetails._getImageLayersColumns()}
+                        showHeader={true}
+                        showLines={true}
+                    />
+                </CardContent>
+            </CustomCard>
         );
     }
 
@@ -156,26 +189,18 @@ export class ImageDetails extends BaseComponent<IImageDetailsProperties, IImageD
 
         columns.push({
             id: "image-layer-directive-col",
-            name: Resources.DirectiveText,
-            width: 400,
+            name: Resources.CommandText,
+            width: -82,
+            minWidth: 100,
             headerClassName: headerColumnClassName,
             className: columnContentClassName,
-            renderCell: ImageDetails._renderLayersDirectiveCell
-        });
-
-        columns.push({
-            id: "image-layer-args-col",
-            name: Resources.ArgumentsText,
-            width: -100,
-            headerClassName: headerColumnClassName,
-            className: columnContentClassName,
-            renderCell: ImageDetails._renderLayersArgumentsCell
+            renderCell: ImageDetails._renderLayersCommandCell
         });
 
         columns.push({
             id: "image-layer-size-col",
             name: Resources.SizeText,
-            width: 256,
+            width: 172,
             headerClassName: headerColumnClassName,
             className: columnContentClassName,
             renderCell: ImageDetails._renderLayersSizeCell
@@ -184,7 +209,8 @@ export class ImageDetails extends BaseComponent<IImageDetailsProperties, IImageD
         columns.push({
             id: "image-layer-created-col",
             name: Resources.AgeText,
-            width: -100,
+            width: -18,
+            minWidth: 100,
             headerClassName: headerColumnClassName,
             className: columnContentClassName,
             renderCell: ImageDetails._renderLayersAgeCell
@@ -193,22 +219,16 @@ export class ImageDetails extends BaseComponent<IImageDetailsProperties, IImageD
         return columns;
     }
 
-    private static _renderLayersDirectiveCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IImageLayer>, imageLayer: IImageLayer): JSX.Element {
-        const textToRender = imageLayer.directive || "";
-        const itemToRender = BaseKubeTable.renderColumn(textToRender, BaseKubeTable.defaultColumnRenderer);
-        return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
-    }
-
-    private static _renderLayersArgumentsCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IImageLayer>, imageLayer: IImageLayer): JSX.Element {
-        const textToRender = imageLayer.arguments || "";
-        const itemToRender = BaseKubeTable.renderColumn(textToRender, BaseKubeTable.defaultColumnRenderer);
+    private static _renderLayersCommandCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IImageLayer>, imageLayer: IImageLayer): JSX.Element {
+        const textToRender = localeFormat("{0}: {1}", imageLayer.directive || "", imageLayer.arguments || "");
+        const itemToRender = BaseKubeTable.defaultColumnRenderer(textToRender);
         return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
     private static _renderLayersSizeCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IImageLayer>, imageLayer: IImageLayer): JSX.Element {
         // Currently size data is not present in imageLayer
         const textToRender = "";
-        const itemToRender = BaseKubeTable.renderColumn(textToRender, BaseKubeTable.defaultColumnRenderer);
+        const itemToRender = BaseKubeTable.defaultColumnRenderer(textToRender);
         return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
@@ -235,10 +255,10 @@ export class ImageDetails extends BaseComponent<IImageDetailsProperties, IImageD
                 directive: "file",
                 arguments: "9ace3ce43db1505091c11d15edce7b520cfb598d38402be254a3024146920859"
             }],
-            buildId: 1,
+            runId: 1,
             buildVersion: "",
-            buildDefinitionName: "",
-            buildDefinitionId: "1"
+            pipelineName: "",
+            pipelineId: "1"
         }
     }
 

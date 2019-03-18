@@ -81,6 +81,5 @@ export declare const RegistryText: string;
 export declare const ImageSizeText: string;
 export declare const ImageDetailsHeaderText: string;
 export declare const LayersText: string;
-export declare const DirectiveText: string;
-export declare const ArgumentsText: string;
+export declare const CommandText: string;
 export declare const SizeText: string;

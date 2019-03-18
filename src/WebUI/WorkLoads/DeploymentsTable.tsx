@@ -32,6 +32,7 @@ import { ImageDetailsActionsCreator } from "../ImageDetails/ImageDetailsActionsC
 import { ImageDetailsStore } from "../ImageDetails/ImageDetailsStore";
 import { IImageDetails } from "../../Contracts/Types";
 import { PodsStore } from "../Pods/PodsStore";
+import { Tooltip } from "azure-devops-ui/TooltipEx";
 
 const replicaSetNameKey: string = "replicaSet-col";
 const podsKey: string = "pods-col";
@@ -216,7 +217,7 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
     }
 
 
-    private _getColumns =(): ITableColumn<IDeploymentReplicaSetItem>[] =>{
+    private _getColumns = (): ITableColumn<IDeploymentReplicaSetItem>[] => {
         let columns: ITableColumn<IDeploymentReplicaSetItem>[] = [];
         const headerColumnClassName: string = "kube-col-header";
         const columnContentClassname: string = "list-col-content";
@@ -276,19 +277,21 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
         return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
-    private _renderImageCell=(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IDeploymentReplicaSetItem>, deployment: IDeploymentReplicaSetItem): JSX.Element=> {
+    private _renderImageCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IDeploymentReplicaSetItem>, deployment: IDeploymentReplicaSetItem): JSX.Element => {
         const textToRender: string = deployment.imageDisplayText;
         const imageId: string = deployment.imageId;
-        // HardCoding hasImageDetails true for the time being, Should change it once we integrate with ImageService
+        // ToDo :: HardCoding hasImageDetails true for the time being, Should change it once we integrate with ImageService
+        // ToDo: Revisit link paddings
         //const hasImageDetails: boolean = this._hasImageDetails && this._hasImageDetails.hasOwnProperty(firstImageName) ? this._hasImageDetails[firstImageName] : false;
         const hasImageDetails = true;
-        const itemToRender = hasImageDetails ?
-            (<Link
-                className="fontSizeM text-ellipsis bolt-table-link bolt-table-inline-link"
-                onClick={() => this._onImageClick(this.props.imageService, imageId)}>
-                {textToRender || ""}
-            </Link>) :
-            BaseKubeTable.renderColumn(textToRender || "", BaseKubeTable.defaultColumnRenderer, colDataClassName);
+        const itemToRender =
+            <Tooltip text={textToRender} overflowOnly>
+                <Link
+                    className="fontSizeM text-ellipsis bolt-table-link bolt-table-inline-link bolt-link"
+                    onClick={() => hasImageDetails && this._onImageClick(this.props.imageService, imageId)}>
+                    {textToRender || ""}
+                </Link>
+            </Tooltip>;
         return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
