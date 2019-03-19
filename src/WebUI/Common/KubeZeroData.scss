@@ -2,25 +2,25 @@
     width: 100%;
 }
 
-/* deployments/services are zero */
+// deployments/services are zero
 .k8s-zero-data {
     margin-bottom: 100px;
 }
 
-/* only deployment are zero */
+// only deployment are zero
 .k8s-zero-workloads-data {
     margin-bottom: 80px;
     margin-top: 80px;
 }
 
-/* only services are zero */
+// only services are zero
 .k8s-zero-services-data,
-/* zero associated pods */
+// zero associated pods
 .k8s-zero-service-pods-data {
     margin-bottom: 80px;
 }
 
-/* filter results are zero */
+// filter results are zero
 .k8s-zero-filter-data {
     margin: 106px 0px;
 }
