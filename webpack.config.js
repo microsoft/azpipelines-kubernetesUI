@@ -61,8 +61,20 @@ module.exports = {
     child_process: 'empty',
     net: 'empty'
   },
-  externals: {
-    react: 'react',
-    "react-dom": 'react-dom'
-  }
+  externals: [
+    function(context, request, callback) {
+      if (request === "react" || request === "react-dom") {
+        return callback(null, request);
+      }
+      else if (request.startsWith("azure-devops-ui/Core")) {
+        return callback(null, "VSS" + request.substr(15));
+      }
+      else if (request.startsWith("azure-devops-ui")) {
+        return callback(null, "VSSUI" + request.substr(15));
+      }
+      else {
+        return callback();
+      }
+    }
+  ]
 }
