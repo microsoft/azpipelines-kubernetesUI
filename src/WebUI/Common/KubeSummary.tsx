@@ -3,52 +3,51 @@
     Licensed under the MIT license.
 */
 
-import { V1DaemonSet, V1ObjectMeta, V1Pod, V1PodTemplateSpec, V1ReplicaSet, V1StatefulSet, V1ReplicaSetList, V1StatefulSetList, V1DaemonSetList, V1ServiceList, V1Service } from "@kubernetes/client-node";
-import { BaseComponent, css } from "@uifabric/utilities";
+import { V1DaemonSet, V1ObjectMeta, V1Pod, V1PodTemplateSpec, V1ReplicaSet, V1StatefulSet } from "@kubernetes/client-node";
+import { BaseComponent } from "@uifabric/utilities";
+import { ConditionalChildren } from "azure-devops-ui/ConditionalChildren";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { localeFormat } from "azure-devops-ui/Core/Util/String";
+import { Header, TitleSize } from "azure-devops-ui/Header";
 import { HeaderCommandBarWithFilter } from "azure-devops-ui/HeaderCommandBar";
-import { Tab, TabBar, TabContent } from "azure-devops-ui/Tabs";
-import { ConditionalChildren } from "azure-devops-ui/ConditionalChildren";
+import { Page } from "azure-devops-ui/Page";
 import { Surface, SurfaceBackground } from "azure-devops-ui/Surface";
-import { Page } from "azure-devops-ui/Page"
+import { Tab, TabBar } from "azure-devops-ui/Tabs";
 import { Filter, FILTER_CHANGE_EVENT, IFilterState } from "azure-devops-ui/Utilities/Filter";
+import { Action, createBrowserHistory, History, Location, UnregisterCallback } from "history";
+import * as queryString from "query-string";
 import * as React from "react";
-import { IKubeService, IImageService, KubeImage } from "../../Contracts/Contracts";
+import { IImageService, IKubeService, KubeImage } from "../../Contracts/Contracts";
 import { IImageDetails } from "../../Contracts/Types";
-import { SelectedItemKeys, ServicesEvents, WorkloadsEvents, HyperLinks } from "../Constants";
+import { SelectedItemKeys, ServicesEvents, WorkloadsEvents } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
+import { ImageDetails } from "../ImageDetails/ImageDetails";
+import { KubeFactory } from "../KubeFactory";
 import { PodOverview } from "../Pods/PodOverview";
 import * as Resources from "../Resources";
+import { SelectionActionsCreator } from "../Selection/SelectionActionCreator";
+import { ISelectionPayload } from "../Selection/SelectionActions";
 import { SelectionStore } from "../Selection/SelectionStore";
 import { ServiceDetails } from "../Services/ServiceDetails";
 import { ServicesPivot } from "../Services/ServicesPivot";
 import { ServicesStore } from "../Services/ServicesStore";
+import { ServicesTable } from "../Services/ServicesTable";
 import { IServiceItem, IVssComponentProperties } from "../Types";
+import { Utils } from "../Utils";
 import { WorkloadDetails } from "../Workloads/WorkloadDetails";
 import { WorkloadsActionsCreator } from "../Workloads/WorkloadsActionsCreator";
 import { WorkloadsPivot } from "../Workloads/WorkloadsPivot";
 import { WorkloadsStore } from "../Workloads/WorkloadsStore";
 import "./KubeSummary.scss";
-import { KubeZeroData, IKubeZeroDataProps } from "./KubeZeroData";
-import { Utils } from "../Utils";
-import { Header, TitleSize } from "azure-devops-ui/Header";
-import { createBrowserHistory, History, UnregisterCallback, Action, Location } from "history";
-import * as queryString from "query-string";
-import { ServicesTable } from "../Services/ServicesTable";
-import { KubeFactory } from "../KubeFactory";
-import { Factory } from "../FluxCommon/Factory";
-import { ImageDetails } from "../ImageDetails/ImageDetails";
-import { SelectionActionsCreator } from "../Selection/SelectionActionCreator";
-import { ISelectionPayload } from "../Selection/SelectionActions";
+import { KubeZeroData } from "./KubeZeroData";
 
 const workloadsPivotItemKey: string = "workloads";
 const servicesPivotItemKey: string = "services";
 const workloadsFilterToggled = new ObservableValue<boolean>(false);
 const servicesFilterToggled = new ObservableValue<boolean>(false);
 
-//todo: refactor filter properties to respective resource type components
+// todo: refactor filter properties to respective resource type components
 export interface IKubernetesContainerState {
     namespace?: string;
     selectedPivotKey?: string;
@@ -131,7 +130,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
     }
 
     public componentDidMount(): void {
-        // This needs to be called after the data is loaded so that we can decide which object is selected as per the URL
+        // this needs to be called after the data is loaded so that we can decide which object is selected as per the URL
         setTimeout(() => {
             this._updateStateFromHistory(queryString.parse(this._historyService.location.search));
             this._historyUnlisten = this._historyService.listen(this._onHistoryChanged);
@@ -164,7 +163,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         else {
             this.setState({ selectedItemType: "", selectedItem: undefined, showSelectedItem: false });
         }
-    };
+    }
 
     private _onHistoryChanged = (location: Location, action: Action): void => {
         let routeValues: queryString.OutputParams = queryString.parse(location.search);
@@ -179,12 +178,12 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
     }
 
     private _onWorkloadsFilterApplied = (currentState: IFilterState) => {
-        this.setState({})
-    };
+        this.setState({});
+    }
 
     private _onSvcFilterApplied = (currentState: IFilterState) => {
-        this.setState({})
-    };
+        this.setState({});
+    }
 
     private _onDataFound = (): void => {
         const workloadSize = this._workloadsStore.getWorkloadSize();
@@ -196,40 +195,47 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
     }
 
     private _getMainContent(): JSX.Element {
+        const pageContent = this.state.resourceSize > 0 ? this._getMainPivot() : this._getZeroData();
+        // must be short syntax or React.Fragment, do not use div here to include heading and content.
         return (
-            <div className="main-content">
-                {this._getMainHeading()}
-                {this.state.resourceSize > 0 ? this._getMainPivot() : this._getZeroData()}
-            </div>
+            <>
+                <Header
+                    title={this.props.title}
+                    titleSize={TitleSize.Large}
+                    className={"content-main-heading"}
+                    description={localeFormat(Resources.NamespaceHeadingText, this.state.namespace || "")}
+                />
+                {pageContent}
+            </>
         );
     }
 
-    private _getMainHeading(): JSX.Element | null {
-        return (
-            <Header
-                title={this.props.title}
-                titleSize={TitleSize.Large}
-                className={"content-main-heading"}
-                description={localeFormat(Resources.NamespaceHeadingText, this.state.namespace || "")}
-            />);
-    }
-
     private _getMainPivot(): JSX.Element {
+        const commonProps = {
+            kubeService: this.props.kubeService,
+            namespace: this.state.namespace
+        };
+
+        const tabContent = this.state.selectedPivotKey === servicesPivotItemKey
+            ? <ServicesPivot {...commonProps} filter={this.state.svcFilter} filterToggled={servicesFilterToggled} />
+            : <WorkloadsPivot {...commonProps} filter={this.state.workloadsFilter} filterToggled={workloadsFilterToggled} />;
+
+        // must be short syntax or React.Fragment, do not use div here to include heading and content.
         return (
-            <div className="content-with-pivot">
+            <>
                 <TabBar
-                    onSelectedTabChanged={(key: string) => { this.setState({ selectedPivotKey: key }); }}
-                    orientation={0}
                     selectedTabId={this.state.selectedPivotKey || workloadsPivotItemKey}
-                    renderAdditionalContent={() => { return this._getFiterHeaderBar(); }}>
+                    onSelectedTabChanged={(key: string) => { this.setState({ selectedPivotKey: key }); }}
+                    renderAdditionalContent={() => { return this._getFilterHeaderBar(); }}
+                    disableSticky={false}
+                >
                     <Tab name={Resources.PivotWorkloadsText} id={workloadsPivotItemKey} />
                     <Tab name={Resources.PivotServiceText} id={servicesPivotItemKey} />
                 </TabBar>
-                <TabContent>
-                    {this.state.selectedPivotKey === servicesPivotItemKey && <ServicesPivot namespace={this.state.namespace} filter={this.state.svcFilter} filterToggled={servicesFilterToggled} />}
-                    {this.state.selectedPivotKey === workloadsPivotItemKey && <WorkloadsPivot namespace={this.state.namespace} filter={this.state.workloadsFilter} filterToggled={workloadsFilterToggled} />}
-                </TabContent>
-            </div>
+                <div className="page-content page-content-top k8s-pivot-content">
+                    {tabContent}
+                </div>
+            </>
         );
     }
 
@@ -245,13 +251,16 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
     }
 
     private _getWorkoadPodsViewComponent(parentMetaData: V1ObjectMeta, podTemplate: V1PodTemplateSpec, parentKind: string, currentScheduledPods: number, desiredPods: number): JSX.Element | null {
-        const statusProps = Utils._getPodsStatusProps(currentScheduledPods, desiredPods);
+        const statusProps = Utils.getPodsStatusProps(currentScheduledPods, desiredPods);
 
-        return (<WorkloadDetails
-            parentMetaData={parentMetaData}
-            podTemplate={podTemplate}
-            parentKind={parentKind}
-            statusProps={statusProps} />);
+        return (
+            <WorkloadDetails
+                parentMetaData={parentMetaData}
+                podTemplate={podTemplate}
+                parentKind={parentKind}
+                statusProps={statusProps}
+            />
+        );
     }
 
     private _onSelectionStoreChanged = () => {
@@ -265,9 +274,9 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
 
     private _setSelectedKeyPodsViewMap = () => {
         this._selectedItemViewMap[SelectedItemKeys.StatefulSetKey] = (item) => this._getWorkoadPodsViewComponent(item.metadata, item.spec && item.spec.template, item.kind || "StatefulSet", item.status.currentReplicas, item.status.replicas);
-        this._selectedItemViewMap[SelectedItemKeys.ServiceItemKey] = (item) => { return <ServiceDetails service={item} /> };
+        this._selectedItemViewMap[SelectedItemKeys.ServiceItemKey] = (item) => { return <ServiceDetails service={item} parentKind={item.kind || "Service"} /> };
         this._selectedItemViewMap[SelectedItemKeys.DaemonSetKey] = (item) => this._getWorkoadPodsViewComponent(item.metadata, item.spec && item.spec.template, item.kind || "DaemonSet", item.status.currentNumberScheduled, item.status.desiredNumberScheduled);
-        this._selectedItemViewMap[SelectedItemKeys.OrphanPodKey] = (item) => { return <PodOverview pod={item} />; }
+        this._selectedItemViewMap[SelectedItemKeys.OrphanPodKey] = (item) => { return <PodOverview pod={item} />; };
         this._selectedItemViewMap[SelectedItemKeys.ReplicaSetKey] = (item) => this._getWorkoadPodsViewComponent(item.metadata, item.spec && item.spec.template, item.kind || "ReplicaSet", item.status.availableReplicas, item.status.replicas);
         this._selectedItemViewMap[SelectedItemKeys.ImageDetailsKey] = (item) => { return <ImageDetails imageDetails={item} onBackButtonClick={this._setSelectionStateFalse} /> }
     }
@@ -282,42 +291,40 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         this._selectionActionCreator.selectItem(payload);
     }
 
-    private _populateObjectFinder() {
-        this._objectFinder[SelectedItemKeys.ReplicaSetKey] = (uid) => (this._workloadsStore.getState().replicaSetList as V1ReplicaSetList).items.filter(r => r.metadata.uid == uid)[0];
-        this._objectFinder[SelectedItemKeys.StatefulSetKey] = (uid) => (this._workloadsStore.getState().statefulSetList as V1StatefulSetList).items.filter(r => r.metadata.uid == uid)[0];
-        this._objectFinder[SelectedItemKeys.DaemonSetKey] = (uid) => (this._workloadsStore.getState().daemonSetList as V1DaemonSetList).items.filter(r => r.metadata.uid == uid)[0];
+    private _populateObjectFinder(): void {
+        this._objectFinder[SelectedItemKeys.ReplicaSetKey] = (uid) => KubeSummary._getFilteredFirstObject(this._workloadsStore.getState().replicaSetList, uid);
+        this._objectFinder[SelectedItemKeys.StatefulSetKey] = (uid) => KubeSummary._getFilteredFirstObject(this._workloadsStore.getState().statefulSetList, uid);
+        this._objectFinder[SelectedItemKeys.DaemonSetKey] = (uid) => KubeSummary._getFilteredFirstObject(this._workloadsStore.getState().daemonSetList, uid);
         this._objectFinder[SelectedItemKeys.ServiceItemKey] = (uid) => {
-            let filteredServices: V1Service[] = (this._servicesStore.getState().serviceList as V1ServiceList).items.filter(r => r.metadata.uid == uid);
+            const filteredServices = KubeSummary._getFilteredFirstObject(this._servicesStore.getState().serviceList, uid);
             return ServicesTable.getServiceItems(filteredServices)[0];
-        }
+        };
     }
 
-    private _getFiterHeaderBar(): JSX.Element {
+    private static _getFilteredFirstObject(itemList: any, uid: string): any {
+        itemList = (itemList || {}) as any;
+        const filteredItems = (itemList.items || []).filter(r => r.metadata.uid === uid);
+        return filteredItems && filteredItems.length > 0 ? filteredItems[0] : {} as any;
+    }
+
+    private _getFilterHeaderBar(): JSX.Element {
         return (
-            <div>
+            <>
                 <ConditionalChildren renderChildren={!this.state.selectedPivotKey || this.state.selectedPivotKey === workloadsPivotItemKey}>
                     <HeaderCommandBarWithFilter filter={this.state.workloadsFilter} filterToggled={workloadsFilterToggled} items={[]} />
                 </ConditionalChildren>
                 <ConditionalChildren renderChildren={this.state.selectedPivotKey === servicesPivotItemKey}>
                     <HeaderCommandBarWithFilter filter={this.state.svcFilter} filterToggled={servicesFilterToggled} items={[]} />
                 </ConditionalChildren>
-            </div>
+            </>
         );
     }
 
     private _getZeroData(): JSX.Element {
-        const zeroDataProps: IKubeZeroDataProps = {
-            imagePath: KubeFactory.getImageLocation(KubeImage.zeroData),
-            hyperLink: HyperLinks.WorkloadsLink,
-            hyperLinkLabel: Resources.LearnMoreKubeResourceText,
-            descriptionText: Resources.DeployKubeResourceText,
-            primaryText: Resources.StartUsingKubeResourceText,
-            className: "zerod-side-align-content"
-        }
-        return (KubeZeroData.getDefaultZeroData(zeroDataProps));
+        return KubeZeroData.getDefaultZeroData();
     }
 
-    private _initializeFactorySettings() {
+    private _initializeFactorySettings(): void {
         KubeFactory.markTTI = this.props.markTTI || KubeFactory.markTTI;
         KubeFactory.getImageLocation = this.props.getImageLocation || KubeFactory.getImageLocation;
     }

@@ -4,26 +4,21 @@
 */
 
 import { V1ServiceList } from "@kubernetes/client-node";
-import { BaseComponent } from "@uifabric/utilities";
+import { BaseComponent, css } from "@uifabric/utilities";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { Filter, IFilterItemState, IFilterState } from "azure-devops-ui/Utilities/Filter";
 import * as React from "react";
-import { IKubeService, KubeImage } from "../../Contracts/Contracts";
-import { KubeZeroData, IKubeZeroDataProps } from "../Common//KubeZeroData";
 import { NameKey, TypeKey } from "../Common/KubeFilterBar";
-import "../Common/KubeSummary.scss";
-import { ServicesEvents, HyperLinks } from "../Constants";
+import { KubeSummary } from "../Common/KubeSummary";
+import { KubeZeroData } from "../Common/KubeZeroData";
+import { ServicesEvents } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
-import * as Resources from "../Resources";
 import { ServicesTable } from "../Services/ServicesTable";
 import { IVssComponentProperties } from "../Types";
 import { ServicesActionsCreator } from "./ServicesActionsCreator";
 import { ServicesFilterBar } from "./ServicesFilterBar";
 import { ServicesStore } from "./ServicesStore";
-import "./ServicesPivot.scss";
-import { KubeFactory } from "../KubeFactory";
-import { KubeSummary } from "../Common/KubeSummary";
 
 export interface IServicesPivotState {
     serviceList?: V1ServiceList;
@@ -52,10 +47,12 @@ export class ServicesPivot extends BaseComponent<IServicesPivotProps, IServicesP
 
     public render(): React.ReactNode {
         return (
-            <div className="services-pivot">
+            <>
                 {this._getFilterBar()}
-                {this._getContent()}
-            </div>
+                <div className={css("services-pivot-data", "k8s-pivot-data")}>
+                    {this._getContent()}
+                </div>
+            </>
         );
     }
 
@@ -69,8 +66,8 @@ export class ServicesPivot extends BaseComponent<IServicesPivotProps, IServicesP
     }
 
     private _getContent(): JSX.Element {
-        const serivceSize: number = this.state.serviceList && this.state.serviceList.items ? this.state.serviceList.items.length : 0;
-        return (serivceSize === 0 ? this._getZeroData() :
+        const serviceSize: number = this.state.serviceList && this.state.serviceList.items ? this.state.serviceList.items.length : 0;
+        return (serviceSize === 0 ? this._getZeroData() :
             <ServicesTable
                 serviceList={this.state.serviceList || {} as V1ServiceList}
                 nameFilter={this._getNameFilterValue()}
@@ -80,6 +77,7 @@ export class ServicesPivot extends BaseComponent<IServicesPivotProps, IServicesP
 
     private _getFilterBar(): JSX.Element {
         return (<ServicesFilterBar
+            className={css("services-pivot-filter", "k8s-pivot-filter")}
             serviceList={this.state.serviceList || {} as V1ServiceList}
             filter={this.props.filter}
             filterToggled={this.props.filterToggled}
@@ -99,16 +97,8 @@ export class ServicesPivot extends BaseComponent<IServicesPivotProps, IServicesP
         return selections;
     }
 
-    private _getZeroData(): JSX.Element{
-        const zeroDataProps: IKubeZeroDataProps = {
-            imagePath: KubeFactory.getImageLocation(KubeImage.zeroWorkloads),
-            hyperLink: HyperLinks.ServicesLink,
-            hyperLinkLabel: Resources.LearnMoreText,
-            primaryText: Resources.DeployServices,
-            descriptionText: Resources.StartingUsingServiceText,
-            className: "zerod-side-align-content"
-        }
-        return (KubeZeroData.getDefaultZeroData(zeroDataProps));
+    private _getZeroData(): JSX.Element {
+        return KubeZeroData.getServicesZeroData();
     }
 
     private _store: ServicesStore;

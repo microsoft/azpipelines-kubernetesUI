@@ -1,13 +1,7 @@
-.replica-with-pod-list {
-    margin-top: 8px;
-
-    &.first-deployment {
-        margin-top: 0px;
-    }
+.deployment-tbl-heading-labels {
+    padding-left: 8px;
 }
 
-
-.deployment-heading-labels {
-    display: inline-block;
-    padding-left: 8px;
+.deployment-replica-with-pod-list .deployment-replicaset-table {
+    padding-top: 10px;
 }

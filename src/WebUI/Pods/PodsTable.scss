@@ -1,11 +1,3 @@
-@import "../Common/Common.scss";
-
-.pl-details {
-    margin-top: 8px
-}
-
-.pods-table {
-    .pods-table-subtext {
-        font-weight: $fontWeightSemiBold;
-    }
+.pods-associated .pod-associated-table {
+    padding-top: 10px;
 }

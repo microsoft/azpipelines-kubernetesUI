@@ -1,27 +1,38 @@
-@import "../Common/Common.scss";
-
-.image-details-content {
-    .image-details-header {
-        padding-left: 0;
-        margin-left: 0;
-
-        .image-details-back-button {
-            cursor: pointer;
-        }
+// following items are not needed ideally
+.list-col-content {
+    &.two-lines {
+        line-height: 30px;
+        align-items: flex-start;
+        width: 100%;
     }
+}
 
-    .image-details-card {
-        margin-top: 16px;
-        .image-details-card-header {
-            font-weight: $fontWeightSemiBold;
-        }
+.kube-status-container {
+    display: flex;
+    align-items: center;
+
+    .kube-status-desc {
+        margin-left: 6px;
+        width: 100%;
     }
+}
 
-    .image-layers-card {
-        margin-top: 16px;
+.item-top-padding {
+    margin-top: 8px;
+}
+// end of above common css copied
 
-        .image-layers-card-header {
-            font-weight: $fontWeightSemiBold;
-        }
-    }
+.image-details-content .image-details-header .image-details-back-button {
+    cursor: pointer;
+}
+
+// todo :: once summary card is available we should remove this
+.image-details-key .image-o-k-col-content,
+.image-details-value .image-o-v-col-content {
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+.image-details-card .image-full-details-table {
+    padding-top: 13px;
 }

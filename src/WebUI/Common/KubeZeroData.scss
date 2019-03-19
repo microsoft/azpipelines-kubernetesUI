@@ -1,7 +1,26 @@
-@import "./Common.scss";
+.k8s-zero-data-max-width {
+    width: 100%;
+}
 
-.zerod-primary-text {
-    font-weight: $fontWeightSemiBold;
-    font-size: $fontSizeLL;
-    line-height: 40px;
+// deployments/services are zero
+.k8s-zero-data {
+    margin-bottom: 100px;
+}
+
+// only deployment are zero
+.k8s-zero-workloads-data {
+    margin-bottom: 80px;
+    margin-top: 80px;
+}
+
+// only services are zero
+.k8s-zero-services-data,
+// zero associated pods
+.k8s-zero-service-pods-data {
+    margin-bottom: 80px;
+}
+
+// filter results are zero
+.k8s-zero-filter-data {
+    margin: 106px 0px;
 }

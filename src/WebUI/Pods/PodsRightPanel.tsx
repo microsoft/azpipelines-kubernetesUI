@@ -10,10 +10,9 @@ import * as React from "react";
 import * as Resources from "../Resources";
 import { PodsRightPanelTabsKeys } from "../Constants";
 import { IVssComponentProperties } from "../Types";
-import "./PodsRightPanel.scss";
-import "../Common/Webplatform.scss";
 import { PodOverview } from "./PodOverview";
 import { Header, IHeaderProps, TitleSize } from "azure-devops-ui/Header";
+import { Page } from "azure-devops-ui/Page";
 
 export interface IPodRightPanelProps extends IVssComponentProperties {
     pod: V1Pod;
@@ -33,7 +32,7 @@ export class PodsRightPanel extends BaseComponent<IPodRightPanelProps, IPodsRigh
 
     public render(): JSX.Element {
         return (
-            <div className="pods-right-panel-container">
+            <Page className="pods-right-panel-container flex flex-grow">
                 {this._getHeader()}
                 <TabBar
                     className={"pods-right-tab-bar"}
@@ -41,27 +40,23 @@ export class PodsRightPanel extends BaseComponent<IPodRightPanelProps, IPodsRigh
                     onSelectedTabChanged={this._onSelectedTabChanged}
                     tabSize={TabSize.Tall}
                 >
-
                     <Tab
                         name={Resources.OverviewText}
                         id={PodsRightPanelTabsKeys.PodsDetailsKey}
                     />
-
                     <Tab
                         name={Resources.LogsText}
                         id={PodsRightPanelTabsKeys.PodsLogsKey}
                     />
-
                     <Tab
                         name={Resources.YamlText}
                         id={PodsRightPanelTabsKeys.PodsYamlKey}
                     />
                 </TabBar>
-
-                <div className="pods-right-tab-content flex-column flex-grow">
+                <div className="pod-details-right-content page-content page-content-top">
                     {this._getTabContent()}
                 </div>
-            </div>
+            </Page>
         );
     }
 

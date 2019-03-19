@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import { ITableComponentProperties, BaseKubeTable } from "../../../src/WebUI/Common/BaseKubeTable";
+import { ITableComponentProperties, KubeCardWithTable } from "../../../src/WebUI/Common/KubeCardWithTable";
 import { shallow } from "../../TestCore";
 
 describe("ListComponent component tests", () => {
@@ -12,7 +12,7 @@ describe("ListComponent component tests", () => {
             onRenderItemColumn: () => null
         };
 
-        const wrapper = shallow(<BaseKubeTable {...props} />);
+        const wrapper = shallow(<KubeCardWithTable {...props} />);
         const heading = wrapper.find("HeaderTitle");
         expect(!!heading && heading.length > 0).toBeTruthy();
     });

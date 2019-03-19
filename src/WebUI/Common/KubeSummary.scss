@@ -1,39 +1,20 @@
-@import "azure-devops-ui/Core/_platformCommon.scss";
-
-.overflow-ellipsis {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    word-wrap: normal;
-}
-
 .kubernetes-container {
-    width: 100%;
-    padding: 20px;
-
-    .content-main-heading {
-        padding-left: 0px;
+    // cards have margins
+    .k8s-card-padding+.k8s-card-padding {
+        margin-top: 16px;
     }
 
-    .sub-heading {
-        color: $secondary-text;
-        font-size: $fontSizeM;
-    }
+    // cards are sibling
+    .k8s-pivot-content {
 
-    .sub-heading2 {
-        color: $secondary-text;
-        font-size: $fontSizeMS;
-    }
+        // filter is immediate element
+        &> .k8s-pivot-filter {
+            margin-top: 0px;
 
-    .content-with-pivot .item-padding {
-        padding-top: 8px;
+            // filter and data are sibling
+            &+ .k8s-pivot-data {
+                padding-top: 8px;
+            }
+        }
     }
-
-    /* We require the first tab to be aligned with the card.
-    Since Tab element does not support className as a prop, we cannot set a particular class that applies only to first tab
-    Hence using id of first tab to set its padding
-    */
-     #tab-workloads {
-         padding-left: 0px;
-     }
 }

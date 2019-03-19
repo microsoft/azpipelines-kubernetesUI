@@ -1,20 +1,3 @@
-.s-details {
-    margin-top: 8px;
-    width: auto;
-
-    .kube-simple-cell .s-value {
-        padding-left: 16px;
-    }
-
-    .s-details-label {
-        box-sizing: border-box;
-        width: 100%;
-    }
-}
-
-.s-de-heading {
-    padding-left: 8px;
-    &.content {
-        padding: 0px;
-    }
+.service-details-card .service-full-details-table {
+    padding-top: 10px;
 }

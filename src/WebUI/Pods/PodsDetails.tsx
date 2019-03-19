@@ -15,6 +15,8 @@ import { PodsRightPanel } from "./PodsRightPanel";
 export interface IPodsDetailsProperties extends IVssComponentProperties {
     pods: V1Pod[];
     parentName: string;
+    selectedPod?: V1Pod;
+    parentKind: string;
     onBackButtonClick?: () => void;
 }
 
@@ -26,7 +28,7 @@ export class PodsDetails extends BaseComponent<IPodsDetailsProperties, IPodsDeta
     constructor(props: IPodsDetailsProperties) {
         super(props, {});
         this.state = {
-            selectedPod: null
+            selectedPod: this.props.selectedPod || null
         };
     }
 
@@ -40,6 +42,8 @@ export class PodsDetails extends BaseComponent<IPodsDetailsProperties, IPodsDeta
             <PodsLeftPanel
                 pods={this.props.pods}
                 parentName={this.props.parentName}
+                parentKind={this.props.parentKind}
+                selectedPodName={selectedPod ? selectedPod.metadata.name : ""}
                 onSelectionChange={this._onPodSelectionChange}
                 onBackButtonClick={this.props.onBackButtonClick} />
         );
@@ -56,6 +60,7 @@ export class PodsDetails extends BaseComponent<IPodsDetailsProperties, IPodsDeta
                 minFixedSize={this._initialFixedSize}
                 onRenderFarElement={() => rightPanel}
                 onRenderNearElement={() => leftPanel}
+                nearElementClassName="pods-details-left-pane"
             />);
     }
 

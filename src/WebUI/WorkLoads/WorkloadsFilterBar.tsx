@@ -7,7 +7,6 @@ import { BaseComponent } from "@uifabric/utilities";
 import * as React from "react";
 import * as Resources from "../Resources";
 import { IVssComponentProperties } from "../Types";
-import "../Common/KubeSummary.scss";
 import { Filter } from "azure-devops-ui/Utilities/Filter";
 import { KubeFilterBar } from "../Common/KubeFilterBar";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
@@ -21,7 +20,7 @@ export interface IWorkloadsFilterBarProps extends IVssComponentProperties {
 export class WorkloadsFilterBar extends BaseComponent<IWorkloadsFilterBarProps> {
     public render(): React.ReactNode {
         return (<KubeFilterBar filter={this.props.filter}
-            keywordPlaceHolder={Resources.WorkloadsFilterText}
+            keywordPlaceHolder={Resources.WorkloadText.toLocaleLowerCase()} // lowercase to show in filter
             pickListPlaceHolder={Resources.KindText}
             pickListItemsFn={this._pickListItems}
             listItemsFn={this._listItems}

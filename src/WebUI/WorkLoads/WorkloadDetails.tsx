@@ -3,37 +3,35 @@
     Licensed under the MIT license.
 */
 
+import { V1ObjectMeta, V1Pod, V1PodTemplateSpec } from "@kubernetes/client-node";
 import { BaseComponent } from "@uifabric/utilities";
-import { localeFormat } from "azure-devops-ui/Core/Util/String";
-import { LabelGroup, WrappingBehavior } from "azure-devops-ui/Label";
-import { ITableColumn } from "azure-devops-ui/Table";
+import { CardContent, CustomCard } from "azure-devops-ui/Card";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
+import { localeFormat } from "azure-devops-ui/Core/Util/String";
+import { CustomHeader, HeaderDescription, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
+import { Page } from "azure-devops-ui/Page";
+import { IStatusProps } from "azure-devops-ui/Status";
+import { ITableColumn, Table } from "azure-devops-ui/Table";
 import * as Date_Utils from "azure-devops-ui/Utilities/Date";
+import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
+import { IImageDetails } from "../../Contracts/Types";
+import { defaultColumnRenderer, renderTableCell } from "../Common/KubeCardWithTable";
+import { KubeZeroData } from "../Common/KubeZeroData";
+import { PageTopHeader } from "../Common/PageTopHeader";
+import { Tags } from "../Common/Tags";
+import { StoreManager } from "../FluxCommon/StoreManager";
+import { ImageDetails } from "../ImageDetails/ImageDetails";
+import { ImageDetailsStore } from "../ImageDetails/ImageDetailsStore";
+import { PodsDetails } from "../Pods/PodsDetails";
+import { PodsStore } from "../Pods/PodsStore";
+import { PodsTable } from "../Pods/PodsTable";
 import * as Resources from "../Resources";
 import { IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
-import "../Services/ServiceDetails.scss";
-import { PodsTable } from "../Pods/PodsTable";
-import { PodsDetails } from "../Pods/PodsDetails";
-import { ResourceStatus } from "../Common/ResourceStatus";
-import { StoreManager } from "../FluxCommon/StoreManager";
-import { BaseKubeTable } from "../Common/BaseKubeTable";
-import { IStatusProps, StatusSize } from "azure-devops-ui/Status";
-import { V1Pod, V1ObjectMeta, V1PodTemplateSpec } from "@kubernetes/client-node";
 import "./WorkloadDetails.scss";
-import "../Common/Webplatform.scss";
-import { PodsStore } from "../Pods/PodsStore";
-import { KubeZeroData, IKubeZeroDataProps } from "../Common/KubeZeroData";
-import { HyperLinks } from "../Constants";
-import { Header, TitleSize } from "azure-devops-ui/Header";
-import { KubeFactory } from "../KubeFactory";
-import { KubeImage } from "../../Contracts/Contracts";
-import { ImageDetailsStore } from "../ImageDetails/ImageDetailsStore";
-import { ImageDetails } from "../ImageDetails/ImageDetails";
-import { IImageDetails } from "../../Contracts/Types";
-import { Link } from "azure-devops-ui/Link";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
+import { Link } from "azure-devops-ui/Link";
 
 export interface IWorkloadDetailsProperties extends IVssComponentProperties {
     parentMetaData: V1ObjectMeta;
@@ -70,6 +68,8 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
             return (<PodsDetails
                 pods={this.state.pods}
                 parentName={parentName}
+                parentKind={this.props.parentKind}
+                selectedPod={this.state.selectedPod}
                 onBackButtonClick={this._setSelectedPodStateFalse}
             />);
         }
@@ -80,17 +80,19 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
         }
 
         return (
-            <div className="workload-details-content">
+            <Page className="workload-details-page flex flex-grow">
                 {this._getMainHeading()}
-                {this._getWorkloadDetails()}
-                {this._getAssociatedPods()}
-            </div>
+                <div className="workload-details-page-content page-content page-content-top">
+                    {this._getWorkloadDetails()}
+                    {this._getAssociatedPods()}
+                </div>
+            </Page>
         );
     }
 
     public componentDidMount(): void {
         const podList = this._podsStore.getState().podsList;
-        let pods: V1Pod[] = (podList && podList.items || []).filter(pod => {
+        const pods: V1Pod[] = (podList && podList.items || []).filter(pod => {
             return Utils.isOwnerMatched(pod.metadata, this.props.parentMetaData.uid);
         });
 
@@ -102,22 +104,7 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
 
     private _getMainHeading(): JSX.Element | null {
         const metadata = this.props.parentMetaData;
-        if (metadata) {
-            const headerItem: React.ReactNode = (
-                <Header
-                    title={metadata.name}
-                    titleSize={TitleSize.Large}
-                    className={"w-details-heading"}
-                />);
-
-            return (
-                <div className="content-main-heading">
-                    <ResourceStatus statusProps={this.props.statusProps} customDescription={headerItem} statusSize={StatusSize.l} className={"w-details-status-header"} />
-                </div>
-            );
-        }
-
-        return null;
+        return metadata ? <PageTopHeader title={metadata.name} statusProps={this.props.statusProps} /> : null;
     }
 
     private _setSelectedPodStateFalse = () => {
@@ -148,21 +135,18 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
                 id: "w-image",
                 name: Resources.ImageText,
                 width: new ObservableValue(360),
-                className: "workload-details-card",
                 minWidth: 250,
-                headerClassName: "workload-details-column-header",
                 renderCell: this._renderImageCell
             },
             {
                 id: "w-labels",
                 name: Resources.LabelsText,
                 width: -100,
-                className: "workload-details-card",
                 minWidth: 200,
-                headerClassName: "workload-details-column-header",
-                renderCell: this._renderLabelsCell
+                renderCell: WorkloadDetails._renderLabelsCell
             }
         ];
+
         return columns;
     }
 
@@ -170,18 +154,38 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
         const metadata = this.props.parentMetaData;
         if (metadata) {
             const pipeline = Utils.getPipelineText(metadata.annotations);
-            const tableItems = [{}, { podTemplate: this.props.podTemplate, parentMetaData: metadata }];
+            const tableItems = [{ podTemplate: this.props.podTemplate, parentMetaData: metadata }];
             const agoTime = Date_Utils.ago(new Date(metadata.creationTimestamp), Date_Utils.AgoFormat.Compact);
-            return (<BaseKubeTable
-                className={"w-details"}
-                headingText={localeFormat(Resources.WorkloadDetails, this.props.parentKind)}
-                headingDescription={pipeline ? localeFormat(Resources.ServiceCreatedText, agoTime, pipeline) :
-                    localeFormat(Resources.CreatedAgo, agoTime)}
-                items={tableItems}
-                columns={this._getColumns()}
-                hideHeaders
-                hideLines
-            />
+
+            return (
+                <CustomCard className="workload-details-card k8s-card-padding flex-grow bolt-card-no-vertical-padding">
+                    <CustomHeader>
+                        <HeaderTitleArea>
+                            <HeaderTitleRow>
+                                <HeaderTitle className="text-ellipsis" titleSize={TitleSize.Medium} >
+                                    {localeFormat(Resources.WorkloadDetails, this.props.parentKind)}
+                                </HeaderTitle>
+                            </HeaderTitleRow>
+                            <HeaderDescription className={"text-ellipsis"}>
+                                {
+                                    pipeline
+                                        ? localeFormat(Resources.ServiceCreatedWithPipelineText, agoTime, pipeline)
+                                        : localeFormat(Resources.CreatedAgo, agoTime)
+                                }
+                            </HeaderDescription>
+                        </HeaderTitleArea>
+                    </CustomHeader>
+                    <CardContent className="workload-full-details-table" contentPadding={false}>
+                        <Table
+                            id="workload-full-details-table"
+                            showHeader={true}
+                            showLines={false}
+                            singleClickActivation={false}
+                            itemProvider={new ArrayItemProvider<any>(tableItems)}
+                            columns={this._getColumns()}
+                        />
+                    </CardContent>
+                </CustomCard>
             );
         }
 
@@ -190,17 +194,12 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
 
     private _getAssociatedPods(): JSX.Element | null {
         if (this.state.pods.length === 0) {
-            const zeroDataProps: IKubeZeroDataProps = {
-                imagePath: KubeFactory.getImageLocation(KubeImage.zeroWorkloads),
-                hyperLink: HyperLinks.LinkToPodsUsingLabelsLink,
-                hyperLinkLabel: Resources.LearnMoreText,
-                descriptionText: Resources.NoPodsFoundText
-            }
-            return KubeZeroData.getDefaultZeroData(zeroDataProps);
+            return KubeZeroData.getWorkloadAssociatedPodsZeroData();
         }
 
         return (
             <PodsTable
+                contentClassName="workload-pods-table"
                 podsToRender={this.state.pods}
                 headingText={Resources.PodsText}
                 onItemActivated={this._onSelectedPodInvoked}
@@ -216,57 +215,32 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
     }
 
     private _renderImageCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<any>, tableItem: any): JSX.Element => {
-        let itemToRender: React.ReactNode;
-        if (rowIndex == 0) {
-            itemToRender = BaseKubeTable.defaultColumnRenderer(Resources.ImageText, "w-details-cell-header");
-        }
-        else {
-            const podslist = this._podsStore.getState().podsList;
-            const pods: V1Pod[] = podslist && podslist.items || [];
-            const imageId = Utils.getImageId(Utils.getFirstImageName(tableItem.podTemplate.spec), tableItem.podTemplate.metadata, pods);
-            const imageName: string = Utils.getImageText(tableItem.podTemplate.spec);
-            // Todo :: HardCoding hasImageDetails true for the time being, Should change it once we integrate with ImageService
-            // ToDo :: Revisit link paddings
-            //const hasImageDetails: boolean = this._imageDetailsStore.hasImageDetails(imageName);
-            const hasImageDetails = true;
-            return (<div className="bolt-table-two-line-cell-item flex-row scroll-hidden">
-                <Tooltip text={imageName} overflowOnly>
-                    <Link
-                        className="fontSizeM text-ellipsis bolt-table-link bolt-table-inline-link bolt-link w-details-cell-value"
-                        onClick={() => hasImageDetails && this._showImageDetails(imageId)}>
-                        {imageName || ""}
-                    </Link>
-                </Tooltip>
-            </div>);
-            itemToRender =
-                <Tooltip text={imageName} overflowOnly>
-                    <Link
-                        className="fontSizeM text-ellipsis bolt-table-link bolt-table-inline-link bolt-link w-details-cell-value"
-                        onClick={() => hasImageDetails && this._showImageDetails(imageId)}>
-                        {imageName || ""}
-                    </Link>
-                </Tooltip>;
-        }
+        const podslist = this._podsStore.getState().podsList;
+        const pods: V1Pod[] = podslist && podslist.items || [];
+        // todo :: fix if we have more than one image, what to do
+        const imageText = Utils.getFirstImageName(tableItem.podTemplate.spec);
+        const imageId = Utils.getImageId(imageText, tableItem.podTemplate.metadata, pods);
+        // Todo :: HardCoding hasImageDetails true for the time being, Should change it once we integrate with ImageService
+        // ToDo :: Revisit link paddings
+        // const hasImageDetails: boolean = this._imageDetailsStore.hasImageDetails(imageName);
+        const hasImageDetails = true;
+        const itemToRender = (
+            <Tooltip text={imageText} overflowOnly>
+                <Link
+                    className="fontSizeM text-ellipsis bolt-table-link bolt-table-inline-link bolt-link w-details-cell-value"
+                    onClick={() => hasImageDetails && this._showImageDetails(imageId)}
+                >
+                    {imageText || ""}
+                </Link>
+            </Tooltip>
+        );
 
-        return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
+        return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
-    private _renderLabelsCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<any>, tableItem: any): JSX.Element {
-        let itemToRender: React.ReactNode;
-        if (rowIndex == 0) {
-            itemToRender = BaseKubeTable.defaultColumnRenderer(Resources.LabelsText, "w-details-cell-header");
-        }
-        else {
-            itemToRender = (
-                <LabelGroup
-                    className="w-details-cell-value"
-                    labelProps={Utils.getUILabelModelArray(tableItem.parentMetaData.labels || {})}
-                    wrappingBehavior={WrappingBehavior.freeFlow}
-                    fadeOutOverflow={true}
-                />);
-        }
-
-        return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
+    private static _renderLabelsCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<any>, tableItem: any): JSX.Element {
+        const itemToRender: React.ReactNode = <Tags items={tableItem.parentMetaData.labels} />;
+        return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
     private _podsStore: PodsStore;

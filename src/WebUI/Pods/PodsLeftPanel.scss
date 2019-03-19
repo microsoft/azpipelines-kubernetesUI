@@ -1,19 +1,10 @@
-@import "../Common/Common.scss";
+// todo :: remove once we have backbutton feature
+.pod-left-panel-header .pod-left-panel-back-button {
+    cursor: pointer;
+    margin-right: 4px;
+}
 
-.pods-left-panel-container {
-    margin-top: 15px;
-
-    .pod-left-panel-header {
-        .pod-left-panel-back-button {
-            cursor: pointer;
-        }
-    }
-
-    .pod-left-panel-table-header {
-        padding-left: 20px;
-        margin-top: 15px;
-        margin-bottom: 20px;
-        font-size: $fontSizeM;
-        font-weight: $fontWeightSemiBold;
-    }
+// todo :: remove once we have master component
+.pod-left-panel-table-header {
+    padding-bottom: 8px;
 }

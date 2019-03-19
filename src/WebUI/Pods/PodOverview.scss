@@ -1,15 +1,10 @@
-@import "../Common/Common.scss";
+// todo :: once summary card is available we should remove this
+.pod-overview-key-col .pod-o-k-col-content,
+.pod-overview-value-col .pod-o-v-col-content {
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
 
-.pod-overview-card {
-    margin-top: 8px;
-    padding-top: 16px;
-
-    .pod-overview-key {
-        padding-left: 8px;
-        color: $secondary-text;
-    }
-
-    .pod-labelgroups {
-        padding-left: 8px;
-    }
+.pod-overview-card .pod-full-details-table {
+    padding-top: 13px;
 }

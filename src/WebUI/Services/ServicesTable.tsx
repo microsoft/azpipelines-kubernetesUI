@@ -4,24 +4,25 @@
 */
 
 import { V1Service, V1ServiceList, V1ServicePort } from "@kubernetes/client-node";
-import { BaseComponent, css } from "@uifabric/utilities";
+import { BaseComponent } from "@uifabric/utilities";
 import { Ago } from "azure-devops-ui/Ago";
+import { Card } from "azure-devops-ui/Card";
 import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
 import { localeFormat } from "azure-devops-ui/Core/Util/String";
-import { IStatusProps, Statuses, StatusSize } from "azure-devops-ui/Status";
-import { ITableColumn } from "azure-devops-ui/Table";
+import { IStatusProps, Status, Statuses, StatusSize } from "azure-devops-ui/Status";
+import { ITableColumn, Table, TwoLineTableCell } from "azure-devops-ui/Table";
+import { Tooltip } from "azure-devops-ui/TooltipEx";
+import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
-import { BaseKubeTable } from "../Common/BaseKubeTable";
-import { IResourceStatusProps } from "../Common/ResourceStatus";
+import { defaultColumnRenderer, renderTableCell } from "../Common/KubeCardWithTable";
+import { KubeZeroData } from "../Common/KubeZeroData";
 import { SelectedItemKeys } from "../Constants";
+import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import * as Resources from "../Resources";
+import { SelectionActionsCreator } from "../Selection/SelectionActionCreator";
 import { ISelectionPayload } from "../Selection/SelectionActions";
 import { IServiceItem, IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
-import "./ServicesTable.scss";
-import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
-import { SelectionActionsCreator } from "../Selection/SelectionActionCreator";
-import { KubeZeroData } from "../Common/KubeZeroData";
 
 const packageKey: string = "package-col";
 const clusterIPKey: string = "cluster-ip-col";
@@ -29,7 +30,6 @@ const externalIPKey: string = "external-ip-col";
 const portKey: string = "port-col";
 const ageKey: string = "age-col";
 const loadBalancerKey: string = "LoadBalancer";
-const colDataClassName: string = "sc-col-data";
 
 export interface IServicesComponentProperties extends IVssComponentProperties {
     typeSelections: string[];
@@ -51,16 +51,23 @@ export class ServicesTable extends BaseComponent<IServicesComponentProperties> {
             });
 
         if (filteredSvc.length > 0) {
+            const serviceItems = ServicesTable.getServiceItems(filteredSvc);
             return (
-                <div>{
-                    <BaseKubeTable
-                        className={css("list-content", "depth-16", "services-table")}
-                        items={ServicesTable.getServiceItems(filteredSvc)}
+                <Card className="services-list-card flex-grow bolt-card-no-vertical-padding"
+                    contentProps={{ contentPadding: false }}>
+                    <Table
+                        id="services-list-table"
+                        showHeader={true}
+                        showLines={true}
+                        singleClickActivation={true}
+                        itemProvider={new ArrayItemProvider<IServiceItem>(serviceItems)}
+                        pageSize={filteredSvc.length}
                         columns={ServicesTable._getColumns()}
-                        onItemActivated={this._openServiceItem}
+                        onActivate={(event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>) => {
+                            this._openServiceItem(event, tableRow, serviceItems[tableRow.index]);
+                        }}
                     />
-                }
-                </div>
+                </Card>
             );
         } else {
             return KubeZeroData.getNoResultsZeroData();
@@ -128,16 +135,13 @@ export class ServicesTable extends BaseComponent<IServicesComponentProperties> {
 
     private static _getColumns(): ITableColumn<IServiceItem>[] {
         let columns: ITableColumn<IServiceItem>[] = [];
-        const headerColumnClassName: string = "kube-col-header";
-        const columnContentClassName: string = "list-col-content";
 
-        // Negative widths are interpreted as percentages. Since we want the table columns to occupy full available width, setting width -100 which is equivalent to 100%
+        // negative widths are interpreted as percentages.
+        // since we want the table columns to occupy full available width, setting width - 100 which is equivalent to 100 %
         columns.push({
             id: packageKey,
             name: Resources.NameText,
             width: -70,
-            headerClassName: css(headerColumnClassName, "first-col-header"),
-            className: columnContentClassName,
             renderCell: ServicesTable._renderPackageKeyCell
         });
 
@@ -145,8 +149,6 @@ export class ServicesTable extends BaseComponent<IServicesComponentProperties> {
             id: clusterIPKey,
             name: Resources.ClusterIPText,
             width: -15,
-            headerClassName: headerColumnClassName,
-            className: columnContentClassName,
             renderCell: ServicesTable._renderClusterIpCell
         });
 
@@ -154,8 +156,6 @@ export class ServicesTable extends BaseComponent<IServicesComponentProperties> {
             id: externalIPKey,
             name: Resources.ExternalIPText,
             width: 172,
-            headerClassName: headerColumnClassName,
-            className: columnContentClassName,
             renderCell: ServicesTable._renderExternalIpCell
         });
 
@@ -163,8 +163,6 @@ export class ServicesTable extends BaseComponent<IServicesComponentProperties> {
             id: portKey,
             name: Resources.PortText,
             width: 200,
-            headerClassName: headerColumnClassName,
-            className: columnContentClassName,
             renderCell: ServicesTable._renderPortCell
         });
 
@@ -172,8 +170,6 @@ export class ServicesTable extends BaseComponent<IServicesComponentProperties> {
             id: ageKey,
             name: Resources.AgeText,
             width: -15,
-            headerClassName: headerColumnClassName,
-            className: columnContentClassName,
             renderCell: ServicesTable._renderAgeCell
         });
 
@@ -181,33 +177,32 @@ export class ServicesTable extends BaseComponent<IServicesComponentProperties> {
     }
 
     private static _renderPackageKeyCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, service: IServiceItem): JSX.Element => {
-        return ServicesTable._getServiceStatusWithName(service, colDataClassName, columnIndex, tableColumn);
+        return ServicesTable._getServiceStatusWithName(service, columnIndex, tableColumn);
     }
 
     private static _renderClusterIpCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, service: IServiceItem): JSX.Element => {
-        const textToRender = service.clusterIP || Resources.NoneText;
-        const itemToRender = BaseKubeTable.renderColumn(textToRender || "", BaseKubeTable.defaultColumnRenderer, colDataClassName);
-        return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
+        return ServicesTable._renderTextCell(rowIndex, columnIndex, tableColumn, service.clusterIP, Resources.NoneText);
     }
 
     private static _renderExternalIpCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, service: IServiceItem): JSX.Element => {
-        const textToRender = service.externalIP || Resources.NoneText;
-        const itemToRender = BaseKubeTable.renderColumn(textToRender || "", BaseKubeTable.defaultColumnRenderer, colDataClassName);
-        return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
+        return ServicesTable._renderTextCell(rowIndex, columnIndex, tableColumn, service.externalIP, Resources.NoneText);
     }
 
     private static _renderPortCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, service: IServiceItem): JSX.Element => {
-        const textToRender = service.port;
-        const itemToRender = BaseKubeTable.renderColumn(textToRender || "", BaseKubeTable.defaultColumnRenderer, colDataClassName);
-        return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
+        return ServicesTable._renderTextCell(rowIndex, columnIndex, tableColumn, service.port, "");
+    }
+
+    private static _renderTextCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, text: string, defaultText: string): JSX.Element => {
+        const itemToRender = defaultColumnRenderer(text || defaultText || "");
+        return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
     private static _renderAgeCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, service: IServiceItem): JSX.Element => {
-        const itemToRender = (<Ago date={new Date(service.creationTimestamp)} />);
-        return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
+        const itemToRender = <Ago date={new Date(service.creationTimestamp)} />;
+        return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
-    private static _getServiceStatusWithName(service: IServiceItem, cssClassName: string, columnIndex: number, tableColumn: ITableColumn<IServiceItem>): JSX.Element{
+    private static _getServiceStatusWithName(service: IServiceItem, columnIndex: number, tableColumn: ITableColumn<IServiceItem>): JSX.Element{
         let statusProps: IStatusProps = Statuses.Success;
         let tooltipText: string = "";
         if (service.type === loadBalancerKey) {
@@ -218,14 +213,32 @@ export class ServicesTable extends BaseComponent<IServicesComponentProperties> {
             }
         }
 
-        const resStatusProps: IResourceStatusProps = {
-            statusProps: statusProps,
-            toolTipText: tooltipText,
-            statusSize: StatusSize.l
-        }
-
-        tableColumn.className = css(tableColumn.className, "stretch-full-width");
-        return BaseKubeTable.renderTwoLineColumn(columnIndex, tableColumn, service.package, service.type, css(cssClassName, "two-lines"), "primary-text", "secondary-text", resStatusProps);
+        return (
+            <TwoLineTableCell
+                key={"col-" + columnIndex}
+                columnIndex={columnIndex}
+                tableColumn={tableColumn}
+                line1={
+                    <Tooltip overflowOnly={true} text={service.package}>
+                        <div className="fontWeightSemiBold text-ellipsis">{service.package}</div>
+                    </Tooltip>
+                }
+                line2={
+                    <div className="fontSize secondary-text text-ellipsis">{service.type}</div>
+                }
+                iconProps={{
+                    render: (className?: string) => {
+                        return (
+                            <Tooltip text={tooltipText}>
+                                <div className="flex-row">
+                                    <Status {...statusProps} className="icon-large-margin" size={StatusSize.l} />
+                                </div>
+                            </Tooltip>
+                        );
+                    }
+                }}
+            />
+        );
     }
 
     private _filterService(svc: V1Service): boolean {

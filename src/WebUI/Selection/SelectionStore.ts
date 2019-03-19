@@ -3,12 +3,12 @@
     Licensed under the MIT license.
 */
 
-import { StoreBase } from "../FluxCommon/Store";
-import { ActionsHubManager } from "../FluxCommon/ActionsHubManager";
-import { V1DeploymentList, V1ReplicaSet, V1Pod, V1DaemonSet, V1StatefulSet } from "@kubernetes/client-node";
-import { SelectionActions, ISelectionPayload } from "./SelectionActions";
-import { IServiceItem } from "../Types";
+import { V1DaemonSet, V1Pod, V1ReplicaSet, V1StatefulSet } from "@kubernetes/client-node";
 import { IImageDetails } from "../../Contracts/Types";
+import { ActionsHubManager } from "../FluxCommon/ActionsHubManager";
+import { StoreBase } from "../FluxCommon/Store";
+import { IServiceItem } from "../Types";
+import { ISelectionPayload, SelectionActions } from "./SelectionActions";
 
 export interface ISelectionStoreState {
     selectedItem: V1ReplicaSet | V1DaemonSet | V1StatefulSet | IServiceItem | V1Pod | IImageDetails | undefined;

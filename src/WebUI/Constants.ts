@@ -43,7 +43,7 @@ export namespace ImageDetailsEvents {
 }
 
 export namespace HyperLinks {
-    export const WorkloadsLink: string = "https://kubernetes.io/docs/concepts/workloads/pods/pod/";
+    export const WorkloadsLink: string = "https://go.microsoft.com/fwlink/?linkid=2083857";
     export const LinkToPodsUsingLabelsLink: string = "https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/";
-    export const ServicesLink: string = "https://kubernetes.io/docs/concepts/services-networking/service/";
+    export const ServicesLink: string = "https://go.microsoft.com/fwlink/?linkid=2083858";
 }

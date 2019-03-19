@@ -3,19 +3,18 @@
     Licensed under the MIT license.
 */
 
-import * as React from "react";
-import { ZeroData } from "azure-devops-ui/ZeroData";
-import { Card } from "azure-devops-ui/Card";
-import { IVssComponentProperties } from "../Types";
 import { BaseComponent, css } from "@uifabric/utilities/lib";
+import { Card, CardContent, CustomCard } from "azure-devops-ui/Card";
+import { CustomHeader, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
 import { Link } from "azure-devops-ui/Link";
-import * as Resources from "../Resources";
-import "./Common.scss";
-import "./BaseKubeTable.scss";
-import "./Webplatform.scss";
-import "./KubeZeroData.scss";
-import { KubeFactory } from "../KubeFactory";
+import { ZeroData } from "azure-devops-ui/ZeroData";
+import * as React from "react";
 import { KubeImage } from "../../Contracts/Contracts";
+import { HyperLinks } from "../Constants";
+import { KubeFactory } from "../KubeFactory";
+import * as Resources from "../Resources";
+import { IVssComponentProperties } from "../Types";
+import "./KubeZeroData.scss";
 
 export interface IKubeZeroDataProps extends IVssComponentProperties {
     title?: string;
@@ -27,8 +26,8 @@ export interface IKubeZeroDataProps extends IVssComponentProperties {
     className?: string;
     primaryText?: string;
     primaryTextClassName?: string;
-    //This prop is used when zero data needs to be a component rather than full page render
-    renderOnCard?: boolean; 
+    // this prop is used when zero data needs to be a component rather than full page render
+    renderOnCard?: boolean;
 }
 
 export class KubeZeroData extends BaseComponent<IKubeZeroDataProps> {
@@ -45,6 +44,7 @@ export class KubeZeroData extends BaseComponent<IKubeZeroDataProps> {
                 secondaryText={this._getTextArea()}
             />
         );
+
         return (
             this.props.renderOnCard ?
                 <Card titleProps={{ text: this.props.title }} className={css("flex-grow", "item-top-padding", "kube-list-content")}>
@@ -54,20 +54,165 @@ export class KubeZeroData extends BaseComponent<IKubeZeroDataProps> {
         );
     }
 
-    public static getDefaultZeroData(zeroDataProps: IKubeZeroDataProps): JSX.Element{
+    public static getDefaultZeroData(): JSX.Element {
         return (
-            <KubeZeroData
-                {...zeroDataProps}
+            <ZeroData
+                className="k8s-zero-data"
+                primaryText={Resources.StartUsingKubeResourceText}
+                secondaryText={
+                    <>
+                        <div>{Resources.DeployKubeResourceText}</div>
+                        <Link
+                            href={HyperLinks.WorkloadsLink}
+                            target="_blank"
+                            rel="nofollow noopener"
+                        >
+                            {Resources.LearnMoreKubeResourceText}
+                        </Link>
+                    </>
+                }
+                imageAltText={Resources.StartUsingKubeResourceText}
+                imagePath={KubeFactory.getImageLocation(KubeImage.zeroData) || ""}
             />
         );
     }
 
     public static getNoResultsZeroData(): JSX.Element {
         return (
-            <KubeZeroData 
-                imagePath={KubeFactory.getImageLocation(KubeImage.zeroResults)} 
-                descriptionText={Resources.NoResultsFoundText} 
-            />
+            <Card className="k8s-zero-data-filter-card k8s-card-padding flex-grow flex-center bolt-card-no-vertical-padding"
+                contentProps={{ contentPadding: false }}>
+                <ZeroData
+                    className="k8s-zero-filter-data"
+                    secondaryText={
+                        <div className="secondary-text body-xl">{Resources.NoResultsFoundText}</div>
+                    }
+                    imageAltText={Resources.NoResultsFoundText}
+                    imagePath={KubeFactory.getImageLocation(KubeImage.zeroResults) || ""}
+                />
+            </Card>
+        );
+    }
+
+    public static getServicesZeroData(): JSX.Element {
+        return (
+            <Card className="services-zero-data-card k8s-card-padding flex-grow flex-center bolt-card-no-vertical-padding"
+                contentProps={{ contentPadding: false }}>
+                <ZeroData
+                    className="k8s-zero-services-data"
+                    primaryText={Resources.DeployServices}
+                    secondaryText={
+                        <>
+                            <div>{Resources.StartingUsingServiceText}</div>
+                            <Link
+                                href={HyperLinks.ServicesLink}
+                                target="_blank"
+                                rel="nofollow noopener"
+                            >
+                                {Resources.LearnMoreText}
+                            </Link>
+                        </>
+                    }
+                    imageAltText={Resources.DeployServices}
+                    imagePath={KubeFactory.getImageLocation(KubeImage.zeroWorkloads) || ""}
+                />
+            </Card>
+        );
+    }
+
+    public static getWorkloadsZeroData(): JSX.Element {
+        return (
+            <Card className="workloads-zero-data-card k8s-card-padding flex-grow flex-center bolt-card-no-vertical-padding"
+                contentProps={{ contentPadding: false }}>
+                <ZeroData
+                    className="k8s-zero-workloads-data"
+                    primaryText={Resources.DeployWorkloads}
+                    secondaryText={
+                        <>
+                            <div>{Resources.WorkloadsZeroDataText}</div>
+                            <Link
+                                href={HyperLinks.WorkloadsLink}
+                                target="_blank"
+                                rel="nofollow noopener"
+                            >
+                                {Resources.LearnMoreText}
+                            </Link>
+                        </>
+                    }
+                    imageAltText={Resources.DeployWorkloads}
+                    imagePath={KubeFactory.getImageLocation(KubeImage.zeroResults) || ""}
+                />
+            </Card>
+        );
+    }
+
+    public static getServiceAssociatedPodsZeroData(): JSX.Element {
+        return (
+            <CustomCard className="service-associated-pods-zero-data-card k8s-card-padding flex-grow bolt-card-no-vertical-padding">
+                <CustomHeader>
+                    <HeaderTitleArea>
+                        <HeaderTitleRow>
+                            <HeaderTitle className="text-ellipsis" titleSize={TitleSize.Medium}>
+                                {Resources.AssociatedPodsText}
+                            </HeaderTitle>
+                        </HeaderTitleRow>
+                    </HeaderTitleArea>
+                </CustomHeader>
+                <CardContent contentPadding={false}>
+                    <ZeroData
+                        className="k8s-zero-service-pods-data k8s-zero-data-max-width"
+                        secondaryText={
+                            <>
+                                <div className="body-xl fontWeightSemiBold">{Resources.NoPodsText}</div>
+                                <div>{Resources.NoPodsForSvcText}</div>
+                                <Link
+                                    href={HyperLinks.LinkToPodsUsingLabelsLink}
+                                    target="_blank"
+                                    rel="nofollow noopener"
+                                >
+                                    {Resources.NoPodsForSvcLinkText}
+                                </Link>
+                            </>
+                        }
+                        imageAltText={Resources.NoPodsText}
+                        imagePath={KubeFactory.getImageLocation(KubeImage.zeroWorkloads) || ""}
+                    />
+                </CardContent>
+            </CustomCard>
+        );
+    }
+
+    public static getWorkloadAssociatedPodsZeroData(): JSX.Element {
+        return (
+            <CustomCard className="workload-associated-pods-zero-data-card k8s-card-padding flex-grow bolt-card-no-vertical-padding">
+                <CustomHeader>
+                    <HeaderTitleArea>
+                        <HeaderTitleRow>
+                            <HeaderTitle className="text-ellipsis" titleSize={TitleSize.Medium}>
+                                {Resources.AssociatedPodsText}
+                            </HeaderTitle>
+                        </HeaderTitleRow>
+                    </HeaderTitleArea>
+                </CustomHeader>
+                <CardContent contentPadding={false}>
+                    <ZeroData
+                        className="k8s-zero-workload-pods-data k8s-zero-data-max-width"
+                        secondaryText={
+                            <>
+                                <div>{Resources.NoPodsFoundText}</div>
+                                <Link
+                                    href={HyperLinks.LinkToPodsUsingLabelsLink}
+                                    target="_blank"
+                                    rel="nofollow noopener"
+                                >
+                                    {Resources.LearnMoreText}
+                                </Link>
+                            </>
+                        }
+                        imageAltText={Resources.NoPodsFoundText}
+                        imagePath={KubeFactory.getImageLocation(KubeImage.zeroWorkloads) || ""}
+                    />
+                </CardContent>
+            </CustomCard>
         );
     }
 
@@ -75,7 +220,7 @@ export class KubeZeroData extends BaseComponent<IKubeZeroDataProps> {
         const primaryText: string | undefined = this.props.primaryText;
         const primaryTxtClass: string = this.props.primaryTextClassName ? this.props.primaryTextClassName : "zerod-primary-text";
         return (<div>
-            {primaryText ? <span className={primaryTxtClass}>{primaryText}</span>: null}<br />
+            {primaryText ? <span className={primaryTxtClass}>{primaryText}</span> : null}<br />
             {this._getDescription()}<br />
             {this._getHyperLink()}
         </div>);

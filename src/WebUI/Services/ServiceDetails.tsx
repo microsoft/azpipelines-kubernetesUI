@@ -5,34 +5,36 @@
 
 import { V1Pod } from "@kubernetes/client-node";
 import { BaseComponent } from "@uifabric/utilities";
+import { CardContent, CustomCard } from "azure-devops-ui/Card";
 import { localeFormat } from "azure-devops-ui/Core/Util/String";
-import { LabelGroup, WrappingBehavior } from "azure-devops-ui/Label";
-import { IStatusProps, Statuses, StatusSize } from "azure-devops-ui/Status";
-import { ITableColumn } from "azure-devops-ui/Table";
+import { CustomHeader, HeaderDescription, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
+import { Page } from "azure-devops-ui/Page";
+import { Statuses } from "azure-devops-ui/Status";
+import { ITableColumn, Table } from "azure-devops-ui/Table";
+import { Tooltip } from "azure-devops-ui/TooltipEx";
 import * as Date_Utils from "azure-devops-ui/Utilities/Date";
+import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
-import { IKubeService, KubeImage } from "../../Contracts/Contracts";
-import { BaseKubeTable } from "../Common/BaseKubeTable";
-import { KubeZeroData, IKubeZeroDataProps } from "../Common/KubeZeroData";
-import { ResourceStatus } from "../Common/ResourceStatus";
-import { ServicesEvents, HyperLinks } from "../Constants";
+import { renderTableCell } from "../Common/KubeCardWithTable";
+import { KubeSummary } from "../Common/KubeSummary";
+import { KubeZeroData } from "../Common/KubeZeroData";
+import { PageTopHeader } from "../Common/PageTopHeader";
+import { Tags } from "../Common/Tags";
+import { ServicesEvents } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
-import { PodsDetails  } from "../Pods/PodsDetails";
 import { PodsActionsCreator } from "../Pods/PodsActionsCreator";
+import { PodsDetails } from "../Pods/PodsDetails";
 import { PodsTable } from "../Pods/PodsTable";
 import * as Resources from "../Resources";
 import { IServiceItem, IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
 import "./ServiceDetails.scss";
-import "../Common/Webplatform.scss";
 import { ServicesStore } from "./ServicesStore";
-import { Header, TitleSize } from "azure-devops-ui/Header";
-import { KubeFactory } from "../KubeFactory";
-import { KubeSummary } from "../Common/KubeSummary";
 
 export interface IServiceDetailsProperties extends IVssComponentProperties {
     service: IServiceItem;
+    parentKind: string;
 }
 
 export interface IServiceDetailsState {
@@ -55,7 +57,7 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
         this._podsActionsCreator = ActionsCreatorManager.GetActionCreator<PodsActionsCreator>(PodsActionsCreator);
 
         const svc = this.props.service && this.props.service.service;
-        //service currently only supports equals with "and" operator. The generator generates that condition.
+        // service currently only supports equals with "and" operator. The generator generates that condition.
         const labelSelector: string = Utils.generateEqualsConditionLabelSelector(svc && svc.spec && svc.spec.selector || {});
         this._podsActionsCreator.getPods(KubeSummary.getKubeService(), labelSelector);
         this._servicesStore.addListener(ServicesEvents.ServicePodsFetchedEvent, this._onPodsFetched);
@@ -65,19 +67,25 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
         if (this.state.selectedPod && this.state.showSelectedPod) {
             const service = this.props.service && this.props.service.service;
             const serviceName = service && service.metadata ? service.metadata.name : "";
-            return (<PodsDetails
-                pods={this.state.pods}
-                parentName={serviceName}
-                onBackButtonClick={this._setSelectedPodStateFalse}
-            />);
+            return (
+                <PodsDetails
+                    pods={this.state.pods}
+                    parentName={serviceName}
+                    selectedPod={this.state.selectedPod}
+                    parentKind={this.props.parentKind}
+                    onBackButtonClick={this._setSelectedPodStateFalse}
+                />
+            );
         }
 
         return (
-            <div className="service-main-content">
+            <Page className="service-details-page flex flex-grow">
                 {this._getMainHeading()}
-                {this._getServiceDetails()}
-                {this._getAssociatedPods()}
-            </div>
+                <div className="service-details-page-content page-content page-content-top">
+                    {this._getServiceDetails()}
+                    {this._getAssociatedPods()}
+                </div>
+            </Page>
         );
     }
 
@@ -88,23 +96,8 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
     private _getMainHeading(): JSX.Element | null {
         const item = this.props.service;
         if (item) {
-            let statusProps: IStatusProps = Statuses.Success;
-            if (item.type === LoadBalancerText) {
-                if (!item.externalIP) {
-                    statusProps = Statuses.Running;
-                }
-            }
-            const headerItem: React.ReactNode = (
-                <Header
-                    title={item.package}
-                    titleSize={TitleSize.Large}
-                    className={"s-details-heading"}
-                />);
-            return (
-                <div className="content-main-heading">
-                    <ResourceStatus statusProps={statusProps} customDescription={headerItem} statusSize={StatusSize.l} className={"s-details-status-header"}/>
-                </div>
-            );
+            const statusProps = item.type === LoadBalancerText && !item.externalIP ? Statuses.Running : Statuses.Success;
+            return <PageTopHeader title={item.package} statusProps={statusProps} />;
         }
 
         return null;
@@ -114,81 +107,93 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
         const columns: ITableColumn<any>[] = [
             {
                 id: "type",
-                name: "type",
+                name: Resources.TypeText,
                 width: -100,
-                className: "s-key",
-                minWidth: 80,   
+                minWidth: 80,
                 renderCell: ServiceDetails._renderTextCell
             },
             {
                 id: "clusterIp",
-                name: "ClusterIP",
+                name: Resources.ClusterIPText,
                 width: -100,
-                className: "s-key",
                 minWidth: 80,
                 renderCell: ServiceDetails._renderTextCell
             },
             {
                 id: "externalIp",
-                name: "externalIp",
+                name: Resources.ExternalIPText,
                 width: -100,
-                className: "s-key",
                 minWidth: 80,
                 renderCell: ServiceDetails._renderTextCell
             },
             {
                 id: "port",
-                name: "port",
+                name: Resources.PortText,
                 width: -100,
-                className: "s-key",
                 minWidth: 80,
                 renderCell: ServiceDetails._renderTextCell
             },
             {
                 id: "sessAffinity",
-                name: "sessAffinity",
+                name: Resources.SessionAffinityText,
                 width: -100,
-                className: "s-key",
                 minWidth: 80,
                 renderCell: ServiceDetails._renderTextCell
             },
             {
                 id: "selector",
-                name: "selector",
+                name: Resources.SelectorText,
                 width: -100,
-                className: "s-key",
-                minWidth: 200,
-                renderCell: ServiceDetails._renderLabelGroups
+                minWidth: 150,
+                renderCell: ServiceDetails._renderTags
             },
             {
                 id: "labels",
-                name: "labels",
+                name: Resources.LabelsText,
                 width: -100,
-                className: "s-key",
                 minWidth: 200,
-                renderCell: ServiceDetails._renderLabelGroups
+                renderCell: ServiceDetails._renderTags
             }
         ];
+
         return columns;
     }
 
     private _getServiceDetails(): JSX.Element | null {
         const item = this.props.service;
         if (item && item.service) {
-            const tableItems: IServiceItem[] = [{ package: "", type:"", clusterIP:"", externalIP:"", port:"", creationTimestamp: new Date(), uid:"", pipeline:""}, item];
+            const tableItems: IServiceItem[] = [item];
             const agoTime = Date_Utils.ago(new Date(item.creationTimestamp), Date_Utils.AgoFormat.Compact);
+
             return (
-                <BaseKubeTable
-                    className={"s-details"}
-                    headingText={Resources.ServiceDetails}
-                    headingDescription={
-                        item.pipeline ? localeFormat(Resources.ServiceCreatedText, agoTime, item.pipeline) :
-                            localeFormat(Resources.CreatedAgo, agoTime)}
-                    items={tableItems}
-                    columns={ServiceDetails._getColumns()}
-                    hideHeaders
-                    hideLines
-                />
+                <CustomCard className="service-details-card k8s-card-padding flex-grow bolt-card-no-vertical-padding">
+                    <CustomHeader>
+                        <HeaderTitleArea>
+                            <HeaderTitleRow>
+                                <HeaderTitle className="text-ellipsis" titleSize={TitleSize.Medium} >
+                                    {Resources.ServiceDetails}
+                                </HeaderTitle>
+                            </HeaderTitleRow>
+                            <HeaderDescription className={"text-ellipsis"}>
+                                {
+                                    item.pipeline
+                                        ? localeFormat(Resources.ServiceCreatedWithPipelineText, agoTime, item.pipeline)
+                                        : localeFormat(Resources.CreatedAgo, agoTime)
+                                }
+                            </HeaderDescription>
+                        </HeaderTitleArea>
+                    </CustomHeader>
+                    <CardContent className="service-full-details-table" contentPadding={false}>
+                        <Table
+                            id="service-full-details-table"
+                            showHeader={true}
+                            showLines={false}
+                            singleClickActivation={false}
+                            itemProvider={new ArrayItemProvider<IServiceItem>(tableItems)}
+                            columns={ServiceDetails._getColumns()}
+                        />
+                    </CardContent>
+                </CustomCard>
             );
         }
 
@@ -203,21 +208,13 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
     }
 
     private _getAssociatedPods(): JSX.Element | null {
-        if (this.state.pods.length === 0) {
-            const zeroDataProps: IKubeZeroDataProps = {
-                imagePath: KubeFactory.getImageLocation(KubeImage.zeroWorkloads),
-                hyperLink: HyperLinks.LinkToPodsUsingLabelsLink,
-                hyperLinkLabel: Resources.NoPodsForSvcLinkText,
-                descriptionText: Resources.NoPodsForSvcText,
-                title: Resources.AssociatedPodsText,
-                primaryText: Resources.NoPodsText,
-                primaryTextClassName: "primary-text",
-                renderOnCard: true
-            }
-            return KubeZeroData.getDefaultZeroData(zeroDataProps);
+        if (!this.state.pods || this.state.pods.length === 0) {
+            return KubeZeroData.getServiceAssociatedPodsZeroData();
         }
+
         return (
             <PodsTable
+                contentClassName="service-pods-table"
                 podsToRender={this.state.pods}
                 headingText={Resources.AssociatedPodsText}
                 onItemActivated={this._onSelectedPodInvoked}
@@ -240,12 +237,15 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
         });
     }
 
-    private _servicesStore: ServicesStore;
-    private _podsActionsCreator: PodsActionsCreator
-
     private static _renderTextCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, service: IServiceItem): JSX.Element {
-        const itemToRender = BaseKubeTable.renderColumn(ServiceDetails._getCellText(tableColumn, rowIndex, service), BaseKubeTable.defaultColumnRenderer);
-        return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
+        const text = ServiceDetails._getCellText(tableColumn, rowIndex, service);
+        const itemToRender = (
+            <Tooltip text={text} overflowOnly>
+                <span className="text-ellipsis">{text}</span>
+            </Tooltip>
+        );
+
+        return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
     private static _getCellText(tableColumn: ITableColumn<IServiceItem>, rowIndex: number, service:IServiceItem): string {
@@ -253,66 +253,40 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
         switch (tableColumn.id) {
             case "type":
                 textToRender = service.type;
-                if (rowIndex === 0) {
-                    textToRender = Resources.TypeText;
-                }
                 break;
             case "clusterIp":
                 textToRender = service.clusterIP;
-                if (rowIndex === 0) {
-                    textToRender = Resources.ClusterIPText;
-                }
                 break;
             case "externalIp":
                 textToRender = service.externalIP;
-                if (rowIndex === 0) {
-                    textToRender = Resources.ExternalIPText;
-                }
                 break;
             case "port":
                 textToRender = service.port;
-                if (rowIndex === 0) {
-                    textToRender = Resources.PortText;
-                }
                 break;
             case "sessAffinity":
                 textToRender = service.service ? service.service.spec.sessionAffinity : "";
-                if (rowIndex === 0) {
-                    textToRender = Resources.SessionAffinityText;
-                }
                 break;
-        };
+        }
 
         return textToRender;
     }
 
-    private static _renderLabelGroups(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, service: IServiceItem): JSX.Element {
+    private static _renderTags(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, item: IServiceItem): JSX.Element {
         let labelsArray: { [key: string]: string } = {};
-        let title: string = "";
 
         switch (tableColumn.id) {
             case "selector":
-                labelsArray = service.service ? service.service.spec.selector : {};
-                title = Resources.SelectorText;
+                labelsArray = item.service ? item.service.spec.selector : {};
                 break;
             case "labels":
-                labelsArray = service.service ? service.service.metadata.labels : {};
-                title = Resources.LabelsText;
+                labelsArray = item.service ? item.service.metadata.labels : {};
                 break;
-        };
-
-        let itemToRender: React.ReactNode = (
-            <LabelGroup
-                className="s-details-label"
-                labelProps={Utils.getUILabelModelArray(labelsArray)}
-                fadeOutOverflow={true}
-                wrappingBehavior={WrappingBehavior.oneLine}
-            />
-        );
-        if (rowIndex === 0) {
-            itemToRender = BaseKubeTable.renderColumn(title, BaseKubeTable.defaultColumnRenderer);
         }
-        return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
+
+        const itemToRender: React.ReactNode = <Tags items={labelsArray} />;
+        return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
+    private _servicesStore: ServicesStore;
+    private _podsActionsCreator: PodsActionsCreator;
 }
