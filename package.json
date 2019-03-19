@@ -36,11 +36,11 @@
   ],
   "dependencies": {
     "@kubernetes/client-node": "~0.8.1",
-    "azure-devops-ui": "^1.148.0",
+    "azure-devops-ui": "1.149.3",
     "history": "^4.7.2",
     "query-string": "^6.2.0",
-    "react": "~16.3.2",
-    "react-dom": "~16.3.2"
+    "react": "16.8.2",
+    "react-dom": "16.8.2"
   },
   "devDependencies": {
     "@types/enzyme": "^3.1.15",
@@ -49,8 +49,8 @@
     "@types/history": "^4.7.2",
     "@types/jest": "^23.3.10",
     "@types/query-string": "^6.2.0",
-    "@types/react": "^16.7.13",
-    "@types/react-dom": "^16.0.11",
+    "@types/react": "16.8.2",
+    "@types/react-dom": "16.8.2",
     "base64-inline-loader": "^1.1.1",
     "copy-webpack-plugin": "^4.6.0",
     "copyfiles": "^2.1.0",

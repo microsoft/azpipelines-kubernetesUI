@@ -1,4 +1,6 @@
 {
+  "palette-primary-darken-6": "rgba(0, 103, 181, 1)",
+  "palette-primary-darken-10": "rgba(0, 91, 161, 1)",
   "palette-primary-shade-30": "0, 69, 120",
   "palette-primary-shade-20": "0, 90, 158",
   "palette-primary-shade-10": "16, 110, 190",
@@ -21,6 +23,36 @@
   "palette-neutral-2": "248, 248, 248",
   "palette-neutral-0": "255, 255, 255",
 
+  "palette-error": "rgba(232, 17, 35, 1)",
+  "palette-error-6": "rgba(203, 15, 31, 1)",
+  "palette-error-10": "rgba(184, 14, 28, 1)",
+
+  "palette-black-alpha-0": "rgba(0, 0, 0, 0)",
+  "palette-black-alpha-2": "rgba(0, 0, 0, 0.02)",
+  "palette-black-alpha-4": "rgba(0, 0, 0, 0.04)",
+  "palette-black-alpha-6": "rgba(0, 0, 0, 0.06)",
+  "palette-black-alpha-8": "rgba(0, 0, 0, 0.08)",
+  "palette-black-alpha-10": "rgba(0, 0, 0, 0.10)",
+  "palette-black-alpha-20": "rgba(0, 0, 0, 0.20)",
+  "palette-black-alpha-30": "rgba(0, 0, 0, 0.30)",
+  "palette-black-alpha-60": "rgba(0, 0, 0, 0.60)",
+  "palette-black-alpha-70": "rgba(0, 0, 0, 0.70)",
+  "palette-black-alpha-80": "rgba(0, 0, 0, 0.80)",
+  "palette-black-alpha-100": "rgba(0, 0, 0, 1)",
+
+  "palette-white-alpha-0": "rgba(255, 255, 255, 0)",
+  "palette-white-alpha-2": "rgba(255, 255, 255, 0.02)",
+  "palette-white-alpha-4": "rgba(255, 255, 255, 0.04)",
+  "palette-white-alpha-6": "rgba(255, 255, 255, 0.08)",
+  "palette-white-alpha-8": "rgba(255, 255, 255, 0.12)",
+  "palette-white-alpha-10": "rgba(255, 255, 255, 0.18)",
+  "palette-white-alpha-20": "rgba(255, 255, 255, 0.29)",
+  "palette-white-alpha-30": "rgba(255, 255, 255, 0.40)",
+  "palette-white-alpha-60": "rgba(255, 255, 255, 0.57)",
+  "palette-white-alpha-70": "rgba(255, 255, 255, 0.7)",
+  "palette-white-alpha-80": "rgba(255, 255, 255, 0.86)",
+  "palette-white-alpha-100": "rgba(255, 255, 255, 1)",
+
   "palette-accent1-light": "249, 235, 235",
   "palette-accent1": "218, 10, 0",
   "palette-accent1-dark": "168, 0, 0",
@@ -36,17 +68,18 @@
   "communication-foreground": "rgba(0, 120, 212, 1)",
   "communication-background": "rgba(0, 120, 212, 1)",
 
-  "status-error-foreground": "rgba(218, 10, 0, 1)",
+  "status-error-foreground": "rgba(205, 74, 69, 1)",
   "status-error-background": "rgba(249, 235, 235, 1)",
+  "status-error-text": "rgba(218, 10, 0, 1)",
   "status-error-strong": "rgba(168, 0, 0, 1)",
 
   "status-info-foreground": "rgba(0, 120, 212, 1)",
   "status-info-background": "rgba(0, 120, 212, 1)",
 
-  "status-success-foreground": "rgba(16, 124, 16, 1)",
+  "status-success-foreground": "rgba(85, 163, 98, 1)",
   "status-success-background": "rgba(223, 246, 221, 1)",
 
-  "status-warning-foreground": "rgba(248, 168, 0, 1)",
+  "status-warning-foreground": "rgba(250, 157, 45, 1)",
   "status-warning-background": "rgba(255, 244, 206, 1)",
 
   "background-color": "rgba(255, 255, 255, 1)",
@@ -61,6 +94,9 @@
   "callout-background-color": "rgba(255, 255, 255, 1)",
   "callout-shadow-color": "rgba(0, 0, 0, .132)",
   "callout-shadow-secondary-color": "rgba(0, 0, 0, .108)",
+
+  "panel-shadow-color": "rgba(0, 0, 0, .22)",
+  "panel-shadow-secondary-color": "rgba(0, 0, 0, .18)",
 
   "focus-pulse-max-color": "rgba(0, 120, 212, 0.35)",
   "focus-pulse-min-color": "rgba(0, 120, 212, 0.15)",
@@ -94,9 +130,8 @@
   "nav-header-active-item-background": "rgba(0, 0, 0, 0.08)",
   "nav-header-text-primary-color": "rgba(0, 0, 0, .9)",
   "nav-header-text-secondary-color": "rgba(0, 0, 0, .55)",
+  "nav-header-text-disabled-color": "rgba(0, 0, 0, .38)",
   "nav-header-product-color": "rgba(0, 120, 212, 1)",
-  "nav-header-breadcrumb-text-opacity": ".55",
-  "nav-header-breadcrumb-separator-opacity": ".33",
 
   "nav-vertical-background-color": "rgba(0, 0, 0, 0.08)",
   "nav-vertical-item-hover-background": "rgba(0, 0, 0, 0.08)",
@@ -108,21 +143,6 @@
   "diff-color-original": "rgba(172, 0, 0, 0.1)",
   "diff-color-modified": "rgba(51, 153, 51, 0.1)",
 
-  "__comment__": "The following mappings are for the legacy/horizontal header and can be removed once vertical nav is turned on everywhere.",
-
-  "mainMenuBackgroundColor": "rgba(51, 51, 51, 1)",
-  "mainMenuBackgroundHoverColor": "rgba(0, 0, 0, 1)",
-  "tfsSelectorBackgroundColor": "rgba(0, 90, 158, 1)",
-
-  "headerBottomBackgroundColor": "rgba(244, 244, 244, 1)",
-  "headerBottomDisplayedTextColor": "rgba(16, 110, 190, 1)",
-  "headerBottomLinkHoverColor": "rgba(200, 200, 200, 1)",
-  "headerBottomTextColor": "rgba(0, 0, 0, 1)",
-  "headerTopBackgroundColor": "rgba(0, 120, 212, 1)",
-  "headerTopLinkHoverColor": "rgba(16, 110, 190, 1)",
-  "headerTopTextColor": "rgba(255, 255, 255, 1)",
-
-  "searchBoxBackgroundColor": "rgba(0, 90, 158, 1)",
-  "searchBoxPlaceholderTextColor": "rgba(199, 224, 244, 1)",
-  "searchBoxTextColor": "rgba(255, 255, 255, 1)"
+  "search-match-background": "rgba(255, 255, 0, 0.6)",
+  "search-selected-match-background": "rgba(245, 139, 31, 0.8)"
 }
