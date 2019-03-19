@@ -15,8 +15,8 @@ import { Tooltip } from "azure-devops-ui/TooltipEx";
 import * as Date_Utils from "azure-devops-ui/Utilities/Date";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
-import { IKubeService } from "../../Contracts/Contracts";
 import { renderTableCell } from "../Common/KubeCardWithTable";
+import { KubeSummary } from "../Common/KubeSummary";
 import { KubeZeroData } from "../Common/KubeZeroData";
 import { PageTopHeader } from "../Common/PageTopHeader";
 import { Tags } from "../Common/Tags";
@@ -29,11 +29,10 @@ import { PodsTable } from "../Pods/PodsTable";
 import * as Resources from "../Resources";
 import { IServiceItem, IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
-import { ServicesStore } from "./ServicesStore";
 import "./ServiceDetails.scss";
+import { ServicesStore } from "./ServicesStore";
 
 export interface IServiceDetailsProperties extends IVssComponentProperties {
-    kubeService: IKubeService;
     service: IServiceItem;
     parentKind: string;
 }
@@ -60,7 +59,7 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
         const svc = this.props.service && this.props.service.service;
         // service currently only supports equals with "and" operator. The generator generates that condition.
         const labelSelector: string = Utils.generateEqualsConditionLabelSelector(svc && svc.spec && svc.spec.selector || {});
-        this._podsActionsCreator.getPods(this.props.kubeService, labelSelector);
+        this._podsActionsCreator.getPods(KubeSummary.getKubeService(), labelSelector);
         this._servicesStore.addListener(ServicesEvents.ServicePodsFetchedEvent, this._onPodsFetched);
     }
 

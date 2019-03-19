@@ -17,13 +17,17 @@ import { Filter, FILTER_CHANGE_EVENT, IFilterState } from "azure-devops-ui/Utili
 import { Action, createBrowserHistory, History, Location, UnregisterCallback } from "history";
 import * as queryString from "query-string";
 import * as React from "react";
-import { IKubeService, KubeImage } from "../../Contracts/Contracts";
+import { IImageService, IKubeService, KubeImage } from "../../Contracts/Contracts";
+import { IImageDetails } from "../../Contracts/Types";
 import { SelectedItemKeys, ServicesEvents, WorkloadsEvents } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
+import { ImageDetails } from "../ImageDetails/ImageDetails";
 import { KubeFactory } from "../KubeFactory";
 import { PodOverview } from "../Pods/PodOverview";
 import * as Resources from "../Resources";
+import { SelectionActionsCreator } from "../Selection/SelectionActionCreator";
+import { ISelectionPayload } from "../Selection/SelectionActions";
 import { SelectionStore } from "../Selection/SelectionStore";
 import { ServiceDetails } from "../Services/ServiceDetails";
 import { ServicesPivot } from "../Services/ServicesPivot";
@@ -47,7 +51,7 @@ const servicesFilterToggled = new ObservableValue<boolean>(false);
 export interface IKubernetesContainerState {
     namespace?: string;
     selectedPivotKey?: string;
-    selectedItem?: V1ReplicaSet | V1DaemonSet | V1StatefulSet | V1Pod | IServiceItem;
+    selectedItem?: V1ReplicaSet | V1DaemonSet | V1StatefulSet | V1Pod | IServiceItem | IImageDetails;
     showSelectedItem?: boolean;
     selectedItemType?: string;
     resourceSize: number;
@@ -58,6 +62,7 @@ export interface IKubernetesContainerState {
 export interface IKubeSummaryProps extends IVssComponentProperties {
     title: string;
     kubeService: IKubeService;
+    imageService?: IImageService;
     namespace?: string;
     markTTI?: () => void;
     getImageLocation?: (image: KubeImage) => string | undefined;
@@ -66,6 +71,8 @@ export interface IKubeSummaryProps extends IVssComponentProperties {
 export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesContainerState> {
     constructor(props: IKubeSummaryProps) {
         super(props, {});
+        KubeSummary._imageService = this.props.imageService;
+        KubeSummary._kubeservice = this.props.kubeService;
 
         this._initializeFactorySettings();
         const workloadsFilter = new Filter();
@@ -93,12 +100,13 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         this._selectionStore.addChangedListener(this._onSelectionStoreChanged);
 
         this._workloadsActionCreator = ActionsCreatorManager.GetActionCreator<WorkloadsActionsCreator>(WorkloadsActionsCreator);
+        this._selectionActionCreator = ActionsCreatorManager.GetActionCreator<SelectionActionsCreator>(SelectionActionsCreator);
 
         // Ensure workload store is created before get Deployments action
         this._workloadsStore = StoreManager.GetStore<WorkloadsStore>(WorkloadsStore);
 
         // Fetch deployments in parent component we need to show nameSpace in heading and namespace is obtained from deployment metadata
-        this._workloadsActionCreator.getDeployments(this.props.kubeService);
+        this._workloadsActionCreator.getDeployments(KubeSummary.getKubeService());
         this._workloadsStore.addListener(WorkloadsEvents.DeploymentsFetchedEvent, this._setNamespaceOnDeploymentsFetched);
 
         this._workloadsStore.addListener(WorkloadsEvents.WorkloadsFoundEvent, this._onDataFound);
@@ -135,6 +143,14 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         this._workloadsStore.removeListener(WorkloadsEvents.WorkloadsFoundEvent, this._onDataFound);
         this._servicesStore.removeListener(ServicesEvents.ServicesFoundEvent, this._onDataFound);
         this._historyUnlisten();
+    }
+
+    public static getImageService(): IImageService | undefined {
+        return KubeSummary._imageService;
+    }
+
+    public static getKubeService(): IKubeService {
+        return KubeSummary._kubeservice;
     }
 
     private _updateStateFromHistory = (routeValues: queryString.OutputParams): void => {
@@ -226,7 +242,8 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
     private _getSelectedItemPodsView(): JSX.Element | null {
         const selectedItem = this.state.selectedItem;
         const selectedItemType = this.state.selectedItemType;
-        if (selectedItem && selectedItemType && this._selectedItemViewMap.hasOwnProperty(selectedItemType)) {
+        // ToDo :: Currently for imageDetails type, the selected item will be undefined, hence adding below check. Remove this once we have data from imageService
+        if (selectedItemType && (selectedItem || selectedItemType === SelectedItemKeys.ImageDetailsKey) && this._selectedItemViewMap.hasOwnProperty(selectedItemType)) {
             return this._selectedItemViewMap[selectedItemType](selectedItem);
         }
 
@@ -255,12 +272,23 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         });
     }
 
-    private _setSelectedKeyPodsViewMap(): void {
+    private _setSelectedKeyPodsViewMap = () => {
         this._selectedItemViewMap[SelectedItemKeys.StatefulSetKey] = (item) => this._getWorkoadPodsViewComponent(item.metadata, item.spec && item.spec.template, item.kind || "StatefulSet", item.status.currentReplicas, item.status.replicas);
-        this._selectedItemViewMap[SelectedItemKeys.ServiceItemKey] = (item) => { return <ServiceDetails kubeService={this.props.kubeService} service={item} parentKind={item.kind || "Service"} /> };
+        this._selectedItemViewMap[SelectedItemKeys.ServiceItemKey] = (item) => { return <ServiceDetails service={item} parentKind={item.kind || "Service"} /> };
         this._selectedItemViewMap[SelectedItemKeys.DaemonSetKey] = (item) => this._getWorkoadPodsViewComponent(item.metadata, item.spec && item.spec.template, item.kind || "DaemonSet", item.status.currentNumberScheduled, item.status.desiredNumberScheduled);
         this._selectedItemViewMap[SelectedItemKeys.OrphanPodKey] = (item) => { return <PodOverview pod={item} />; };
         this._selectedItemViewMap[SelectedItemKeys.ReplicaSetKey] = (item) => this._getWorkoadPodsViewComponent(item.metadata, item.spec && item.spec.template, item.kind || "ReplicaSet", item.status.availableReplicas, item.status.replicas);
+        this._selectedItemViewMap[SelectedItemKeys.ImageDetailsKey] = (item) => { return <ImageDetails imageDetails={item} onBackButtonClick={this._setSelectionStateFalse} /> }
+    }
+
+    private _setSelectionStateFalse = () => {
+        const payload: ISelectionPayload = {
+            item: undefined,
+            itemUID: "",
+            showSelectedItem: false,
+            selectedItemType: ""
+        };
+        this._selectionActionCreator.selectItem(payload);
     }
 
     private _populateObjectFinder(): void {
@@ -309,4 +337,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
     private _servicesStore: ServicesStore;
     private _historyService: History;
     private _historyUnlisten: UnregisterCallback;
+    private _selectionActionCreator: SelectionActionsCreator;
+    private static _imageService: IImageService | undefined;
+    private static _kubeservice: IKubeService;
 }

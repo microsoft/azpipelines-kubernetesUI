@@ -8,8 +8,8 @@ import { BaseComponent, css } from "@uifabric/utilities";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { Filter, IFilterItemState, IFilterState } from "azure-devops-ui/Utilities/Filter";
 import * as React from "react";
-import { IKubeService } from "../../Contracts/Contracts";
 import { NameKey, TypeKey } from "../Common/KubeFilterBar";
+import { KubeSummary } from "../Common/KubeSummary";
 import { KubeZeroData } from "../Common/KubeZeroData";
 import { ServicesEvents } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
@@ -25,7 +25,6 @@ export interface IServicesPivotState {
 }
 
 export interface IServicesPivotProps extends IVssComponentProperties {
-    kubeService: IKubeService;
     filter: Filter;
     namespace?: string;
     filterToggled: ObservableValue<boolean>;
@@ -42,7 +41,7 @@ export class ServicesPivot extends BaseComponent<IServicesPivotProps, IServicesP
             serviceList: undefined
         };
 
-        this._actionCreator.getServices(this.props.kubeService);
+        this._actionCreator.getServices(KubeSummary.getKubeService());
         this._store.addListener(ServicesEvents.ServicesFetchedEvent, this._onServicesFetched);
     }
 

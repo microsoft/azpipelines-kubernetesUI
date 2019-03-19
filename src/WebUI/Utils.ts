@@ -3,11 +3,13 @@
     Licensed under the MIT license.
 */
 
-import { V1ObjectMeta, V1PodSpec, V1PodStatus } from "@kubernetes/client-node";
-import { format, localeFormat } from "azure-devops-ui/Core/Util/String";
+import { V1ObjectMeta, V1Pod, V1PodSpec, V1PodStatus } from "@kubernetes/client-node";
+import { equals, format, localeFormat } from "azure-devops-ui/Core/Util/String";
 import { IStatusProps, Statuses } from "azure-devops-ui/Status";
 import { PodPhase } from "../Contracts/Contracts";
 import * as Resources from "./Resources";
+import { ObservableArray } from "azure-devops-ui/Core/Observable";
+import { ILabelModel } from "azure-devops-ui/Label";
 
 const pipelineNameAnnotationKey: string = "azure-pipelines/pipeline";
 const pipelineExecutionIdAnnotationKey: string = "azure-pipelines/execution";
@@ -17,6 +19,17 @@ export class Utils {
         return objectMeta.ownerReferences
             && objectMeta.ownerReferences.length > 0
             && objectMeta.ownerReferences[0].uid.toLowerCase() === ownerUIdLowerCase;
+    }
+
+    public static getUILabelModelArray(items: { [key: string]: string }): ObservableArray<ILabelModel> {
+        let labelArray = new ObservableArray<ILabelModel>();
+        if (items) {
+            Object.keys(items).forEach((key: string) => {
+                labelArray.push({ content: format("{0}={1}", key, items[key]) });
+            });
+        }
+
+        return labelArray;
     }
 
     public static getPillTags(items: { [key: string]: string }): string[] {
@@ -105,5 +118,31 @@ export class Utils {
         }
 
         return { imageText: imageText, imageTooltipText: imageTooltipText };
+    }
+
+    public static getFirstImageName(podSpec: V1PodSpec | undefined): string {
+        if (podSpec && podSpec.containers && podSpec.containers.length > 0) {
+            return podSpec.containers[0].image;
+        }
+
+        return "";
+    }
+
+    public static getImageId(imageName: string, podMetadata: V1ObjectMeta, pods: V1Pod[]): string {
+        let imageId: string = "";
+        if (pods.length > 0) {
+            const matchingPod: V1Pod | undefined = pods.find(pod => { return pod.metadata && podMetadata && equals(pod.metadata.uid, podMetadata.uid, true) });
+            if (matchingPod) {
+                const podStatus = matchingPod.status;
+                if (podStatus.containerStatuses && podStatus.containerStatuses.length > 0) {
+                    const containerStatusForGivenImage = podStatus.containerStatuses.find(status => equals(status.image, imageName, true));
+                    if (containerStatusForGivenImage) {
+                        imageId = containerStatusForGivenImage.imageID;
+                    }
+                }
+            }
+        }
+
+        return imageId;
     }
 }

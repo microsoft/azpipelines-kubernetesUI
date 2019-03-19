@@ -2,10 +2,11 @@
     Copyright (c) Microsoft Corporation. All rights reserved.
     Licensed under the MIT license.
 */
-import { V1Deployment, V1DeploymentList, V1PodList, V1ReplicaSetList, V1Service, V1ServiceList, V1ReplicaSet,  V1DaemonSetList, V1StatefulSetList, V1DaemonSet, V1StatefulSet } from "@kubernetes/client-node";
+
+import { V1DaemonSet, V1DaemonSetList, V1Deployment, V1DeploymentList, V1PodList, V1ReplicaSet, V1ReplicaSetList, V1Service, V1ServiceList, V1StatefulSet, V1StatefulSetList } from "@kubernetes/client-node";
+import { IBaseProps } from "@uifabric/utilities";
 import { IObservable } from "azure-devops-ui/Core/Observable";
 import { IStatusProps } from "azure-devops-ui/Status";
-import { IBaseProps } from "@uifabric/utilities";
 
 export interface IKubernetesSummary {
     namespace?: string;
@@ -27,7 +28,8 @@ export interface IDeploymentReplicaSetItem {
     statusProps?: IStatusProps;
     showRowBorder?: boolean;
     deployment?: V1Deployment;
-    image: string;
+    imageId: string;
+    imageDisplayText: string;
     imageTooltip?: string;
     creationTimeStamp: Date;
     kind?: string;
@@ -49,14 +51,15 @@ export interface IServiceItem {
 export interface IDeploymentReplicaSetMap {
     deployment: V1Deployment;
     //this list is sorted in descending order
-    replicaSets:V1ReplicaSet[];
+    replicaSets: V1ReplicaSet[];
 }
 
 export interface ISetWorkloadTypeItem {
     name: string;
     uid: string;
     kind: string;
-    image: string;
+    imageId: string;
+    imageDisplayText: string;
     imageTooltip?: string;
     desiredPodCount: number;
     currentPodCount: number;
@@ -88,5 +91,4 @@ export interface IVssComponentProperties extends IBaseProps {
      * Any of the properties MAY be accessed as an IObservable.
      */
     [property: string]: IObservable<any> | any;
-
 }

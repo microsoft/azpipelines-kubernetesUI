@@ -15,11 +15,14 @@ import { ITableColumn, Table } from "azure-devops-ui/Table";
 import * as Date_Utils from "azure-devops-ui/Utilities/Date";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
+import { IImageDetails } from "../../Contracts/Types";
 import { defaultColumnRenderer, renderTableCell } from "../Common/KubeCardWithTable";
 import { KubeZeroData } from "../Common/KubeZeroData";
 import { PageTopHeader } from "../Common/PageTopHeader";
 import { Tags } from "../Common/Tags";
 import { StoreManager } from "../FluxCommon/StoreManager";
+import { ImageDetails } from "../ImageDetails/ImageDetails";
+import { ImageDetailsStore } from "../ImageDetails/ImageDetailsStore";
 import { PodsDetails } from "../Pods/PodsDetails";
 import { PodsStore } from "../Pods/PodsStore";
 import { PodsTable } from "../Pods/PodsTable";
@@ -27,6 +30,8 @@ import * as Resources from "../Resources";
 import { IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
 import "./WorkloadDetails.scss";
+import { Tooltip } from "azure-devops-ui/TooltipEx";
+import { Link } from "azure-devops-ui/Link";
 
 export interface IWorkloadDetailsProperties extends IVssComponentProperties {
     parentMetaData: V1ObjectMeta;
@@ -39,6 +44,8 @@ export interface IWorkloadDetailsState {
     pods: Array<V1Pod>;
     selectedPod: V1Pod | null;
     showSelectedPod: boolean;
+    showImageDetails: boolean;
+    selectedImageDetails: IImageDetails | undefined;
 }
 
 export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, IWorkloadDetailsState> {
@@ -47,9 +54,12 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
         this.state = {
             pods: [],
             selectedPod: null,
-            showSelectedPod: false
+            showSelectedPod: false,
+            showImageDetails: false,
+            selectedImageDetails: undefined
         };
         this._podsStore = StoreManager.GetStore<PodsStore>(PodsStore);
+        this._imageDetailsStore = StoreManager.GetStore<ImageDetailsStore>(ImageDetailsStore);
     }
 
     public render(): JSX.Element {
@@ -62,6 +72,11 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
                 selectedPod={this.state.selectedPod}
                 onBackButtonClick={this._setSelectedPodStateFalse}
             />);
+        }
+        else if (this.state.showImageDetails) {
+            return <ImageDetails
+                imageDetails={this.state.selectedImageDetails}
+                onBackButtonClick={this._hideImageDetails} />;
         }
 
         return (
@@ -99,14 +114,29 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
         });
     }
 
-    private static _getColumns(): ITableColumn<any>[] {
+    private _showImageDetails = (imageId: string) => {
+        const imageDetails = this._imageDetailsStore.getImageDetails(imageId);
+        this.setState({
+            showImageDetails: true,
+            selectedImageDetails: imageDetails
+        });
+    }
+
+    private _hideImageDetails = () => {
+        this.setState({
+            showImageDetails: false,
+            selectedImageDetails: undefined
+        });
+    }
+
+    private _getColumns = (): ITableColumn<any>[] => {
         const columns: ITableColumn<any>[] = [
             {
                 id: "w-image",
                 name: Resources.ImageText,
                 width: new ObservableValue(360),
                 minWidth: 250,
-                renderCell: WorkloadDetails._renderImageCell
+                renderCell: this._renderImageCell
             },
             {
                 id: "w-labels",
@@ -152,7 +182,7 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
                             showLines={false}
                             singleClickActivation={false}
                             itemProvider={new ArrayItemProvider<any>(tableItems)}
-                            columns={WorkloadDetails._getColumns()}
+                            columns={this._getColumns()}
                         />
                     </CardContent>
                 </CustomCard>
@@ -184,9 +214,27 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
         });
     }
 
-    private static _renderImageCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<any>, tableItem: any): JSX.Element {
-        const { imageText, imageTooltipText } = Utils.getImageText(tableItem.podTemplate.spec);
-        const itemToRender = defaultColumnRenderer(imageText, undefined, imageTooltipText);
+    private _renderImageCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<any>, tableItem: any): JSX.Element => {
+        const podslist = this._podsStore.getState().podsList;
+        const pods: V1Pod[] = podslist && podslist.items || [];
+        // todo :: fix if we have more than one image, what to do
+        const imageText = Utils.getFirstImageName(tableItem.podTemplate.spec);
+        const imageId = Utils.getImageId(imageText, tableItem.podTemplate.metadata, pods);
+        // Todo :: HardCoding hasImageDetails true for the time being, Should change it once we integrate with ImageService
+        // ToDo :: Revisit link paddings
+        // const hasImageDetails: boolean = this._imageDetailsStore.hasImageDetails(imageName);
+        const hasImageDetails = true;
+        const itemToRender = (
+            <Tooltip text={imageText} overflowOnly>
+                <Link
+                    className="fontSizeM text-ellipsis bolt-table-link bolt-table-inline-link bolt-link w-details-cell-value"
+                    onClick={() => hasImageDetails && this._showImageDetails(imageId)}
+                >
+                    {imageText || ""}
+                </Link>
+            </Tooltip>
+        );
+
         return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
@@ -196,4 +244,5 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
     }
 
     private _podsStore: PodsStore;
+    private _imageDetailsStore: ImageDetailsStore;
 }

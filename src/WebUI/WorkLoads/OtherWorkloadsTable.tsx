@@ -3,32 +3,37 @@
     Licensed under the MIT license.
 */
 
-import { V1DaemonSet, V1PodSpec, V1ReplicaSet, V1StatefulSet } from "@kubernetes/client-node";
+import { V1DaemonSet, V1Pod, V1PodSpec, V1ReplicaSet, V1StatefulSet } from "@kubernetes/client-node";
 import { BaseComponent } from "@uifabric/utilities";
 import { Ago } from "azure-devops-ui/Ago";
 import { CardContent, CustomCard } from "azure-devops-ui/Card";
 import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
-import { format } from "azure-devops-ui/Core/Util/String";
+import { equals, format } from "azure-devops-ui/Core/Util/String";
 import { CustomHeader, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
+import { Link } from "azure-devops-ui/Link";
 import { IStatusProps } from "azure-devops-ui/Status";
 import { ITableColumn, Table, TwoLineTableCell } from "azure-devops-ui/Table";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
-import { IKubeService } from "../../Contracts/Contracts";
+import { IImageService } from "../../Contracts/Contracts";
 import { KubeResourceType } from "../../Contracts/KubeServiceBase";
-import { defaultColumnRenderer, renderTableCell, renderPodsStatusTableCell } from "../Common/KubeCardWithTable";
-import { SelectedItemKeys, WorkloadsEvents } from "../Constants";
+import { defaultColumnRenderer, renderPodsStatusTableCell, renderTableCell } from "../Common/KubeCardWithTable";
+import { KubeSummary } from "../Common/KubeSummary";
+import { ImageDetailsEvents, SelectedItemKeys, WorkloadsEvents } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
+import { ImageDetailsActionsCreator } from "../ImageDetails/ImageDetailsActionsCreator";
+import { ImageDetailsStore } from "../ImageDetails/ImageDetailsStore";
+import { PodsStore } from "../Pods/PodsStore";
 import * as Resources from "../Resources";
 import { SelectionActionsCreator } from "../Selection/SelectionActionCreator";
 import { ISelectionPayload } from "../Selection/SelectionActions";
 import { ISetWorkloadTypeItem, IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
+import "./OtherWorkloadsTable.scss";
 import { WorkloadsActionsCreator } from "./WorkloadsActionsCreator";
 import { WorkloadsStore } from "./WorkloadsStore";
-import "./OtherWorkloadsTable.scss";
 
 const setNameKey = "otherwrkld-name-key";
 const imageKey = "otherwrkld-image-key";
@@ -36,7 +41,6 @@ const podsKey = "otherwrkld-pods-key";
 const ageKey = "otherwrkld-age-key";
 
 export interface IOtherWorkloadsProperties extends IVssComponentProperties {
-    kubeService: IKubeService;
     nameFilter?: string;
     typeFilter: KubeResourceType[];
 }
@@ -53,17 +57,20 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
 
         this._actionCreator = ActionsCreatorManager.GetActionCreator<WorkloadsActionsCreator>(WorkloadsActionsCreator);
         this._selectionActionCreator = ActionsCreatorManager.GetActionCreator<SelectionActionsCreator>(SelectionActionsCreator);
+        this._imageActionsCreator = ActionsCreatorManager.GetActionCreator<ImageDetailsActionsCreator>(ImageDetailsActionsCreator);
         this._store = StoreManager.GetStore<WorkloadsStore>(WorkloadsStore);
+        this._imageDetailsStore = StoreManager.GetStore<ImageDetailsStore>(ImageDetailsStore);
 
         this.state = { statefulSetList: [], daemonSetList: [], replicaSets: [] };
 
         this._store.addListener(WorkloadsEvents.StatefulSetsFetchedEvent, this._onStatefulSetsFetched);
         this._store.addListener(WorkloadsEvents.DaemonSetsFetchedEvent, this._onDaemonSetsFetched);
         this._store.addListener(WorkloadsEvents.ReplicaSetsFetchedEvent, this._onReplicaSetsFetched);
+        this._imageDetailsStore.addListener(ImageDetailsEvents.HasImageDetailsEvent, this._setHasImageDetails);
 
-        this._actionCreator.getStatefulSets(this.props.kubeService);
-        this._actionCreator.getDaemonSets(this.props.kubeService);
-        this._actionCreator.getReplicaSets(this.props.kubeService);
+        this._actionCreator.getStatefulSets(KubeSummary.getKubeService());
+        this._actionCreator.getDaemonSets(KubeSummary.getKubeService());
+        this._actionCreator.getReplicaSets(KubeSummary.getKubeService());
     }
 
     public render(): React.ReactNode {
@@ -90,7 +97,7 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
                             showLines={true}
                             singleClickActivation={true}
                             itemProvider={new ArrayItemProvider<ISetWorkloadTypeItem>(filteredSet)}
-                            columns={OtherWorkloads._getColumns()}
+                            columns={this._getColumns()}
                             onActivate={(event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>) => {
                                 this._openStatefulSetItem(event, tableRow, filteredSet[tableRow.index]);
                             }}
@@ -103,10 +110,16 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
         return null;
     }
 
+    public componentDidUpdate(): void {
+        const imageService = KubeSummary.getImageService();
+        imageService && this._imageActionsCreator.setHasImageDetails(imageService, this._imageList);
+    }
+
     public componentWillUnmount(): void {
         this._store.removeListener(WorkloadsEvents.StatefulSetsFetchedEvent, this._onStatefulSetsFetched);
         this._store.removeListener(WorkloadsEvents.DaemonSetsFetchedEvent, this._onDaemonSetsFetched);
         this._store.removeListener(WorkloadsEvents.ReplicaSetsFetchedEvent, this._onReplicaSetsFetched);
+        this._imageDetailsStore.removeListener(ImageDetailsEvents.HasImageDetailsEvent, this._setHasImageDetails);
     }
 
     private _onStatefulSetsFetched = (): void => {
@@ -132,6 +145,12 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
         })
     }
 
+    private _setHasImageDetails = (): void => {
+        const hasImageDetails = this._imageDetailsStore.getHasImageDetailsList();
+        this._hasImageDetails = hasImageDetails;
+        this.setState({});
+    }
+
     private _openStatefulSetItem = (event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>, selectedItem: ISetWorkloadTypeItem) => {
         if (selectedItem) {
             const payload: ISelectionPayload = {
@@ -145,7 +164,7 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
         }
     }
 
-    private static _getColumns(): ITableColumn<ISetWorkloadTypeItem>[] {
+    private _getColumns = (): ITableColumn<ISetWorkloadTypeItem>[] => {
         let columns: ITableColumn<ISetWorkloadTypeItem>[] = [];
         columns.push({
             id: setNameKey,
@@ -158,7 +177,7 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
             id: imageKey,
             name: Resources.ImageText,
             width: -72,
-            renderCell: OtherWorkloads._renderImageCell
+            renderCell: this._renderImageCell
         });
 
         columns.push({
@@ -178,51 +197,73 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
         return columns;
     }
 
-    private static _renderSetNameCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<ISetWorkloadTypeItem>, statefulSet: ISetWorkloadTypeItem): JSX.Element {
+    private static _renderSetNameCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<ISetWorkloadTypeItem>, workload: ISetWorkloadTypeItem): JSX.Element {
         return (
             <TwoLineTableCell
                 key={"col-" + columnIndex}
                 columnIndex={columnIndex}
                 tableColumn={tableColumn}
                 line1={
-                    <Tooltip overflowOnly={true} text={statefulSet.name}>
-                        <span className="fontWeightSemiBold text-ellipsis">{statefulSet.name}</span>
+                    <Tooltip overflowOnly={true} text={workload.name}>
+                        <span className="fontWeightSemiBold text-ellipsis">{workload.name}</span>
                     </Tooltip>
                 }
-                line2={<span className="fontSize secondary-text text-ellipsis">{OtherWorkloads._getSetType(statefulSet.kind)}</span>}
+                line2={<span className="fontSize secondary-text text-ellipsis">{OtherWorkloads._getSetType(workload.kind)}</span>}
             />
         );
     }
 
-    private static _renderImageCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<ISetWorkloadTypeItem>, statefulSet: ISetWorkloadTypeItem): JSX.Element {
-        const itemToRender = defaultColumnRenderer(statefulSet.image || "", undefined, statefulSet.imageTooltip || "");
+    private _renderImageCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<ISetWorkloadTypeItem>, workload: ISetWorkloadTypeItem): JSX.Element => {
+        const imageId = workload.imageId;
+        const imageText = workload.imageDisplayText;
+        // ToDo :: HardCoding hasImageDetails true for the time being, Should change it once we integrate with ImageService
+        // ToDo :: Revisit link paddings
+        //const hasImageDetails: boolean = this._hasImageDetails && this._hasImageDetails.hasOwnProperty(imageId) ? this._hasImageDetails[imageId] : false;
+        const hasImageDetails = true;
+        const itemToRender =
+            <Tooltip text={imageText} overflowOnly>
+                <Link
+                    className="fontSizeM text-ellipsis bolt-table-link bolt-table-inline-link bolt-link"
+                    onClick={() => hasImageDetails && this._onImageClick(KubeSummary.getImageService(), imageId, workload.uid)}>
+                    {imageText || ""}
+                </Link>
+            </Tooltip>;
+
         return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
-    private static _renderPodsCountCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<ISetWorkloadTypeItem>, statefulSet: ISetWorkloadTypeItem): JSX.Element {
+    private static _renderPodsCountCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<ISetWorkloadTypeItem>, workload: ISetWorkloadTypeItem): JSX.Element {
         let statusProps: IStatusProps | undefined;
         let podString: string = "";
-        if (statefulSet.desiredPodCount > 0) {
-            statusProps = Utils.getPodsStatusProps(statefulSet.desiredPodCount, statefulSet.currentPodCount);
-            podString = format("{0}/{1}", statefulSet.desiredPodCount, statefulSet.currentPodCount);
+        if (workload.desiredPodCount > 0) {
+            statusProps = Utils.getPodsStatusProps(workload.desiredPodCount, workload.currentPodCount);
+            podString = format("{0}/{1}", workload.desiredPodCount, workload.currentPodCount);
         }
 
         return renderPodsStatusTableCell(rowIndex, columnIndex, tableColumn, podString, statusProps);
     }
 
     private static _renderAgeCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<ISetWorkloadTypeItem>, statefulSet: ISetWorkloadTypeItem): JSX.Element {
-        const itemToRender = <Ago date={new Date(statefulSet.creationTimeStamp)} />;
+        const creationTime = statefulSet.creationTimeStamp ? statefulSet.creationTimeStamp : new Date();
+        const itemToRender = <Ago date={new Date(creationTime)} />;
         return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
     private _generateRenderData(): ISetWorkloadTypeItem[] {
         let data: ISetWorkloadTypeItem[] = [];
+        let imageId: string = "";
         this._showType(KubeResourceType.StatefulSets) && this.state.statefulSetList.forEach(set => {
+            imageId = this._getImageId(set);
+            if (this._imageList.length <= 0 || this._imageList.findIndex(img => equals(img, imageId, true)) < 0) {
+                this._imageList.push(imageId);
+            }
+
             data.push({
                 name: set.metadata.name,
                 uid: set.metadata.uid,
                 kind: SelectedItemKeys.StatefulSetKey,
                 creationTimeStamp: set.metadata.creationTimestamp,
+                imageId: imageId,
                 desiredPodCount: set.status.replicas,
                 currentPodCount: set.status.currentReplicas,
                 payload: set,
@@ -231,11 +272,17 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
         });
 
         this._showType(KubeResourceType.DaemonSets) && this.state.daemonSetList.forEach(set => {
+            imageId = this._getImageId(set);
+            if (this._imageList.length <= 0 || this._imageList.findIndex(img => equals(img, imageId, true)) < 0) {
+                this._imageList.push(imageId);
+            }
+
             data.push({
                 name: set.metadata.name,
                 uid: set.metadata.uid,
                 kind: SelectedItemKeys.DaemonSetKey,
                 creationTimeStamp: set.metadata.creationTimestamp,
+                imageId: imageId,
                 desiredPodCount: set.status.desiredNumberScheduled,
                 currentPodCount: set.status.currentNumberScheduled,
                 payload: set,
@@ -244,11 +291,17 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
         });
 
         this._showType(KubeResourceType.ReplicaSets) && this.state.replicaSets.forEach(set => {
+            imageId = this._getImageId(set);
+            if (this._imageList.length <= 0 || this._imageList.findIndex(img => equals(img, imageId, true)) < 0) {
+                this._imageList.push(imageId);
+            }
+
             data.push({
                 name: set.metadata.name,
                 uid: set.metadata.uid,
                 kind: SelectedItemKeys.ReplicaSetKey,
                 creationTimeStamp: set.metadata.creationTimestamp,
+                imageId: imageId,
                 desiredPodCount: set.status.replicas,
                 currentPodCount: set.status.availableReplicas,
                 payload: set,
@@ -259,13 +312,19 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
         return data;
     }
 
+    private _getImageId(set: V1ReplicaSet | V1DaemonSet | V1StatefulSet): string {
+        const podslist = StoreManager.GetStore<PodsStore>(PodsStore).getState().podsList;
+        const pods: V1Pod[] = podslist && podslist.items || [];
+        return Utils.getImageId(Utils.getFirstImageName(set.spec.template.spec), set.spec.template.metadata, pods);
+    }
+
     private _showType(type: KubeResourceType): boolean {
         return (this.props.typeFilter.length == 0 || this.props.typeFilter.indexOf(type) >= 0);
     }
 
-    private static _getImageText(spec: V1PodSpec): { image: string, imageTooltip?: string } {
+    private static _getImageText(spec: V1PodSpec): { imageDisplayText: string, imageTooltip?: string } {
         const { imageText, imageTooltipText } = Utils.getImageText(spec);
-        return { image: imageText, imageTooltip: imageTooltipText };
+        return { imageDisplayText: imageText, imageTooltip: imageTooltipText };
     }
 
     private static _getSetType(selectedItem: string): string {
@@ -281,7 +340,33 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
         return "";
     }
 
+    private _onImageClick = (imageService: IImageService | undefined, imageId: string, itemUid: string): void => {
+        // imageService && imageService.getImageDetails(imageId).then(imageDetails => {
+        //     if (imageDetails) {
+        //         const payload: ISelectionPayload = {
+        //             item: imageDetails,
+        //             itemUID: itemUid,
+        //             showSelectedItem: true,
+        //             selectedItemType: SelectedItemKeys.ImageDetailsKey
+        //         };
+        //         this._selectionActionCreator.selectItem(payload);
+        //     }
+        // });
+
+        const payload: ISelectionPayload = {
+            item: undefined,
+            itemUID: itemUid,
+            showSelectedItem: true,
+            selectedItemType: SelectedItemKeys.ImageDetailsKey
+        };
+        this._selectionActionCreator.selectItem(payload);
+    }
+
     private _store: WorkloadsStore;
     private _actionCreator: WorkloadsActionsCreator;
     private _selectionActionCreator: SelectionActionsCreator;
+    private _imageActionsCreator: ImageDetailsActionsCreator;
+    private _imageDetailsStore: ImageDetailsStore;
+    private _imageList: string[] = [];
+    private _hasImageDetails: { [key: string]: boolean };
 }
