@@ -19,24 +19,7 @@ export class PageTopHeader extends BaseComponent<IPageTopHeader> {
         const { title, statusProps } = this.props;
         return (
             <CustomHeader>
-                {
-                    statusProps &&
-                    <HeaderIcon
-                        className="bolt-table-status-icon-large"
-                        iconProps={{
-                            render: (className?: string) => {
-                                return (
-                                    <div className="flex-row">
-                                        {
-                                            statusProps &&
-                                            <Status {...statusProps} className={className} size={StatusSize.l} />
-                                        }
-                                    </div>
-                                );
-                            }
-                        }}
-                    />
-                }
+                {PageTopHeader._getHeaderIcon(statusProps)}
                 <HeaderTitleArea>
                     <HeaderTitleRow>
                         <HeaderTitle titleSize={TitleSize.Large}>{title || ""}</HeaderTitle>
@@ -44,5 +27,17 @@ export class PageTopHeader extends BaseComponent<IPageTopHeader> {
                 </HeaderTitleArea>
             </CustomHeader>
         );
+    }
+
+    private static _getHeaderIcon(statusProps?: IStatusProps): JSX.Element | undefined {
+        const statusComponent = (statusProps, className) => <Status {...statusProps} className={className} size={StatusSize.l} />;
+
+        return statusProps &&
+            <HeaderIcon
+                className="bolt-table-status-icon-large"
+                iconProps={{
+                    render: (className?: string) => <div className="flex-row">{statusComponent(statusProps, className)}</div>
+                }}
+            />;
     }
 }
