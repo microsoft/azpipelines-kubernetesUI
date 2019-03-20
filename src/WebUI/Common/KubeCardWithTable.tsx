@@ -5,7 +5,7 @@
 
 import { BaseComponent, css } from "@uifabric/utilities";
 import { CardContent, CustomCard } from "azure-devops-ui/Card";
-import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
+import { ITableRow, TableColumnStyle } from "azure-devops-ui/Components/Table/Table.Props";
 import { CustomHeader, HeaderDescription, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
 import { Link } from "azure-devops-ui/Link";
 import { IStatusProps, Status, StatusSize } from "azure-devops-ui/Status";
@@ -110,12 +110,18 @@ export function renderTableCell(
     statusProps?: IResourceStatusProps,
     contentClassName?: string
 ): JSX.Element {
+    const { columnStyle } = tableColumn;
     return (
         <SimpleTableCell
+            className={css(
+                columnStyle === TableColumnStyle.Primary && "bolt-table-cell-primary",
+                columnStyle === TableColumnStyle.Secondary && "bolt-table-cell-secondary",
+                columnStyle === TableColumnStyle.Tertiary && "bolt-table-cell-tertiary"
+            )}
             contentClassName={contentClassName || ""}
             columnIndex={columnIndex}
             tableColumn={tableColumn}
-            key={format("row-{0}-col-{1}", rowIndex, columnIndex)}
+            key={columnIndex}
         >
             {statusProps && <ResourceStatus {...statusProps} />}
             {itemToRender}

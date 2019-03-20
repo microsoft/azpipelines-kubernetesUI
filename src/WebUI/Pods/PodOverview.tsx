@@ -11,7 +11,7 @@ import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { format, localeFormat } from "azure-devops-ui/Core/Util/String";
 import { CustomHeader, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
 import { MessageCard, MessageCardSeverity } from "azure-devops-ui/MessageCard";
-import { ColumnFill, ITableColumn, SimpleTableCell as renderSimpleTableCell, Table } from "azure-devops-ui/Table";
+import { ITableColumn, SimpleTableCell as renderSimpleTableCell, Table, TableColumnStyle } from "azure-devops-ui/Table";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
 import { AgoFormat } from "azure-devops-ui/Utilities/Date";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
@@ -32,16 +32,16 @@ export class PodOverview extends BaseComponent<IPodOverviewProps> {
             {
                 id: "key",
                 name: "key",
-                width: new ObservableValue(150),
                 className: "pod-overview-key-col",
-                minWidth: 100,
+                width: new ObservableValue(150),
+                columnStyle: TableColumnStyle.Tertiary,
                 renderCell: PodOverview._renderKeyCell
             },
             {
                 id: "value",
                 name: "value",
-                width: new ObservableValue(500),
                 className: "pod-overview-value-col",
+                width: -100,
                 minWidth: 400,
                 renderCell: PodOverview._renderValueCell
             }
@@ -50,7 +50,6 @@ export class PodOverview extends BaseComponent<IPodOverviewProps> {
         const { imageText, imageTooltipText } = Utils.getImageText(pod.spec);
 
         const tableRows = new ArrayItemProvider<any>([
-            { key: Resources.StatusText, value: localeFormat("{0}{1}", pod.status.phase, !pod.status.reason ? "" : localeFormat(" | {0}", pod.status.reason)) },
             { key: Resources.Created, value: pod.metadata.creationTimestamp ? new Date(pod.metadata.creationTimestamp) : new Date().getTime() },
             { key: Resources.AnnotationsText, value: pod.metadata.annotations || "" },
             { key: Resources.RestartPolicyText, value: pod.spec.restartPolicy || "" },
@@ -58,7 +57,9 @@ export class PodOverview extends BaseComponent<IPodOverviewProps> {
             { key: Resources.NodeText, value: pod.spec.nodeName || "" },
             { key: Resources.ClusterIPText, value: "" },
             { key: Resources.ImageText, value: imageText, valueTooltipText: imageTooltipText },
-            { key: Resources.LabelsText, value: pod.metadata.labels || "" }
+            { key: Resources.LabelsText, value: pod.metadata.labels || "" },
+            { key: Resources.StatusText, value: localeFormat("{0}{1}", pod.status.phase, !pod.status.reason ? "" : localeFormat(" | {0}", pod.status.reason)) },
+            { key: Resources.ConditionsText, value: this._getPodConditionsText(pod) },
         ]);
 
         const podErrorMessage = pod.status.message;
@@ -93,6 +94,15 @@ export class PodOverview extends BaseComponent<IPodOverviewProps> {
         );
     }
 
+    private _getPodConditionsText(pod: V1Pod): string {
+        let conditions: string[] = [];
+        if (pod.status && pod.status.conditions) {
+            conditions = (pod.status.conditions || []).map<string>(condition => localeFormat("{0}={1}", condition.type || "", condition.status || ""));
+        }
+
+        return conditions.join("; ") || "";
+    }
+
     private static _renderKeyCell(
         rowIndex: number,
         columnIndex: number,
@@ -103,7 +113,7 @@ export class PodOverview extends BaseComponent<IPodOverviewProps> {
 
         const itemToRender = (
             <Tooltip text={key} overflowOnly>
-                <span className={css("text-ellipsis secondary-text")}>{key}</span>
+                <span className={css("text-ellipsis")}>{key}</span>
             </Tooltip>
         );
 

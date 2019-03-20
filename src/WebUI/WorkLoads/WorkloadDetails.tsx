@@ -218,24 +218,25 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
         const podslist = this._podsStore.getState().podsList;
         const pods: V1Pod[] = podslist && podslist.items || [];
         // todo :: fix if we have more than one image, what to do
-        const imageText = Utils.getFirstImageName(tableItem.podTemplate.spec);
+        const imageText = Utils.getFirstImageName(tableItem.podTemplate.spec) || "";
         const imageId = Utils.getImageId(imageText, tableItem.podTemplate.metadata, pods);
         // Todo :: HardCoding hasImageDetails true for the time being, Should change it once we integrate with ImageService
         // ToDo :: Revisit link paddings
         // const hasImageDetails: boolean = this._imageDetailsStore.hasImageDetails(imageName);
         const hasImageDetails = true;
         const itemToRender = (
-            <Tooltip text={imageText} overflowOnly>
+            <Tooltip overflowOnly={true}>
                 <Link
-                    className="fontSizeM text-ellipsis bolt-table-link bolt-table-inline-link bolt-link w-details-cell-value"
+                    className="fontSizeM text-ellipsis bolt-table-link"
+                    excludeTabStop={true}
                     onClick={() => hasImageDetails && this._showImageDetails(imageId)}
                 >
-                    {imageText || ""}
+                    {imageText}
                 </Link>
             </Tooltip>
         );
 
-        return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
+        return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender, undefined, "bolt-table-cell-content-with-link");
     }
 
     private static _renderLabelsCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<any>, tableItem: any): JSX.Element {

@@ -6,6 +6,7 @@ define("Environments/Providers/Kubernetes/Resources", ["require", "exports"], fu
     exports.AgeText = "Created";
     exports.NameText = "Name";
     exports.StatusText = "Status";
+    exports.ConditionsText = "Conditions";
     exports.ImageText = "Image";
     exports.PodsDetailsText = "Pod";
     exports.StrategyText = "Strategy";

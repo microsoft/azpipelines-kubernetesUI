@@ -34,6 +34,7 @@ import { Utils } from "../Utils";
 import "./OtherWorkloadsTable.scss";
 import { WorkloadsActionsCreator } from "./WorkloadsActionsCreator";
 import { WorkloadsStore } from "./WorkloadsStore";
+import { ObservableValue } from "azure-devops-ui/Core/Observable";
 
 const setNameKey = "otherwrkld-name-key";
 const imageKey = "otherwrkld-image-key";
@@ -169,7 +170,7 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
         columns.push({
             id: setNameKey,
             name: Resources.NameText,
-            width: 348,
+            width: new ObservableValue(348),
             renderCell: OtherWorkloads._renderSetNameCell
         });
 
@@ -183,7 +184,7 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
         columns.push({
             id: podsKey,
             name: Resources.PodsText,
-            width: 140,
+            width: new ObservableValue(140),
             renderCell: OtherWorkloads._renderPodsCountCell
         });
 
@@ -215,21 +216,22 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
 
     private _renderImageCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<ISetWorkloadTypeItem>, workload: ISetWorkloadTypeItem): JSX.Element => {
         const imageId = workload.imageId;
-        const imageText = workload.imageDisplayText;
+        const imageText = workload.imageDisplayText || "";
         // ToDo :: HardCoding hasImageDetails true for the time being, Should change it once we integrate with ImageService
         // ToDo :: Revisit link paddings
         //const hasImageDetails: boolean = this._hasImageDetails && this._hasImageDetails.hasOwnProperty(imageId) ? this._hasImageDetails[imageId] : false;
         const hasImageDetails = true;
         const itemToRender =
-            <Tooltip text={imageText} overflowOnly>
+            <Tooltip overflowOnly={true}>
                 <Link
-                    className="fontSizeM text-ellipsis bolt-table-link bolt-table-inline-link bolt-link"
+                    className="fontSizeM text-ellipsis bolt-table-link"
+                    excludeTabStop={true}
                     onClick={() => hasImageDetails && this._onImageClick(KubeSummary.getImageService(), imageId, workload.uid)}>
-                    {imageText || ""}
+                    {imageText}
                 </Link>
             </Tooltip>;
 
-        return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
+        return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender, undefined, "bolt-table-cell-content-with-link");
     }
 
     private static _renderPodsCountCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<ISetWorkloadTypeItem>, workload: ISetWorkloadTypeItem): JSX.Element {

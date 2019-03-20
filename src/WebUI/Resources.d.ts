@@ -4,6 +4,7 @@
 */
 export declare const NameText: string;
 export declare const StatusText: string;
+export declare const ConditionsText: string;
 export declare const ImageText: string;
 export declare const PodsDetailsText: string;
 export declare const StrategyText: string;

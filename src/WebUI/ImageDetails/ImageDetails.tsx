@@ -10,7 +10,7 @@ import { format, localeFormat } from "azure-devops-ui/Core/Util/String";
 import { CustomHeader, HeaderIcon, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
 import { LabelGroup, WrappingBehavior } from "azure-devops-ui/Label";
 import { Page } from "azure-devops-ui/Page";
-import { ColumnFill, ITableColumn, SimpleTableCell as renderSimpleTableCell, Table } from "azure-devops-ui/Table";
+import { ColumnFill, ITableColumn, SimpleTableCell as renderSimpleTableCell, Table, TableColumnStyle } from "azure-devops-ui/Table";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
 import { IImageDetails, IImageLayer } from "../../Contracts/Types";
@@ -21,6 +21,7 @@ import { Utils } from "../Utils";
 import "./ImageDetails.scss";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
 import { AgoFormat } from "azure-devops-ui/Utilities/Date";
+import { ObservableValue } from "azure-devops-ui/Core/Observable";
 
 export interface IImageDetailsProperties extends IVssComponentProperties {
     imageDetails?: IImageDetails;
@@ -70,8 +71,9 @@ export class ImageDetails extends BaseComponent<IImageDetailsProperties, IImageD
             {
                 id: "key",
                 name: "key",
-                width: 150,
+                width: new ObservableValue(150),
                 className: "image-details-key",
+                columnStyle: TableColumnStyle.Tertiary,
                 renderCell: ImageDetails._renderKeyCell
             },
             {
@@ -161,7 +163,7 @@ export class ImageDetails extends BaseComponent<IImageDetailsProperties, IImageD
 
         const itemToRender = (
             <Tooltip text={key} overflowOnly>
-                <span className={css("text-ellipsis secondary-text")}>{key}</span>
+                <span className={css("text-ellipsis")}>{key}</span>
             </Tooltip>
         );
 
@@ -203,7 +205,7 @@ export class ImageDetails extends BaseComponent<IImageDetailsProperties, IImageD
             id: "image-layer-directive-col",
             name: Resources.CommandText,
             width: -82,
-            minWidth: 100,
+            minWidth: 300,
             headerClassName: headerColumnClassName,
             className: columnContentClassName,
             renderCell: ImageDetails._renderLayersCommandCell
@@ -212,7 +214,7 @@ export class ImageDetails extends BaseComponent<IImageDetailsProperties, IImageD
         columns.push({
             id: "image-layer-size-col",
             name: Resources.SizeText,
-            width: 172,
+            width: new ObservableValue(172),
             headerClassName: headerColumnClassName,
             className: columnContentClassName,
             renderCell: ImageDetails._renderLayersSizeCell
@@ -222,7 +224,7 @@ export class ImageDetails extends BaseComponent<IImageDetailsProperties, IImageD
             id: "image-layer-created-col",
             name: Resources.AgeText,
             width: -18,
-            minWidth: 100,
+            minWidth: 150,
             headerClassName: headerColumnClassName,
             className: columnContentClassName,
             renderCell: ImageDetails._renderLayersAgeCell
