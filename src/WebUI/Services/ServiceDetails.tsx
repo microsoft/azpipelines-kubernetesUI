@@ -10,8 +10,7 @@ import { localeFormat } from "azure-devops-ui/Core/Util/String";
 import { CustomHeader, HeaderDescription, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
 import { Page } from "azure-devops-ui/Page";
 import { Statuses } from "azure-devops-ui/Status";
-import { ITableColumn, Table } from "azure-devops-ui/Table";
-import { Tooltip } from "azure-devops-ui/TooltipEx";
+import { ITableColumn, renderSimpleCell, Table } from "azure-devops-ui/Table";
 import * as Date_Utils from "azure-devops-ui/Utilities/Date";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
@@ -103,67 +102,14 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
         return null;
     }
 
-    private static _getColumns(): ITableColumn<IServiceItem>[] {
-        const columns: ITableColumn<any>[] = [
-            {
-                id: "type",
-                name: Resources.TypeText,
-                width: -100,
-                minWidth: 80,
-                renderCell: ServiceDetails._renderTextCell
-            },
-            {
-                id: "clusterIp",
-                name: Resources.ClusterIPText,
-                width: -100,
-                minWidth: 80,
-                renderCell: ServiceDetails._renderTextCell
-            },
-            {
-                id: "externalIp",
-                name: Resources.ExternalIPText,
-                width: -100,
-                minWidth: 80,
-                renderCell: ServiceDetails._renderTextCell
-            },
-            {
-                id: "port",
-                name: Resources.PortText,
-                width: -100,
-                minWidth: 80,
-                renderCell: ServiceDetails._renderTextCell
-            },
-            {
-                id: "sessAffinity",
-                name: Resources.SessionAffinityText,
-                width: -100,
-                minWidth: 80,
-                renderCell: ServiceDetails._renderTextCell
-            },
-            {
-                id: "selector",
-                name: Resources.SelectorText,
-                width: -100,
-                minWidth: 150,
-                renderCell: ServiceDetails._renderTags
-            },
-            {
-                id: "labels",
-                name: Resources.LabelsText,
-                width: -100,
-                minWidth: 200,
-                renderCell: ServiceDetails._renderTags
-            }
-        ];
-
-        return columns;
-    }
-
     private _getServiceDetails(): JSX.Element | null {
         const item = this.props.service;
         if (item && item.service) {
-            const tableItems: IServiceItem[] = [item];
+            const tableItems: IServiceItem[] = [ServiceDetails._getServiceDetailsObject(item)];
             const agoTime = Date_Utils.ago(new Date(item.creationTimestamp), Date_Utils.AgoFormat.Compact);
+            const pipelineText = item.pipeline
+                ? localeFormat(Resources.ServiceCreatedWithPipelineText, agoTime, item.pipeline)
+                : localeFormat(Resources.CreatedAgo, agoTime);
 
             return (
                 <CustomCard className="service-details-card k8s-card-padding flex-grow bolt-card-no-vertical-padding">
@@ -175,11 +121,7 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
                                 </HeaderTitle>
                             </HeaderTitleRow>
                             <HeaderDescription className={"text-ellipsis"}>
-                                {
-                                    item.pipeline
-                                        ? localeFormat(Resources.ServiceCreatedWithPipelineText, agoTime, item.pipeline)
-                                        : localeFormat(Resources.CreatedAgo, agoTime)
-                                }
+                                {pipelineText}
                             </HeaderDescription>
                         </HeaderTitleArea>
                     </CustomHeader>
@@ -237,53 +179,76 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
         });
     }
 
-    private static _renderTextCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, service: IServiceItem): JSX.Element {
-        const text = ServiceDetails._getCellText(tableColumn, rowIndex, service);
-        const itemToRender = (
-            <Tooltip text={text} overflowOnly>
-                <span className="text-ellipsis">{text}</span>
-            </Tooltip>
-        );
-
-        return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
+    private static _getServiceDetailsObject(item: IServiceItem): any {
+        return {
+            type: item.type,
+            clusterIP: item.clusterIP,
+            externalIP: item.externalIP,
+            port: item.port,
+            sessionAffinity: item.service ? item.service.spec.sessionAffinity : "",
+            selector: item.service ? item.service.spec.selector : {},
+            labels: item.service ? item.service.metadata.labels : {}
+        };
     }
 
-    private static _getCellText(tableColumn: ITableColumn<IServiceItem>, rowIndex: number, service:IServiceItem): string {
-        let textToRender: string = "";
-        switch (tableColumn.id) {
-            case "type":
-                textToRender = service.type;
-                break;
-            case "clusterIp":
-                textToRender = service.clusterIP;
-                break;
-            case "externalIp":
-                textToRender = service.externalIP;
-                break;
-            case "port":
-                textToRender = service.port;
-                break;
-            case "sessAffinity":
-                textToRender = service.service ? service.service.spec.sessionAffinity : "";
-                break;
-        }
+    private static _getColumns(): ITableColumn<IServiceItem>[] {
+        const columns: ITableColumn<any>[] = [
+            {
+                id: "type",
+                name: Resources.TypeText,
+                width: -100,
+                minWidth: 104,
+                renderCell: renderSimpleCell
+            },
+            {
+                id: "clusterIP",
+                name: Resources.ClusterIPText,
+                width: -100,
+                minWidth: 104,
+                renderCell: renderSimpleCell
+            },
+            {
+                id: "externalIP",
+                name: Resources.ExternalIPText,
+                width: -100,
+                minWidth: 104,
+                renderCell: renderSimpleCell
+            },
+            {
+                id: "port",
+                name: Resources.PortText,
+                width: -100,
+                minWidth: 104,
+                renderCell: renderSimpleCell
+            },
+            {
+                id: "sessionAffinity",
+                name: Resources.SessionAffinityText,
+                width: -100,
+                minWidth: 104,
+                renderCell: renderSimpleCell
+            },
+            {
+                id: "selector",
+                name: Resources.SelectorText,
+                width: -100,
+                minWidth: 120,
+                renderCell: ServiceDetails._renderTags
+            },
+            {
+                id: "labels",
+                name: Resources.LabelsText,
+                width: -100,
+                minWidth: 312,
+                renderCell: ServiceDetails._renderTags
+            }
+        ];
 
-        return textToRender;
+        return columns;
     }
 
-    private static _renderTags(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, item: IServiceItem): JSX.Element {
-        let labelsArray: { [key: string]: string } = {};
-
-        switch (tableColumn.id) {
-            case "selector":
-                labelsArray = item.service ? item.service.spec.selector : {};
-                break;
-            case "labels":
-                labelsArray = item.service ? item.service.metadata.labels : {};
-                break;
-        }
-
-        const itemToRender: React.ReactNode = <Tags items={labelsArray} />;
+    private static _renderTags(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, item: any): JSX.Element {
+        const itemToRender: React.ReactNode = <Tags items={item[tableColumn.id]} />;
         return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 

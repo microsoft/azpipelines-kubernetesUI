@@ -7,6 +7,7 @@ import { BaseComponent, css } from "@uifabric/utilities";
 import React = require("react");
 import { Utils } from "../Utils";
 import { Pill, PillSize } from "azure-devops-ui/Pill";
+import { PillGroup, PillGroupOverflow  } from "azure-devops-ui/PillGroup";
 import "./Tags.scss";
 
 export interface ITagsProperties extends IVssComponentProperties {
@@ -14,14 +15,15 @@ export interface ITagsProperties extends IVssComponentProperties {
 }
 
 export class Tags extends BaseComponent<ITagsProperties> {
+    darkColor: any;
     public render(): React.ReactNode {
         return (
-            <div className={css(this.props.className, "k8s-tags flex-row")}>
+            <PillGroup className={css(this.props.className, "k8s-tags flex-row")} overflow={PillGroupOverflow.fade}>
                 {
                     Utils.getPillTags(this.props.items)
                         .map((tagText, index) => <Pill key={index} className="k8s-tag-pill" size={PillSize.compact}>{tagText}</Pill>)
                 }
-            </div>
+            </PillGroup>
         );
     }
 }

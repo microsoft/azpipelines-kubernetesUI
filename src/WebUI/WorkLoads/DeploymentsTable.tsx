@@ -35,6 +35,7 @@ import { Utils } from "../Utils";
 import "./DeploymentsTable.scss";
 import { WorkloadsActionsCreator } from "./WorkloadsActionsCreator";
 import { WorkloadsStore } from "./WorkloadsStore";
+import { ObservableValue } from "azure-devops-ui/Core/Observable";
 
 const replicaSetNameKey: string = "replicaSet-col";
 const podsKey: string = "pods-col";
@@ -250,7 +251,7 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
         columns.push({
             id: replicaSetNameKey,
             name: Resources.ReplicaSetText,
-            width: 348,
+            width: new ObservableValue(348),
             renderCell: DeploymentsTable._renderReplicaSetNameCell
         });
         columns.push({
@@ -262,7 +263,7 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
         columns.push({
             id: podsKey,
             name: Resources.PodsText,
-            width: 140,
+            width: new ObservableValue(140),
             renderCell: DeploymentsTable._renderPodsCountCell
         });
         columns.push({
@@ -285,21 +286,24 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
     }
 
     private _renderImageCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IDeploymentReplicaSetItem>, deployment: IDeploymentReplicaSetItem): JSX.Element => {
-        const textToRender: string = deployment.imageDisplayText;
+        const textToRender: string = deployment.imageDisplayText || "";
         const imageId: string = deployment.imageId;
         // ToDo :: HardCoding hasImageDetails true for the time being, Should change it once we integrate with ImageService
         // ToDo: Revisit link paddings
         // const hasImageDetails: boolean = this._hasImageDetails && this._hasImageDetails.hasOwnProperty(firstImageName) ? this._hasImageDetails[firstImageName] : false;
         const hasImageDetails = true;
         const itemToRender =
-            <Tooltip text={textToRender} overflowOnly>
+            <Tooltip overflowOnly={true}>
                 <Link
-                    className="fontSizeM text-ellipsis bolt-table-link bolt-table-inline-link bolt-link"
-                    onClick={() => hasImageDetails && this._onImageClick(KubeSummary.getImageService(), imageId)}>
-                    {textToRender || ""}
+                    className="fontSizeM text-ellipsis bolt-table-link"
+                    excludeTabStop={true}
+                    onClick={() => hasImageDetails && this._onImageClick(KubeSummary.getImageService(), imageId)}
+                >
+                    {textToRender}
                 </Link>
             </Tooltip>;
-        return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
+
+        return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender, undefined, "bolt-table-cell-content-with-link");
     }
 
     private static _renderAgeCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IDeploymentReplicaSetItem>, deployment: IDeploymentReplicaSetItem): JSX.Element {

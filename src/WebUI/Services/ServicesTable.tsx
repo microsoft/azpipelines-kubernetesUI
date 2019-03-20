@@ -8,13 +8,14 @@ import { BaseComponent } from "@uifabric/utilities";
 import { Ago } from "azure-devops-ui/Ago";
 import { Card } from "azure-devops-ui/Card";
 import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
+import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { localeFormat } from "azure-devops-ui/Core/Util/String";
 import { IStatusProps, Status, Statuses, StatusSize } from "azure-devops-ui/Status";
-import { ITableColumn, Table, TwoLineTableCell } from "azure-devops-ui/Table";
+import { ITableColumn, Table, TwoLineTableCell, renderSimpleCell } from "azure-devops-ui/Table";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
-import { defaultColumnRenderer, renderTableCell } from "../Common/KubeCardWithTable";
+import { renderTableCell } from "../Common/KubeCardWithTable";
 import { KubeZeroData } from "../Common/KubeZeroData";
 import { SelectedItemKeys } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
@@ -24,11 +25,6 @@ import { ISelectionPayload } from "../Selection/SelectionActions";
 import { IServiceItem, IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
 
-const packageKey: string = "package-col";
-const clusterIPKey: string = "cluster-ip-col";
-const externalIPKey: string = "external-ip-col";
-const portKey: string = "port-col";
-const ageKey: string = "age-col";
 const loadBalancerKey: string = "LoadBalancer";
 
 export interface IServicesComponentProperties extends IVssComponentProperties {
@@ -80,10 +76,10 @@ export class ServicesTable extends BaseComponent<IServicesComponentProperties> {
             items.push({
                 package: service.metadata.name,
                 type: service.spec.type,
-                clusterIP: service.spec.clusterIP,
-                externalIP: this._getExternalIP(service),
-                port: this._getPort(service),
-                creationTimestamp: service.metadata.creationTimestamp,
+                clusterIP: service.spec.clusterIP || Resources.NoneText,
+                externalIP: this._getExternalIP(service) || Resources.NoneText,
+                port: this._getPort(service) || "",
+                creationTimestamp: service.metadata.creationTimestamp || new Date(),
                 uid: service.metadata.uid.toLowerCase(),
                 pipeline: Utils.getPipelineText(service.metadata.annotations),
                 service: service,
@@ -96,11 +92,11 @@ export class ServicesTable extends BaseComponent<IServicesComponentProperties> {
 
     private _openServiceItem = (event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>, selectedItem: IServiceItem) => {
         if (selectedItem) {
-            const payload: ISelectionPayload = { 
-                item: selectedItem, 
+            const payload: ISelectionPayload = {
+                item: selectedItem,
                 itemUID: (selectedItem.service as V1Service).metadata.uid,
-                showSelectedItem: true, 
-                selectedItemType: SelectedItemKeys.ServiceItemKey 
+                showSelectedItem: true,
+                selectedItemType: SelectedItemKeys.ServiceItemKey
             };
 
             this._selectionActionCreator.selectItem(payload);
@@ -134,40 +130,40 @@ export class ServicesTable extends BaseComponent<IServicesComponentProperties> {
     }
 
     private static _getColumns(): ITableColumn<IServiceItem>[] {
-        let columns: ITableColumn<IServiceItem>[] = [];
+        let columns: ITableColumn<any>[] = [];
 
         // negative widths are interpreted as percentages.
         // since we want the table columns to occupy full available width, setting width - 100 which is equivalent to 100 %
         columns.push({
-            id: packageKey,
+            id: "package",
             name: Resources.NameText,
             width: -70,
             renderCell: ServicesTable._renderPackageKeyCell
         });
 
         columns.push({
-            id: clusterIPKey,
+            id: "clusterIP",
             name: Resources.ClusterIPText,
             width: -15,
-            renderCell: ServicesTable._renderClusterIpCell
+            renderCell: renderSimpleCell
         });
 
         columns.push({
-            id: externalIPKey,
+            id: "externalIP",
             name: Resources.ExternalIPText,
-            width: 172,
-            renderCell: ServicesTable._renderExternalIpCell
+            width: new ObservableValue(172),
+            renderCell: renderSimpleCell
         });
 
         columns.push({
-            id: portKey,
+            id: "port",
             name: Resources.PortText,
-            width: 200,
-            renderCell: ServicesTable._renderPortCell
+            width: new ObservableValue(200),
+            renderCell: renderSimpleCell
         });
 
         columns.push({
-            id: ageKey,
+            id: "creationTimestamp",
             name: Resources.AgeText,
             width: -15,
             renderCell: ServicesTable._renderAgeCell
@@ -180,29 +176,12 @@ export class ServicesTable extends BaseComponent<IServicesComponentProperties> {
         return ServicesTable._getServiceStatusWithName(service, columnIndex, tableColumn);
     }
 
-    private static _renderClusterIpCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, service: IServiceItem): JSX.Element => {
-        return ServicesTable._renderTextCell(rowIndex, columnIndex, tableColumn, service.clusterIP, Resources.NoneText);
-    }
-
-    private static _renderExternalIpCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, service: IServiceItem): JSX.Element => {
-        return ServicesTable._renderTextCell(rowIndex, columnIndex, tableColumn, service.externalIP, Resources.NoneText);
-    }
-
-    private static _renderPortCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, service: IServiceItem): JSX.Element => {
-        return ServicesTable._renderTextCell(rowIndex, columnIndex, tableColumn, service.port, "");
-    }
-
-    private static _renderTextCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, text: string, defaultText: string): JSX.Element => {
-        const itemToRender = defaultColumnRenderer(text || defaultText || "");
-        return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
-    }
-
     private static _renderAgeCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, service: IServiceItem): JSX.Element => {
         const itemToRender = <Ago date={new Date(service.creationTimestamp)} />;
         return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
-    private static _getServiceStatusWithName(service: IServiceItem, columnIndex: number, tableColumn: ITableColumn<IServiceItem>): JSX.Element{
+    private static _getServiceStatusWithName(service: IServiceItem, columnIndex: number, tableColumn: ITableColumn<IServiceItem>): JSX.Element {
         let statusProps: IStatusProps = Statuses.Success;
         let tooltipText: string = "";
         if (service.type === loadBalancerKey) {

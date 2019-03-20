@@ -11,7 +11,7 @@ import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
 import { localeFormat } from "azure-devops-ui/Core/Util/String";
 import { CustomHeader, HeaderDescription, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
 import { Link } from "azure-devops-ui/Link";
-import { ITableColumn, Table } from "azure-devops-ui/Table";
+import { ITableColumn, Table, renderSimpleCell } from "azure-devops-ui/Table";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
@@ -24,10 +24,10 @@ import { IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
 import { AgoFormat } from "azure-devops-ui/Utilities/Date";
 import "./PodsTable.scss";
+import { ObservableValue } from "azure-devops-ui/Core/Observable";
 
 const podNameKey: string = "pl-name-key";
 const podWorkloadsKey: string = "pl-wrkld-key";
-const podStatusKey: string = "pl-status-key";
 const podAgeKey: string = "pl-age-key";
 const RunningStatusKey: string = "running";
 
@@ -96,15 +96,18 @@ export class PodsTable extends BaseComponent<IPodsTableProperties> {
         columns.push({
             id: podNameKey,
             name: Resources.PodsDetailsText,
-            width: showWorkloadsColumn ? -58 : 362,
+            width: showWorkloadsColumn ? -58 : new ObservableValue(362),
             renderCell: PodsTable._renderPodNameCell
         });
 
         columns.push({
-            id: podStatusKey,
+            id: "podStatus",
             name: Resources.StatusText,
-            width: showWorkloadsColumn ? 220 : 256,
-            renderCell: PodsTable._renderPodStatusCell
+            width: new ObservableValue(showWorkloadsColumn ? 220 : 256),
+            renderCell: (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod) => {
+                const textToRender: string = pod.status.message ? pod.status.reason : pod.status.phase;
+                return renderSimpleCell(rowIndex, columnIndex, tableColumn as any, { "podStatus": textToRender });
+            }
         });
 
         if (showWorkloadsColumn) {
@@ -147,28 +150,20 @@ export class PodsTable extends BaseComponent<IPodsTableProperties> {
 
     private static _renderPodWorkload(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod): JSX.Element {
         const textToRender = pod.metadata && pod.metadata.ownerReferences && pod.metadata.ownerReferences.length > 0 ? pod.metadata.ownerReferences[0].name || "" : "";
-        const contentClassName = "bolt-table-cell-content-with-inline-link no-v-padding";
+        const contentClassName = "bolt-table-cell-content-with-link";
         const itemToRender: React.ReactNode = textToRender.length > 0 ? (
-            <div className="bolt-table-two-line-cell-item flex-row scroll-hidden">
-                <Tooltip text={textToRender} overflowOnly>
-                    <Link
-                        className="fontSizeM text-ellipsis bolt-table-link bolt-table-inline-link bolt-link"
-                        excludeTabStop
-                        href="#"
-                    >
-                        {textToRender}
-                    </Link>
-                </Tooltip>
-            </div>
+            <Tooltip overflowOnly={true}>
+                <Link
+                    className="fontSizeM text-ellipsis bolt-table-link"
+                    href="#"
+                    excludeTabStop={true}
+                >
+                    {textToRender}
+                </Link>
+            </Tooltip>
         ) : null;
 
         return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender, undefined, contentClassName);
-    }
-
-    private static _renderPodStatusCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod): JSX.Element {
-        const textToRender: string = pod.status.message ? pod.status.reason : pod.status.phase;
-        const itemToRender = defaultColumnRenderer(textToRender);
-        return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
     private static _renderPodAgeCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod): JSX.Element {
