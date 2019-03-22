@@ -11,8 +11,8 @@ import * as React from "react";
 import { KubeResourceType } from "../../Contracts/KubeServiceBase";
 import { KubeZeroData } from "../Common//KubeZeroData";
 import { NameKey, TypeKey } from "../Common/KubeFilterBar";
-import { KubeSummary } from "../Common/KubeSummary";
-import { WorkloadsEvents } from "../Constants";
+import "../Common/KubeSummary.scss";
+import { WorkloadsEvents, PodsEvents } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
 import { PodsActionsCreator } from "../Pods/PodsActionsCreator";
@@ -20,12 +20,19 @@ import { PodsStore } from "../Pods/PodsStore";
 import { IVssComponentProperties } from "../Types";
 import { DeploymentsTable } from "../Workloads/DeploymentsTable";
 import { OtherWorkloads } from "../Workloads/OtherWorkloadsTable";
-import { WorkloadsActionsCreator } from "./WorkloadsActionsCreator";
 import { WorkloadsFilterBar } from "./WorkloadsFilterBar";
 import { WorkloadsStore } from "./WorkloadsStore";
+import { HyperLinks } from "../Constants";
+import { WorkloadsActionsCreator } from "./WorkloadsActionsCreator";
+import { KubeFactory } from "../KubeFactory";
+import { KubeSummary } from "../Common/KubeSummary";
+import { V1Pod, V1PodList } from "@kubernetes/client-node";
+import { Utils } from "../Utils";
+import { ImageDetailsActionsCreator } from "../ImageDetails/ImageDetailsActionsCreator";
 
 export interface IWorkloadsPivotState {
     workloadResourceSize: number;
+    imageList: string[];
 }
 
 export interface IWorkloadsPivotProps extends IVssComponentProperties {
@@ -40,12 +47,14 @@ export class WorkloadsPivot extends BaseComponent<IWorkloadsPivotProps, IWorkloa
 
         this._workloadsActionCreator = ActionsCreatorManager.GetActionCreator<WorkloadsActionsCreator>(WorkloadsActionsCreator);
         this._podsActionCreator = ActionsCreatorManager.GetActionCreator<PodsActionsCreator>(PodsActionsCreator);
+        this._imageActionsCreator = ActionsCreatorManager.GetActionCreator<ImageDetailsActionsCreator>(ImageDetailsActionsCreator);
         this._workloadsStore = StoreManager.GetStore<WorkloadsStore>(WorkloadsStore);
         // Initialize pods store as pods list will be required in workloadPodsView on item selection
-        StoreManager.GetStore<PodsStore>(PodsStore);
+        this._podsStore = StoreManager.GetStore<PodsStore>(PodsStore);
 
         this.state = {
-            workloadResourceSize: 0
+            workloadResourceSize: 0,
+            imageList: []
         };
 
         this._workloadsActionCreator.getDeployments(KubeSummary.getKubeService());
@@ -53,7 +62,8 @@ export class WorkloadsPivot extends BaseComponent<IWorkloadsPivotProps, IWorkloa
         // Fetch all pods in parent component as the podList is required in selected workload pods view
         this._podsActionCreator.getPods(KubeSummary.getKubeService());
 
-        this._workloadsStore.addListener(WorkloadsEvents.WorkloadPodsFetchedEvent, this._onPodsFetched);
+        this._podsStore.addListener(PodsEvents.PodsFetchedEvent, this._onPodsFetched);
+        this._workloadsStore.addListener(WorkloadsEvents.WorkloadPodsFetchedEvent, this._onOrphanPodsFetched);
         this._workloadsStore.addListener(WorkloadsEvents.WorkloadsFoundEvent, this._onDataFound);
     }
 
@@ -69,11 +79,28 @@ export class WorkloadsPivot extends BaseComponent<IWorkloadsPivotProps, IWorkloa
     }
 
     public componentWillUnmount(): void {
-        this._workloadsStore.removeListener(WorkloadsEvents.WorkloadPodsFetchedEvent, this._onPodsFetched);
+        this._workloadsStore.removeListener(WorkloadsEvents.WorkloadPodsFetchedEvent, this._onOrphanPodsFetched);
         this._workloadsStore.removeListener(WorkloadsEvents.WorkloadsFoundEvent, this._onDataFound);
+        this._podsStore.removeListener(PodsEvents.PodsFetchedEvent, this._onPodsFetched);
+    }
+
+    public componentDidUpdate(prevProps: IWorkloadsPivotProps, prevState: IWorkloadsPivotState) {
+        const imageService = KubeSummary.getImageService();
+        imageService && (this.state.imageList.length > 0) && this._imageActionsCreator.setHasImageDetails(imageService, this.state.imageList);
     }
 
     private _onPodsFetched = (): void => {
+        const podlist: V1PodList | undefined = this._podsStore.getState().podsList;
+        if (podlist && podlist.items && podlist.items.length > 0) {
+            const imageList = Utils.getImageIdsForPods(podlist.items);
+            this.setState({
+                imageList: imageList
+            });
+        }
+    }
+
+    private _onOrphanPodsFetched = (): void => {
+
     }
 
     private _onDataFound = (): void => {
@@ -146,4 +173,6 @@ export class WorkloadsPivot extends BaseComponent<IWorkloadsPivotProps, IWorkloa
     private _workloadsStore: WorkloadsStore;
     private _workloadsActionCreator: WorkloadsActionsCreator;
     private _podsActionCreator: PodsActionsCreator;
+    private _podsStore: PodsStore;
+    private _imageActionsCreator: ImageDetailsActionsCreator;
 }

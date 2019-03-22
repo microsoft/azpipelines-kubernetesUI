@@ -13,6 +13,9 @@ import { ILabelModel } from "azure-devops-ui/Label";
 
 const pipelineNameAnnotationKey: string = "azure-pipelines/pipeline";
 const pipelineExecutionIdAnnotationKey: string = "azure-pipelines/execution";
+const matchPatternForImageName = new RegExp(/\:\/\/(.+?)\@/);
+const matchPatternForDigest = new RegExp(/\@sha256\:(.+)/);
+const invalidCharPatternInNamespace = new RegExp(/[:.]/);
 
 export class Utils {
     public static isOwnerMatched(objectMeta: V1ObjectMeta, ownerUIdLowerCase: string): boolean {
@@ -128,21 +131,105 @@ export class Utils {
         return "";
     }
 
-    public static getImageId(imageName: string, podMetadata: V1ObjectMeta, pods: V1Pod[]): string {
-        let imageId: string = "";
-        if (pods.length > 0) {
-            const matchingPod: V1Pod | undefined = pods.find(pod => { return pod.metadata && podMetadata && equals(pod.metadata.uid, podMetadata.uid, true) });
-            if (matchingPod) {
-                const podStatus = matchingPod.status;
-                if (podStatus.containerStatuses && podStatus.containerStatuses.length > 0) {
-                    const containerStatusForGivenImage = podStatus.containerStatuses.find(status => equals(status.image, imageName, true));
-                    if (containerStatusForGivenImage) {
-                        imageId = containerStatusForGivenImage.imageID;
-                    }
+    public static getFirstContainerName(podSpec: V1PodSpec | undefined): string {
+        if (podSpec && podSpec.containers && podSpec.containers.length > 0) {
+            return podSpec.containers[0].name;
+        }
+
+        return "";
+    }
+
+    public static getImageIdsForPods(pods: V1Pod[]): string[] {
+        let imageIds: string[] = [];
+        for (const pod of pods) {
+            const podStatus = pod.status;
+            if (podStatus.containerStatuses && podStatus.containerStatuses.length > 0) {
+                for (const containerStatus of podStatus.containerStatuses) {
+                    // Separate out image and digest from imageId
+                    let imgName = Utils.getImageResourceUrlParameter(containerStatus.imageID, matchPatternForImageName);
+                    let digest = Utils.getImageResourceUrlParameter(containerStatus.imageID, matchPatternForDigest);
+                    // Construct the query URL as per Grafeas format
+                    imageIds.push(Utils.getImageResourceUrl(imgName, digest));
                 }
             }
         }
 
-        return imageId;
+        return imageIds;
+    }
+
+    public static getImageIdForWorkload(containerName: string, pods: V1Pod[], ownerId?: string): string {
+        // The image name in parent.spec.template.spec.containers and in pod.status.containerStatuses is not a constant, example it is redis in former, and redis:latest in latter
+        // Hence filtering the pods on the basis of container name which is a constant
+        const getImageIdForMatchingPods = (pods: V1Pod[]): string => {
+            for (const pod of pods) {
+                const podStatus = pod.status;
+                if (podStatus.containerStatuses && podStatus.containerStatuses.length > 0) {
+                    // Return the imageId for the first matching pod
+                    const containerStatusForGivenImage = podStatus.containerStatuses.find(status => status.name.toLowerCase() === containerName.toLowerCase());
+                    if (containerStatusForGivenImage) {
+                        // Separate out image and digest from imageId
+                        let imgName = Utils.getImageResourceUrlParameter(containerStatusForGivenImage.imageID, matchPatternForImageName);
+                        let digest = Utils.getImageResourceUrlParameter(containerStatusForGivenImage.imageID, matchPatternForDigest);
+                        // Construct the query URL as per Grafeas format
+                        return Utils.getImageResourceUrl(imgName, digest);
+                    }
+                }
+            }
+
+            return "";
+        }
+
+        if (ownerId && pods.length > 0) {
+            const matchingPods: V1Pod[] = pods.filter(pod => { return pod.metadata && Utils.isOwnerMatched(pod.metadata, ownerId.toLowerCase()) });
+            return getImageIdForMatchingPods(matchingPods);
+        }
+        else {
+            return getImageIdForMatchingPods(pods);
+        }
+    }
+
+    public static getImageResourceUrlParameter(imageId: string, matchPattern: RegExp): string {
+        const imageMatch = imageId.match(matchPattern);
+        if (imageMatch && imageMatch.length >= 1) {
+            return imageMatch[1];
+        }
+
+        return "";
+    }
+
+    public static getImageResourceUrl(image: string, digest: string): string {
+        const result = image.split("/");
+        if (result.length <= 0) {
+            return "";
+        }
+
+        let registry = result[0];
+        let imgNamespace = result.length > 1 ? result[1] : "";
+        let repository = result.length > 2 ? result[2] : "";
+        let tag = result.length > 3 ? result[3] : "";
+
+        if (!imgNamespace && !(invalidCharPatternInNamespace).test(registry)) {
+            imgNamespace = registry;
+            registry = "";
+        }
+
+        if (!registry) {
+            registry = "docker.io";
+        }
+
+        if (!imgNamespace) {
+            imgNamespace = "library";
+        }
+
+        if (repository) {
+            return format("https://{0}/{1}/{2}/{3}{4}", registry, imgNamespace, repository,"@sha256", digest);
+        }
+        else {
+            return format("https://{0}/{1}{2}{3}", registry, imgNamespace,"@sha256", digest);
+        }
+    }
+
+    public static extractDisplayImageName(imageId: string): string {
+        return Utils.getImageResourceUrlParameter(imageId, matchPatternForImageName);
     }
 }

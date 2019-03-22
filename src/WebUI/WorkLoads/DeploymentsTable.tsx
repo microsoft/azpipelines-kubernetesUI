@@ -13,28 +13,29 @@ import { CustomHeader, HeaderDescription, HeaderTitle, HeaderTitleArea, HeaderTi
 import { Link } from "azure-devops-ui/Link";
 import { IStatusProps, Statuses } from "azure-devops-ui/Status";
 import { ITableColumn, Table } from "azure-devops-ui/Table";
-import { Tooltip } from "azure-devops-ui/TooltipEx";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
-import { IImageService } from "../../Contracts/Contracts";
 import { defaultColumnRenderer, renderPodsStatusTableCell, renderTableCell } from "../Common/KubeCardWithTable";
-import { KubeSummary } from "../Common/KubeSummary";
 import { Tags } from "../Common/Tags";
 import { ImageDetailsEvents, SelectedItemKeys, WorkloadsEvents } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
-import { ImageDetailsActionsCreator } from "../ImageDetails/ImageDetailsActionsCreator";
-import { ImageDetailsStore } from "../ImageDetails/ImageDetailsStore";
-import { KubeFactory } from "../KubeFactory";
-import { PodsStore } from "../Pods/PodsStore";
 import * as Resources from "../Resources";
-import { SelectionActionsCreator } from "../Selection/SelectionActionCreator";
 import { ISelectionPayload } from "../Selection/SelectionActions";
 import { IDeploymentReplicaSetItem, IDeploymentReplicaSetMap, IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
 import "./DeploymentsTable.scss";
 import { WorkloadsActionsCreator } from "./WorkloadsActionsCreator";
 import { WorkloadsStore } from "./WorkloadsStore";
+import { IKubeService, IImageService } from "../../Contracts/Contracts";
+import { SelectionActionsCreator } from "../Selection/SelectionActionCreator";
+import { KubeFactory } from "../KubeFactory";
+import { ImageDetailsActionsCreator } from "../ImageDetails/ImageDetailsActionsCreator";
+import { ImageDetailsStore } from "../ImageDetails/ImageDetailsStore";
+import { IImageDetails } from "../../Contracts/Types";
+import { Tooltip } from "azure-devops-ui/TooltipEx";
+import { KubeSummary } from "../Common/KubeSummary";
+import { PodsStore } from "../Pods/PodsStore";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
 
 const replicaSetNameKey: string = "replicaSet-col";
@@ -71,8 +72,6 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
 
     public componentDidUpdate(prevProps: IDeploymentsTableProperties, prevState: IDeploymentsTableState) {
         this._markTTI(prevProps, prevState);
-        const imageService = KubeSummary.getImageService();
-        imageService && this._imageActionsCreator.setHasImageDetails(imageService, DeploymentsTable._imageList);
     }
 
     public render(): React.ReactNode {
@@ -103,8 +102,6 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
     }
 
     private _setHasImageDetails = (): void => {
-        const hasImageDetails = this._imageDetailsStore.getHasImageDetailsList();
-        this._hasImageDetails = hasImageDetails;
         this.setState({});
     }
 
@@ -197,8 +194,8 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
         } = index === 0 ? deployment.metadata.annotations : replica.metadata.annotations;
         const podslist = StoreManager.GetStore<PodsStore>(PodsStore).getState().podsList;
         const pods: V1Pod[] = podslist && podslist.items || [];
-        const imageId = Utils.getImageId(Utils.getFirstImageName(replica.spec.template.spec), replica.spec.template.metadata, pods);
-        if (DeploymentsTable._imageList.length <= 0 || DeploymentsTable._imageList.findIndex(img => equals(img, imageId)) < 0) {
+        const imageId = Utils.getImageIdForWorkload(Utils.getFirstContainerName(replica.spec.template.spec), pods, replica.metadata.uid);
+        if (imageId && (DeploymentsTable._imageList.length <= 0 || DeploymentsTable._imageList.findIndex(img => equals(img, imageId)) < 0)) {
             DeploymentsTable._imageList.push(imageId);
         }
         const { imageText, imageTooltipText } = Utils.getImageText(replica.spec.template.spec);
@@ -288,19 +285,19 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
     private _renderImageCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IDeploymentReplicaSetItem>, deployment: IDeploymentReplicaSetItem): JSX.Element => {
         const textToRender: string = deployment.imageDisplayText || "";
         const imageId: string = deployment.imageId;
-        // ToDo :: HardCoding hasImageDetails true for the time being, Should change it once we integrate with ImageService
         // ToDo: Revisit link paddings
-        // const hasImageDetails: boolean = this._hasImageDetails && this._hasImageDetails.hasOwnProperty(firstImageName) ? this._hasImageDetails[firstImageName] : false;
-        const hasImageDetails = true;
-        const itemToRender =
+        const hasImageDetails = StoreManager.GetStore<ImageDetailsStore>(ImageDetailsStore).hasImageDetails(imageId);
+        const itemToRender = hasImageDetails ?
             <Tooltip overflowOnly={true}>
                 <Link
                     className="fontSizeM text-ellipsis bolt-table-link"
                     excludeTabStop={true}
-                    onClick={() => hasImageDetails && this._onImageClick(KubeSummary.getImageService(), imageId)}
-                >
+                    onClick={() => this._onImageClick(imageId)}>
                     {textToRender}
                 </Link>
+            </Tooltip> :
+            <Tooltip text={textToRender} overflowOnly>
+                {defaultColumnRenderer(textToRender || "")}
             </Tooltip>;
 
         return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender, undefined, "bolt-table-cell-content-with-link");
@@ -363,25 +360,19 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
         }
     }
 
-    private _onImageClick = (imageService: IImageService | undefined, imageName: string): void => {
-        // imageService && imageService.getImageDetails(imageId).then(imageDetails => {
-        //     if (imageDetails) {
-        //         const payload: ISelectionPayload = {
-        //         item: imageDetails,
-        //         itemUID: "",
-        //         showSelectedItem: true,
-        //         selectedItemType: SelectedItemKeys.ImageDetailsKey
-        //     };
-        //     this._selectionActionCreator.selectItem(payload);
-        //     }
-        // });
-        const payload: ISelectionPayload = {
-            item: undefined,
-            itemUID: "",
-            showSelectedItem: true,
-            selectedItemType: SelectedItemKeys.ImageDetailsKey
-        };
-        this._selectionActionCreator.selectItem(payload);
+    private _onImageClick = (imageId: string): void => {
+        const imageService = KubeSummary.getImageService();
+        imageService && imageService.getImageDetails(imageId).then(imageDetails => {
+            if (imageDetails) {
+                const payload: ISelectionPayload = {
+                    item: imageDetails,
+                    itemUID: "",
+                    showSelectedItem: true,
+                    selectedItemType: SelectedItemKeys.ImageDetailsKey
+                };
+                this._selectionActionCreator.selectItem(payload);
+            }
+        });
     }
 
     private _isTTIMarked: boolean = false;
@@ -392,5 +383,4 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
     private _imageActionsCreator: ImageDetailsActionsCreator;
     private _imageDetailsStore: ImageDetailsStore;
     private static _imageList: string[] = [];
-    private _hasImageDetails: { [key: string]: boolean };
 }

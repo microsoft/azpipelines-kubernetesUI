@@ -21,7 +21,9 @@ export class ImageDetailsActionsCreator extends ActionCreatorBase {
 
     public setHasImageDetails(imageService: IImageService, listImages: string[]): void {
         imageService && imageService.hasImageDetails(listImages).then(hasImageDetails => {
-            this._actions.setHasImageDetails.invoke(hasImageDetails);
+            if (hasImageDetails && hasImageDetails.hasOwnProperty("hasImageDetails")) {
+                this._actions.setHasImageDetails.invoke(hasImageDetails["hasImageDetails"] as { [key: string]: boolean });
+            }
         });
     }
 
