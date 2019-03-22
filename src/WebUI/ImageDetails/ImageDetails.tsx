@@ -32,7 +32,7 @@ import { ImageDetailsStore } from "../ImageDetails/ImageDetailsStore";
 import { IImageDetails, IImageLayer } from "../../Contracts/Types";
 
 export interface IImageDetailsProperties extends IVssComponentProperties {
-    imageDetails?: IImageDetails;
+    imageDetails: IImageDetails;
     onBackButtonClick?: () => void;
 }
 
@@ -52,7 +52,8 @@ export class ImageDetails extends BaseComponent<IImageDetailsProperties, IImageD
     }
 
     private _getMainHeading(): JSX.Element | null {
-        const imageDetails = this.props.imageDetails || this._getDummyDataForImageDetails(); // Hard coding till we link data from image service
+        const imageDetails = this.props.imageDetails;
+        this._displayImageName = Utils.extractDisplayImageName(imageDetails.imageName);
         return (
             <CustomHeader className="image-details-header">
                 <HeaderIcon iconProps={{ iconName: "Back", onClick: this.props.onBackButtonClick, className: "image-details-back-button" }} titleSize={TitleSize.Large} />
@@ -60,7 +61,7 @@ export class ImageDetails extends BaseComponent<IImageDetailsProperties, IImageD
                     <HeaderTitleRow>
                         {
                             <HeaderTitle className="text-ellipsis" titleSize={TitleSize.Large} >
-                                {imageDetails.imageName}
+                                {this._displayImageName}
                             </HeaderTitle>
                         }
                     </HeaderTitleRow>
@@ -70,7 +71,7 @@ export class ImageDetails extends BaseComponent<IImageDetailsProperties, IImageD
     }
 
     private _getImageDetails(): JSX.Element | null {
-        const imageDetails = this.props.imageDetails || this._getDummyDataForImageDetails();
+        const imageDetails = this.props.imageDetails;
         const columns: ITableColumn<any>[] = [
             {
                 id: "key",
@@ -95,7 +96,7 @@ export class ImageDetails extends BaseComponent<IImageDetailsProperties, IImageD
             { key: Resources.TarIdText, value: "" },
             { key: Resources.ImageTypeText, value: imageDetails.imageType || "" },
             { key: Resources.MediaTypeText, value: imageDetails.mediaType || "" },
-            { key: Resources.RegistryText, value: this._getRegistryName(imageDetails.imageUri) },
+            { key: Resources.RegistryText, value: this._getRegistryName() },
             { key: Resources.ImageSizeText, value: "" },
             { key: Resources.LabelsText, value: imageDetails.tags || "" }
         ]);
@@ -157,7 +158,7 @@ export class ImageDetails extends BaseComponent<IImageDetailsProperties, IImageD
     }
 
     private _getImageLayers(): JSX.Element | null {
-        const imageDetails = this.props.imageDetails || this._getDummyDataForImageDetails();
+        const imageDetails = this.props.imageDetails;
         return (
             <CustomCard className="image-layers-card k8s-card-padding flex-grow bolt-card-no-vertical-padding">
                 <CustomHeader>
@@ -238,37 +239,14 @@ export class ImageDetails extends BaseComponent<IImageDetailsProperties, IImageD
         return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
-    private _getDummyDataForImageDetails(): IImageDetails {
-        return {
-            imageName: "azure-vote-front",
-            imageUri: "https://microsoft/azure-vote-front@sha256:9ace3ce43db1505091c11d15edce7b520cfb598d38402be254a3024146920859",
-            hash: "sha256:9ace3ce43db1505091c11d15edce7b520cfb598d38402be254a3024146920859",
-            baseImageName: "azure-vote-front",
-            imageType: "Docker Manifest, Schema 2",
-            mediaType: "application/vdn.docker.distribution.manifest.v2+json",
-            tags: ["482-production"],
-            layerInfo: [{
-                directive: "file",
-                arguments: "9ace3ce43db1505091c11d15edce7b520cfb598d38402be254a3024146920859"
-            },
-            {
-                directive: "file",
-                arguments: "9ace3ce43db1505091c11d15edce7b520cfb598d38402be254a3024146920859"
-            }],
-            runId: 1,
-            buildVersion: "",
-            pipelineName: "",
-            pipelineId: "1"
-        }
-    }
-
-    private _getRegistryName(imageUri: string): string {
-        const imageUriParts = imageUri.split("\//");
-        if (imageUriParts && imageUriParts.length >= 2) {
-            const indexOfSeparator = imageUriParts[1].indexOf("\/");
-            return (indexOfSeparator >= 0 && imageUriParts[1].substring(0, indexOfSeparator)) || "";
+    private _getRegistryName(): string {
+        const imageParts = this._displayImageName.split("/");
+        if (imageParts && imageParts.length > 0) {
+            return imageParts[0];
         }
 
         return "";
     }
+
+    private _displayImageName: string;
 }

@@ -27,7 +27,7 @@ export enum KubeImage {
 }
 
 export interface IImageService {
-    hasImageDetails(listImages: Array<string>): Promise<{ [key: string]: boolean } | undefined>;
+    hasImageDetails(listImages: Array<string>): Promise<any>;
 
     getImageDetails(imageName: string): Promise<IImageDetails | undefined>;
 }

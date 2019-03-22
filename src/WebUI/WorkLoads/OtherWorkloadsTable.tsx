@@ -90,11 +90,6 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
         return null;
     }
 
-    public componentDidUpdate(): void {
-        const imageService = KubeSummary.getImageService();
-        imageService && this._imageActionsCreator.setHasImageDetails(imageService, this._imageList);
-    }
-
     public componentWillUnmount(): void {
         this._store.removeListener(WorkloadsEvents.StatefulSetsFetchedEvent, this._onStatefulSetsFetched);
         this._store.removeListener(WorkloadsEvents.DaemonSetsFetchedEvent, this._onDaemonSetsFetched);
@@ -128,8 +123,6 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
     }
 
     private _setHasImageDetails = (): void => {
-        const hasImageDetails = this._imageDetailsStore.getHasImageDetailsList();
-        this._hasImageDetails = hasImageDetails;
         this.setState({});
     }
 
@@ -207,17 +200,18 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
     private _renderImageCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<ISetWorkloadTypeItem>, workload: ISetWorkloadTypeItem): JSX.Element => {
         const imageId = workload.imageId;
         const imageText = workload.imageDisplayText;
-        // ToDo :: HardCoding hasImageDetails true for the time being, Should change it once we integrate with ImageService
         // ToDo :: Revisit link paddings
-        //const hasImageDetails: boolean = this._hasImageDetails && this._hasImageDetails.hasOwnProperty(imageId) ? this._hasImageDetails[imageId] : false;
-        const hasImageDetails = true;
-        const itemToRender =
+        const hasImageDetails = StoreManager.GetStore<ImageDetailsStore>(ImageDetailsStore).hasImageDetails(imageId);
+        const itemToRender = hasImageDetails ?
             <Tooltip text={imageText} overflowOnly>
                 <Link
                     className="fontSizeM text-ellipsis bolt-table-link bolt-table-inline-link bolt-link"
-                    onClick={() => hasImageDetails && this._onImageClick(KubeSummary.getImageService(), imageId, workload.uid)}>
+                    onClick={() => this._onImageClick(imageId)}>
                     {imageText || ""}
                 </Link>
+            </Tooltip> :
+            <Tooltip text={imageText} overflowOnly>
+                {BaseKubeTable.defaultColumnRenderer(imageText || "")}
             </Tooltip>;
 
         return BaseKubeTable.renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
@@ -256,7 +250,7 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
         let imageId: string = "";
         this._showType(KubeResourceType.StatefulSets) && this.state.statefulSetList.forEach((set) => {
             imageId = this._getImageId(set);
-            if (this._imageList.length <= 0 || this._imageList.findIndex(img => equals(img, imageId, true)) < 0) {
+            if (imageId && (this._imageList.length <= 0 || this._imageList.findIndex(img => equals(img, imageId, true)) < 0)) {
                 this._imageList.push(imageId);
             }
 
@@ -275,7 +269,7 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
 
         this._showType(KubeResourceType.DaemonSets) && this.state.daemonSetList.forEach((set) => {
             imageId = this._getImageId(set);
-            if (this._imageList.length <= 0 || this._imageList.findIndex(img => equals(img, imageId, true)) < 0) {
+            if (imageId && (this._imageList.length <= 0 || this._imageList.findIndex(img => equals(img, imageId, true)) < 0)) {
                 this._imageList.push(imageId);
             }
 
@@ -294,7 +288,7 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
 
         this._showType(KubeResourceType.ReplicaSets) && this.state.replicaSets.forEach((set) => {
             imageId = this._getImageId(set);
-            if (this._imageList.length <= 0 || this._imageList.findIndex(img => equals(img, imageId, true)) < 0) {
+            if (imageId && (this._imageList.length <= 0 || this._imageList.findIndex(img => equals(img, imageId, true)) < 0)) {
                 this._imageList.push(imageId);
             }
 
@@ -317,7 +311,7 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
     private _getImageId(set: V1ReplicaSet | V1DaemonSet | V1StatefulSet): string {
         const podslist = StoreManager.GetStore<PodsStore>(PodsStore).getState().podsList;
         const pods: V1Pod[] = podslist && podslist.items || [];
-        return Utils.getImageId(Utils.getFirstImageName(set.spec.template.spec), set.spec.template.metadata, pods);
+        return Utils.getImageIdForWorkload(Utils.getFirstContainerName(set.spec.template.spec), pods, set.metadata.uid);
     }
 
     private _showType(type: KubeResourceType): boolean {
@@ -336,26 +330,19 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
         return "";
     }
 
-    private _onImageClick = (imageService: IImageService | undefined, imageId: string, itemUid: string): void => {
-        // imageService && imageService.getImageDetails(imageId).then(imageDetails => {
-        //     if (imageDetails) {
-        //         const payload: ISelectionPayload = {
-        //             item: imageDetails,
-        //             itemUID: itemUid,
-        //             showSelectedItem: true,
-        //             selectedItemType: SelectedItemKeys.ImageDetailsKey
-        //         };
-        //         this._selectionActionCreator.selectItem(payload);
-        //     }
-        // });
-
-        const payload: ISelectionPayload = {
-            item: undefined,
-            itemUID: itemUid,
-            showSelectedItem: true,
-            selectedItemType: SelectedItemKeys.ImageDetailsKey
-        };
-        this._selectionActionCreator.selectItem(payload);
+    private _onImageClick = (imageId: string, itemUid: string = ""): void => {
+        const imageService = KubeSummary.getImageService();
+        imageService && imageService.getImageDetails(imageId).then(imageDetails => {
+            if (imageDetails) {
+                const payload: ISelectionPayload = {
+                    item: imageDetails,
+                    itemUID: itemUid,
+                    showSelectedItem: true,
+                    selectedItemType: SelectedItemKeys.ImageDetailsKey
+                };
+                this._selectionActionCreator.selectItem(payload);
+            }
+        });
     }
 
     private _store: WorkloadsStore;
@@ -364,5 +351,4 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
     private _imageActionsCreator: ImageDetailsActionsCreator;
     private _imageDetailsStore: ImageDetailsStore;
     private _imageList: string[] = [];
-    private _hasImageDetails: { [key: string]: boolean };
 }
