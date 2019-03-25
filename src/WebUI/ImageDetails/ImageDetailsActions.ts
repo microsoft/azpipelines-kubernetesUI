@@ -12,18 +12,12 @@ export class ImageDetailsActions extends ActionsHubBase {
     }
 
     public initialize(): void {
-        this._setImageDetails = new Action<IImageDetails | undefined>();
         this._setHasImageDetails = new Action<{ [key: string]: boolean } | undefined>();
-    }
-
-    public get setImageDetails(): Action<IImageDetails | undefined> {
-        return this._setImageDetails;
     }
 
     public get setHasImageDetails(): Action<{ [key: string]: boolean } | undefined> {
         return this._setHasImageDetails;
     }
 
-    private _setImageDetails: Action<IImageDetails | undefined>;
     private _setHasImageDetails: Action<{ [key: string]: boolean } | undefined>;
 }
