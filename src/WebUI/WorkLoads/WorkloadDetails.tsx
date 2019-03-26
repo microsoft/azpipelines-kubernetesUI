@@ -3,7 +3,7 @@
     Licensed under the MIT license.
 */
 
-import { V1ObjectMeta, V1Pod, V1PodTemplateSpec } from "@kubernetes/client-node";
+import { V1ObjectMeta, V1Pod, V1PodTemplateSpec, V1LabelSelector } from "@kubernetes/client-node";
 import { BaseComponent } from "@uifabric/utilities";
 import { CardContent, CustomCard } from "azure-devops-ui/Card";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
@@ -37,6 +37,7 @@ import { KubeSummary } from "../Common/KubeSummary";
 export interface IWorkloadDetailsProperties extends IVssComponentProperties {
     parentMetaData: V1ObjectMeta;
     podTemplate: V1PodTemplateSpec;
+    selector: V1LabelSelector | undefined;
     parentKind: string;
     statusProps?: IStatusProps;
 }
@@ -47,6 +48,12 @@ export interface IWorkloadDetailsState {
     showSelectedPod: boolean;
     showImageDetails: boolean;
     selectedImageDetails: IImageDetails | undefined;
+}
+
+export interface IWorkLoadDetailsItem {
+    podTemplate: V1PodTemplateSpec;
+    parentMetaData: V1ObjectMeta;
+    selector: V1LabelSelector | undefined;
 }
 
 export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, IWorkloadDetailsState> {
@@ -132,8 +139,8 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
         });
     }
 
-    private _getColumns = (): ITableColumn<any>[] => {
-        const columns: ITableColumn<any>[] = [
+    private _getColumns = (): ITableColumn<IWorkLoadDetailsItem>[] => {
+        const columns: ITableColumn<IWorkLoadDetailsItem>[] = [
             {
                 id: "w-image",
                 name: Resources.ImageText,
@@ -144,9 +151,16 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
             {
                 id: "w-labels",
                 name: Resources.LabelsText,
-                width: -100,
+                width: -50,
                 minWidth: 200,
-                renderCell: WorkloadDetails._renderLabelsCell
+                renderCell: (r, c, col, item) => WorkloadDetails._renderCellWithTags(r, c, col, item, (item) => item.parentMetaData.labels)
+            },
+            {
+                id: "w-selector",
+                name: Resources.SelectorText,
+                width: -50,
+                minWidth: 200,
+                renderCell: (r, c, col, item) => WorkloadDetails._renderCellWithTags(r, c, col, item, (item) => (item.selector && item.selector.matchLabels) || {})
             }
         ];
 
@@ -157,7 +171,7 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
         const metadata = this.props.parentMetaData;
         if (metadata) {
             const pipeline = Utils.getPipelineText(metadata.annotations);
-            const tableItems = [{ podTemplate: this.props.podTemplate, parentMetaData: metadata }];
+            const tableItems: IWorkLoadDetailsItem[] = [{ podTemplate: this.props.podTemplate, parentMetaData: metadata, selector: this.props.selector }];
             const agoTime = Date_Utils.ago(new Date(metadata.creationTimestamp), Date_Utils.AgoFormat.Compact);
 
             return (
@@ -184,7 +198,7 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
                             showHeader={true}
                             showLines={false}
                             singleClickActivation={false}
-                            itemProvider={new ArrayItemProvider<any>(tableItems)}
+                            itemProvider={new ArrayItemProvider<IWorkLoadDetailsItem>(tableItems)}
                             columns={this._getColumns()}
                         />
                     </CardContent>
@@ -217,7 +231,7 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
         });
     }
 
-    private _renderImageCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<any>, tableItem: any): JSX.Element => {
+    private _renderImageCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IWorkLoadDetailsItem>, tableItem: IWorkLoadDetailsItem): JSX.Element => {
         const podslist = this._podsStore.getState().podsList;
         const pods: V1Pod[] = podslist && podslist.items || [];
         const imageId = Utils.getImageIdForWorkload(Utils.getFirstContainerName(tableItem.podTemplate.spec), this.state.pods);
@@ -236,12 +250,17 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
             <Tooltip overflowOnly={true}>
                 {defaultColumnRenderer(imageText)}
             </Tooltip>;
-            
+
         return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender, undefined, "bolt-table-cell-content-with-link");
     }
 
-    private static _renderLabelsCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<any>, tableItem: any): JSX.Element {
-        const itemToRender: React.ReactNode = <Tags items={tableItem.parentMetaData.labels} />;
+    private static _renderCellWithTags(
+        rowIndex: number,
+        columnIndex: number,
+        tableColumn: ITableColumn<IWorkLoadDetailsItem>,
+        tableItem: IWorkLoadDetailsItem,
+        getItems: (tableItem: IWorkLoadDetailsItem) => { [key: string]: string }): JSX.Element {
+        const itemToRender: React.ReactNode = <Tags items={getItems(tableItem)} />;
         return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
