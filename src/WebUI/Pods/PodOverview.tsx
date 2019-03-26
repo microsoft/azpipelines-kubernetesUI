@@ -55,7 +55,6 @@ export class PodOverview extends BaseComponent<IPodOverviewProps> {
             { key: Resources.RestartPolicyText, value: pod.spec.restartPolicy || "" },
             { key: Resources.QoSClassText, value: pod.status.qosClass || "" },
             { key: Resources.NodeText, value: pod.spec.nodeName || "" },
-            { key: Resources.ClusterIPText, value: "" },
             { key: Resources.ImageText, value: imageText, valueTooltipText: imageTooltipText },
             { key: Resources.LabelsText, value: pod.metadata.labels || "" },
             { key: Resources.StatusText, value: localeFormat("{0}{1}", pod.status.phase, !pod.status.reason ? "" : localeFormat(" | {0}", pod.status.reason)) },
