@@ -18,9 +18,6 @@ import * as Resources from "../Resources";
 import { IVssComponentProperties } from "../Types";
 import "./PodsLeftPanel.scss";
 
-const podStatusKey = "pods-list-status-col";
-const colDataClassName: string = "list-col-content";
-
 export interface IPodsLeftPanelProperties extends IVssComponentProperties {
     pods: V1Pod[];
     parentName: string;
@@ -84,14 +81,11 @@ export class PodsLeftPanel extends BaseComponent<IPodsLeftPanelProperties> {
 
     private _getPodsList(): JSX.Element | null {
         let columns: ITableColumn<V1Pod>[] = [];
-        const headerColumnClassName = "pod-left-panel-table-header";
         columns.push({
-            id: podStatusKey,
+            id: "podName",
             name: Resources.PodsListHeaderText,
             minWidth: 250,
             width: -100,
-            headerClassName: headerColumnClassName,
-            className: colDataClassName,
             renderCell: (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod) => {
                 return PodsLeftPanel._renderPodNameCell(rowIndex, columnIndex, tableColumn, pod, this._selectedRow);
             }

@@ -8,40 +8,32 @@ import { BaseComponent, format } from "@uifabric/utilities";
 import { Ago } from "azure-devops-ui/Ago";
 import { CardContent, CustomCard } from "azure-devops-ui/Card";
 import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
+import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { equals, localeFormat } from "azure-devops-ui/Core/Util/String";
 import { CustomHeader, HeaderDescription, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
 import { Link } from "azure-devops-ui/Link";
 import { IStatusProps, Statuses } from "azure-devops-ui/Status";
 import { ITableColumn, Table } from "azure-devops-ui/Table";
+import { Tooltip } from "azure-devops-ui/TooltipEx";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
 import { defaultColumnRenderer, renderPodsStatusTableCell, renderTableCell } from "../Common/KubeCardWithTable";
+import { KubeSummary } from "../Common/KubeSummary";
 import { Tags } from "../Common/Tags";
 import { ImageDetailsEvents, SelectedItemKeys, WorkloadsEvents } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
+import { ImageDetailsStore } from "../ImageDetails/ImageDetailsStore";
+import { KubeFactory } from "../KubeFactory";
+import { PodsStore } from "../Pods/PodsStore";
 import * as Resources from "../Resources";
+import { SelectionActionsCreator } from "../Selection/SelectionActionCreator";
 import { ISelectionPayload } from "../Selection/SelectionActions";
 import { IDeploymentReplicaSetItem, IDeploymentReplicaSetMap, IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
 import "./DeploymentsTable.scss";
 import { WorkloadsActionsCreator } from "./WorkloadsActionsCreator";
 import { WorkloadsStore } from "./WorkloadsStore";
-import { IKubeService, IImageService } from "../../Contracts/Contracts";
-import { SelectionActionsCreator } from "../Selection/SelectionActionCreator";
-import { KubeFactory } from "../KubeFactory";
-import { ImageDetailsActionsCreator } from "../ImageDetails/ImageDetailsActionsCreator";
-import { ImageDetailsStore } from "../ImageDetails/ImageDetailsStore";
-import { IImageDetails } from "../../Contracts/Types";
-import { Tooltip } from "azure-devops-ui/TooltipEx";
-import { KubeSummary } from "../Common/KubeSummary";
-import { PodsStore } from "../Pods/PodsStore";
-import { ObservableValue } from "azure-devops-ui/Core/Observable";
-
-const replicaSetNameKey: string = "replicaSet-col";
-const podsKey: string = "pods-col";
-const imageKey: string = "image-col";
-const ageKey: string = "age-key";
 
 export interface IDeploymentsTableProperties extends IVssComponentProperties {
     nameFilter?: string;
@@ -58,7 +50,6 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
 
         this._workloadsActionCreator = ActionsCreatorManager.GetActionCreator<WorkloadsActionsCreator>(WorkloadsActionsCreator);
         this._selectionActionCreator = ActionsCreatorManager.GetActionCreator<SelectionActionsCreator>(SelectionActionsCreator);
-        this._imageActionsCreator = ActionsCreatorManager.GetActionCreator<ImageDetailsActionsCreator>(ImageDetailsActionsCreator);
         this._imageDetailsStore = StoreManager.GetStore<ImageDetailsStore>(ImageDetailsStore);
         this._store = StoreManager.GetStore<WorkloadsStore>(WorkloadsStore);
 
@@ -109,7 +100,7 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
         let renderList: JSX.Element[] = [];
         DeploymentsTable._generateDeploymentReplicaSetMap(filteredDeployments, this.state.replicaSetList).forEach((entry, index) => {
             const items = DeploymentsTable._getDeploymentReplicaSetItems(entry.deployment, entry.replicaSets);
-            const key = format("workloads-deployment-table-{0}", index);
+            const key = format("workloads-d-t-{0}", index);
             const deploymentCard = (
                 <CustomCard
                     className="deployment-replica-with-pod-list k8s-card-padding flex-grow bolt-card-no-vertical-padding"
@@ -246,25 +237,25 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
     private _getColumns = (): ITableColumn<IDeploymentReplicaSetItem>[] => {
         let columns: ITableColumn<IDeploymentReplicaSetItem>[] = [];
         columns.push({
-            id: replicaSetNameKey,
+            id: "replicasetName",
             name: Resources.ReplicaSetText,
             width: new ObservableValue(348),
             renderCell: DeploymentsTable._renderReplicaSetNameCell
         });
         columns.push({
-            id: imageKey,
+            id: "imageName",
             name: Resources.ImageText,
             width: -72,
             renderCell: this._renderImageCell
         });
         columns.push({
-            id: podsKey,
+            id: "pods",
             name: Resources.PodsText,
             width: new ObservableValue(140),
             renderCell: DeploymentsTable._renderPodsCountCell
         });
         columns.push({
-            id: ageKey,
+            id: "age",
             name: Resources.AgeText,
             width: -28,
             renderCell: DeploymentsTable._renderAgeCell
@@ -285,20 +276,23 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
     private _renderImageCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IDeploymentReplicaSetItem>, deployment: IDeploymentReplicaSetItem): JSX.Element => {
         const textToRender: string = deployment.imageDisplayText || "";
         const imageId: string = deployment.imageId;
-        // ToDo: Revisit link paddings
         const hasImageDetails = StoreManager.GetStore<ImageDetailsStore>(ImageDetailsStore).hasImageDetails(imageId);
-        const itemToRender = hasImageDetails ?
-            <Tooltip overflowOnly={true}>
-                <Link
-                    className="fontSizeM text-ellipsis bolt-table-link"
-                    excludeTabStop={true}
-                    onClick={() => this._onImageClick(imageId)}>
-                    {textToRender}
-                </Link>
-            </Tooltip> :
-            <Tooltip text={textToRender} overflowOnly>
-                {defaultColumnRenderer(textToRender || "")}
-            </Tooltip>;
+        const itemToRender = (
+            <Tooltip overflowOnly>
+                {
+                    hasImageDetails ?
+                        <Link
+                            className="fontSizeM text-ellipsis bolt-table-link"
+                            rel={"noopener noreferrer"}
+                            excludeTabStop
+                            onClick={() => this._onImageClick(imageId)}
+                        >
+                            {textToRender}
+                        </Link>
+                        : defaultColumnRenderer(textToRender || "")
+                }
+            </Tooltip>
+        );
 
         return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender, undefined, "bolt-table-cell-content-with-link");
     }
@@ -380,7 +374,6 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
     private _store: WorkloadsStore;
     private _workloadsActionCreator: WorkloadsActionsCreator;
     private _selectionActionCreator: SelectionActionsCreator;
-    private _imageActionsCreator: ImageDetailsActionsCreator;
     private _imageDetailsStore: ImageDetailsStore;
     private static _imageList: string[] = [];
 }
