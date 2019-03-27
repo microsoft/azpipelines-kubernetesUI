@@ -216,7 +216,8 @@ export function renderPodsStatusTableCell(
         // show tooltip always if specified, otherwise show only when element overflows
         <Tooltip text={tooltip || podsCountString || ""} overflowOnly={!tooltip}>
             <Link
-                className="fontSizeM flex-center flex-row text-ellipsis bolt-table-link bolt-table-inline-link"
+                className="fontSizeM flex-center flex-row text-ellipsis bolt-table-link"
+                rel={"noopener noreferrer"}
                 excludeTabStop
                 href="#"
             >
@@ -226,5 +227,5 @@ export function renderPodsStatusTableCell(
         </Tooltip>
     ) : null;
 
-    return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
+    return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender, undefined, "bolt-table-cell-content-with-link");
 }
