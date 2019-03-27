@@ -3,7 +3,7 @@
     Licensed under the MIT license.
 */
 
-import { V1DaemonSet, V1ObjectMeta, V1Pod, V1PodTemplateSpec, V1ReplicaSet, V1StatefulSet } from "@kubernetes/client-node";
+import { V1DaemonSet, V1ObjectMeta, V1Pod, V1PodTemplateSpec, V1ReplicaSet, V1StatefulSet, V1DaemonSetList, V1ReplicaSetList, V1StatefulSetList } from "@kubernetes/client-node";
 import { BaseComponent } from "@uifabric/utilities";
 import { ConditionalChildren } from "azure-devops-ui/ConditionalChildren";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
@@ -28,7 +28,7 @@ import { PodOverview } from "../Pods/PodOverview";
 import * as Resources from "../Resources";
 import { SelectionActionsCreator } from "../Selection/SelectionActionCreator";
 import { ISelectionPayload } from "../Selection/SelectionActions";
-import { SelectionStore } from "../Selection/SelectionStore";
+import { SelectionStore, ISelectionStoreState } from "../Selection/SelectionStore";
 import { ServiceDetails } from "../Services/ServiceDetails";
 import { ServicesPivot } from "../Services/ServicesPivot";
 import { ServicesStore } from "../Services/ServicesStore";
@@ -273,11 +273,72 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
 
     private _onSelectionStoreChanged = () => {
         const selectionStoreState = this._selectionStore.getState();
-        this.setState({
-            showSelectedItem: selectionStoreState.showSelectedItem,
-            selectedItem: selectionStoreState.selectedItem,
-            selectedItemType: selectionStoreState.selectedItemType
-        });
+
+        const setStateWithSelection = (item: V1ReplicaSet | V1DaemonSet | V1StatefulSet | IServiceItem | V1Pod | IImageDetails | undefined) => {
+            this.setState({
+                showSelectedItem: selectionStoreState.showSelectedItem,
+                selectedItem: item,
+                selectedItemType: selectionStoreState.selectedItemType
+            });
+        }
+
+        // If the selection only has id and doesn't have the item, we would need to fetch the item
+        if (!!selectionStoreState.itemUID && !selectionStoreState.selectedItem) {
+            let invokedFunc: (() => Promise<V1DaemonSetList | V1ReplicaSetList | V1StatefulSetList>) | undefined = undefined;
+            let item: V1DaemonSet | V1ReplicaSet | V1StatefulSet | undefined = undefined;
+
+            const getMatchingItem = <T extends { metadata: V1ObjectMeta }>(items: T[]): T | undefined => {
+                if (items && items.length) {
+                    return items.find(r => r.metadata.uid === selectionStoreState.itemUID);
+                }
+            }
+            switch (selectionStoreState.selectedItemType) {
+                case SelectedItemKeys.ReplicaSetKey:
+                    const replicaSets = this._workloadsStore.getState().replicaSetList;
+                    if (replicaSets) {
+                        item = getMatchingItem(replicaSets.items);
+                    }
+                    invokedFunc = () => KubeSummary.getKubeService().getReplicaSets();
+                    break;
+                case SelectedItemKeys.StatefulSetKey:
+                    const statefulSets = this._workloadsStore.getState().statefulSetList;
+                    if (statefulSets) {
+                        item = getMatchingItem(statefulSets.items);
+                    }
+                    invokedFunc = () => KubeSummary.getKubeService().getStatefulSets();
+                    break;
+                case SelectedItemKeys.DaemonSetKey:
+                    const daemonSets = this._workloadsStore.getState().daemonSetList;
+                    if (daemonSets) {
+                        item = getMatchingItem(daemonSets.items);
+                    }
+                    invokedFunc = () => KubeSummary.getKubeService().getDaemonSets();
+                    break;
+            }
+
+            if (item) {
+                setStateWithSelection(item);
+            }
+            else if (invokedFunc) {
+                invokedFunc().then(list => {
+                    // If the selection has been modified while this promise was being resolved, don't do anything
+                    if (selectionStoreState.itemUID !== this._selectionStore.getState().itemUID) {
+                        return;
+                    }
+
+                    if (list && list.items && list.items.length) {
+                        item = (list.items as { metadata: V1ObjectMeta }[]).find((i: { metadata: V1ObjectMeta }) => i.metadata.uid === selectionStoreState.itemUID) as V1DaemonSet | V1ReplicaSet | V1StatefulSet;
+                    }
+
+                    if (item) {
+                        setStateWithSelection(item);
+                    }
+                });
+            }
+        }
+        else {
+            setStateWithSelection(selectionStoreState.selectedItem);
+        }
     }
 
     private _setSelectedKeyPodsViewMap = () => {
