@@ -3,7 +3,7 @@
     Licensed under the MIT license.
 */
 
-import { V1Pod } from "@kubernetes/client-node";
+import { V1Pod, V1OwnerReference } from "@kubernetes/client-node";
 import { BaseComponent, css } from "@uifabric/utilities";
 import { Ago } from "azure-devops-ui/Ago";
 import { CardContent, CustomCard } from "azure-devops-ui/Card";
@@ -19,12 +19,14 @@ import { defaultColumnRenderer, renderPodNameWithStatusTableCell, renderTableCel
 import { SelectedItemKeys } from "../Constants";
 import { ActionsHubManager } from "../FluxCommon/ActionsHubManager";
 import * as Resources from "../Resources";
-import { SelectionActions } from "../Selection/SelectionActions";
+import { SelectionActions, ISelectionPayload } from "../Selection/SelectionActions";
 import { IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
 import { AgoFormat } from "azure-devops-ui/Utilities/Date";
 import "./PodsTable.scss";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
+import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
+import { SelectionActionsCreator } from "../Selection/SelectionActionCreator";
 
 const podNameKey: string = "pl-name-key";
 const podWorkloadsKey: string = "pl-wrkld-key";
@@ -151,19 +153,46 @@ export class PodsTable extends BaseComponent<IPodsTableProperties> {
     private static _renderPodWorkload(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod): JSX.Element {
         const textToRender = pod.metadata && pod.metadata.ownerReferences && pod.metadata.ownerReferences.length > 0 ? pod.metadata.ownerReferences[0].name || "" : "";
         const contentClassName = "bolt-table-cell-content-with-link";
+        const controllerOwner: V1OwnerReference | undefined = pod.metadata.ownerReferences && pod.metadata.ownerReferences.find(o => !!o.controller);
         const itemToRender: React.ReactNode = textToRender.length > 0 ? (
             <Tooltip overflowOnly={true}>
-                <Link
-                    className="fontSizeM text-ellipsis bolt-table-link"
-                    href="#"
-                    excludeTabStop={true}
-                >
-                    {textToRender}
-                </Link>
+                {
+                    controllerOwner ?
+                        (<Link
+                            className="fontSizeM text-ellipsis bolt-table-link"
+                            rel={"noopener noreferrer"}
+                            onClick={() => PodsTable._onWorkloadClicked(pod, controllerOwner)}
+                            excludeTabStop={true}
+                        >
+                            {textToRender}
+                        </Link>)
+                        : textToRender
+                }
             </Tooltip>
         ) : null;
 
         return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender, undefined, contentClassName);
+    }
+
+    private static _onWorkloadClicked = (pod: V1Pod, controllerOwner: V1OwnerReference) => {
+        let type: SelectedItemKeys = SelectedItemKeys.ReplicaSetKey;
+        switch (controllerOwner.kind) {
+            case "DaemonSet":
+                type = SelectedItemKeys.DaemonSetKey;
+                break;
+            case "StatefulSet":
+                type = SelectedItemKeys.StatefulSetKey;
+                break;
+        }
+
+        const payload: ISelectionPayload = {
+            item: undefined,
+            itemUID: controllerOwner.uid,
+            showSelectedItem: true,
+            selectedItemType: type
+        };
+
+        ActionsCreatorManager.GetActionCreator<SelectionActionsCreator>(SelectionActionsCreator).selectItem(payload);
     }
 
     private static _renderPodAgeCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod): JSX.Element {
