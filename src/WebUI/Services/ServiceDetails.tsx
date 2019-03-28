@@ -160,7 +160,7 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
                 podsToRender={this.state.pods}
                 headingText={Resources.AssociatedPodsText}
                 onItemActivated={this._onSelectedPodInvoked}
-                showWorkloadsColumn={true}
+                showWorkloadColumn={true}
             />
         );
     }
