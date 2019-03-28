@@ -64,6 +64,7 @@ export interface IKubeSummaryProps extends IVssComponentProperties {
     kubeService: IKubeService;
     imageService?: IImageService;
     namespace?: string;
+    clusterName?: string;
     markTTI?: () => void;
     getImageLocation?: (image: KubeImage) => string | undefined;
 }
@@ -203,7 +204,9 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
                     title={this.props.title}
                     titleSize={TitleSize.Large}
                     className={"content-main-heading"}
-                    description={localeFormat(Resources.NamespaceHeadingText, this.state.namespace || "")}
+                    description={this.props.clusterName 
+                        ? localeFormat(Resources.SummaryHeaderSubTextFormat, this.props.clusterName) 
+                        : localeFormat(Resources.NamespaceHeadingText, this.state.namespace || "")}
                 />
                 {pageContent}
             </>
