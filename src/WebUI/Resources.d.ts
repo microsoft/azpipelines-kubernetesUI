@@ -83,3 +83,4 @@ export declare const ImageDetailsHeaderText: string;
 export declare const LayersText: string;
 export declare const CommandText: string;
 export declare const SizeText: string;
+export declare const SummaryHeaderSubTextFormat: string; 

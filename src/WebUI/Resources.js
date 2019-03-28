@@ -84,4 +84,5 @@ define("Environments/Providers/Kubernetes/Resources", ["require", "exports"], fu
     exports.LayersText = "Layers";
     exports.CommandText = "Command";
     exports.SizeText = "Size";
+    exports.SummaryHeaderSubTextFormat = "{0} (cluster)";
 });
