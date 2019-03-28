@@ -33,7 +33,6 @@ define("Environments/Providers/Kubernetes/Resources", ["require", "exports"], fu
     exports.LabelsText = "Labels";
     exports.SelectorText = "Selector";
     exports.SessionAffinityText = "Session affinity";
-    exports.NoneText = "None";
     exports.AssociatedPodsText = "Associated pods";
     exports.DaemonSetText = "DaemonSet";
     exports.StatefulSetText = "StatefulSet";

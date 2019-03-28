@@ -76,8 +76,8 @@ export class ServicesTable extends BaseComponent<IServicesComponentProperties> {
             items.push({
                 package: service.metadata.name,
                 type: service.spec.type,
-                clusterIP: service.spec.clusterIP || Resources.NoneText,
-                externalIP: this._getExternalIP(service) || Resources.NoneText,
+                clusterIP: service.spec.clusterIP || "-",
+                externalIP: this._getExternalIP(service) || "-",
                 port: this._getPort(service) || "",
                 creationTimestamp: service.metadata.creationTimestamp || new Date(),
                 uid: service.metadata.uid.toLowerCase(),
