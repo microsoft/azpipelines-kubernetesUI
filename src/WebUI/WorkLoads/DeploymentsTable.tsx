@@ -166,7 +166,7 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
         IDeploymentReplicaSetItem[] {
         let items: IDeploymentReplicaSetItem[] = [];
         replicaSets.forEach((replicaSet, index) => {
-            if (replicaSet.spec.replicas > 0) {
+            if (replicaSet && replicaSet.spec && replicaSet.spec.replicas > 0) {
                 items.push(DeploymentsTable._getDeploymentReplicaSetItem(deployment, replicaSet, index, replicaSets.length));
             }
         });
@@ -205,7 +205,7 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
             kind: replica.kind || "ReplicaSet",
             imageTooltip: imageTooltipText,
             // todo :: how to find error in replicaSet
-            ...DeploymentsTable._getPodsStatus(replica.status.availableReplicas, replica.status.replicas)
+            ...Utils.getPodsStatusProps(replica.status.readyReplicas, replica.status.replicas)
         };
     }
 
@@ -219,20 +219,6 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
             && replica.metadata.ownerReferences && replica.metadata.ownerReferences.length > 0
             && replica.metadata.ownerReferences[0].uid.toLowerCase() === deployment.metadata.uid.toLowerCase();
     }
-
-    private static _getPodsStatus(availableReplicas: number, replicas: number): { statusProps: IStatusProps | undefined, pods: string } {
-        let statusProps: IStatusProps | undefined = undefined;
-        let pods = "";
-        if (replicas != null && replicas > 0) {
-            statusProps = availableReplicas == null
-                ? Statuses.Failed
-                : availableReplicas < replicas ? Statuses.Running : Statuses.Success;
-            pods = localeFormat("{0}/{1}", availableReplicas || 0, replicas);
-        }
-
-        return { statusProps: statusProps, pods: pods };
-    }
-
 
     private _getColumns = (): ITableColumn<IDeploymentReplicaSetItem>[] => {
         let columns: ITableColumn<IDeploymentReplicaSetItem>[] = [];
@@ -270,31 +256,27 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
     }
 
     private static _renderPodsCountCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IDeploymentReplicaSetItem>, deployment: IDeploymentReplicaSetItem): JSX.Element {
-        return renderPodsStatusTableCell(rowIndex, columnIndex, tableColumn, deployment.pods, deployment.statusProps);
+        return renderPodsStatusTableCell(rowIndex, columnIndex, tableColumn, deployment.pods, deployment.statusProps, deployment.podsTooltip);
     }
 
     private _renderImageCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IDeploymentReplicaSetItem>, deployment: IDeploymentReplicaSetItem): JSX.Element => {
         const textToRender: string = deployment.imageDisplayText || "";
         const imageId: string = deployment.imageId;
         const hasImageDetails = StoreManager.GetStore<ImageDetailsStore>(ImageDetailsStore).hasImageDetails(imageId);
-        const itemToRender = (
+        const itemToRender = hasImageDetails ?
             <Tooltip overflowOnly>
-                {
-                    hasImageDetails ?
-                        <Link
-                            className="fontSizeM text-ellipsis bolt-table-link"
-                            rel={"noopener noreferrer"}
-                            excludeTabStop
-                            onClick={() => this._onImageClick(imageId)}
-                        >
-                            {textToRender}
-                        </Link>
-                        : defaultColumnRenderer(textToRender || "")
-                }
+                <Link
+                    className="fontSizeM text-ellipsis bolt-table-link"
+                    rel={"noopener noreferrer"}
+                    excludeTabStop
+                    onClick={() => this._onImageClick(imageId)}
+                >
+                    {textToRender}
+                </Link>
             </Tooltip>
-        );
+            : defaultColumnRenderer(textToRender);
 
-        return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender, undefined, "bolt-table-cell-content-with-link");
+        return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender, undefined, hasImageDetails ? "bolt-table-cell-content-with-link" : "");
     }
 
     private static _renderAgeCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IDeploymentReplicaSetItem>, deployment: IDeploymentReplicaSetItem): JSX.Element {

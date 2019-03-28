@@ -25,6 +25,7 @@ export interface IDeploymentReplicaSetItem {
     replicaSetId?: string;
     pipeline?: string;
     pods?: string;
+    podsTooltip?: string;
     statusProps?: IStatusProps;
     showRowBorder?: boolean;
     deployment?: V1Deployment;

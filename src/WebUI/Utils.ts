@@ -66,14 +66,22 @@ export class Utils {
         return pipelineName && pipelineExecutionId ? localeFormat("{0} / {1}", pipelineName, pipelineExecutionId) : "";
     }
 
-    public static getPodsStatusProps(currentScheduledPods: number, desiredPods: number): IStatusProps | undefined {
-        // todo:: modify logic to base on pod events so that we can distinguish between pending/failed pods
+    public static getPodsStatusProps(currentPods: number, desiredPods: number): { statusProps: IStatusProps | undefined, pods: string, podsTooltip: string } {
+        let statusProps: IStatusProps | undefined = undefined;
+        let podsText = "", podsTooltip = "";
         if (desiredPods != null && desiredPods > 0) {
-            return currentScheduledPods == null || currentScheduledPods < desiredPods ? Statuses.Failed : Statuses.Success;
+            const availableCount = currentPods == null || currentPods <= 0 ? 0 : currentPods;
+            const diffCount = desiredPods - availableCount;
+            statusProps = availableCount < desiredPods ? Statuses.Failed : Statuses.Success;
+            podsText = localeFormat("{0}/{1}", availableCount, desiredPods);
+            podsTooltip = availableCount === desiredPods
+                ? Resources.AllPodsRunningText
+                : diffCount === 1 ? Resources.PodNotReadyText : localeFormat(Resources.PodsNotReadyText, diffCount);
         }
 
-        return undefined;
+        return { statusProps: statusProps, pods: podsText, podsTooltip: podsTooltip };
     }
+
     public static generateEqualsConditionLabelSelector(labels: { [key: string]: string }): string {
         let labelSelector: string = "";
         if (labels) {

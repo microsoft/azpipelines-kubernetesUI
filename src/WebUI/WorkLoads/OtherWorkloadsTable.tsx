@@ -8,6 +8,7 @@ import { BaseComponent } from "@uifabric/utilities";
 import { Ago } from "azure-devops-ui/Ago";
 import { CardContent, CustomCard } from "azure-devops-ui/Card";
 import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
+import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { equals, format } from "azure-devops-ui/Core/Util/String";
 import { CustomHeader, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
 import { Link } from "azure-devops-ui/Link";
@@ -16,7 +17,6 @@ import { ITableColumn, Table, TwoLineTableCell } from "azure-devops-ui/Table";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
-import { IImageService } from "../../Contracts/Contracts";
 import { KubeResourceType } from "../../Contracts/KubeServiceBase";
 import { defaultColumnRenderer, renderPodsStatusTableCell, renderTableCell } from "../Common/KubeCardWithTable";
 import { KubeSummary } from "../Common/KubeSummary";
@@ -34,7 +34,6 @@ import { Utils } from "../Utils";
 import "./OtherWorkloadsTable.scss";
 import { WorkloadsActionsCreator } from "./WorkloadsActionsCreator";
 import { WorkloadsStore } from "./WorkloadsStore";
-import { ObservableValue } from "azure-devops-ui/Core/Observable";
 
 const setNameKey = "otherwrkld-name-key";
 const imageKey = "otherwrkld-image-key";
@@ -56,22 +55,23 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
     constructor(props: IOtherWorkloadsProperties) {
         super(props, {});
 
-        this._actionCreator = ActionsCreatorManager.GetActionCreator<WorkloadsActionsCreator>(WorkloadsActionsCreator);
-        this._selectionActionCreator = ActionsCreatorManager.GetActionCreator<SelectionActionsCreator>(SelectionActionsCreator);
-        this._imageActionsCreator = ActionsCreatorManager.GetActionCreator<ImageDetailsActionsCreator>(ImageDetailsActionsCreator);
         this._store = StoreManager.GetStore<WorkloadsStore>(WorkloadsStore);
         this._imageDetailsStore = StoreManager.GetStore<ImageDetailsStore>(ImageDetailsStore);
 
+        this._actionCreator = ActionsCreatorManager.GetActionCreator<WorkloadsActionsCreator>(WorkloadsActionsCreator);
+        this._selectionActionCreator = ActionsCreatorManager.GetActionCreator<SelectionActionsCreator>(SelectionActionsCreator);
+        this._imageActionsCreator = ActionsCreatorManager.GetActionCreator<ImageDetailsActionsCreator>(ImageDetailsActionsCreator);
+
         this.state = { statefulSetList: [], daemonSetList: [], replicaSets: [] };
 
+        this._store.addListener(WorkloadsEvents.ReplicaSetsFetchedEvent, this._onReplicaSetsFetched);
         this._store.addListener(WorkloadsEvents.StatefulSetsFetchedEvent, this._onStatefulSetsFetched);
         this._store.addListener(WorkloadsEvents.DaemonSetsFetchedEvent, this._onDaemonSetsFetched);
-        this._store.addListener(WorkloadsEvents.ReplicaSetsFetchedEvent, this._onReplicaSetsFetched);
         this._imageDetailsStore.addListener(ImageDetailsEvents.HasImageDetailsEvent, this._setHasImageDetails);
 
+        this._actionCreator.getReplicaSets(KubeSummary.getKubeService());
         this._actionCreator.getStatefulSets(KubeSummary.getKubeService());
         this._actionCreator.getDaemonSets(KubeSummary.getKubeService());
-        this._actionCreator.getReplicaSets(KubeSummary.getKubeService());
     }
 
     public render(): React.ReactNode {
@@ -112,10 +112,10 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
     }
 
     public componentWillUnmount(): void {
-        this._store.removeListener(WorkloadsEvents.StatefulSetsFetchedEvent, this._onStatefulSetsFetched);
-        this._store.removeListener(WorkloadsEvents.DaemonSetsFetchedEvent, this._onDaemonSetsFetched);
-        this._store.removeListener(WorkloadsEvents.ReplicaSetsFetchedEvent, this._onReplicaSetsFetched);
         this._imageDetailsStore.removeListener(ImageDetailsEvents.HasImageDetailsEvent, this._setHasImageDetails);
+        this._store.removeListener(WorkloadsEvents.DaemonSetsFetchedEvent, this._onDaemonSetsFetched);
+        this._store.removeListener(WorkloadsEvents.StatefulSetsFetchedEvent, this._onStatefulSetsFetched);
+        this._store.removeListener(WorkloadsEvents.ReplicaSetsFetchedEvent, this._onReplicaSetsFetched);
     }
 
     private _onStatefulSetsFetched = (): void => {
@@ -229,14 +229,8 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
     }
 
     private static _renderPodsCountCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<ISetWorkloadTypeItem>, workload: ISetWorkloadTypeItem): JSX.Element {
-        let statusProps: IStatusProps | undefined;
-        let podString: string = "";
-        if (workload.desiredPodCount > 0) {
-            statusProps = Utils.getPodsStatusProps(workload.desiredPodCount, workload.currentPodCount);
-            podString = format("{0}/{1}", workload.desiredPodCount, workload.currentPodCount);
-        }
-
-        return renderPodsStatusTableCell(rowIndex, columnIndex, tableColumn, podString, statusProps);
+        const { statusProps, pods, podsTooltip } = Utils.getPodsStatusProps(workload.currentPodCount, workload.desiredPodCount);
+        return renderPodsStatusTableCell(rowIndex, columnIndex, tableColumn, pods, statusProps, podsTooltip);
     }
 
     private static _renderAgeCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<ISetWorkloadTypeItem>, statefulSet: ISetWorkloadTypeItem): JSX.Element {
@@ -261,7 +255,7 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
                 creationTimeStamp: set.metadata.creationTimestamp,
                 imageId: imageId,
                 desiredPodCount: set.status.replicas,
-                currentPodCount: set.status.currentReplicas,
+                currentPodCount: set.status.readyReplicas,
                 payload: set,
                 ...OtherWorkloads._getImageText(set.spec.template.spec)
             });
@@ -280,7 +274,7 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
                 creationTimeStamp: set.metadata.creationTimestamp,
                 imageId: imageId,
                 desiredPodCount: set.status.desiredNumberScheduled,
-                currentPodCount: set.status.currentNumberScheduled,
+                currentPodCount: set.status.numberAvailable,
                 payload: set,
                 ...OtherWorkloads._getImageText(set.spec.template.spec)
             });
@@ -299,7 +293,7 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
                 creationTimeStamp: set.metadata.creationTimestamp,
                 imageId: imageId,
                 desiredPodCount: set.status.replicas,
-                currentPodCount: set.status.availableReplicas,
+                currentPodCount: set.status.readyReplicas,
                 payload: set,
                 ...OtherWorkloads._getImageText(set.spec.template.spec)
             });
