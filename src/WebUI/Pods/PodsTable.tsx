@@ -37,13 +37,16 @@ export interface IPodsTableProperties extends IVssComponentProperties {
     podsToRender: V1Pod[];
     headingText?: string;
     nameFilter?: string;
-    showWorkloadsColumn?: boolean;
+    showWorkloadColumn?: boolean;
     onItemActivated?: (event: React.SyntheticEvent<HTMLElement>, selectedItem: V1Pod) => void;
     contentClassName?: string;
 }
 
 export class PodsTable extends BaseComponent<IPodsTableProperties> {
     public render(): React.ReactNode {
+        // original value for this property --> this.props.showWorkloadColumn || false
+        // we will disable till we have full details on navigation
+        const showWorkloadColumn = false;
         const filteredPods: V1Pod[] = (this.props.podsToRender || []).filter((pod) => {
             return Utils.filterByName(pod.metadata.name, this.props.nameFilter);
         });
@@ -77,7 +80,7 @@ export class PodsTable extends BaseComponent<IPodsTableProperties> {
                             id="pods-table"
                             showHeader={true}
                             showLines={true}
-                            columns={PodsTable._getColumns(this.props.showWorkloadsColumn || false)}
+                            columns={PodsTable._getColumns(showWorkloadColumn)}
                             itemProvider={new ArrayItemProvider<V1Pod>(filteredPods)}
                             pageSize={filteredPods.length}
                             singleClickActivation={true}
@@ -93,26 +96,26 @@ export class PodsTable extends BaseComponent<IPodsTableProperties> {
         return null;
     }
 
-    private static _getColumns(showWorkloadsColumn: boolean): ITableColumn<V1Pod>[] {
+    private static _getColumns(showWorkloadColumn: boolean): ITableColumn<V1Pod>[] {
         let columns: ITableColumn<V1Pod>[] = [];
         columns.push({
             id: podNameKey,
             name: Resources.PodsDetailsText,
-            width: showWorkloadsColumn ? -58 : new ObservableValue(362),
+            width: showWorkloadColumn ? -58 : new ObservableValue(362),
             renderCell: PodsTable._renderPodNameCell
         });
 
         columns.push({
             id: "podStatus",
             name: Resources.StatusText,
-            width: new ObservableValue(showWorkloadsColumn ? 220 : 256),
+            width: new ObservableValue(showWorkloadColumn ? 220 : 256),
             renderCell: (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod) => {
                 const textToRender: string = pod.status.message ? pod.status.reason : pod.status.phase;
                 return renderSimpleCell(rowIndex, columnIndex, tableColumn as any, { "podStatus": textToRender });
             }
         });
 
-        if (showWorkloadsColumn) {
+        if (showWorkloadColumn) {
             columns.push({
                 id: podWorkloadsKey,
                 name: Resources.WorkloadText,
@@ -124,7 +127,7 @@ export class PodsTable extends BaseComponent<IPodsTableProperties> {
         columns.push({
             id: podAgeKey,
             name: Resources.AgeText,
-            width: showWorkloadsColumn ? -18 : -100,
+            width: showWorkloadColumn ? -18 : -100,
             renderCell: PodsTable._renderPodAgeCell
         });
 
