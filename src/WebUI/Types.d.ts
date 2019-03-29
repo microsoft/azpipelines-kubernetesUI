@@ -3,7 +3,7 @@
     Licensed under the MIT license.
 */
 
-import { V1DaemonSet, V1DaemonSetList, V1Deployment, V1DeploymentList, V1PodList, V1ReplicaSet, V1ReplicaSetList, V1Service, V1ServiceList, V1StatefulSet, V1StatefulSetList } from "@kubernetes/client-node";
+import { V1DaemonSet, V1DaemonSetList, V1Deployment, V1DeploymentList, V1PodList, V1ReplicaSet, V1ReplicaSetList, V1Service, V1ServiceList, V1StatefulSet, V1StatefulSetList, V1Pod } from "@kubernetes/client-node";
 import { IBaseProps } from "@uifabric/utilities";
 import { IObservable } from "azure-devops-ui/Core/Observable";
 import { IStatusProps } from "azure-devops-ui/Status";
@@ -65,7 +65,8 @@ export interface ISetWorkloadTypeItem {
     desiredPodCount: number;
     currentPodCount: number;
     creationTimeStamp: Date;
-    payload: V1DaemonSet | V1StatefulSet | V1ReplicaSet;
+    payload: V1DaemonSet | V1StatefulSet | V1ReplicaSet | V1Pod;
+    status?: V1PodStatus;
 }
 
 export interface IVssComponentProperties extends IBaseProps {

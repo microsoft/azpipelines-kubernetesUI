@@ -17,6 +17,7 @@ import { ITableColumn, Table, TwoLineTableCell } from "azure-devops-ui/Table";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
+import { PodPhase, PodPhaseToStatus } from "../../Contracts/Contracts";
 import { KubeResourceType } from "../../Contracts/KubeServiceBase";
 import { defaultColumnRenderer, renderPodsStatusTableCell, renderTableCell } from "../Common/KubeCardWithTable";
 import { KubeSummary } from "../Common/KubeSummary";
@@ -46,9 +47,10 @@ export interface IOtherWorkloadsProperties extends IVssComponentProperties {
 }
 
 export interface IOtherWorkloadsState {
-    statefulSetList: V1StatefulSet[];
-    daemonSetList: V1DaemonSet[];
+    statefulSets: V1StatefulSet[];
+    daemonSets: V1DaemonSet[];
     replicaSets: V1ReplicaSet[];
+    orphanPods: V1Pod[];
 }
 
 export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOtherWorkloadsState> {
@@ -62,11 +64,13 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
         this._selectionActionCreator = ActionsCreatorManager.GetActionCreator<SelectionActionsCreator>(SelectionActionsCreator);
         this._imageActionsCreator = ActionsCreatorManager.GetActionCreator<ImageDetailsActionsCreator>(ImageDetailsActionsCreator);
 
-        this.state = { statefulSetList: [], daemonSetList: [], replicaSets: [] };
+        this.state = { statefulSets: [], daemonSets: [], replicaSets: [], orphanPods: [] };
 
         this._store.addListener(WorkloadsEvents.ReplicaSetsFetchedEvent, this._onReplicaSetsFetched);
         this._store.addListener(WorkloadsEvents.StatefulSetsFetchedEvent, this._onStatefulSetsFetched);
         this._store.addListener(WorkloadsEvents.DaemonSetsFetchedEvent, this._onDaemonSetsFetched);
+        this._store.addListener(WorkloadsEvents.WorkloadPodsFetchedEvent, this._onOrphanPodsFetched);
+
         this._imageDetailsStore.addListener(ImageDetailsEvents.HasImageDetailsEvent, this._setHasImageDetails);
 
         this._actionCreator.getReplicaSets(KubeSummary.getKubeService());
@@ -100,7 +104,7 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
                             itemProvider={new ArrayItemProvider<ISetWorkloadTypeItem>(filteredSet)}
                             columns={this._getColumns()}
                             onActivate={(event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>) => {
-                                this._openStatefulSetItem(event, tableRow, filteredSet[tableRow.index]);
+                                this._showWorkloadDetails(event, tableRow, filteredSet[tableRow.index]);
                             }}
                         />
                     </CardContent>
@@ -116,19 +120,20 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
         this._store.removeListener(WorkloadsEvents.DaemonSetsFetchedEvent, this._onDaemonSetsFetched);
         this._store.removeListener(WorkloadsEvents.StatefulSetsFetchedEvent, this._onStatefulSetsFetched);
         this._store.removeListener(WorkloadsEvents.ReplicaSetsFetchedEvent, this._onReplicaSetsFetched);
+        this._store.removeListener(WorkloadsEvents.WorkloadPodsFetchedEvent, this._onOrphanPodsFetched);
     }
 
     private _onStatefulSetsFetched = (): void => {
         const storeState = this._store.getState();
         this.setState({
-            statefulSetList: storeState.statefulSetList && storeState.statefulSetList.items || []
+            statefulSets: storeState.statefulSetList && storeState.statefulSetList.items || []
         });
     }
 
     private _onDaemonSetsFetched = (): void => {
         const storeState = this._store.getState();
         this.setState({
-            daemonSetList: storeState.daemonSetList && storeState.daemonSetList.items || []
+            daemonSets: storeState.daemonSetList && storeState.daemonSetList.items || []
         });
     }
 
@@ -141,11 +146,19 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
         })
     }
 
+    private _onOrphanPodsFetched = (): void => {
+        const storeState = this._store.getState();
+        const orphanPods = storeState.orphanPodsList || [];
+        this.setState({
+            orphanPods: orphanPods
+        });
+    }
+
     private _setHasImageDetails = (): void => {
         this.setState({});
     }
 
-    private _openStatefulSetItem = (event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>, selectedItem: ISetWorkloadTypeItem) => {
+    private _showWorkloadDetails = (event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>, selectedItem: ISetWorkloadTypeItem) => {
         if (selectedItem) {
             const payload: ISelectionPayload = {
                 item: selectedItem.payload,
@@ -229,7 +242,12 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
     }
 
     private static _renderPodsCountCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<ISetWorkloadTypeItem>, workload: ISetWorkloadTypeItem): JSX.Element {
-        const { statusProps, pods, podsTooltip } = Utils.getPodsStatusProps(workload.currentPodCount, workload.desiredPodCount);
+        let { statusProps, pods, podsTooltip } = Utils.getPodsStatusProps(workload.currentPodCount, workload.desiredPodCount);
+        if (workload.kind === SelectedItemKeys.OrphanPodKey) {
+            statusProps = PodPhaseToStatus[workload.status.phase];
+            podsTooltip = workload.status.message || workload.status.phase
+        }
+
         return renderPodsStatusTableCell(rowIndex, columnIndex, tableColumn, pods, statusProps, podsTooltip);
     }
 
@@ -242,8 +260,8 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
     private _generateRenderData(): ISetWorkloadTypeItem[] {
         let data: ISetWorkloadTypeItem[] = [];
         let imageId: string = "";
-        this._showType(KubeResourceType.StatefulSets) && this.state.statefulSetList.forEach(set => {
-            imageId = this._getImageId(set);
+        this._showType(KubeResourceType.StatefulSets) && this.state.statefulSets.forEach(set => {
+            imageId = this._getImageId(set.spec.template.spec, set.metadata.uid);
             if (imageId && (this._imageList.length <= 0 || this._imageList.findIndex(img => equals(img, imageId, true)) < 0)) {
                 this._imageList.push(imageId);
             }
@@ -261,8 +279,8 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
             });
         });
 
-        this._showType(KubeResourceType.DaemonSets) && this.state.daemonSetList.forEach(set => {
-            imageId = this._getImageId(set);
+        this._showType(KubeResourceType.DaemonSets) && this.state.daemonSets.forEach(set => {
+            imageId = this._getImageId(set.spec.template.spec, set.metadata.uid);
             if (imageId && (this._imageList.length <= 0 || this._imageList.findIndex(img => equals(img, imageId, true)) < 0)) {
                 this._imageList.push(imageId);
             }
@@ -281,7 +299,7 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
         });
 
         this._showType(KubeResourceType.ReplicaSets) && this.state.replicaSets.forEach(set => {
-            imageId = this._getImageId(set);
+            imageId = this._getImageId(set.spec.template.spec, set.metadata.uid);
             if (imageId && (this._imageList.length <= 0 || this._imageList.findIndex(img => equals(img, imageId, true)) < 0)) {
                 this._imageList.push(imageId);
             }
@@ -299,13 +317,34 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
             });
         });
 
+        this._showType(KubeResourceType.Pods) && this.state.orphanPods.forEach(pod => {
+            imageId = this._getImageId(pod.spec, pod.metadata.uid);
+            if (imageId && (this._imageList.length <= 0 || this._imageList.findIndex(img => equals(img, imageId, true)) < 0)) {
+                this._imageList.push(imageId);
+            }
+
+            const currentPodCount = pod.status && (pod.status.phase === PodPhase.Running || pod.status.phase === PodPhase.Succeeded) ? 1 : 0;
+            data.push({
+                name: pod.metadata.name,
+                uid: pod.metadata.uid,
+                kind: SelectedItemKeys.OrphanPodKey,
+                creationTimeStamp: pod.metadata.creationTimestamp,
+                imageId: imageId,
+                desiredPodCount: 1,
+                currentPodCount: currentPodCount,
+                status: pod.status,
+                payload: pod,
+                ...OtherWorkloads._getImageText(pod.spec)
+            });
+        });
+
         return data;
     }
 
-    private _getImageId(set: V1ReplicaSet | V1DaemonSet | V1StatefulSet): string {
+    private _getImageId(podSpec: V1PodSpec, uid: string): string {
         const podslist = StoreManager.GetStore<PodsStore>(PodsStore).getState().podsList;
         const pods: V1Pod[] = podslist && podslist.items || [];
-        return Utils.getImageIdForWorkload(Utils.getFirstContainerName(set.spec.template.spec), pods, set.metadata.uid);
+        return Utils.getImageIdForWorkload(Utils.getFirstContainerName(podSpec), pods, uid);
     }
 
     private _showType(type: KubeResourceType): boolean {
@@ -325,6 +364,8 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
                 return Resources.ReplicaSetText;
             case SelectedItemKeys.StatefulSetKey:
                 return Resources.StatefulSetText;
+            case SelectedItemKeys.OrphanPodKey:
+                return Resources.PodText;
         }
 
         return "";
