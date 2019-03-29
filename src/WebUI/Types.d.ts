@@ -66,7 +66,8 @@ export interface ISetWorkloadTypeItem {
     currentPodCount: number;
     creationTimeStamp: Date;
     payload: V1DaemonSet | V1StatefulSet | V1ReplicaSet | V1Pod;
-    status?: V1PodStatus;
+    statusProps?: IStatusProps;
+    statusTooltip?: string;
 }
 
 export interface IVssComponentProperties extends IBaseProps {

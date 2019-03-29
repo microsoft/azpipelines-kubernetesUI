@@ -11,13 +11,14 @@ import { localeFormat } from "azure-devops-ui/Core/Util/String";
 import { Header, TitleSize } from "azure-devops-ui/Header";
 import { HeaderCommandBarWithFilter } from "azure-devops-ui/HeaderCommandBar";
 import { Page } from "azure-devops-ui/Page";
+import { IStatusProps } from "azure-devops-ui/Status";
 import { Surface, SurfaceBackground } from "azure-devops-ui/Surface";
 import { Tab, TabBar } from "azure-devops-ui/Tabs";
 import { Filter, FILTER_CHANGE_EVENT, IFilterState } from "azure-devops-ui/Utilities/Filter";
 import { Action, createBrowserHistory, History, Location, UnregisterCallback } from "history";
 import * as queryString from "query-string";
 import * as React from "react";
-import { IImageService, IKubeService, KubeImage, PodPhaseToStatus } from "../../Contracts/Contracts";
+import { IImageService, IKubeService, KubeImage } from "../../Contracts/Contracts";
 import { IImageDetails } from "../../Contracts/Types";
 import { SelectedItemKeys, ServicesEvents, WorkloadsEvents } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
@@ -41,7 +42,6 @@ import { WorkloadsPivot } from "../Workloads/WorkloadsPivot";
 import { WorkloadsStore } from "../Workloads/WorkloadsStore";
 import "./KubeSummary.scss";
 import { KubeZeroData } from "./KubeZeroData";
-import { IStatusProps } from "azure-devops-ui/Status";
 
 const workloadsPivotItemKey: string = "workloads";
 const servicesPivotItemKey: string = "services";
@@ -202,14 +202,14 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         // must be short syntax or React.Fragment, do not use div here to include heading and content.
         return (
             <>
-            <Header
-                title={this.props.title}
-                titleSize={TitleSize.Large}
-                className={"content-main-heading"}
-                description={this.props.clusterName
-                    ? localeFormat(Resources.SummaryHeaderSubTextFormat, this.props.clusterName)
-                    : localeFormat(Resources.NamespaceHeadingText, this.state.namespace || "")}
-            />
+                <Header
+                    title={this.props.title}
+                    titleSize={TitleSize.Large}
+                    className={"content-main-heading"}
+                    description={this.props.clusterName
+                        ? localeFormat(Resources.SummaryHeaderSubTextFormat, this.props.clusterName)
+                        : localeFormat(Resources.NamespaceHeadingText, this.state.namespace || "")}
+                />
                 {pageContent}
             </>
         );
@@ -228,18 +228,18 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         // must be short syntax or React.Fragment, do not use div here to include heading and content.
         return (
             <>
-            <TabBar
-                selectedTabId={this.state.selectedPivotKey || workloadsPivotItemKey}
-                onSelectedTabChanged={(key: string) => { this.setState({ selectedPivotKey: key }); }}
-                renderAdditionalContent={() => { return this._getFilterHeaderBar(); }}
-                disableSticky={false}
-            >
-                <Tab name={Resources.PivotWorkloadsText} id={workloadsPivotItemKey} />
-                <Tab name={Resources.PivotServiceText} id={servicesPivotItemKey} />
-            </TabBar>
-            <div className="page-content page-content-top k8s-pivot-content">
-                {tabContent}
-            </div>
+                <TabBar
+                    selectedTabId={this.state.selectedPivotKey || workloadsPivotItemKey}
+                    onSelectedTabChanged={(key: string) => { this.setState({ selectedPivotKey: key }); }}
+                    renderAdditionalContent={() => { return this._getFilterHeaderBar(); }}
+                    disableSticky={false}
+                >
+                    <Tab name={Resources.PivotWorkloadsText} id={workloadsPivotItemKey} />
+                    <Tab name={Resources.PivotServiceText} id={servicesPivotItemKey} />
+                </TabBar>
+                <div className="page-content page-content-top k8s-pivot-content">
+                    {tabContent}
+                </div>
             </>
         );
     }
@@ -361,7 +361,10 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
 
         this._selectedItemViewMap[SelectedItemKeys.ServiceItemKey] = (service) => { return <ServiceDetails service={service} parentKind={service.kind || "Service"} />; };
         this._selectedItemViewMap[SelectedItemKeys.ImageDetailsKey] = (item) => { return <ImageDetails imageDetails={item} onBackButtonClick={this._setSelectionStateFalse} />; };
-        this._selectedItemViewMap[SelectedItemKeys.OrphanPodKey] = (pod) => <PodsRightPanel key={pod.metadata.uid} pod={pod} podStatusProps={PodPhaseToStatus[pod.status.phase]} statusTooltip={pod.status.message || pod.status.phase} />;
+        this._selectedItemViewMap[SelectedItemKeys.OrphanPodKey] = (pod) => {
+            const { statusProps, tooltip } = Utils.generatePodStatusProps(pod.status);
+            return <PodsRightPanel key={pod.metadata.uid} pod={pod} podStatusProps={statusProps} statusTooltip={tooltip} />;
+        }
     }
 
     private _setSelectionStateFalse = () => {
@@ -393,12 +396,12 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
     private _getFilterHeaderBar(): JSX.Element {
         return (
             <>
-            <ConditionalChildren renderChildren={!this.state.selectedPivotKey || this.state.selectedPivotKey === workloadsPivotItemKey}>
-                <HeaderCommandBarWithFilter filter={this.state.workloadsFilter} filterToggled={workloadsFilterToggled} items={[]} />
-            </ConditionalChildren>
-            <ConditionalChildren renderChildren={this.state.selectedPivotKey === servicesPivotItemKey}>
-                <HeaderCommandBarWithFilter filter={this.state.svcFilter} filterToggled={servicesFilterToggled} items={[]} />
-            </ConditionalChildren>
+                <ConditionalChildren renderChildren={!this.state.selectedPivotKey || this.state.selectedPivotKey === workloadsPivotItemKey}>
+                    <HeaderCommandBarWithFilter filter={this.state.workloadsFilter} filterToggled={workloadsFilterToggled} items={[]} />
+                </ConditionalChildren>
+                <ConditionalChildren renderChildren={this.state.selectedPivotKey === servicesPivotItemKey}>
+                    <HeaderCommandBarWithFilter filter={this.state.svcFilter} filterToggled={servicesFilterToggled} items={[]} />
+                </ConditionalChildren>
             </>
         );
     }

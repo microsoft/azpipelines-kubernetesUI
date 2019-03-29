@@ -5,16 +5,17 @@
 
 import { V1Pod } from "@kubernetes/client-node";
 import { BaseComponent } from "@uifabric/utilities";
-import { TabBar, TabSize, Tab } from "azure-devops-ui/Tabs";
+import { MessageCard, MessageCardSeverity } from "azure-devops-ui/MessageCard";
+import { Page } from "azure-devops-ui/Page";
+import { IStatusProps, Statuses } from "azure-devops-ui/Status";
+import { Tab, TabBar, TabSize } from "azure-devops-ui/Tabs";
 import * as React from "react";
-import * as Resources from "../Resources";
+import { PageTopHeader } from "../Common/PageTopHeader";
 import { PodsRightPanelTabsKeys } from "../Constants";
+import * as Resources from "../Resources";
 import { IVssComponentProperties } from "../Types";
 import { PodOverview } from "./PodOverview";
-import { Header, IHeaderProps, TitleSize } from "azure-devops-ui/Header";
-import { Page } from "azure-devops-ui/Page";
-import { IStatusProps, Status, StatusSize } from "azure-devops-ui/Status";
-import { PageTopHeader } from "../Common/PageTopHeader";
+import { Utils } from "../Utils";
 
 export interface IPodRightPanelProps extends IVssComponentProperties {
     pod: V1Pod;
@@ -58,7 +59,7 @@ export class PodsRightPanel extends BaseComponent<IPodRightPanelProps, IPodsRigh
                     />
                 </TabBar>
                 <div className="pod-details-right-content page-content page-content-top">
-                    {this._getTabContent()}
+                    {this._getPageContent()}
                 </div>
             </Page>
         );
@@ -71,7 +72,8 @@ export class PodsRightPanel extends BaseComponent<IPodRightPanelProps, IPodsRigh
                 statusProps={this.props.podStatusProps}
                 statusTooltip={this.props.statusTooltip}
                 className={"pod-right-panel-header"}
-            />);
+            />
+        );
     }
 
     private _onSelectedTabChanged = (selectedTab: string): void => {
@@ -80,21 +82,30 @@ export class PodsRightPanel extends BaseComponent<IPodRightPanelProps, IPodsRigh
         });
     }
 
-    private _getTabContent(): React.ReactNode {
+    private _getPageContent(): React.ReactNode {
+        const { statusProps, tooltip } = Utils.generatePodStatusProps(this.props.pod.status);
+        const podErrorMessage: string = statusProps !== Statuses.Success ? tooltip : "";
+        return (
+            <>
+                {podErrorMessage && <MessageCard severity={MessageCardSeverity.Error}>{podErrorMessage}</MessageCard>}
+                <div className={podErrorMessage ? "page-content-top" : ""}>
+                    {this._getSelectedTabContent()}
+                </div>
+            </>
+        );
+    }
+
+    private _getSelectedTabContent(): React.ReactNode {
         const selectedTab = this.state.selectedTab;
         switch (selectedTab) {
-            case PodsRightPanelTabsKeys.PodsLogsKey: return (
-                <span>{"Pods Logs View coming soon..."}</span>
-            );
+            case PodsRightPanelTabsKeys.PodsLogsKey:
+                return <span>{"Pods Logs View coming soon..."}</span>;
 
-            case PodsRightPanelTabsKeys.PodsYamlKey: return (
-                <span>{"Pods YAML View coming soon..."}</span>
-            );
+            case PodsRightPanelTabsKeys.PodsYamlKey:
+                return <span>{"Pods YAML View coming soon..."}</span>;
 
-            default: return (<PodOverview
-                pod={this.props.pod}
-            />);
-
+            default:
+                return <PodOverview key={this.props.pod.metadata.uid} pod={this.props.pod} />;
         }
     }
 }
