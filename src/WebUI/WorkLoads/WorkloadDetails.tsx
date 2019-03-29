@@ -29,10 +29,11 @@ import { PodsStore } from "../Pods/PodsStore";
 import { PodsTable } from "../Pods/PodsTable";
 import * as Resources from "../Resources";
 import { IVssComponentProperties } from "../Types";
-import { Utils } from "../Utils";
+import { Utils, IMetadataAnnotationPipeline } from "../Utils";
 import "./WorkloadDetails.scss";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
 import { KubeSummary } from "../Common/KubeSummary";
+import { getRunDetailsText } from "../RunDetails";
 
 export interface IWorkloadDetailsProperties extends IVssComponentProperties {
     parentMetaData: V1ObjectMeta;
@@ -172,7 +173,7 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
     private _getWorkloadDetails(): JSX.Element | null {
         const metadata = this.props.parentMetaData;
         if (metadata) {
-            const pipeline = Utils.getPipelineText(metadata.annotations);
+            const pipelineDetails = Utils.getPipelineDetails(metadata.annotations);
             const tableItems: IWorkLoadDetailsItem[] = [{ podTemplate: this.props.podTemplate, parentMetaData: metadata, selector: this.props.selector }];
             const agoTime = Date_Utils.ago(new Date(metadata.creationTimestamp), Date_Utils.AgoFormat.Compact);
 
@@ -187,9 +188,7 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
                             </HeaderTitleRow>
                             <HeaderDescription className={"text-ellipsis"}>
                                 {
-                                    pipeline
-                                        ? localeFormat(Resources.ServiceCreatedWithPipelineText, agoTime, pipeline)
-                                        : localeFormat(Resources.CreatedAgo, agoTime)
+                                   getRunDetailsText(metadata.annotations, agoTime)
                                 }
                             </HeaderDescription>
                         </HeaderTitleArea>

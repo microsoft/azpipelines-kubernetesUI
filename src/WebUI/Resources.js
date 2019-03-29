@@ -29,7 +29,8 @@ define("Environments/Providers/Kubernetes/Resources", ["require", "exports"], fu
     exports.AgoBy = " ago. Image: {0}";
     exports.Deployment = "Deployment: {0}";
     exports.ReplicaSet = "ReplicaSet: {0}";
-    exports.ServiceCreatedWithPipelineText = "Created {0} by {1}"
+    exports.ServiceCreatedWithPipelineText = "Created {0} by {1}";
+    exports.RunInformationForWorkload = "{0} on {1}";
     exports.OverviewText = "Overview";
     exports.LabelsText = "Labels";
     exports.SelectorText = "Selector";
@@ -47,6 +48,7 @@ define("Environments/Providers/Kubernetes/Resources", ["require", "exports"], fu
     exports.NoItemsText = "No Items found"
     exports.PodDetailsHeader = "Pod details";
     exports.KindText = "Kind";
+    exports.JobText = "Job";
     exports.AnnotationsText = "Annotations";
     exports.RestartPolicyText = "Restart policy";
     exports.QoSClassText = "QoS class";
