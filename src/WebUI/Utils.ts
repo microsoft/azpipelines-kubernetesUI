@@ -3,6 +3,7 @@
     Licensed under the MIT license.
 */
 
+import * as React from "react";
 import { V1ObjectMeta, V1Pod, V1PodSpec, V1PodStatus } from "@kubernetes/client-node";
 import { ObservableArray } from "azure-devops-ui/Core/Observable";
 import { format, localeFormat } from "azure-devops-ui/Core/Util/String";
@@ -12,10 +13,19 @@ import { PodPhase } from "../Contracts/Contracts";
 import * as Resources from "./Resources";
 
 const pipelineNameAnnotationKey: string = "azure-pipelines/pipeline";
-const pipelineExecutionIdAnnotationKey: string = "azure-pipelines/execution";
+const pipelineRunIdAnnotationKey: string = "azure-pipelines/execution";
+const pipelineRunUrlAnnotationKey: string = "azure-pipelines/executionuri";
+const pipelineJobNameAnnotationKey: string = "azure-pipelines/__TEMP_PLACEHOLDER__";
 const matchPatternForImageName = new RegExp(/\:\/\/(.+?)\@/);
 const matchPatternForDigest = new RegExp(/\@sha256\:(.+)/);
 const invalidCharPatternInNamespace = new RegExp(/[:.]/);
+
+export interface IMetadataAnnotationPipeline {
+    runName: string | undefined;
+    runUrl: string | undefined;
+    pipelineName: string | undefined;
+    jobName: string | undefined;
+}
 
 export class Utils {
     public static isOwnerMatched(objectMeta: V1ObjectMeta, ownerUIdLowerCase: string): boolean {
@@ -56,7 +66,7 @@ export class Utils {
             if (!pipelineName && keyVal === pipelineNameAnnotationKey) {
                 pipelineName = annotations[key];
             }
-            else if (!pipelineExecutionId && keyVal === pipelineExecutionIdAnnotationKey) {
+            else if (!pipelineExecutionId && keyVal === pipelineRunIdAnnotationKey) {
                 pipelineExecutionId = annotations[key];
             }
 
@@ -64,6 +74,19 @@ export class Utils {
         });
 
         return pipelineName && pipelineExecutionId ? localeFormat("{0} / {1}", pipelineName, pipelineExecutionId) : "";
+    }
+
+    public static getPipelineDetails(annotations: { [key: string]: string }): IMetadataAnnotationPipeline {
+        if (!annotations) {
+            return {} as IMetadataAnnotationPipeline;
+        }
+
+        return {
+            jobName: annotations[pipelineJobNameAnnotationKey],
+            pipelineName: annotations[pipelineNameAnnotationKey],
+            runName: annotations[pipelineRunIdAnnotationKey],
+            runUrl: annotations[pipelineRunUrlAnnotationKey]
+        };
     }
 
     public static getPodsStatusProps(currentPods: number, desiredPods: number): { statusProps: IStatusProps | undefined, pods: string, podsTooltip: string } {

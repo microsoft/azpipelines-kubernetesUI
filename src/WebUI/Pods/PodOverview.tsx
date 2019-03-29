@@ -18,6 +18,7 @@ import * as React from "react";
 import { defaultColumnRenderer, renderTableCell } from "../Common/KubeCardWithTable";
 import { Tags } from "../Common/Tags";
 import * as Resources from "../Resources";
+import { getRunDetailsText } from "../RunDetails";
 import { Utils } from "../Utils";
 import "./PodOverview.scss";
 import { IPodRightPanelProps } from "./PodsRightPanel";
@@ -61,10 +62,11 @@ export class PodOverview extends BaseComponent<IPodOverviewProps> {
         const hasLabels = pod.metadata.labels && Object.keys(pod.metadata.labels).length > 0;
         const { imageText, imageTooltipText } = Utils.getImageText(pod.spec);
         const conditionsText = PodOverview._getPodConditionsText(pod);
-
+        const jobName = getRunDetailsText(pod.metadata.annotations);
         let podDetails: any[] = [];
         // order of rows to be preserved as per spec
         createTime && podDetails.push({ key: Resources.Created, value: createTime });
+        jobName && podDetails.push({ key: Resources.JobText, value: jobName });
         hasAnnotations && podDetails.push({ key: Resources.AnnotationsText, value: pod.metadata.annotations });
         pod.spec.restartPolicy && podDetails.push({ key: Resources.RestartPolicyText, value: pod.spec.restartPolicy });
         pod.status.qosClass && podDetails.push({ key: Resources.QoSClassText, value: pod.status.qosClass });
