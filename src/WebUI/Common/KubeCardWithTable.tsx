@@ -17,6 +17,10 @@ import { IVssComponentProperties } from "../Types";
 import "./KubeCardWithTable.scss";
 import { IResourceStatusProps, ResourceStatus } from "./ResourceStatus";
 import { format } from "azure-devops-ui/Core/Util/String";
+import { V1Pod } from "@kubernetes/client-node";
+import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
+import { SelectionActionsCreator } from "../Selection/SelectionActionCreator";
+import { SelectedItemKeys } from "../Constants";
 
 export interface ITableComponentProperties<T> extends IVssComponentProperties {
     className?: string;
@@ -210,20 +214,34 @@ export function renderPodsStatusTableCell(
     tableColumn: ITableColumn<any>,
     podsCountString?: string,
     podsStatusProps?: IStatusProps,
+    onClick?: () => void,
     tooltip?: string
 ): JSX.Element {
+    const content = (
+        <>
+            {podsStatusProps && <Status {...podsStatusProps} size={StatusSize.m} />}
+            <div className="k8s-pods-status-count">{podsCountString}</div>
+        </>
+    );
+
+    const classNames = "fontSizeM flex-center flex-row text-ellipsis";
+
     const itemToRender = podsCountString ? (
         // show tooltip always if specified, otherwise show only when element overflows
         <Tooltip text={tooltip || podsCountString || ""} overflowOnly={!tooltip}>
-            <Link
-                className="fontSizeM flex-center flex-row text-ellipsis bolt-table-link"
-                rel={"noopener noreferrer"}
-                excludeTabStop
-                href="#"
-            >
-                {podsStatusProps && <Status {...podsStatusProps} size={StatusSize.m} />}
-                <div className="k8s-pods-status-count">{podsCountString}</div>
-            </Link>
+            {
+                onClick ? (
+                    <Link
+                        className={classNames + " bolt-table-link"}
+                        rel={"noopener noreferrer"}
+                        excludeTabStop
+                        onClick={() => onClick()}
+                    >
+                        {content}
+                    </Link>)
+                    : (<span className={classNames}>
+                        {content}
+                    </span>)}
         </Tooltip>
     ) : null;
 
