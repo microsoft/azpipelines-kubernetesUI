@@ -22,6 +22,7 @@ import * as Resources from "../Resources";
 import { Utils } from "../Utils";
 import "./PodOverview.scss";
 import { IPodRightPanelProps } from "./PodsRightPanel";
+import { getRunDetailsText } from "../RunDetails";
 
 export interface IPodOverviewProps extends IPodRightPanelProps { }
 
@@ -51,6 +52,7 @@ export class PodOverview extends BaseComponent<IPodOverviewProps> {
 
         const tableRows = new ArrayItemProvider<any>([
             { key: Resources.Created, value: pod.metadata.creationTimestamp ? new Date(pod.metadata.creationTimestamp) : new Date().getTime() },
+            { key: Resources.JobText, value: getRunDetailsText(pod.metadata.annotations) },
             { key: Resources.AnnotationsText, value: pod.metadata.annotations || "" },
             { key: Resources.RestartPolicyText, value: pod.spec.restartPolicy || "" },
             { key: Resources.QoSClassText, value: pod.status.qosClass || "" },
