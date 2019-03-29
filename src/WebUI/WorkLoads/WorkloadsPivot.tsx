@@ -57,7 +57,6 @@ export class WorkloadsPivot extends BaseComponent<IWorkloadsPivotProps, IWorkloa
         };
 
         this._podsStore.addListener(PodsEvents.PodsFetchedEvent, this._onPodsFetched);
-        this._workloadsStore.addListener(WorkloadsEvents.WorkloadPodsFetchedEvent, this._onOrphanPodsFetched);
         this._workloadsStore.addListener(WorkloadsEvents.WorkloadsFoundEvent, this._onDataFound);
 
         this._workloadsActionCreator.getDeployments(KubeSummary.getKubeService());
@@ -78,7 +77,6 @@ export class WorkloadsPivot extends BaseComponent<IWorkloadsPivotProps, IWorkloa
 
     public componentWillUnmount(): void {
         this._workloadsStore.removeListener(WorkloadsEvents.WorkloadsFoundEvent, this._onDataFound);
-        this._workloadsStore.removeListener(WorkloadsEvents.WorkloadPodsFetchedEvent, this._onOrphanPodsFetched);
         this._podsStore.removeListener(PodsEvents.PodsFetchedEvent, this._onPodsFetched);
     }
 
@@ -95,10 +93,6 @@ export class WorkloadsPivot extends BaseComponent<IWorkloadsPivotProps, IWorkloa
                 imageList: imageList
             });
         }
-    }
-
-    private _onOrphanPodsFetched = (): void => {
-
     }
 
     private _onDataFound = (): void => {

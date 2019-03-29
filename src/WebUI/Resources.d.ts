@@ -17,6 +17,7 @@ export declare const ReplicaSetText: string;
 export declare const PackageText: string;
 export declare const PipelineText: string;
 export declare const PodsText: string;
+export declare const PodText: string;
 export declare const PortText: string;
 export declare const AgeText: string;
 export declare const NamespaceHeadingText: string;

@@ -13,9 +13,13 @@ import { IVssComponentProperties } from "../Types";
 import { PodOverview } from "./PodOverview";
 import { Header, IHeaderProps, TitleSize } from "azure-devops-ui/Header";
 import { Page } from "azure-devops-ui/Page";
+import { IStatusProps, Status, StatusSize } from "azure-devops-ui/Status";
+import { PageTopHeader } from "../Common/PageTopHeader";
 
 export interface IPodRightPanelProps extends IVssComponentProperties {
     pod: V1Pod;
+    podStatusProps?: IStatusProps,
+    statusTooltip?: string,
 }
 
 export interface IPodsRightPanelState {
@@ -62,9 +66,10 @@ export class PodsRightPanel extends BaseComponent<IPodRightPanelProps, IPodsRigh
 
     private _getHeader(): JSX.Element | null {
         return (
-            <Header
+            <PageTopHeader
                 title={(this.props.pod.metadata && this.props.pod.metadata.name) || ""}
-                titleSize={TitleSize.Large}
+                statusProps={this.props.podStatusProps}
+                statusTooltip={this.props.statusTooltip}
                 className={"pod-right-panel-header"}
             />);
     }
