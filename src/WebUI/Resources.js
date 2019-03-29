@@ -80,6 +80,9 @@ define("Environments/Providers/Kubernetes/Resources", ["require", "exports"], fu
     exports.RegistryText = "Registry";
     exports.ImageSizeText = "Image size";
     exports.ImageDetailsHeaderText = "Image details";
+    exports.AllPodsRunningText = "All pods are running";
+    exports.PodsNotReadyText = "{0} pods are not ready";
+    exports.PodNotReadyText = "1 pod is not ready";
     exports.LayersText = "Layers";
     exports.CommandText = "Command";
     exports.SizeText = "Size";

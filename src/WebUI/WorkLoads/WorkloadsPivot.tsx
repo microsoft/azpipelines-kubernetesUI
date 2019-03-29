@@ -3,6 +3,7 @@
     Licensed under the MIT license.
 */
 
+import { V1PodList } from "@kubernetes/client-node";
 import { BaseComponent, css } from "@uifabric/utilities";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { format } from "azure-devops-ui/Core/Util/String";
@@ -11,24 +12,21 @@ import * as React from "react";
 import { KubeResourceType } from "../../Contracts/KubeServiceBase";
 import { KubeZeroData } from "../Common//KubeZeroData";
 import { NameKey, TypeKey } from "../Common/KubeFilterBar";
+import { KubeSummary } from "../Common/KubeSummary";
 import "../Common/KubeSummary.scss";
-import { WorkloadsEvents, PodsEvents } from "../Constants";
+import { PodsEvents, WorkloadsEvents } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
+import { ImageDetailsActionsCreator } from "../ImageDetails/ImageDetailsActionsCreator";
 import { PodsActionsCreator } from "../Pods/PodsActionsCreator";
 import { PodsStore } from "../Pods/PodsStore";
 import { IVssComponentProperties } from "../Types";
+import { Utils } from "../Utils";
 import { DeploymentsTable } from "../Workloads/DeploymentsTable";
 import { OtherWorkloads } from "../Workloads/OtherWorkloadsTable";
+import { WorkloadsActionsCreator } from "./WorkloadsActionsCreator";
 import { WorkloadsFilterBar } from "./WorkloadsFilterBar";
 import { WorkloadsStore } from "./WorkloadsStore";
-import { HyperLinks } from "../Constants";
-import { WorkloadsActionsCreator } from "./WorkloadsActionsCreator";
-import { KubeFactory } from "../KubeFactory";
-import { KubeSummary } from "../Common/KubeSummary";
-import { V1Pod, V1PodList } from "@kubernetes/client-node";
-import { Utils } from "../Utils";
-import { ImageDetailsActionsCreator } from "../ImageDetails/ImageDetailsActionsCreator";
 
 export interface IWorkloadsPivotState {
     workloadResourceSize: number;
@@ -45,26 +43,26 @@ export class WorkloadsPivot extends BaseComponent<IWorkloadsPivotProps, IWorkloa
     constructor(props: IWorkloadsPivotProps) {
         super(props, {});
 
-        this._workloadsActionCreator = ActionsCreatorManager.GetActionCreator<WorkloadsActionsCreator>(WorkloadsActionsCreator);
+        this._workloadsStore = StoreManager.GetStore<WorkloadsStore>(WorkloadsStore);
+        // initialize pods store as pods list will be required in workloadPodsView on item selection
+        this._podsStore = StoreManager.GetStore<PodsStore>(PodsStore);
+
         this._podsActionCreator = ActionsCreatorManager.GetActionCreator<PodsActionsCreator>(PodsActionsCreator);
         this._imageActionsCreator = ActionsCreatorManager.GetActionCreator<ImageDetailsActionsCreator>(ImageDetailsActionsCreator);
-        this._workloadsStore = StoreManager.GetStore<WorkloadsStore>(WorkloadsStore);
-        // Initialize pods store as pods list will be required in workloadPodsView on item selection
-        this._podsStore = StoreManager.GetStore<PodsStore>(PodsStore);
+        this._workloadsActionCreator = ActionsCreatorManager.GetActionCreator<WorkloadsActionsCreator>(WorkloadsActionsCreator);
 
         this.state = {
             workloadResourceSize: 0,
             imageList: []
         };
 
-        this._workloadsActionCreator.getDeployments(KubeSummary.getKubeService());
-
-        // Fetch all pods in parent component as the podList is required in selected workload pods view
-        this._podsActionCreator.getPods(KubeSummary.getKubeService());
-
         this._podsStore.addListener(PodsEvents.PodsFetchedEvent, this._onPodsFetched);
         this._workloadsStore.addListener(WorkloadsEvents.WorkloadPodsFetchedEvent, this._onOrphanPodsFetched);
         this._workloadsStore.addListener(WorkloadsEvents.WorkloadsFoundEvent, this._onDataFound);
+
+        this._workloadsActionCreator.getDeployments(KubeSummary.getKubeService());
+        // fetch all pods in parent component as the podList is required in selected workload pods view
+        this._podsActionCreator.getPods(KubeSummary.getKubeService());
     }
 
     public render(): React.ReactNode {
@@ -79,8 +77,8 @@ export class WorkloadsPivot extends BaseComponent<IWorkloadsPivotProps, IWorkloa
     }
 
     public componentWillUnmount(): void {
-        this._workloadsStore.removeListener(WorkloadsEvents.WorkloadPodsFetchedEvent, this._onOrphanPodsFetched);
         this._workloadsStore.removeListener(WorkloadsEvents.WorkloadsFoundEvent, this._onDataFound);
+        this._workloadsStore.removeListener(WorkloadsEvents.WorkloadPodsFetchedEvent, this._onOrphanPodsFetched);
         this._podsStore.removeListener(PodsEvents.PodsFetchedEvent, this._onPodsFetched);
     }
 

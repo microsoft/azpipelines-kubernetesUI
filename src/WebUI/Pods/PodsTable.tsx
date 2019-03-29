@@ -155,17 +155,16 @@ export class PodsTable extends BaseComponent<IPodsTableProperties> {
 
     private static _renderPodWorkload(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod): JSX.Element {
         const textToRender = pod.metadata && pod.metadata.ownerReferences && pod.metadata.ownerReferences.length > 0 ? pod.metadata.ownerReferences[0].name || "" : "";
-        const contentClassName = "bolt-table-cell-content-with-link";
         const controllerOwner: V1OwnerReference | undefined = pod.metadata.ownerReferences && pod.metadata.ownerReferences.find(o => !!o.controller);
         const itemToRender: React.ReactNode = textToRender.length > 0 ? (
-            <Tooltip overflowOnly={true}>
+            <Tooltip overflowOnly>
                 {
                     controllerOwner ?
                         (<Link
                             className="fontSizeM text-ellipsis bolt-table-link"
                             rel={"noopener noreferrer"}
+                            excludeTabStop
                             onClick={() => PodsTable._onWorkloadClicked(pod, controllerOwner)}
-                            excludeTabStop={true}
                         >
                             {textToRender}
                         </Link>)
@@ -174,7 +173,7 @@ export class PodsTable extends BaseComponent<IPodsTableProperties> {
             </Tooltip>
         ) : null;
 
-        return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender, undefined, contentClassName);
+        return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender, undefined, textToRender && controllerOwner ? "bolt-table-cell-content-with-link" : "");
     }
 
     private static _onWorkloadClicked = (pod: V1Pod, controllerOwner: V1OwnerReference) => {

@@ -40,6 +40,7 @@ export interface IWorkloadDetailsProperties extends IVssComponentProperties {
     selector: V1LabelSelector | undefined;
     parentKind: string;
     statusProps?: IStatusProps;
+    statusTooltip?: string;
 }
 
 export interface IWorkloadDetailsState {
@@ -112,7 +113,8 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
 
     private _getMainHeading(): JSX.Element | null {
         const metadata = this.props.parentMetaData;
-        return metadata ? <PageTopHeader title={metadata.name} statusProps={this.props.statusProps} /> : null;
+        return !metadata ? null
+            : <PageTopHeader title={metadata.name} statusProps={this.props.statusProps} statusTooltip={this.props.statusTooltip} />;
     }
 
     private _setSelectedPodStateFalse = () => {
@@ -232,26 +234,23 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
     }
 
     private _renderImageCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IWorkLoadDetailsItem>, tableItem: IWorkLoadDetailsItem): JSX.Element => {
-        const podslist = this._podsStore.getState().podsList;
-        const pods: V1Pod[] = podslist && podslist.items || [];
         const imageId = Utils.getImageIdForWorkload(Utils.getFirstContainerName(tableItem.podTemplate.spec), this.state.pods);
         const imageText = Utils.getFirstImageName(tableItem.podTemplate.spec) || "";
-        // ToDo :: Revisit link paddings
         const hasImageDetails: boolean = this._imageDetailsStore.hasImageDetails(imageId);
         const itemToRender = hasImageDetails ?
-            <Tooltip overflowOnly={true}>
+            <Tooltip overflowOnly>
                 <Link
                     className="fontSizeM text-ellipsis bolt-table-link"
-                    excludeTabStop={true}
-                    onClick={() => this._showImageDetails(imageId)}>
+                    rel={"noopener noreferrer"}
+                    excludeTabStop
+                    onClick={() => this._showImageDetails(imageId)}
+                >
                     {imageText}
                 </Link>
-            </Tooltip> :
-            <Tooltip overflowOnly={true}>
-                {defaultColumnRenderer(imageText)}
-            </Tooltip>;
+            </Tooltip>
+            : defaultColumnRenderer(imageText);
 
-        return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender, undefined, "bolt-table-cell-content-with-link");
+        return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender, undefined, hasImageDetails ? "bolt-table-cell-content-with-link" : "");
     }
 
     private static _renderCellWithTags(
