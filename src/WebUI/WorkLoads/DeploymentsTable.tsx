@@ -29,11 +29,12 @@ import { PodsStore } from "../Pods/PodsStore";
 import * as Resources from "../Resources";
 import { SelectionActionsCreator } from "../Selection/SelectionActionCreator";
 import { ISelectionPayload } from "../Selection/SelectionActions";
-import { IDeploymentReplicaSetItem, IDeploymentReplicaSetMap, IVssComponentProperties } from "../Types";
+import { IDeploymentReplicaSetItem, IDeploymentReplicaSetMap, IVssComponentProperties, IPodDetailsSelectionPropeties } from "../Types";
 import { Utils } from "../Utils";
 import "./DeploymentsTable.scss";
 import { WorkloadsActionsCreator } from "./WorkloadsActionsCreator";
 import { WorkloadsStore } from "./WorkloadsStore";
+import { PodPhaseToStatus } from "../../Contracts/Contracts";
 
 export interface IDeploymentsTableProperties extends IVssComponentProperties {
     nameFilter?: string;
@@ -238,7 +239,7 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
             id: "pods",
             name: Resources.PodsText,
             width: new ObservableValue(140),
-            renderCell: DeploymentsTable._renderPodsCountCell
+            renderCell: this._renderPodsCountCell
         });
         columns.push({
             id: "age",
@@ -255,8 +256,28 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
         return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
-    private static _renderPodsCountCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IDeploymentReplicaSetItem>, deployment: IDeploymentReplicaSetItem): JSX.Element {
-        return renderPodsStatusTableCell(rowIndex, columnIndex, tableColumn, deployment.pods, deployment.statusProps, deployment.podsTooltip);
+    private _renderPodsCountCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IDeploymentReplicaSetItem>, deployment: IDeploymentReplicaSetItem): JSX.Element => {
+        const replicaSet = this._getSelectedReplicaSet(deployment);
+        const podslist = StoreManager.GetStore<PodsStore>(PodsStore).getState().podsList;
+        const relevantPods = (podslist && podslist.items && podslist.items.filter(p => (replicaSet && Utils.isOwnerMatched(p.metadata, replicaSet.metadata.uid)) || false))
+
+        const _onPodsClicked = (relevantPods && replicaSet) ? (() => {
+            const selectedPod = relevantPods.find(p => PodPhaseToStatus[p.status.phase] === Statuses.Failed) || relevantPods[0];
+            this._selectionActionCreator.selectItem({
+                item: selectedPod,
+                itemUID: selectedPod.metadata.uid,
+                selectedItemType: SelectedItemKeys.PodDetailsKey,
+                showSelectedItem: true,
+                properties: {
+                    pods: relevantPods,
+                    parentItemKind: replicaSet.kind || "ReplicaSet",
+                    parentItemName: replicaSet.metadata.name,
+                    onBackClick: () => { replicaSet && this._selectionActionCreator.selectItem({ item: replicaSet, itemUID: replicaSet.metadata.uid, selectedItemType: SelectedItemKeys.ReplicaSetKey, showSelectedItem: true }) }
+                } as IPodDetailsSelectionPropeties
+            })
+        }) : undefined;
+
+        return renderPodsStatusTableCell(rowIndex, columnIndex, tableColumn, deployment.pods, deployment.statusProps, _onPodsClicked, deployment.podsTooltip);
     }
 
     private _renderImageCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IDeploymentReplicaSetItem>, deployment: IDeploymentReplicaSetItem): JSX.Element => {

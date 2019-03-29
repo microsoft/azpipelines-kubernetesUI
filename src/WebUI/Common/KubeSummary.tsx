@@ -33,7 +33,7 @@ import { ServiceDetails } from "../Services/ServiceDetails";
 import { ServicesPivot } from "../Services/ServicesPivot";
 import { ServicesStore } from "../Services/ServicesStore";
 import { ServicesTable } from "../Services/ServicesTable";
-import { IServiceItem, IVssComponentProperties } from "../Types";
+import { IServiceItem, IVssComponentProperties, IPodDetailsSelectionPropeties } from "../Types";
 import { Utils } from "../Utils";
 import { WorkloadDetails } from "../Workloads/WorkloadDetails";
 import { WorkloadsActionsCreator } from "../Workloads/WorkloadsActionsCreator";
@@ -42,6 +42,7 @@ import { WorkloadsStore } from "../Workloads/WorkloadsStore";
 import "./KubeSummary.scss";
 import { KubeZeroData } from "./KubeZeroData";
 import { IStatusProps } from "azure-devops-ui/Status";
+import { PodsDetails } from "../Pods/PodsDetails";
 
 const workloadsPivotItemKey: string = "workloads";
 const servicesPivotItemKey: string = "services";
@@ -55,6 +56,7 @@ export interface IKubernetesContainerState {
     selectedItem?: V1ReplicaSet | V1DaemonSet | V1StatefulSet | V1Pod | IServiceItem | IImageDetails;
     showSelectedItem?: boolean;
     selectedItemType?: string;
+    selectedItemProperties?: { [key: string]: string };
     resourceSize: number;
     workloadsFilter: Filter;
     svcFilter: Filter;
@@ -202,14 +204,14 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         // must be short syntax or React.Fragment, do not use div here to include heading and content.
         return (
             <>
-            <Header
-                title={this.props.title}
-                titleSize={TitleSize.Large}
-                className={"content-main-heading"}
-                description={this.props.clusterName
-                    ? localeFormat(Resources.SummaryHeaderSubTextFormat, this.props.clusterName)
-                    : localeFormat(Resources.NamespaceHeadingText, this.state.namespace || "")}
-            />
+                <Header
+                    title={this.props.title}
+                    titleSize={TitleSize.Large}
+                    className={"content-main-heading"}
+                    description={this.props.clusterName
+                        ? localeFormat(Resources.SummaryHeaderSubTextFormat, this.props.clusterName)
+                        : localeFormat(Resources.NamespaceHeadingText, this.state.namespace || "")}
+                />
                 {pageContent}
             </>
         );
@@ -228,18 +230,18 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         // must be short syntax or React.Fragment, do not use div here to include heading and content.
         return (
             <>
-            <TabBar
-                selectedTabId={this.state.selectedPivotKey || workloadsPivotItemKey}
-                onSelectedTabChanged={(key: string) => { this.setState({ selectedPivotKey: key }); }}
-                renderAdditionalContent={() => { return this._getFilterHeaderBar(); }}
-                disableSticky={false}
-            >
-                <Tab name={Resources.PivotWorkloadsText} id={workloadsPivotItemKey} />
-                <Tab name={Resources.PivotServiceText} id={servicesPivotItemKey} />
-            </TabBar>
-            <div className="page-content page-content-top k8s-pivot-content">
-                {tabContent}
-            </div>
+                <TabBar
+                    selectedTabId={this.state.selectedPivotKey || workloadsPivotItemKey}
+                    onSelectedTabChanged={(key: string) => { this.setState({ selectedPivotKey: key }); }}
+                    renderAdditionalContent={() => { return this._getFilterHeaderBar(); }}
+                    disableSticky={false}
+                >
+                    <Tab name={Resources.PivotWorkloadsText} id={workloadsPivotItemKey} />
+                    <Tab name={Resources.PivotServiceText} id={servicesPivotItemKey} />
+                </TabBar>
+                <div className="page-content page-content-top k8s-pivot-content">
+                    {tabContent}
+                </div>
             </>
         );
     }
@@ -249,7 +251,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         const selectedItemType = this.state.selectedItemType;
         // ToDo :: Currently for imageDetails type, the selected item will be undefined, hence adding below check. Remove this once we have data from imageService
         if (selectedItemType && (selectedItem || selectedItemType === SelectedItemKeys.ImageDetailsKey) && this._selectedItemViewMap.hasOwnProperty(selectedItemType)) {
-            return this._selectedItemViewMap[selectedItemType](selectedItem);
+            return this._selectedItemViewMap[selectedItemType](selectedItem, this.state.selectedItemProperties);
         }
 
         return null;
@@ -280,7 +282,8 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
             this.setState({
                 showSelectedItem: selectionStoreState.showSelectedItem,
                 selectedItem: item,
-                selectedItemType: selectionStoreState.selectedItemType
+                selectedItemType: selectionStoreState.selectedItemType,
+                selectedItemProperties: selectionStoreState.properties
             });
         }
 
@@ -362,6 +365,35 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         this._selectedItemViewMap[SelectedItemKeys.ServiceItemKey] = (service) => { return <ServiceDetails service={service} parentKind={service.kind || "Service"} />; };
         this._selectedItemViewMap[SelectedItemKeys.ImageDetailsKey] = (item) => { return <ImageDetails imageDetails={item} onBackButtonClick={this._setSelectionStateFalse} />; };
         this._selectedItemViewMap[SelectedItemKeys.OrphanPodKey] = (pod) => <PodsRightPanel key={pod.metadata.uid} pod={pod} podStatusProps={PodPhaseToStatus[pod.status.phase]} statusTooltip={pod.status.message || pod.status.phase} />;
+        this._selectedItemViewMap[SelectedItemKeys.ReplicaSetKey] = (item) => this._getWorkloadPodsViewComponent(item, "ReplicaSet", (item) => {
+            const status = (item as V1ReplicaSet).status;
+            return Utils.getPodsStatusProps(status.readyReplicas, status.replicas);
+        });
+
+        this._selectedItemViewMap[SelectedItemKeys.StatefulSetKey] = (item) => this._getWorkloadPodsViewComponent(item, "StatefulSet", (item) => {
+            const status = (item as V1StatefulSet).status;
+            return Utils.getPodsStatusProps(status.readyReplicas, status.replicas);
+        });
+
+        this._selectedItemViewMap[SelectedItemKeys.DaemonSetKey] = (item) => this._getWorkloadPodsViewComponent(item, "DaemonSet", (item) => {
+            const status = (item as V1DaemonSet).status;
+            return Utils.getPodsStatusProps(status.numberAvailable, status.desiredNumberScheduled);
+        });
+
+        this._selectedItemViewMap[SelectedItemKeys.ServiceItemKey] = (service) => { return <ServiceDetails service={service} parentKind={service.kind || "Service"} />; };
+        this._selectedItemViewMap[SelectedItemKeys.ImageDetailsKey] = (item) => { return <ImageDetails imageDetails={item} onBackButtonClick={this._setSelectionStateFalse} />; };
+        this._selectedItemViewMap[SelectedItemKeys.OrphanPodKey] = (pod) => <PodsRightPanel key={pod.metadata.uid} pod={pod} podStatusProps={PodPhaseToStatus[pod.status.phase]} statusTooltip={pod.status.message || pod.status.phase} />;
+        this._selectedItemViewMap[SelectedItemKeys.PodDetailsKey] = (item, properties?) => {
+            const selectionProperties = properties as IPodDetailsSelectionPropeties;
+            return selectionProperties ? (
+                <PodsDetails
+                    pods={selectionProperties.pods}
+                    parentKind={selectionProperties.parentItemKind}
+                    parentName={selectionProperties.parentItemName}
+                    onBackButtonClick={selectionProperties.onBackClick}
+                    selectedPod={item} />)
+                : null;
+        }
     }
 
     private _setSelectionStateFalse = () => {
@@ -393,12 +425,12 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
     private _getFilterHeaderBar(): JSX.Element {
         return (
             <>
-            <ConditionalChildren renderChildren={!this.state.selectedPivotKey || this.state.selectedPivotKey === workloadsPivotItemKey}>
-                <HeaderCommandBarWithFilter filter={this.state.workloadsFilter} filterToggled={workloadsFilterToggled} items={[]} />
-            </ConditionalChildren>
-            <ConditionalChildren renderChildren={this.state.selectedPivotKey === servicesPivotItemKey}>
-                <HeaderCommandBarWithFilter filter={this.state.svcFilter} filterToggled={servicesFilterToggled} items={[]} />
-            </ConditionalChildren>
+                <ConditionalChildren renderChildren={!this.state.selectedPivotKey || this.state.selectedPivotKey === workloadsPivotItemKey}>
+                    <HeaderCommandBarWithFilter filter={this.state.workloadsFilter} filterToggled={workloadsFilterToggled} items={[]} />
+                </ConditionalChildren>
+                <ConditionalChildren renderChildren={this.state.selectedPivotKey === servicesPivotItemKey}>
+                    <HeaderCommandBarWithFilter filter={this.state.svcFilter} filterToggled={servicesFilterToggled} items={[]} />
+                </ConditionalChildren>
             </>
         );
     }
@@ -412,7 +444,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         KubeFactory.getImageLocation = this.props.getImageLocation || KubeFactory.getImageLocation;
     }
 
-    private _selectedItemViewMap: { [selectedItemKey: string]: (selectedItem: any) => JSX.Element | null } = {};
+    private _selectedItemViewMap: { [selectedItemKey: string]: (selectedItem: any, properties?: { [key: string]: any }) => JSX.Element | null } = {};
     private _objectFinder: { [selectedItemKey: string]: (name: string) => V1ReplicaSet | V1DaemonSet | V1StatefulSet | IServiceItem } = {};
     private _selectionStore: SelectionStore;
     private _workloadsActionCreator: WorkloadsActionsCreator;

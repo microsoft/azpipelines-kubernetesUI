@@ -243,12 +243,10 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
 
     private static _renderPodsCountCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<ISetWorkloadTypeItem>, workload: ISetWorkloadTypeItem): JSX.Element {
         let { statusProps, pods, podsTooltip } = Utils.getPodsStatusProps(workload.currentPodCount, workload.desiredPodCount);
-        if (workload.kind === SelectedItemKeys.OrphanPodKey) {
-            statusProps = PodPhaseToStatus[workload.status.phase];
-            podsTooltip = workload.status.message || workload.status.phase
-        }
+        statusProps = PodPhaseToStatus[workload.status.phase];
+        podsTooltip = workload.status.message || workload.status.phase
 
-        return renderPodsStatusTableCell(rowIndex, columnIndex, tableColumn, pods, statusProps, podsTooltip);
+        return renderPodsStatusTableCell(rowIndex, columnIndex, tableColumn, pods, statusProps, undefined, podsTooltip);
     }
 
     private static _renderAgeCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<ISetWorkloadTypeItem>, statefulSet: ISetWorkloadTypeItem): JSX.Element {

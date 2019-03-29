@@ -15,6 +15,7 @@ export interface ISelectionStoreState {
     itemUID: string;
     showSelectedItem: boolean;
     selectedItemType: string;
+    properties?: { [key: string]: string };
 }
 
 export class SelectionStore extends StoreBase {
@@ -44,6 +45,7 @@ export class SelectionStore extends StoreBase {
         this._state.showSelectedItem = payload.showSelectedItem;
         this._state.selectedItemType = payload.selectedItemType;
         this._state.itemUID = payload.itemUID;
+        this._state.properties = payload.properties;
         this.emitChanged();
     }
 
