@@ -5,16 +5,16 @@
 
 import { V1Pod } from "@kubernetes/client-node";
 import { BaseComponent } from "@uifabric/utilities";
-import { TabBar, TabSize, Tab } from "azure-devops-ui/Tabs";
+import { Page } from "azure-devops-ui/Page";
+import { IStatusProps } from "azure-devops-ui/Status";
+import { Tab, TabBar, TabSize } from "azure-devops-ui/Tabs";
 import * as React from "react";
-import * as Resources from "../Resources";
+import { PageTopHeader } from "../Common/PageTopHeader";
 import { PodsRightPanelTabsKeys } from "../Constants";
+import * as Resources from "../Resources";
 import { IVssComponentProperties } from "../Types";
 import { PodOverview } from "./PodOverview";
-import { Header, IHeaderProps, TitleSize } from "azure-devops-ui/Header";
-import { Page } from "azure-devops-ui/Page";
-import { IStatusProps, Status, StatusSize } from "azure-devops-ui/Status";
-import { PageTopHeader } from "../Common/PageTopHeader";
+import { PodYaml } from "./PodYaml";
 
 export interface IPodRightPanelProps extends IVssComponentProperties {
     pod: V1Pod;
@@ -87,9 +87,8 @@ export class PodsRightPanel extends BaseComponent<IPodRightPanelProps, IPodsRigh
                 <span>{"Pods Logs View coming soon..."}</span>
             );
 
-            case PodsRightPanelTabsKeys.PodsYamlKey: return (
-                <span>{"Pods YAML View coming soon..."}</span>
-            );
+            case PodsRightPanelTabsKeys.PodsYamlKey:
+                return <PodYaml key={this.props.pod.metadata.uid} pod={this.props.pod} />;
 
             default: return (<PodOverview
                 pod={this.props.pod}
