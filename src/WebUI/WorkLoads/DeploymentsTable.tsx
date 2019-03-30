@@ -12,12 +12,11 @@ import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { equals, localeFormat } from "azure-devops-ui/Core/Util/String";
 import { CustomHeader, HeaderDescription, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
 import { Link } from "azure-devops-ui/Link";
-import { IStatusProps, Statuses } from "azure-devops-ui/Status";
 import { ITableColumn, Table } from "azure-devops-ui/Table";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
-import { defaultColumnRenderer, renderPodsStatusTableCell, renderTableCell } from "../Common/KubeCardWithTable";
+import { defaultColumnRenderer, renderPodsStatusTableCell, renderTableCell, onPodsColumnClicked } from "../Common/KubeCardWithTable";
 import { KubeSummary } from "../Common/KubeSummary";
 import { Tags } from "../Common/Tags";
 import { ImageDetailsEvents, SelectedItemKeys, WorkloadsEvents } from "../Constants";
@@ -34,7 +33,6 @@ import { Utils } from "../Utils";
 import "./DeploymentsTable.scss";
 import { WorkloadsActionsCreator } from "./WorkloadsActionsCreator";
 import { WorkloadsStore } from "./WorkloadsStore";
-import { PodPhaseToStatus } from "../../Contracts/Contracts";
 
 export interface IDeploymentsTableProperties extends IVssComponentProperties {
     nameFilter?: string;
@@ -261,23 +259,9 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
         const podslist = StoreManager.GetStore<PodsStore>(PodsStore).getState().podsList;
         const relevantPods = (podslist && podslist.items && podslist.items.filter(p => (replicaSet && Utils.isOwnerMatched(p.metadata, replicaSet.metadata.uid)) || false))
 
-        const _onPodsClicked = (relevantPods && replicaSet) ? (() => {
-            const selectedPod = relevantPods.find(p => PodPhaseToStatus[p.status.phase] === Statuses.Failed) || relevantPods[0];
-            this._selectionActionCreator.selectItem({
-                item: selectedPod,
-                itemUID: selectedPod.metadata.uid,
-                selectedItemType: SelectedItemKeys.PodDetailsKey,
-                showSelectedItem: true,
-                properties: {
-                    pods: relevantPods,
-                    parentItemKind: replicaSet.kind || "ReplicaSet",
-                    parentItemName: replicaSet.metadata.name,
-                    onBackClick: () => { replicaSet && this._selectionActionCreator.selectItem({ item: replicaSet, itemUID: replicaSet.metadata.uid, selectedItemType: SelectedItemKeys.ReplicaSetKey, showSelectedItem: true }) }
-                } as IPodDetailsSelectionPropeties
-            })
-        }) : undefined;
+        const _onPodsClicked = (relevantPods && replicaSet) ? (() => onPodsColumnClicked(relevantPods, replicaSet, "ReplicaSet", this._selectionActionCreator)) : undefined;
 
-        return renderPodsStatusTableCell(rowIndex, columnIndex, tableColumn, deployment.pods, deployment.statusProps, _onPodsClicked, deployment.podsTooltip);
+        return renderPodsStatusTableCell(rowIndex, columnIndex, tableColumn, deployment.pods, deployment.statusProps, deployment.podsTooltip, _onPodsClicked);
     }
 
     private _renderImageCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IDeploymentReplicaSetItem>, deployment: IDeploymentReplicaSetItem): JSX.Element => {

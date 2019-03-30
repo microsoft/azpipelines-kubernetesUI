@@ -20,7 +20,7 @@ export function getRunDetailsText(annotations: { [key: string]: string }, create
 
     const runElement = pipelineDetails.runName
         ? (pipelineDetails.runUrl
-            ? (<Link className={"run-name-link"} rel={"noopener noreferrer"} href={pipelineDetails.runUrl}> {"#" + pipelineDetails.runName} </Link>)
+            ? (<Link className={"run-name-link bolt-table-link"} rel={"noopener noreferrer"} href={pipelineDetails.runUrl}> {"#" + pipelineDetails.runName} </Link>)
             : "#" + pipelineDetails.runName)
         : undefined;
 
