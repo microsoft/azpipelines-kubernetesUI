@@ -275,6 +275,18 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         );
     }
 
+    private _getPodDetailsComponent(item: V1Pod, properties?: IPodDetailsSelectionPropeties): JSX.Element | null {
+        const selectionProperties = properties as IPodDetailsSelectionPropeties;
+        return selectionProperties ? (
+            <PodsDetails
+                pods={selectionProperties.pods}
+                parentKind={selectionProperties.parentItemKind}
+                parentName={selectionProperties.parentItemName}
+                onBackButtonClick={selectionProperties.onBackClick}
+                selectedPod={item} />)
+            : null;
+    }
+
     private _onSelectionStoreChanged = () => {
         const selectionStoreState = this._selectionStore.getState();
 
@@ -365,35 +377,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         this._selectedItemViewMap[SelectedItemKeys.ServiceItemKey] = (service) => { return <ServiceDetails service={service} parentKind={service.kind || "Service"} />; };
         this._selectedItemViewMap[SelectedItemKeys.ImageDetailsKey] = (item) => { return <ImageDetails imageDetails={item} onBackButtonClick={this._setSelectionStateFalse} />; };
         this._selectedItemViewMap[SelectedItemKeys.OrphanPodKey] = (pod) => <PodsRightPanel key={pod.metadata.uid} pod={pod} podStatusProps={PodPhaseToStatus[pod.status.phase]} statusTooltip={pod.status.message || pod.status.phase} />;
-        this._selectedItemViewMap[SelectedItemKeys.ReplicaSetKey] = (item) => this._getWorkloadPodsViewComponent(item, "ReplicaSet", (item) => {
-            const status = (item as V1ReplicaSet).status;
-            return Utils.getPodsStatusProps(status.readyReplicas, status.replicas);
-        });
-
-        this._selectedItemViewMap[SelectedItemKeys.StatefulSetKey] = (item) => this._getWorkloadPodsViewComponent(item, "StatefulSet", (item) => {
-            const status = (item as V1StatefulSet).status;
-            return Utils.getPodsStatusProps(status.readyReplicas, status.replicas);
-        });
-
-        this._selectedItemViewMap[SelectedItemKeys.DaemonSetKey] = (item) => this._getWorkloadPodsViewComponent(item, "DaemonSet", (item) => {
-            const status = (item as V1DaemonSet).status;
-            return Utils.getPodsStatusProps(status.numberAvailable, status.desiredNumberScheduled);
-        });
-
-        this._selectedItemViewMap[SelectedItemKeys.ServiceItemKey] = (service) => { return <ServiceDetails service={service} parentKind={service.kind || "Service"} />; };
-        this._selectedItemViewMap[SelectedItemKeys.ImageDetailsKey] = (item) => { return <ImageDetails imageDetails={item} onBackButtonClick={this._setSelectionStateFalse} />; };
-        this._selectedItemViewMap[SelectedItemKeys.OrphanPodKey] = (pod) => <PodsRightPanel key={pod.metadata.uid} pod={pod} podStatusProps={PodPhaseToStatus[pod.status.phase]} statusTooltip={pod.status.message || pod.status.phase} />;
-        this._selectedItemViewMap[SelectedItemKeys.PodDetailsKey] = (item, properties?) => {
-            const selectionProperties = properties as IPodDetailsSelectionPropeties;
-            return selectionProperties ? (
-                <PodsDetails
-                    pods={selectionProperties.pods}
-                    parentKind={selectionProperties.parentItemKind}
-                    parentName={selectionProperties.parentItemName}
-                    onBackButtonClick={selectionProperties.onBackClick}
-                    selectedPod={item} />)
-                : null;
-        }
+        this._selectedItemViewMap[SelectedItemKeys.PodDetailsKey] = (item, properties?) => this._getPodDetailsComponent(item, properties as IPodDetailsSelectionPropeties);
     }
 
     private _setSelectionStateFalse = () => {
