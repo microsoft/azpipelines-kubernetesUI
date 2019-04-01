@@ -18,14 +18,14 @@ import { Filter, FILTER_CHANGE_EVENT, IFilterState } from "azure-devops-ui/Utili
 import { Action, createBrowserHistory, History, Location, UnregisterCallback } from "history";
 import * as queryString from "query-string";
 import * as React from "react";
-import { IImageService, IKubeService, KubeImage } from "../../Contracts/Contracts";
+import { IImageService, IKubeService, KubeImage, PodPhaseToStatus, ITelemetryService } from "../../Contracts/Contracts";
 import { IImageDetails } from "../../Contracts/Types";
 import { SelectedItemKeys, ServicesEvents, WorkloadsEvents } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
 import { ImageDetails } from "../ImageDetails/ImageDetails";
-import { KubeFactory } from "../KubeFactory";
 import { PodsDetails } from "../Pods/PodsDetails";
+import { KubeFactory, DefaultTelemetryService } from "../KubeFactory";
 import { PodsRightPanel } from "../Pods/PodsRightPanel";
 import * as Resources from "../Resources";
 import { SelectionActionsCreator } from "../Selection/SelectionActionCreator";
@@ -68,7 +68,7 @@ export interface IKubeSummaryProps extends IVssComponentProperties {
     imageService?: IImageService;
     namespace?: string;
     clusterName?: string;
-    markTTI?: () => void;
+    telemteryService?: ITelemetryService;
     getImageLocation?: (image: KubeImage) => string | undefined;
 }
 
@@ -427,6 +427,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
     }
 
     private _initializeFactorySettings(): void {
+        KubeFactory.telemetryService = this.props.telemteryService || new DefaultTelemetryService();
         KubeFactory.markTTI = this.props.markTTI || KubeFactory.markTTI;
         KubeFactory.getImageLocation = this.props.getImageLocation || KubeFactory.getImageLocation;
     }
