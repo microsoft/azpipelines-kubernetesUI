@@ -12,14 +12,14 @@ import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { equals, format } from "azure-devops-ui/Core/Util/String";
 import { CustomHeader, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
 import { Link } from "azure-devops-ui/Link";
-import { IStatusProps } from "azure-devops-ui/Status";
+import { Statuses } from "azure-devops-ui/Status";
 import { ITableColumn, Table, TwoLineTableCell } from "azure-devops-ui/Table";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
 import { PodPhase, PodPhaseToStatus } from "../../Contracts/Contracts";
 import { KubeResourceType } from "../../Contracts/KubeServiceBase";
-import { defaultColumnRenderer, renderPodsStatusTableCell, renderTableCell } from "../Common/KubeCardWithTable";
+import { defaultColumnRenderer, renderPodsStatusTableCell, renderTableCell, onPodsColumnClicked } from "../Common/KubeCardWithTable";
 import { KubeSummary } from "../Common/KubeSummary";
 import { ImageDetailsEvents, SelectedItemKeys, WorkloadsEvents } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
@@ -191,7 +191,7 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
             id: podsKey,
             name: Resources.PodsText,
             width: new ObservableValue(140),
-            renderCell: OtherWorkloads._renderPodsCountCell
+            renderCell: this._renderPodsCountCell
         });
 
         columns.push({
@@ -241,14 +241,30 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
         return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender, undefined, "bolt-table-cell-content-with-link");
     }
 
-    private static _renderPodsCountCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<ISetWorkloadTypeItem>, workload: ISetWorkloadTypeItem): JSX.Element {
+    private _renderPodsCountCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<ISetWorkloadTypeItem>, workload: ISetWorkloadTypeItem): JSX.Element => {
         let { statusProps, pods, podsTooltip } = Utils.getPodsStatusProps(workload.currentPodCount, workload.desiredPodCount);
-        if (workload.kind === SelectedItemKeys.OrphanPodKey) {
-            statusProps = PodPhaseToStatus[workload.status.phase];
-            podsTooltip = workload.status.message || workload.status.phase
-        }
+        const payload = workload.payload;
+        const podslist = StoreManager.GetStore<PodsStore>(PodsStore).getState().podsList;
+        const relevantPods = (podslist && podslist.items && podslist.items.filter(p => (payload && Utils.isOwnerMatched(p.metadata, payload.metadata.uid)) || false))
 
-        return renderPodsStatusTableCell(rowIndex, columnIndex, tableColumn, pods, statusProps, podsTooltip);
+        let type = "";
+        switch (payload.kind) {
+            case SelectedItemKeys.DaemonSetKey:
+                type = "DaemonSet";
+                break;
+            case SelectedItemKeys.ReplicaSetKey:
+                type = "ReplicaSet";
+                break;
+            case SelectedItemKeys.StatefulSetKey:
+                type = "StatefulSet";
+                break;
+            case SelectedItemKeys.OrphanPodKey:
+                type = "Pod";
+                break;
+        }
+        const _onPodsClicked = (relevantPods && payload) ? (() => onPodsColumnClicked(relevantPods, payload, type, this._selectionActionCreator)) : undefined;
+
+        return renderPodsStatusTableCell(rowIndex, columnIndex, tableColumn, pods, statusProps, podsTooltip, _onPodsClicked);
     }
 
     private static _renderAgeCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<ISetWorkloadTypeItem>, statefulSet: ISetWorkloadTypeItem): JSX.Element {
