@@ -88,15 +88,7 @@ export class ImageDetails extends BaseComponent<IImageDetailsProperties, IImageD
             ColumnFill
         ];
 
-        const tableItems = new ArrayItemProvider<any>([
-            { key: Resources.DigestText, value: imageDetails.hash || "" },
-            { key: Resources.TarIdText, value: "" },
-            { key: Resources.ImageTypeText, value: imageDetails.imageType || "" },
-            { key: Resources.MediaTypeText, value: imageDetails.mediaType || "" },
-            { key: Resources.RegistryText, value: this._getRegistryName() },
-            { key: Resources.ImageSizeText, value: "" },
-            { key: Resources.LabelsText, value: imageDetails.tags || "" }
-        ]);
+        const tableItems = this._getImageDetailsRowsData(imageDetails);
 
         return (
             <CustomCard className="image-details-card k8s-card-padding flex-grow bolt-card-no-vertical-padding">
@@ -109,7 +101,7 @@ export class ImageDetails extends BaseComponent<IImageDetailsProperties, IImageD
                         </HeaderTitleRow>
                     </HeaderTitleArea>
                 </CustomHeader>
-                <CardContent  className="image-full-details-table" contentPadding={false}>
+                <CardContent className="image-full-details-table" contentPadding={false}>
                     <Table
                         className="image-details-table"
                         id={format("image-details-{0}", imageDetails.hash)}
@@ -125,6 +117,27 @@ export class ImageDetails extends BaseComponent<IImageDetailsProperties, IImageD
         );
     }
 
+    private _getImageDetailsRowsData(imageDetails: IImageDetails): ArrayItemProvider<any> {
+        let imageDetailsRows: any[] = [];
+        const digest: string = imageDetails.hash || "";
+        const imageType: string = imageDetails.imageType || "";
+        const mediaType: string = imageDetails.mediaType || "";
+        const registryName: string = this._getRegistryName();
+        const imageSize: string = ""; // ToDo: Size is currently not available in imageDetails.
+        const labels: string[] = imageDetails.tags || [];
+        const jobName: string = format("#{0} on {1}", imageDetails.buildId || "", imageDetails.buildDefinitionName || ""); // ToDo: JobName is currently not available in imageDetails.
+
+        digest && imageDetailsRows.push({ key: Resources.DigestText, value: digest });
+        imageType && imageDetailsRows.push({ key: Resources.ImageTypeText, value: imageType });
+        mediaType && imageDetailsRows.push({ key: Resources.MediaTypeText, value: mediaType });
+        registryName && imageDetailsRows.push({ key: Resources.RegistryText, value: registryName });
+        imageSize && imageDetailsRows.push({ key: Resources.ImageSizeText, value: imageSize });
+        labels && labels.length > 0 && imageDetailsRows.push({ key: Resources.LabelsText, value: labels });
+        jobName && imageDetailsRows.push({ key: Resources.JobText, value: jobName });
+
+        return new ArrayItemProvider<any>(imageDetailsRows);
+    }
+
     private static _renderValueCell(
         rowIndex: number,
         columnIndex: number,
@@ -138,10 +151,10 @@ export class ImageDetails extends BaseComponent<IImageDetailsProperties, IImageD
                 props = {
                     columnIndex: columnIndex,
                     children:
-                        <LabelGroup
-                            labelProps={Utils.getUILabelModelArray(value)}
-                            wrappingBehavior={WrappingBehavior.freeFlow}
-                        />,
+                    <LabelGroup
+                        labelProps={Utils.getUILabelModelArray(value)}
+                        wrappingBehavior={WrappingBehavior.freeFlow}
+                    />,
                     tableColumn: tableColumn,
                     contentClassName: css(contentClassName, "image-labelgroups")
                 };
@@ -184,7 +197,7 @@ export class ImageDetails extends BaseComponent<IImageDetailsProperties, IImageD
                         </HeaderTitleRow>
                     </HeaderTitleArea>
                 </CustomHeader>
-                <CardContent  className="image-layer-details" contentPadding={false}>
+                <CardContent className="image-layer-details" contentPadding={false}>
                     <Table
                         id="image-layers-table"
                         itemProvider={new ArrayItemProvider<IImageLayer>(imageDetails.layerInfo)}
@@ -235,14 +248,20 @@ export class ImageDetails extends BaseComponent<IImageDetailsProperties, IImageD
     }
 
     private static _renderLayersCommandCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IImageLayer>, imageLayer: IImageLayer): JSX.Element {
-        const textToRender = localeFormat("{0}: {1}", imageLayer.directive || "", imageLayer.arguments || "");
+        const directive = imageLayer.directive || "";
+        const layerArguments = imageLayer.arguments || "";
+        let textToRender = "-";
+        if (directive && layerArguments) {
+            textToRender = localeFormat("{0}: {1}", directive, layerArguments);
+        }
+
         const itemToRender = defaultColumnRenderer(textToRender);
         return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
     private static _renderLayersSizeCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IImageLayer>, imageLayer: IImageLayer): JSX.Element {
         // Currently size data is not present in imageLayer
-        const textToRender = "";
+        const textToRender = "-";
         const itemToRender = defaultColumnRenderer(textToRender);
         return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }

@@ -13,10 +13,11 @@ export interface IImageDetails {
     mediaType: string;
     tags: Array<string>;
     layerInfo: Array<IImageLayer>;
-    runId: number;
+    // Todo: Change to generic names - runId, pipelineName, pipelineId after these are implemented in ImageDetailsService code
+    buildId: number;
     buildVersion: string;
-    pipelineName: string;
-    pipelineId: string;
+    buildDefinitionName: string;
+    buildDefinitionId: string;
 }
 
 export interface IImageLayer {

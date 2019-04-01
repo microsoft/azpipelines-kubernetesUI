@@ -22,6 +22,7 @@ export interface IPodRightPanelProps extends IVssComponentProperties {
     pod: V1Pod;
     podStatusProps?: IStatusProps,
     statusTooltip?: string,
+    showImageDetails?: (imageId: string) => void;
 }
 
 export interface IPodsRightPanelState {
@@ -106,7 +107,7 @@ export class PodsRightPanel extends BaseComponent<IPodRightPanelProps, IPodsRigh
                 return <PodYaml key={this.props.pod.metadata.uid} pod={this.props.pod} />;
 
             default:
-                return <PodOverview key={this.props.pod.metadata.uid} pod={this.props.pod} />;
+                return <PodOverview key={this.props.pod.metadata.uid} pod={this.props.pod} showImageDetails={this.props.showImageDetails} />;
         }
     }
 }
