@@ -93,13 +93,16 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         this._setSelectedKeyPodsViewMap();
         this._populateObjectFinder();
 
+        this._historyService = createBrowserHistory();
+        const queryParams = queryString.parse(this._historyService.location.search)
+
         // Take namespace from deployment store and rest from selection store
         this.state = {
             namespace: this.props.namespace || "",
             selectedPivotKey: workloadsPivotItemKey,
-            showSelectedItem: false,
+            showSelectedItem: queryParams.uid ? true : false,
             selectedItem: undefined,
-            selectedItemType: "",
+            selectedItemType: queryParams.type as string || "",
             resourceSize: 0,
             svcFilter: servicesFilter,
             workloadsFilter: workloadsFilter
@@ -123,8 +126,6 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         // so we can show nameSpace in heading and namespace is obtained from deployment metadata
         // this data also helpful in deciding to show zero data or workloads
         this._workloadsActionCreator.getDeployments(KubeSummary.getKubeService());
-
-        this._historyService = createBrowserHistory();
     }
 
     public render(): React.ReactNode {
@@ -257,7 +258,9 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         const selectedItem = this.state.selectedItem;
         const selectedItemType = this.state.selectedItemType;
         // ToDo :: Currently for imageDetails type, the selected item will be undefined, hence adding below check. Remove this once we have data from imageService
-        if (selectedItemType && (selectedItem || selectedItemType === SelectedItemKeys.ImageDetailsKey) && this._selectedItemViewMap.hasOwnProperty(selectedItemType)) {
+        if (selectedItemType
+            && !(selectedItem && ([SelectedItemKeys.ServiceItemKey, SelectedItemKeys.OrphanPodKey, SelectedItemKeys.PodDetailsKey].some(s => s == selectedItemType)))
+            && this._selectedItemViewMap.hasOwnProperty(selectedItemType)) {
             return this._selectedItemViewMap[selectedItemType](selectedItem, this.state.selectedItemProperties);
         }
 
@@ -269,15 +272,11 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         defaultType: string,
         getStatusProps: (item: V1ReplicaSet | V1DaemonSet | V1StatefulSet) => { statusProps: IStatusProps | undefined, pods: string, podsTooltip: string }
     ): JSX.Element | null {
-        const { statusProps, podsTooltip } = getStatusProps(item);
         return (
             <WorkloadDetails
-                parentMetaData={item.metadata}
-                podTemplate={item.spec && item.spec.template}
-                selector={item.spec && item.spec.selector}
-                parentKind={item.kind || defaultType}
-                statusProps={statusProps}
-                statusTooltip={podsTooltip}
+                item={item}
+                parentKind={(item && item.kind) || defaultType}
+                getStatusProps={getStatusProps}
             />
         );
     }
@@ -416,7 +415,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         const filteredItems = ((itemList || {}).items || []).filter(r => r.metadata.uid === uid);
         return filteredItems && filteredItems.length > 0 ? filteredItems[0] : {} as any;
     }
-
+    
     private _getFilterHeaderBar(): JSX.Element {
         return (
             <>
