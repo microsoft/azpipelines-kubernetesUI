@@ -5,9 +5,6 @@
 
 import { V1Pod } from "@kubernetes/client-node";
 import { BaseComponent } from "@uifabric/utilities";
-import { Page } from "azure-devops-ui/Page";
-import { IStatusProps } from "azure-devops-ui/Status";
-import { Tab, TabBar, TabSize } from "azure-devops-ui/Tabs";
 import { MessageCard, MessageCardSeverity } from "azure-devops-ui/MessageCard";
 import { Page } from "azure-devops-ui/Page";
 import { IStatusProps, Statuses } from "azure-devops-ui/Status";
@@ -17,9 +14,9 @@ import { PageTopHeader } from "../Common/PageTopHeader";
 import { PodsRightPanelTabsKeys } from "../Constants";
 import * as Resources from "../Resources";
 import { IVssComponentProperties } from "../Types";
+import { Utils } from "../Utils";
 import { PodOverview } from "./PodOverview";
 import { PodYaml } from "./PodYaml";
-import { Utils } from "../Utils";
 
 export interface IPodRightPanelProps extends IVssComponentProperties {
     pod: V1Pod;
@@ -102,17 +99,11 @@ export class PodsRightPanel extends BaseComponent<IPodRightPanelProps, IPodsRigh
     private _getSelectedTabContent(): React.ReactNode {
         const selectedTab = this.state.selectedTab;
         switch (selectedTab) {
-            case PodsRightPanelTabsKeys.PodsLogsKey: return (
-                <span>{"Pods Logs View coming soon..."}</span>
-            );
-
-            case PodsRightPanelTabsKeys.PodsYamlKey:
-                return <PodYaml key={this.props.pod.metadata.uid} pod={this.props.pod} />;
             case PodsRightPanelTabsKeys.PodsLogsKey:
                 return <span>{"Pods Logs View coming soon..."}</span>;
 
             case PodsRightPanelTabsKeys.PodsYamlKey:
-                return <span>{"Pods YAML View coming soon..."}</span>;
+                return <PodYaml key={this.props.pod.metadata.uid} pod={this.props.pod} />;
 
             default:
                 return <PodOverview key={this.props.pod.metadata.uid} pod={this.props.pod} />;

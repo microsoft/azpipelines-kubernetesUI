@@ -3,24 +3,24 @@
     Licensed under the MIT license.
 */
 
+import { V1DaemonSet, V1Pod, V1ReplicaSet, V1StatefulSet } from "@kubernetes/client-node";
 import { BaseComponent, css } from "@uifabric/utilities";
 import { CardContent, CustomCard } from "azure-devops-ui/Card";
 import { ITableRow, TableColumnStyle } from "azure-devops-ui/Components/Table/Table.Props";
+import { format } from "azure-devops-ui/Core/Util/String";
 import { CustomHeader, HeaderDescription, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
 import { Link } from "azure-devops-ui/Link";
-import { IStatusProps, Status, StatusSize, Statuses } from "azure-devops-ui/Status";
+import { IStatusProps, Status, Statuses, StatusSize } from "azure-devops-ui/Status";
 import { ITableColumn, SimpleTableCell, Table, TwoLineTableCell } from "azure-devops-ui/Table";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
-import { IVssComponentProperties, IPodDetailsSelectionPropeties } from "../Types";
+import { SelectedItemKeys } from "../Constants";
+import { SelectionActionsCreator } from "../Selection/SelectionActionCreator";
+import { IPodDetailsSelectionProperties, IVssComponentProperties } from "../Types";
+import { Utils } from "../Utils";
 import "./KubeCardWithTable.scss";
 import { IResourceStatusProps, ResourceStatus } from "./ResourceStatus";
-import { format } from "azure-devops-ui/Core/Util/String";
-import { V1Pod, V1StatefulSet, V1DaemonSet, V1ReplicaSet } from "@kubernetes/client-node";
-import { SelectionActionsCreator } from "../Selection/SelectionActionCreator";
-import { SelectedItemKeys } from "../Constants";
-import { Utils } from "../Utils";
 
 export interface ITableComponentProperties<T> extends IVssComponentProperties {
     className?: string;
@@ -232,7 +232,7 @@ export function renderPodsStatusTableCell(
             {
                 onClick ? (
                     <Link
-                        className={classNames + " bolt-table-link"}
+                        className={css(classNames, "bolt-table-link")}
                         rel={"noopener noreferrer"}
                         excludeTabStop
                         onClick={() => onClick()}
@@ -249,15 +249,15 @@ export function renderPodsStatusTableCell(
 }
 
 export function onPodsColumnClicked(pods: V1Pod[], item: V1ReplicaSet | V1StatefulSet | V1DaemonSet | V1Pod, itemKind: string, selectionActionCreator: SelectionActionsCreator): void {
-    const selectedPod = pods.find(p => Utils.generatePodStatusProps(p.status) === Statuses.Failed) || pods[0];
-    
+    const selectedPod = pods.find(p => Utils.generatePodStatusProps(p.status).statusProps === Statuses.Failed) || pods[0];
+
     // Item kind "Pod" implies that the type is an orphan pod
     const properties = itemKind === "Pod" ? undefined : {
         pods: pods,
         parentItemKind: itemKind,
         parentItemName: item.metadata.name,
         onBackClick: () => { item && selectionActionCreator.selectItem({ item: item, itemUID: item.metadata.uid, selectedItemType: SelectedItemKeys.ReplicaSetKey, showSelectedItem: true }) }
-    } as IPodDetailsSelectionPropeties
+    } as IPodDetailsSelectionProperties;
 
     selectionActionCreator.selectItem({
         item: selectedPod,
@@ -265,5 +265,5 @@ export function onPodsColumnClicked(pods: V1Pod[], item: V1ReplicaSet | V1Statef
         selectedItemType: itemKind === "Pod" ? SelectedItemKeys.OrphanPodKey : SelectedItemKeys.PodDetailsKey,
         showSelectedItem: true,
         properties: properties
-    })
+    });
 }

@@ -25,6 +25,7 @@ import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
 import { ImageDetails } from "../ImageDetails/ImageDetails";
 import { KubeFactory } from "../KubeFactory";
+import { PodsDetails } from "../Pods/PodsDetails";
 import { PodsRightPanel } from "../Pods/PodsRightPanel";
 import * as Resources from "../Resources";
 import { SelectionActionsCreator } from "../Selection/SelectionActionCreator";
@@ -34,7 +35,7 @@ import { ServiceDetails } from "../Services/ServiceDetails";
 import { ServicesPivot } from "../Services/ServicesPivot";
 import { ServicesStore } from "../Services/ServicesStore";
 import { ServicesTable } from "../Services/ServicesTable";
-import { IServiceItem, IVssComponentProperties, IPodDetailsSelectionPropeties } from "../Types";
+import { IPodDetailsSelectionProperties, IServiceItem, IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
 import { WorkloadDetails } from "../Workloads/WorkloadDetails";
 import { WorkloadsActionsCreator } from "../Workloads/WorkloadsActionsCreator";
@@ -42,8 +43,6 @@ import { WorkloadsPivot } from "../Workloads/WorkloadsPivot";
 import { WorkloadsStore } from "../Workloads/WorkloadsStore";
 import "./KubeSummary.scss";
 import { KubeZeroData } from "./KubeZeroData";
-import { IStatusProps } from "azure-devops-ui/Status";
-import { PodsDetails } from "../Pods/PodsDetails";
 
 const workloadsPivotItemKey: string = "workloads";
 const servicesPivotItemKey: string = "services";
@@ -276,8 +275,8 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         );
     }
 
-    private _getPodDetailsComponent(item: V1Pod, properties?: IPodDetailsSelectionPropeties): JSX.Element | null {
-        const selectionProperties = properties as IPodDetailsSelectionPropeties;
+    private _getPodDetailsComponent(item: V1Pod, properties?: IPodDetailsSelectionProperties): JSX.Element | null {
+        const selectionProperties = properties as IPodDetailsSelectionProperties;
         return selectionProperties ? (
             <PodsDetails
                 pods={selectionProperties.pods}
@@ -375,14 +374,14 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
             return Utils.getPodsStatusProps(status.numberAvailable, status.desiredNumberScheduled);
         });
 
-        this._selectedItemViewMap[SelectedItemKeys.ServiceItemKey] = (service) => { return <ServiceDetails service={service} parentKind={service.kind || "Service"} />; };
-        this._selectedItemViewMap[SelectedItemKeys.ImageDetailsKey] = (item) => { return <ImageDetails imageDetails={item} onBackButtonClick={this._setSelectionStateFalse} />; };
         this._selectedItemViewMap[SelectedItemKeys.OrphanPodKey] = (pod) => {
             const { statusProps, tooltip } = Utils.generatePodStatusProps(pod.status);
             return <PodsRightPanel key={pod.metadata.uid} pod={pod} podStatusProps={statusProps} statusTooltip={tooltip} />;
-        }
-        this._selectedItemViewMap[SelectedItemKeys.OrphanPodKey] = (pod) => <PodsRightPanel key={pod.metadata.uid} pod={pod} podStatusProps={PodPhaseToStatus[pod.status.phase]} statusTooltip={pod.status.message || pod.status.phase} />;
-        this._selectedItemViewMap[SelectedItemKeys.PodDetailsKey] = (item, properties?) => this._getPodDetailsComponent(item, properties as IPodDetailsSelectionPropeties);
+        };
+
+        this._selectedItemViewMap[SelectedItemKeys.ServiceItemKey] = (service) => { return <ServiceDetails service={service} parentKind={service.kind || "Service"} />; };
+        this._selectedItemViewMap[SelectedItemKeys.ImageDetailsKey] = (item) => { return <ImageDetails imageDetails={item} onBackButtonClick={this._setSelectionStateFalse} />; };
+        this._selectedItemViewMap[SelectedItemKeys.PodDetailsKey] = (item, properties?) => this._getPodDetailsComponent(item, properties as IPodDetailsSelectionProperties);
     }
 
     private _setSelectionStateFalse = () => {

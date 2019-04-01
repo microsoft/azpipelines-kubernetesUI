@@ -70,7 +70,7 @@ export interface ISetWorkloadTypeItem {
     statusTooltip?: string;
 }
 
-export interface IPodDetailsSelectionPropeties {
+export interface IPodDetailsSelectionProperties {
     pods: V1Pod[];
     parentItemKind: string;
     parentItemName: string;
