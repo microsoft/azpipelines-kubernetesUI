@@ -11,6 +11,9 @@ import * as Resources from "../Resources";
 import { IVssComponentProperties } from "../Types";
 import { PodsLeftPanel } from "./PodsLeftPanel";
 import { PodsRightPanel } from "./PodsRightPanel";
+import { KubeSummary } from "../Common/KubeSummary";
+import { IImageDetails } from "../../Contracts/Types";
+import { ImageDetails } from "../ImageDetails/ImageDetails";
 
 export interface IPodsDetailsProperties extends IVssComponentProperties {
     pods: V1Pod[];
@@ -22,17 +25,25 @@ export interface IPodsDetailsProperties extends IVssComponentProperties {
 
 export interface IPodsDetailsState {
     selectedPod: V1Pod | null;
+    selectedImageDetails: IImageDetails | undefined;
 }
 
 export class PodsDetails extends BaseComponent<IPodsDetailsProperties, IPodsDetailsState> {
     constructor(props: IPodsDetailsProperties) {
         super(props, {});
         this.state = {
-            selectedPod: this.props.selectedPod || null
+            selectedPod: this.props.selectedPod || null,
+            selectedImageDetails: undefined
         };
     }
 
     public render(): JSX.Element {
+        if (this.state.selectedImageDetails) {
+            return <ImageDetails
+                imageDetails={this.state.selectedImageDetails}
+                onBackButtonClick={this._hideImageDetails} />;
+        }
+
         let selectedPod = this.state.selectedPod;
         if (!selectedPod && this.props.pods && this.props.pods.length > 0) {
             selectedPod = this.props.pods[0];
@@ -50,7 +61,8 @@ export class PodsDetails extends BaseComponent<IPodsDetailsProperties, IPodsDeta
 
         const rightPanel = (selectedPod ?
             <PodsRightPanel
-                pod={selectedPod} />
+                pod={selectedPod}
+                showImageDetails={this._showImageDetails} />
             : <div className="zero-pods-text-container">{Resources.NoPodsFoundText}</div>);
 
         return (
@@ -68,6 +80,22 @@ export class PodsDetails extends BaseComponent<IPodsDetailsProperties, IPodsDeta
     private _onPodSelectionChange = (event: React.SyntheticEvent<HTMLElement>, selectedPod: V1Pod): void => {
         this.setState({
             selectedPod: selectedPod
+        });
+    }
+
+    // ToDO:: Handle GetImageDetails via ImageStore to avoid multiple calls to API from UI
+    private _showImageDetails = (imageId: string) => {
+        const imageService = KubeSummary.getImageService();
+        imageService && imageService.getImageDetails(imageId).then(imageDetails => {
+            this.setState({
+                selectedImageDetails: imageDetails
+            });
+        });
+    }
+
+    private _hideImageDetails = () => {
+        this.setState({
+            selectedImageDetails: undefined
         });
     }
 

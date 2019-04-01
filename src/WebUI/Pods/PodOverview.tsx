@@ -18,16 +18,21 @@ import * as React from "react";
 import { defaultColumnRenderer, renderTableCell } from "../Common/KubeCardWithTable";
 import { Tags } from "../Common/Tags";
 import * as Resources from "../Resources";
-import { getRunDetailsText } from "../RunDetails";
 import { Utils } from "../Utils";
 import "./PodOverview.scss";
 import { IPodRightPanelProps } from "./PodsRightPanel";
+import { Link } from "azure-devops-ui/Link";
+import { StoreManager } from "../FluxCommon/StoreManager";
+import { ImageDetailsStore } from "../ImageDetails/ImageDetailsStore";
+import { getRunDetailsText } from "../RunDetails";
 
-export interface IPodOverviewProps extends IPodRightPanelProps { }
+export interface IPodOverviewProps extends IPodRightPanelProps {
+    showImageDetails?: (imageId: string) => void;
+}
 
 export class PodOverview extends BaseComponent<IPodOverviewProps> {
     public render(): JSX.Element {
-        const podDetails = PodOverview._getPodDetails(this.props.pod);
+        const podDetails = PodOverview._getPodDetails(this.props.pod, this.props.showImageDetails);
         return (
             <CustomCard className="pod-overview-card k8s-card-padding flex-grow bolt-card-no-vertical-padding">
                 <CustomHeader>
@@ -54,13 +59,14 @@ export class PodOverview extends BaseComponent<IPodOverviewProps> {
         );
     }
 
-    private static _getPodDetails(pod: V1Pod): ArrayItemProvider<any> {
+    private static _getPodDetails = (pod: V1Pod, showImageDetails?: (imageId: string) => void): ArrayItemProvider<any> => {
         const createTime = pod.metadata.creationTimestamp ? new Date(pod.metadata.creationTimestamp) : new Date().getTime();
         const statusReason = pod.status.reason ? localeFormat(" | {0}", pod.status.reason) : "";
         const statusText = localeFormat("{0}{1}", pod.status.phase, statusReason);
         const hasAnnotations = pod.metadata.annotations && Object.keys(pod.metadata.annotations).length > 0;
         const hasLabels = pod.metadata.labels && Object.keys(pod.metadata.labels).length > 0;
         const { imageText, imageTooltipText } = Utils.getImageText(pod.spec);
+        const imageId: string = Utils.getImageIdsForPods([pod])[0] || "";
         const conditionsText = PodOverview._getPodConditionsText(pod);
         const jobName = getRunDetailsText(pod.metadata.annotations);
         let podDetails: any[] = [];
@@ -71,7 +77,7 @@ export class PodOverview extends BaseComponent<IPodOverviewProps> {
         pod.spec.restartPolicy && podDetails.push({ key: Resources.RestartPolicyText, value: pod.spec.restartPolicy });
         pod.status.qosClass && podDetails.push({ key: Resources.QoSClassText, value: pod.status.qosClass });
         pod.spec.nodeName && podDetails.push({ key: Resources.NodeText, value: pod.spec.nodeName });
-        imageText && podDetails.push({ key: Resources.ImageText, value: imageText, valueTooltipText: imageTooltipText });
+        imageText && podDetails.push({ key: Resources.ImageText, value: imageText, valueTooltipText: imageTooltipText, imageId: imageId, showImageDetails: showImageDetails });
         hasLabels && podDetails.push({ key: Resources.LabelsText, value: pod.metadata.labels });
         statusText && podDetails.push({ key: Resources.StatusText, value: statusText });
         conditionsText && podDetails.push({ key: Resources.ConditionsText, value: conditionsText });
@@ -88,11 +94,11 @@ export class PodOverview extends BaseComponent<IPodOverviewProps> {
         return conditions.join("; ") || "";
     }
 
-    private static _renderKeyCell(
+    private static _renderKeyCell = (
         rowIndex: number,
         columnIndex: number,
         tableColumn: ITableColumn<any>,
-        tableItem: any): JSX.Element {
+        tableItem: any): JSX.Element => {
         const itemToRender = (
             <Tooltip overflowOnly>
                 <span className={css("text-ellipsis")}>
@@ -103,11 +109,11 @@ export class PodOverview extends BaseComponent<IPodOverviewProps> {
         return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender, undefined, "pod-o-k-col-content");
     }
 
-    private static _renderValueCell(
+    private static _renderValueCell = (
         rowIndex: number,
         columnIndex: number,
         tableColumn: ITableColumn<any>,
-        tableItem: any): JSX.Element {
+        tableItem: any): JSX.Element => {
         const { key, value, valueTooltipText } = tableItem;
         const contentClassName = "pod-o-v-col-content";
         let props: any = {};
@@ -127,12 +133,15 @@ export class PodOverview extends BaseComponent<IPodOverviewProps> {
                 props = {
                     columnIndex: columnIndex,
                     children:
-                        <Tags items={value} />,
+                    <Tags items={value} />,
                     tableColumn: tableColumn,
                     contentClassName: css("pod-labels-pill", contentClassName)
                 };
 
                 return renderSimpleTableCell(props);
+
+            case Resources.ImageText:
+                return PodOverview._renderImageCell(rowIndex, columnIndex, tableColumn, tableItem);
 
             default:
                 const itemToRender = defaultColumnRenderer(value, undefined, valueTooltipText);
@@ -159,5 +168,24 @@ export class PodOverview extends BaseComponent<IPodOverviewProps> {
                 renderCell: PodOverview._renderValueCell
             }
         ];
+    }
+
+    private static _renderImageCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<any>, tableItem: any): JSX.Element => {
+        const { key, value, valueTooltipText, imageId, showImageDetails } = tableItem;
+        const hasImageDetails: boolean = StoreManager.GetStore<ImageDetailsStore>(ImageDetailsStore).hasImageDetails(imageId);
+        const itemToRender = hasImageDetails ?
+            <Tooltip overflowOnly>
+                <Link
+                    className="fontSizeM text-ellipsis bolt-table-link"
+                    rel={"noopener noreferrer"}
+                    excludeTabStop
+                    onClick={() => showImageDetails(imageId)}
+                >
+                    {value}
+                </Link>
+            </Tooltip>
+            : defaultColumnRenderer(value, undefined, valueTooltipText);
+
+        return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender, undefined, hasImageDetails ? "bolt-table-cell-content-with-link" : "");
     }
 }
