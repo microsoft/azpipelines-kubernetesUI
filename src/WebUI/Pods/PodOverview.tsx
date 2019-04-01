@@ -32,7 +32,7 @@ export interface IPodOverviewProps extends IPodRightPanelProps {
 
 export class PodOverview extends BaseComponent<IPodOverviewProps> {
     public render(): JSX.Element {
-        const podDetails = PodOverview._getPodDetails(this.props.pod);
+        const podDetails = PodOverview._getPodDetails(this.props.pod, this.props.showImageDetails);
         return (
             <CustomCard className="pod-overview-card k8s-card-padding flex-grow bolt-card-no-vertical-padding">
                 <CustomHeader>
@@ -59,14 +59,14 @@ export class PodOverview extends BaseComponent<IPodOverviewProps> {
         );
     }
 
-    private static _getPodDetails(pod: V1Pod): ArrayItemProvider<any> {
+    private static _getPodDetails(pod: V1Pod, showImageDetails?: (imageId: string) => void): ArrayItemProvider<any> {
         const createTime = pod.metadata.creationTimestamp ? new Date(pod.metadata.creationTimestamp) : new Date().getTime();
         const statusReason = pod.status.reason ? localeFormat(" | {0}", pod.status.reason) : "";
         const statusText = localeFormat("{0}{1}", pod.status.phase, statusReason);
         const hasAnnotations = pod.metadata.annotations && Object.keys(pod.metadata.annotations).length > 0;
         const hasLabels = pod.metadata.labels && Object.keys(pod.metadata.labels).length > 0;
         const { imageText, imageTooltipText } = Utils.getImageText(pod.spec);
-        const imageId: string = Utils.getImageIdsForPods([this.props.pod])[0] || "";
+        const imageId: string = Utils.getImageIdsForPods([pod])[0] || "";
         const conditionsText = PodOverview._getPodConditionsText(pod);
         const jobName = getRunDetailsText(pod.metadata.annotations);
         let podDetails: any[] = [];
@@ -77,7 +77,7 @@ export class PodOverview extends BaseComponent<IPodOverviewProps> {
         pod.spec.restartPolicy && podDetails.push({ key: Resources.RestartPolicyText, value: pod.spec.restartPolicy });
         pod.status.qosClass && podDetails.push({ key: Resources.QoSClassText, value: pod.status.qosClass });
         pod.spec.nodeName && podDetails.push({ key: Resources.NodeText, value: pod.spec.nodeName });
-        imageText && podDetails.push({ key: Resources.ImageText, value: imageText, valueTooltipText: imageTooltipText, imageId: imageId, showImageDetails: this.props.showImageDetails });
+        imageText && podDetails.push({ key: Resources.ImageText, value: imageText, valueTooltipText: imageTooltipText, imageId: imageId, showImageDetails: showImageDetails });
         hasLabels && podDetails.push({ key: Resources.LabelsText, value: pod.metadata.labels });
         statusText && podDetails.push({ key: Resources.StatusText, value: statusText });
         conditionsText && podDetails.push({ key: Resources.ConditionsText, value: conditionsText });
