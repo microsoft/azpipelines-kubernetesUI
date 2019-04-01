@@ -28,7 +28,7 @@ import { PodsDetails } from "../Pods/PodsDetails";
 import { PodsStore } from "../Pods/PodsStore";
 import { PodsTable } from "../Pods/PodsTable";
 import * as Resources from "../Resources";
-import { IVssComponentProperties, IPodDetailsSelectionPropeties } from "../Types";
+import { IVssComponentProperties, IPodDetailsSelectionProperties } from "../Types";
 import { Utils, IMetadataAnnotationPipeline } from "../Utils";
 import "./WorkloadDetails.scss";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
@@ -310,7 +310,7 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
                     pods: this.state.pods,
                     parentItemName: this.state.item!.metadata.name,
                     onBackClick: () => selectionActionCreator.selectItem({ item: this.state.item, showSelectedItem: true, itemUID: this.state.item!.metadata.uid, selectedItemType: this.props.parentKind })
-                } as IPodDetailsSelectionPropeties
+                } as IPodDetailsSelectionProperties
             }
         );
     }
