@@ -83,6 +83,7 @@ export class PodsDetails extends BaseComponent<IPodsDetailsProperties, IPodsDeta
         });
     }
 
+    // ToDO:: Handle GetImageDetails via ImageStore to avoid multiple calls to API from UI
     private _showImageDetails = (imageId: string) => {
         const imageService = KubeSummary.getImageService();
         imageService && imageService.getImageDetails(imageId).then(imageDetails => {

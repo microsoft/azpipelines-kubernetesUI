@@ -59,7 +59,7 @@ export class PodOverview extends BaseComponent<IPodOverviewProps> {
         );
     }
 
-    private static _getPodDetails(pod: V1Pod, showImageDetails?: (imageId: string) => void): ArrayItemProvider<any> {
+    private static _getPodDetails = (pod: V1Pod, showImageDetails?: (imageId: string) => void): ArrayItemProvider<any> => {
         const createTime = pod.metadata.creationTimestamp ? new Date(pod.metadata.creationTimestamp) : new Date().getTime();
         const statusReason = pod.status.reason ? localeFormat(" | {0}", pod.status.reason) : "";
         const statusText = localeFormat("{0}{1}", pod.status.phase, statusReason);
@@ -94,11 +94,11 @@ export class PodOverview extends BaseComponent<IPodOverviewProps> {
         return conditions.join("; ") || "";
     }
 
-    private static _renderKeyCell(
+    private static _renderKeyCell = (
         rowIndex: number,
         columnIndex: number,
         tableColumn: ITableColumn<any>,
-        tableItem: any): JSX.Element {
+        tableItem: any): JSX.Element => {
         const itemToRender = (
             <Tooltip overflowOnly>
                 <span className={css("text-ellipsis")}>

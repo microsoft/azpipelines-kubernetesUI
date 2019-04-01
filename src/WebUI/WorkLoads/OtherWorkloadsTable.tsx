@@ -333,7 +333,7 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
         });
 
         this._showType(KubeResourceType.Pods) && this.state.orphanPods.forEach(pod => {
-            imageId = this._getImageId(pod.spec, pod.metadata.uid);
+            imageId = Utils.getImageIdsForPods([pod])[0] || "";
             if (imageId && (this._imageList.length <= 0 || this._imageList.findIndex(img => equals(img, imageId, true)) < 0)) {
                 this._imageList.push(imageId);
             }
