@@ -3,9 +3,10 @@
     Licensed under the MIT license.
 */
 
-import { ActionCreatorBase, Action } from "../FluxCommon/Actions";
-import { ActionsHubManager } from "../FluxCommon/ActionsHubManager";
+import { V1Pod, V1PodList } from "@kubernetes/client-node";
 import { IKubeService } from "../../Contracts/Contracts";
+import { ActionCreatorBase } from "../FluxCommon/Actions";
+import { ActionsHubManager } from "../FluxCommon/ActionsHubManager";
 import { PodsActions } from "./PodsActions";
 
 export class PodsActionsCreator extends ActionCreatorBase {
@@ -18,15 +19,28 @@ export class PodsActionsCreator extends ActionCreatorBase {
     }
 
     public getPods(kubeService: IKubeService, labelSelector?: string): void {
-        if (labelSelector) {
-            kubeService && kubeService.getPods(labelSelector).then(podsList => {
-                this._actions.podsFetchedByLabel.invoke(podsList);
-            });
-        }
-        else {
-            kubeService && kubeService.getPods().then(podsList => {
-                this._actions.podsFetched.invoke(podsList);
-            });
+        kubeService && kubeService.getPods(labelSelector || undefined).then(podList => {
+            this._extendPodMetadataInList(podList);
+            if (labelSelector) {
+                this._actions.podsFetchedByLabel.invoke(podList);
+            }
+            else {
+                this._actions.podsFetched.invoke(podList);
+            }
+        });
+    }
+
+    // getPod() will provide apiVersion for pod also, should we call?
+    private _extendPodMetadataInList(podList: V1PodList): void {
+        const pods: V1Pod[] = podList && podList.items || [];
+        const podsCount: number = pods.length;
+        for (let i: number = 0; i < podsCount; i++) {
+            const pod: V1Pod = podList.items[i];
+            podList.items[i] = {
+                apiVersion: pod.apiVersion || podList.apiVersion,
+                kind: pod.kind || "Pod",
+                ...pod
+            };
         }
     }
 

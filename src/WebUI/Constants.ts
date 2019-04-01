@@ -6,7 +6,7 @@
 export const enum PodsRightPanelTabsKeys {
     PodsDetailsKey = "pod-details",
     PodsLogsKey = "pod-logs",
-    PodsYamlKey= "pod-yaml"
+    PodsYamlKey = "pod-yaml"
 }
 
 export const enum SelectedItemKeys {
@@ -15,7 +15,8 @@ export const enum SelectedItemKeys {
     StatefulSetKey = "stateful-set",
     OrphanPodKey = "orphan-pod",
     ServiceItemKey = "service-item",
-    ImageDetailsKey = "image-details"
+    ImageDetailsKey = "image-details",
+    PodDetailsKey = "pod-details"
 }
 
 export namespace WorkloadsEvents {

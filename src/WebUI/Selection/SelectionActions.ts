@@ -13,6 +13,7 @@ export interface ISelectionPayload {
     itemUID: string;
     showSelectedItem: boolean;
     selectedItemType: string;
+    properties?: { [key: string]: any };
 }
 
 export class SelectionActions extends ActionsHubBase {

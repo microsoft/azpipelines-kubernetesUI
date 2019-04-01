@@ -70,6 +70,13 @@ export interface ISetWorkloadTypeItem {
     statusTooltip?: string;
 }
 
+export interface IPodDetailsSelectionPropeties {
+    pods: V1Pod[];
+    parentItemKind: string;
+    parentItemName: string;
+    onBackClick: () => void;
+}
+
 export interface IVssComponentProperties extends IBaseProps {
     /**
      * Components may specify a css classe list that should be applied to the primary

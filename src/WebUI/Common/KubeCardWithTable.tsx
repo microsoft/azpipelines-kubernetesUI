@@ -8,15 +8,19 @@ import { CardContent, CustomCard } from "azure-devops-ui/Card";
 import { ITableRow, TableColumnStyle } from "azure-devops-ui/Components/Table/Table.Props";
 import { CustomHeader, HeaderDescription, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
 import { Link } from "azure-devops-ui/Link";
-import { IStatusProps, Status, StatusSize } from "azure-devops-ui/Status";
+import { IStatusProps, Status, StatusSize, Statuses } from "azure-devops-ui/Status";
 import { ITableColumn, SimpleTableCell, Table, TwoLineTableCell } from "azure-devops-ui/Table";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
-import { IVssComponentProperties } from "../Types";
+import { IVssComponentProperties, IPodDetailsSelectionPropeties } from "../Types";
 import "./KubeCardWithTable.scss";
 import { IResourceStatusProps, ResourceStatus } from "./ResourceStatus";
 import { format } from "azure-devops-ui/Core/Util/String";
+import { V1Pod, V1StatefulSet, V1DaemonSet, V1ReplicaSet } from "@kubernetes/client-node";
+import { SelectionActionsCreator } from "../Selection/SelectionActionCreator";
+import { SelectedItemKeys } from "../Constants";
+import { Utils } from "../Utils";
 
 export interface ITableComponentProperties<T> extends IVssComponentProperties {
     className?: string;
@@ -210,22 +214,56 @@ export function renderPodsStatusTableCell(
     tableColumn: ITableColumn<any>,
     podsCountString?: string,
     podsStatusProps?: IStatusProps,
-    tooltip?: string
+    tooltip?: string,
+    onClick?: () => void
 ): JSX.Element {
+    const content = (
+        <>
+            {podsStatusProps && <Status {...podsStatusProps} size={StatusSize.m} />}
+            <div className="k8s-pods-status-count">{podsCountString}</div>
+        </>
+    );
+
+    const classNames = "fontSizeM flex-center flex-row text-ellipsis";
+
     const itemToRender = podsCountString ? (
         // show tooltip always if specified, otherwise show only when element overflows
         <Tooltip text={tooltip || podsCountString || ""} overflowOnly={!tooltip}>
-            <Link
-                className="fontSizeM flex-center flex-row text-ellipsis bolt-table-link"
-                rel={"noopener noreferrer"}
-                excludeTabStop
-                href="#"
-            >
-                {podsStatusProps && <Status {...podsStatusProps} size={StatusSize.m} />}
-                <div className="k8s-pods-status-count">{podsCountString}</div>
-            </Link>
+            {
+                onClick ? (
+                    <Link
+                        className={classNames + " bolt-table-link"}
+                        rel={"noopener noreferrer"}
+                        excludeTabStop
+                        onClick={() => onClick()}
+                    >
+                        {content}
+                    </Link>)
+                    : (<span className={classNames}>
+                        {content}
+                    </span>)}
         </Tooltip>
     ) : null;
 
     return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender, undefined, podsCountString ? "bolt-table-cell-content-with-link" : "");
+}
+
+export function onPodsColumnClicked(pods: V1Pod[], item: V1ReplicaSet | V1StatefulSet | V1DaemonSet | V1Pod, itemKind: string, selectionActionCreator: SelectionActionsCreator): void {
+    const selectedPod = pods.find(p => Utils.generatePodStatusProps(p.status) === Statuses.Failed) || pods[0];
+    
+    // Item kind "Pod" implies that the type is an orphan pod
+    const properties = itemKind === "Pod" ? undefined : {
+        pods: pods,
+        parentItemKind: itemKind,
+        parentItemName: item.metadata.name,
+        onBackClick: () => { item && selectionActionCreator.selectItem({ item: item, itemUID: item.metadata.uid, selectedItemType: SelectedItemKeys.ReplicaSetKey, showSelectedItem: true }) }
+    } as IPodDetailsSelectionPropeties
+
+    selectionActionCreator.selectItem({
+        item: selectedPod,
+        itemUID: selectedPod.metadata.uid,
+        selectedItemType: itemKind === "Pod" ? SelectedItemKeys.OrphanPodKey : SelectedItemKeys.PodDetailsKey,
+        showSelectedItem: true,
+        properties: properties
+    })
 }

@@ -34,7 +34,7 @@ import { ServiceDetails } from "../Services/ServiceDetails";
 import { ServicesPivot } from "../Services/ServicesPivot";
 import { ServicesStore } from "../Services/ServicesStore";
 import { ServicesTable } from "../Services/ServicesTable";
-import { IServiceItem, IVssComponentProperties } from "../Types";
+import { IServiceItem, IVssComponentProperties, IPodDetailsSelectionPropeties } from "../Types";
 import { Utils } from "../Utils";
 import { WorkloadDetails } from "../Workloads/WorkloadDetails";
 import { WorkloadsActionsCreator } from "../Workloads/WorkloadsActionsCreator";
@@ -42,6 +42,8 @@ import { WorkloadsPivot } from "../Workloads/WorkloadsPivot";
 import { WorkloadsStore } from "../Workloads/WorkloadsStore";
 import "./KubeSummary.scss";
 import { KubeZeroData } from "./KubeZeroData";
+import { IStatusProps } from "azure-devops-ui/Status";
+import { PodsDetails } from "../Pods/PodsDetails";
 
 const workloadsPivotItemKey: string = "workloads";
 const servicesPivotItemKey: string = "services";
@@ -55,6 +57,7 @@ export interface IKubernetesContainerState {
     selectedItem?: V1ReplicaSet | V1DaemonSet | V1StatefulSet | V1Pod | IServiceItem | IImageDetails;
     showSelectedItem?: boolean;
     selectedItemType?: string;
+    selectedItemProperties?: { [key: string]: string };
     resourceSize: number;
     workloadsFilter: Filter;
     svcFilter: Filter;
@@ -249,7 +252,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         const selectedItemType = this.state.selectedItemType;
         // ToDo :: Currently for imageDetails type, the selected item will be undefined, hence adding below check. Remove this once we have data from imageService
         if (selectedItemType && (selectedItem || selectedItemType === SelectedItemKeys.ImageDetailsKey) && this._selectedItemViewMap.hasOwnProperty(selectedItemType)) {
-            return this._selectedItemViewMap[selectedItemType](selectedItem);
+            return this._selectedItemViewMap[selectedItemType](selectedItem, this.state.selectedItemProperties);
         }
 
         return null;
@@ -273,6 +276,18 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         );
     }
 
+    private _getPodDetailsComponent(item: V1Pod, properties?: IPodDetailsSelectionPropeties): JSX.Element | null {
+        const selectionProperties = properties as IPodDetailsSelectionPropeties;
+        return selectionProperties ? (
+            <PodsDetails
+                pods={selectionProperties.pods}
+                parentKind={selectionProperties.parentItemKind}
+                parentName={selectionProperties.parentItemName}
+                onBackButtonClick={selectionProperties.onBackClick}
+                selectedPod={item} />)
+            : null;
+    }
+
     private _onSelectionStoreChanged = () => {
         const selectionStoreState = this._selectionStore.getState();
 
@@ -280,7 +295,8 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
             this.setState({
                 showSelectedItem: selectionStoreState.showSelectedItem,
                 selectedItem: item,
-                selectedItemType: selectionStoreState.selectedItemType
+                selectedItemType: selectionStoreState.selectedItemType,
+                selectedItemProperties: selectionStoreState.properties
             });
         }
 
@@ -365,6 +381,8 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
             const { statusProps, tooltip } = Utils.generatePodStatusProps(pod.status);
             return <PodsRightPanel key={pod.metadata.uid} pod={pod} podStatusProps={statusProps} statusTooltip={tooltip} />;
         }
+        this._selectedItemViewMap[SelectedItemKeys.OrphanPodKey] = (pod) => <PodsRightPanel key={pod.metadata.uid} pod={pod} podStatusProps={PodPhaseToStatus[pod.status.phase]} statusTooltip={pod.status.message || pod.status.phase} />;
+        this._selectedItemViewMap[SelectedItemKeys.PodDetailsKey] = (item, properties?) => this._getPodDetailsComponent(item, properties as IPodDetailsSelectionPropeties);
     }
 
     private _setSelectionStateFalse = () => {
@@ -415,7 +433,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         KubeFactory.getImageLocation = this.props.getImageLocation || KubeFactory.getImageLocation;
     }
 
-    private _selectedItemViewMap: { [selectedItemKey: string]: (selectedItem: any) => JSX.Element | null } = {};
+    private _selectedItemViewMap: { [selectedItemKey: string]: (selectedItem: any, properties?: { [key: string]: any }) => JSX.Element | null } = {};
     private _objectFinder: { [selectedItemKey: string]: (name: string) => V1ReplicaSet | V1DaemonSet | V1StatefulSet | IServiceItem } = {};
     private _selectionStore: SelectionStore;
     private _workloadsActionCreator: WorkloadsActionsCreator;

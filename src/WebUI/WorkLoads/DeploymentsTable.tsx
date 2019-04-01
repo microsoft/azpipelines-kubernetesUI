@@ -12,12 +12,11 @@ import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { equals, localeFormat } from "azure-devops-ui/Core/Util/String";
 import { CustomHeader, HeaderDescription, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
 import { Link } from "azure-devops-ui/Link";
-import { IStatusProps, Statuses } from "azure-devops-ui/Status";
 import { ITableColumn, Table } from "azure-devops-ui/Table";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
-import { defaultColumnRenderer, renderPodsStatusTableCell, renderTableCell } from "../Common/KubeCardWithTable";
+import { defaultColumnRenderer, renderPodsStatusTableCell, renderTableCell, onPodsColumnClicked } from "../Common/KubeCardWithTable";
 import { KubeSummary } from "../Common/KubeSummary";
 import { Tags } from "../Common/Tags";
 import { ImageDetailsEvents, SelectedItemKeys, WorkloadsEvents } from "../Constants";
@@ -29,7 +28,7 @@ import { PodsStore } from "../Pods/PodsStore";
 import * as Resources from "../Resources";
 import { SelectionActionsCreator } from "../Selection/SelectionActionCreator";
 import { ISelectionPayload } from "../Selection/SelectionActions";
-import { IDeploymentReplicaSetItem, IDeploymentReplicaSetMap, IVssComponentProperties } from "../Types";
+import { IDeploymentReplicaSetItem, IDeploymentReplicaSetMap, IVssComponentProperties, IPodDetailsSelectionPropeties } from "../Types";
 import { Utils } from "../Utils";
 import "./DeploymentsTable.scss";
 import { WorkloadsActionsCreator } from "./WorkloadsActionsCreator";
@@ -238,7 +237,7 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
             id: "pods",
             name: Resources.PodsText,
             width: new ObservableValue(140),
-            renderCell: DeploymentsTable._renderPodsCountCell
+            renderCell: this._renderPodsCountCell
         });
         columns.push({
             id: "age",
@@ -255,8 +254,14 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
         return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
-    private static _renderPodsCountCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IDeploymentReplicaSetItem>, deployment: IDeploymentReplicaSetItem): JSX.Element {
-        return renderPodsStatusTableCell(rowIndex, columnIndex, tableColumn, deployment.pods, deployment.statusProps, deployment.podsTooltip);
+    private _renderPodsCountCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IDeploymentReplicaSetItem>, deployment: IDeploymentReplicaSetItem): JSX.Element => {
+        const replicaSet = this._getSelectedReplicaSet(deployment);
+        const podslist = StoreManager.GetStore<PodsStore>(PodsStore).getState().podsList;
+        const relevantPods = (podslist && podslist.items && podslist.items.filter(p => (replicaSet && Utils.isOwnerMatched(p.metadata, replicaSet.metadata.uid)) || false))
+
+        const _onPodsClicked = (relevantPods && replicaSet) ? (() => onPodsColumnClicked(relevantPods, replicaSet, "ReplicaSet", this._selectionActionCreator)) : undefined;
+
+        return renderPodsStatusTableCell(rowIndex, columnIndex, tableColumn, deployment.pods, deployment.statusProps, deployment.podsTooltip, _onPodsClicked);
     }
 
     private _renderImageCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IDeploymentReplicaSetItem>, deployment: IDeploymentReplicaSetItem): JSX.Element => {
