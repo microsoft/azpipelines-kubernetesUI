@@ -5,12 +5,12 @@
 
 import * as React from "react";
 import { V1ObjectMeta, V1Pod, V1PodSpec, V1PodStatus } from "@kubernetes/client-node";
-import { equals, format, localeFormat } from "azure-devops-ui/Core/Util/String";
+import { ObservableArray } from "azure-devops-ui/Core/Observable";
+import { format, localeFormat } from "azure-devops-ui/Core/Util/String";
+import { ILabelModel } from "azure-devops-ui/Label";
 import { IStatusProps, Statuses } from "azure-devops-ui/Status";
 import { PodPhase } from "../Contracts/Contracts";
 import * as Resources from "./Resources";
-import { ObservableArray } from "azure-devops-ui/Core/Observable";
-import { ILabelModel } from "azure-devops-ui/Label";
 
 const pipelineNameAnnotationKey: string = "azure-pipelines/pipeline";
 const pipelineRunIdAnnotationKey: string = "azure-pipelines/execution";
@@ -117,12 +117,22 @@ export class Utils {
         return labelSelector;
     }
 
-    public static generatePodStatusProps(status: V1PodStatus): IStatusProps {
+    public static generatePodStatusProps(status: V1PodStatus): { statusProps: IStatusProps, tooltip: string } {
+        let statusProps: IStatusProps = Statuses.Failed;
+        let tooltip: string = status.message || status.phase;
         if (status.phase === PodPhase.Running || status.phase === PodPhase.Succeeded) {
-            return Statuses.Success;
+            statusProps = Statuses.Success;
         }
 
-        return Statuses.Failed;
+        const failedContainerState = (status.containerStatuses || []).find(cs => !cs.ready && !cs.state.running);
+        if (failedContainerState) {
+            const failedState = failedContainerState.state;
+            statusProps = Statuses.Failed;
+            tooltip = failedState.waiting && failedState.waiting.message
+                || failedState.terminated && failedState.terminated.message;
+        }
+
+        return { statusProps: statusProps, tooltip: tooltip };
     }
 
     public static filterByName(objectName: string, filterKey?: string): boolean {
@@ -229,6 +239,7 @@ export class Utils {
     }
 
     public static getImageResourceUrl(image: string, digest: string): string {
+        const sha256Text = "@sha256";
         const result = image.split("/");
         if (result.length <= 0) {
             return "";
@@ -253,10 +264,10 @@ export class Utils {
         }
 
         if (repository) {
-            return format("https://{0}/{1}/{2}/{3}{4}", registry, imgNamespace, repository, "@sha256", digest);
+            return format("https://{0}/{1}/{2}/{3}{4}", registry, imgNamespace, repository, sha256Text, digest);
         }
         else {
-            return format("https://{0}/{1}{2}{3}", registry, imgNamespace, "@sha256", digest);
+            return format("https://{0}/{1}{2}{3}", registry, imgNamespace, sha256Text, digest);
         }
     }
 

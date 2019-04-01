@@ -9,7 +9,7 @@ import { Ago } from "azure-devops-ui/Ago";
 import { CardContent, CustomCard } from "azure-devops-ui/Card";
 import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
-import { equals, format } from "azure-devops-ui/Core/Util/String";
+import { equals } from "azure-devops-ui/Core/Util/String";
 import { CustomHeader, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
 import { Link } from "azure-devops-ui/Link";
 import { Statuses } from "azure-devops-ui/Status";
@@ -17,7 +17,6 @@ import { ITableColumn, Table, TwoLineTableCell } from "azure-devops-ui/Table";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
-import { PodPhase, PodPhaseToStatus } from "../../Contracts/Contracts";
 import { KubeResourceType } from "../../Contracts/KubeServiceBase";
 import { defaultColumnRenderer, renderPodsStatusTableCell, renderTableCell, onPodsColumnClicked } from "../Common/KubeCardWithTable";
 import { KubeSummary } from "../Common/KubeSummary";
@@ -339,7 +338,7 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
                 this._imageList.push(imageId);
             }
 
-            const currentPodCount = pod.status && (pod.status.phase === PodPhase.Running || pod.status.phase === PodPhase.Succeeded) ? 1 : 0;
+            const { statusProps, tooltip } = Utils.generatePodStatusProps(pod.status);
             data.push({
                 name: pod.metadata.name,
                 uid: pod.metadata.uid,
@@ -347,8 +346,9 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
                 creationTimeStamp: pod.metadata.creationTimestamp,
                 imageId: imageId,
                 desiredPodCount: 1,
-                currentPodCount: currentPodCount,
-                status: pod.status,
+                currentPodCount: statusProps === Statuses.Success ? 1 : 0,
+                statusProps: statusProps,
+                statusTooltip: tooltip,
                 payload: pod,
                 ...OtherWorkloads._getImageText(pod.spec)
             });

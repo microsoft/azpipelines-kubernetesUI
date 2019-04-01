@@ -150,7 +150,8 @@ export class PodsTable extends BaseComponent<IPodsTableProperties> {
     }
 
     private static _renderPodNameCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod): JSX.Element {
-        return renderPodNameWithStatusTableCell(rowIndex, columnIndex, tableColumn, pod.metadata.name, Utils.generatePodStatusProps(pod.status), pod.status.message || pod.status.phase);
+        const { statusProps, tooltip } = Utils.generatePodStatusProps(pod.status);
+        return renderPodNameWithStatusTableCell(rowIndex, columnIndex, tableColumn, pod.metadata.name, statusProps, tooltip);
     }
 
     private static _renderPodWorkload(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod): JSX.Element {

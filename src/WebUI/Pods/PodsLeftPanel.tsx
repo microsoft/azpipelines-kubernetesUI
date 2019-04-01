@@ -12,10 +12,10 @@ import { ITableColumn, Table } from "azure-devops-ui/Table";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
-import { PodPhaseToStatus } from "../../Contracts/Contracts";
 import { renderPodNameWithStatusTableCell } from "../Common/KubeCardWithTable";
 import * as Resources from "../Resources";
 import { IVssComponentProperties } from "../Types";
+import { Utils } from "../Utils";
 import "./PodsLeftPanel.scss";
 
 export interface IPodsLeftPanelProperties extends IVssComponentProperties {
@@ -44,7 +44,7 @@ export class PodsLeftPanel extends BaseComponent<IPodsLeftPanelProperties> {
                 this._selectedRow = (this.props.pods || []).findIndex(pod => pod.metadata.name === selectedPodName);
             }
 
-            if (this._selectedRow === -1 || this._selectedRow >= (this.props.pods || []).length ) {
+            if (this._selectedRow === -1 || this._selectedRow >= (this.props.pods || []).length) {
                 this._selectedRow = 0;
             }
 
@@ -119,7 +119,8 @@ export class PodsLeftPanel extends BaseComponent<IPodsLeftPanelProperties> {
         selectedIndex: number
     ): JSX.Element {
         const contentClassName = rowIndex === selectedIndex ? "fontWeightSemiBold" : "";
-        return renderPodNameWithStatusTableCell(rowIndex, columnIndex, tableColumn, pod.metadata.name, PodPhaseToStatus[pod.status.phase], pod.status.message || pod.status.phase, contentClassName);
+        const { statusProps, tooltip } = Utils.generatePodStatusProps(pod.status);
+        return renderPodNameWithStatusTableCell(rowIndex, columnIndex, tableColumn, pod.metadata.name, statusProps, tooltip, contentClassName);
     }
 
     private _selection: IListSelection = new ListSelection();

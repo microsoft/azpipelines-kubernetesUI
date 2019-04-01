@@ -45,13 +45,3 @@ export enum PodPhase {
     Completed = "Completed",
     CrashLoopBackOff = "CrashLoopBackOff",
 }
-
-export const PodPhaseToStatus: { [index: string]: IStatusProps } = {
-    "Running": Statuses.Success,
-    "Succeeded": Statuses.Success,
-    "Completed": Statuses.Success,
-    "Pending": Statuses.Failed,
-    "Failed": Statuses.Failed,
-    "Unknown": Statuses.Queued,
-    "CrashLoopBackOff": Statuses.Failed,
-}

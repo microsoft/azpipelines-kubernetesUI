@@ -10,7 +10,6 @@ import { CardContent, CustomCard } from "azure-devops-ui/Card";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { format, localeFormat } from "azure-devops-ui/Core/Util/String";
 import { CustomHeader, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
-import { MessageCard, MessageCardSeverity } from "azure-devops-ui/MessageCard";
 import { ITableColumn, SimpleTableCell as renderSimpleTableCell, Table, TableColumnStyle } from "azure-devops-ui/Table";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
 import { AgoFormat } from "azure-devops-ui/Utilities/Date";
@@ -19,85 +18,70 @@ import * as React from "react";
 import { defaultColumnRenderer, renderTableCell } from "../Common/KubeCardWithTable";
 import { Tags } from "../Common/Tags";
 import * as Resources from "../Resources";
+import { getRunDetailsText } from "../RunDetails";
 import { Utils } from "../Utils";
 import "./PodOverview.scss";
 import { IPodRightPanelProps } from "./PodsRightPanel";
-import { getRunDetailsText } from "../RunDetails";
 
 export interface IPodOverviewProps extends IPodRightPanelProps { }
 
 export class PodOverview extends BaseComponent<IPodOverviewProps> {
     public render(): JSX.Element {
-        const pod: V1Pod = this.props.pod;
-        const columns: ITableColumn<any>[] = [
-            {
-                id: "key",
-                name: "key",
-                className: "pod-overview-key-col",
-                width: new ObservableValue(150),
-                columnStyle: TableColumnStyle.Tertiary,
-                renderCell: PodOverview._renderKeyCell
-            },
-            {
-                id: "value",
-                name: "value",
-                className: "pod-overview-value-col",
-                width: -100,
-                minWidth: 400,
-                renderCell: PodOverview._renderValueCell
-            }
-        ];
-
-        const { imageText, imageTooltipText } = Utils.getImageText(pod.spec);
-
-        const tableRows = new ArrayItemProvider<any>([
-            { key: Resources.Created, value: pod.metadata.creationTimestamp ? new Date(pod.metadata.creationTimestamp) : new Date().getTime() },
-            { key: Resources.JobText, value: getRunDetailsText(pod.metadata.annotations) },
-            { key: Resources.AnnotationsText, value: pod.metadata.annotations || "" },
-            { key: Resources.RestartPolicyText, value: pod.spec.restartPolicy || "" },
-            { key: Resources.QoSClassText, value: pod.status.qosClass || "" },
-            { key: Resources.NodeText, value: pod.spec.nodeName || "" },
-            { key: Resources.ImageText, value: imageText, valueTooltipText: imageTooltipText },
-            { key: Resources.LabelsText, value: pod.metadata.labels || "" },
-            { key: Resources.StatusText, value: localeFormat("{0}{1}", pod.status.phase, !pod.status.reason ? "" : localeFormat(" | {0}", pod.status.reason)) },
-            { key: Resources.ConditionsText, value: this._getPodConditionsText(pod) },
-        ]);
-
-        const podErrorMessage = pod.status.message;
+        const podDetails = PodOverview._getPodDetails(this.props.pod);
         return (
-            <>
-                {podErrorMessage && <MessageCard severity={MessageCardSeverity.Error}>{pod.status.message}</MessageCard>}
-                <div className={podErrorMessage ? "page-content-top" : ""}>
-                    <CustomCard className="pod-overview-card k8s-card-padding flex-grow bolt-card-no-vertical-padding">
-                        <CustomHeader>
-                            <HeaderTitleArea>
-                                <HeaderTitleRow>
-                                    <HeaderTitle className="text-ellipsis" titleSize={TitleSize.Medium}>
-                                        {Resources.PodDetailsHeader}
-                                    </HeaderTitle>
-                                </HeaderTitleRow>
-                            </HeaderTitleArea>
-                        </CustomHeader>
-                        <CardContent className="pod-full-details-table" contentPadding={false}>
-                            <Table
-                                id={format("pod-overview-{0}", pod.metadata.uid)}
-                                showHeader={false}
-                                showLines={false}
-                                singleClickActivation={false}
-                                itemProvider={tableRows}
-                                pageSize={tableRows.length}
-                                columns={columns}
-                            />
-                        </CardContent>
-                    </CustomCard>
-                </div>
-            </>
+            <CustomCard className="pod-overview-card k8s-card-padding flex-grow bolt-card-no-vertical-padding">
+                <CustomHeader>
+                    <HeaderTitleArea>
+                        <HeaderTitleRow>
+                            <HeaderTitle className="text-ellipsis" titleSize={TitleSize.Medium}>
+                                {Resources.PodDetailsHeader}
+                            </HeaderTitle>
+                        </HeaderTitleRow>
+                    </HeaderTitleArea>
+                </CustomHeader>
+                <CardContent className="pod-full-details-table" contentPadding={false}>
+                    <Table
+                        id={format("pod-overview-{0}", this.props.pod.metadata.uid)}
+                        showHeader={false}
+                        showLines={false}
+                        singleClickActivation={false}
+                        itemProvider={podDetails}
+                        pageSize={podDetails.length}
+                        columns={PodOverview._getColumns()}
+                    />
+                </CardContent>
+            </CustomCard>
         );
     }
 
-    private _getPodConditionsText(pod: V1Pod): string {
+    private static _getPodDetails(pod: V1Pod): ArrayItemProvider<any> {
+        const createTime = pod.metadata.creationTimestamp ? new Date(pod.metadata.creationTimestamp) : new Date().getTime();
+        const statusReason = pod.status.reason ? localeFormat(" | {0}", pod.status.reason) : "";
+        const statusText = localeFormat("{0}{1}", pod.status.phase, statusReason);
+        const hasAnnotations = pod.metadata.annotations && Object.keys(pod.metadata.annotations).length > 0;
+        const hasLabels = pod.metadata.labels && Object.keys(pod.metadata.labels).length > 0;
+        const { imageText, imageTooltipText } = Utils.getImageText(pod.spec);
+        const conditionsText = PodOverview._getPodConditionsText(pod);
+        const jobName = getRunDetailsText(pod.metadata.annotations);
+        let podDetails: any[] = [];
+        // order of rows to be preserved as per spec
+        createTime && podDetails.push({ key: Resources.Created, value: createTime });
+        jobName && podDetails.push({ key: Resources.JobText, value: jobName });
+        hasAnnotations && podDetails.push({ key: Resources.AnnotationsText, value: pod.metadata.annotations });
+        pod.spec.restartPolicy && podDetails.push({ key: Resources.RestartPolicyText, value: pod.spec.restartPolicy });
+        pod.status.qosClass && podDetails.push({ key: Resources.QoSClassText, value: pod.status.qosClass });
+        pod.spec.nodeName && podDetails.push({ key: Resources.NodeText, value: pod.spec.nodeName });
+        imageText && podDetails.push({ key: Resources.ImageText, value: imageText, valueTooltipText: imageTooltipText });
+        hasLabels && podDetails.push({ key: Resources.LabelsText, value: pod.metadata.labels });
+        statusText && podDetails.push({ key: Resources.StatusText, value: statusText });
+        conditionsText && podDetails.push({ key: Resources.ConditionsText, value: conditionsText });
+
+        return new ArrayItemProvider<any>(podDetails);
+    }
+
+    private static _getPodConditionsText(pod: V1Pod): string {
         let conditions: string[] = [];
-        if (pod.status && pod.status.conditions) {
+        if (pod.status) {
             conditions = (pod.status.conditions || []).map<string>(condition => localeFormat("{0}={1}", condition.type || "", condition.status || ""));
         }
 
@@ -109,16 +93,14 @@ export class PodOverview extends BaseComponent<IPodOverviewProps> {
         columnIndex: number,
         tableColumn: ITableColumn<any>,
         tableItem: any): JSX.Element {
-        const { key } = tableItem;
-        const contentClassName = "pod-o-k-col-content";
-
         const itemToRender = (
-            <Tooltip text={key} overflowOnly>
-                <span className={css("text-ellipsis")}>{key}</span>
+            <Tooltip overflowOnly>
+                <span className={css("text-ellipsis")}>
+                    {tableItem.key}
+                </span>
             </Tooltip>
         );
-
-        return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender, undefined, contentClassName);
+        return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender, undefined, "pod-o-k-col-content");
     }
 
     private static _renderValueCell(
@@ -127,8 +109,8 @@ export class PodOverview extends BaseComponent<IPodOverviewProps> {
         tableColumn: ITableColumn<any>,
         tableItem: any): JSX.Element {
         const { key, value, valueTooltipText } = tableItem;
-        let props: any = {};
         const contentClassName = "pod-o-v-col-content";
+        let props: any = {};
         switch (key) {
             case Resources.Created:
                 props = {
@@ -156,5 +138,26 @@ export class PodOverview extends BaseComponent<IPodOverviewProps> {
                 const itemToRender = defaultColumnRenderer(value, undefined, valueTooltipText);
                 return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender, undefined, contentClassName);
         }
+    }
+
+    private static _getColumns(): ITableColumn<any>[] {
+        return [
+            {
+                id: "key",
+                name: "key",
+                className: "pod-overview-key-col",
+                width: new ObservableValue(150),
+                columnStyle: TableColumnStyle.Tertiary,
+                renderCell: PodOverview._renderKeyCell
+            },
+            {
+                id: "value",
+                name: "value",
+                className: "pod-overview-value-col",
+                width: -100,
+                minWidth: 400,
+                renderCell: PodOverview._renderValueCell
+            }
+        ];
     }
 }
