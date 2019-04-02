@@ -1,10 +1,6 @@
-import { KubeServiceBase, KubeResourceType } from "../../src/Contracts/KubeServiceBase";
-
-class MockKubeService extends KubeServiceBase {
-    public fetch(resourceType: KubeResourceType): Promise<any> {
-        return Promise.resolve(resourceType);
-    }
-}
+import { KubeResourceType, KubeServiceBase } from "../../src/Contracts/KubeServiceBase";
+import { MockKubeService } from "../WebUI/MockKubeService";
+import { localeFormat, newGuid } from "azure-devops-ui/Core/Util/String";
 
 describe("KubeServiceBase Tests", () => {
     let service: KubeServiceBase;
@@ -56,11 +52,19 @@ describe("KubeServiceBase Tests", () => {
         });
     });
 
-    it("getPods calls with labelSelector as input",() => {
+    it("getPods calls with labelSelector as input", () => {
         expect.assertions(1);
-        const labelSelector:string = "app=app";
-        return service.getPods(labelSelector).then(output =>{
-            expect(output).toBe(KubeResourceType.Pods);
+        const labelSelector: string = "app=app";
+        return service.getPods(labelSelector).then(output => {
+            expect(output).toBe(localeFormat("{0}{1}", KubeResourceType.Pods, labelSelector));
+        });
+    });
+
+    it("getPodLog should give log", () => {
+        expect.assertions(1);
+        const podName: string = newGuid();
+        return service.getPodLog(podName).then(output => {
+            expect(output).toBe(localeFormat("Output:{0}", podName));
         });
     });
 });
