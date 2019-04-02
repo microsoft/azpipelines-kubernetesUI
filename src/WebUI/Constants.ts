@@ -48,3 +48,8 @@ export namespace HyperLinks {
     export const LinkToPodsUsingLabelsLink: string = "https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/";
     export const ServicesLink: string = "https://go.microsoft.com/fwlink/?linkid=2083858";
 }
+
+export namespace Scenarios{
+    const Prefix = "KubeSummary.";
+    export const Deployments = Prefix + "Deployments";
+}

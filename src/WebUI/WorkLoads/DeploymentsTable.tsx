@@ -19,7 +19,7 @@ import * as React from "react";
 import { defaultColumnRenderer, onPodsColumnClicked, renderPodsStatusTableCell, renderTableCell } from "../Common/KubeCardWithTable";
 import { KubeSummary } from "../Common/KubeSummary";
 import { Tags } from "../Common/Tags";
-import { ImageDetailsEvents, SelectedItemKeys, WorkloadsEvents } from "../Constants";
+import { ImageDetailsEvents, SelectedItemKeys, WorkloadsEvents, Scenarios } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
 import { ImageDetailsStore } from "../ImageDetails/ImageDetailsStore";
@@ -47,6 +47,7 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
     constructor(props: IDeploymentsTableProperties) {
         super(props, {});
 
+        KubeFactory.telemetryService.scenarioStart(Scenarios.Deployments);
         this._workloadsActionCreator = ActionsCreatorManager.GetActionCreator<WorkloadsActionsCreator>(WorkloadsActionsCreator);
         this._selectionActionCreator = ActionsCreatorManager.GetActionCreator<SelectionActionsCreator>(SelectionActionsCreator);
         this._imageDetailsStore = StoreManager.GetStore<ImageDetailsStore>(ImageDetailsStore);
@@ -330,13 +331,18 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
     }
 
     private _markTTI(prevProps: IDeploymentsTableProperties, prevState: IDeploymentsTableState): void {
-        if (!this._isTTIMarked) {
-            // if previously replicaSet did not exist and is rendered just now
-            const prevReplicas = prevState.replicaSetList;
-            const currentReplicas = this.state.replicaSetList;
-            if ((!prevReplicas || !prevReplicas.items) && (currentReplicas && currentReplicas.items)) {
+        const prevReplicas = prevState.replicaSetList;
+        const currentReplicas = this.state.replicaSetList;
+        if ((!prevReplicas || !prevReplicas.items) && (currentReplicas && currentReplicas.items)) {
+            if (!this._isTTIMarked) {
+                // if previously replicaSet did not exist and is rendered just now
+                KubeFactory.telemetryService.scenarioEnd(Scenarios.Deployments, { isTTI: true })
+
                 KubeFactory.markTTI();
                 this._isTTIMarked = true;
+            }
+            else {
+                KubeFactory.telemetryService.scenarioEnd(Scenarios.Deployments);
             }
         }
     }
