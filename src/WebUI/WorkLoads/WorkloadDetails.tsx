@@ -83,7 +83,10 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
             const history = createBrowserHistory();
             const queryParams = queryString.parse(history.location.search);
             if (queryParams.type) {
+                // function to make sure we get the item for the view if present, or we make a call and set up a store listener to fetch that item
                 const getItem = (getItemList: () => (V1ReplicaSetList | V1StatefulSetList | V1DaemonSetList | undefined), actionCreatorFunc: (k: IKubeService) => void, storeEvent: string) => {
+                    
+                    // function to search the relevant item from the item list provided
                     const searchItem = () => {
                         const itemList = getItemList();
                         if (itemList && itemList.items) {
