@@ -15,7 +15,7 @@ import * as Resources from "./Resources";
 const pipelineNameAnnotationKey: string = "azure-pipelines/pipeline";
 const pipelineRunIdAnnotationKey: string = "azure-pipelines/execution";
 const pipelineRunUrlAnnotationKey: string = "azure-pipelines/executionuri";
-const pipelineJobNameAnnotationKey: string = "azure-pipelines/__TEMP_PLACEHOLDER__";
+const pipelineJobNameAnnotationKey: string = "azure-pipelines/jobName";
 const matchPatternForImageName = new RegExp(/\:\/\/(.+?)\@/);
 const matchPatternForDigest = new RegExp(/\@sha256\:(.+)/);
 const invalidCharPatternInNamespace = new RegExp(/[:.]/);
