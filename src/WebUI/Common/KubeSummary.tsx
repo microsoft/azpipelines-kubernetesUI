@@ -18,7 +18,7 @@ import { Filter, FILTER_CHANGE_EVENT, IFilterState } from "azure-devops-ui/Utili
 import { Action, createBrowserHistory, History, Location, UnregisterCallback } from "history";
 import * as queryString from "query-string";
 import * as React from "react";
-import { IImageService, IKubeService, KubeImage, PodPhaseToStatus, ITelemetryService } from "../../Contracts/Contracts";
+import { IImageService, IKubeService, KubeImage, ITelemetryService } from "../../Contracts/Contracts";
 import { IImageDetails } from "../../Contracts/Types";
 import { SelectedItemKeys, ServicesEvents, WorkloadsEvents } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
