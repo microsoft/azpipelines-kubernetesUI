@@ -33,6 +33,12 @@ export interface IImageService {
     getImageDetails(imageName: string): Promise<IImageDetails | undefined>;
 }
 
+export interface ITelemetryService {
+    onClickTelemetry(source: string, additionalProperties?: { [key: string]: any }): void;
+    scenarioStart(scenarioName: string, additionalProperties?: { [key: string]: any }): void;
+    scenarioEnd(scenarioName: string, additionalProperties?: { [key: string]: any }): void;
+}
+
 /**
  * https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-phase
  **/
