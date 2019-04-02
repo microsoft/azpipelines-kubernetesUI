@@ -72,6 +72,7 @@ export declare const DeployServices: string;
 export declare const DeployWorkloads: string;
 export declare const WorkloadsZeroDataText: string;
 export declare const NoPodsForSvcLinkText: string;
+export declare const LoadingText: string;
 export declare const NoPodsText: string;
 export declare const ServiceText: string;
 export declare const NoResultsFoundText: string;

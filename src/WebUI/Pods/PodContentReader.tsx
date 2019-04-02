@@ -26,7 +26,8 @@ export interface IReaderProps extends IVssComponentProperties {
 export class PodContentReader extends BaseComponent<IReaderProps> {
     public render(): JSX.Element {
         return (
-            <CustomCard className={css(this.props.className || "", "k8s-card-padding", "flex-grow")}>
+            // monaco-editor class added here to have the same theme as monaco.
+            <CustomCard className={css(this.props.className || "", "monaco-editor", "k8s-card-padding", "flex-grow")}>
                 <CardContent className={css(this.props.contentClassName || "", "reader-content")} contentPadding={false}>
                     <div className="reader-outer" style={{ width: "100%", height: "500px", position: "relative" }}>
                         <div
@@ -61,13 +62,13 @@ export class PodContentReader extends BaseComponent<IReaderProps> {
             this._disposeEditor();
 
             this._editor = monaco.editor.create(innerRef, {
-                language: "yaml",
                 readOnly: true,
                 renderWhitespace: "all",
-                theme: "vs",
                 scrollbar: { horizontalScrollbarSize: 16 },
                 lineNumbers: "on",
                 extraEditorClassName: "k8s-monaco-editor",
+                theme: "vs",
+                language: "yaml",
                 ...this.props.options,
                 value: text
             });
