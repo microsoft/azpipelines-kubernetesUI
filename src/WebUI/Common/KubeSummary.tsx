@@ -250,9 +250,10 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
     private _getSelectedItemPodsView(): JSX.Element | null {
         const selectedItem = this.state.selectedItem;
         const selectedItemType = this.state.selectedItemType;
+        const isEmptyItemAllowed = ![SelectedItemKeys.ServiceItemKey, SelectedItemKeys.OrphanPodKey, SelectedItemKeys.PodDetailsKey].some(s => s === selectedItemType);
         // ToDo :: Currently for imageDetails type, the selected item will be undefined, hence adding below check. Remove this once we have data from imageService
         if (selectedItemType
-            && (selectedItem || !([SelectedItemKeys.ServiceItemKey, SelectedItemKeys.OrphanPodKey, SelectedItemKeys.PodDetailsKey].some(s => s == selectedItemType)))
+            && (selectedItem || isEmptyItemAllowed)
             && this._selectedItemViewMap.hasOwnProperty(selectedItemType)) {
             return this._selectedItemViewMap[selectedItemType](selectedItem, this.state.selectedItemProperties);
         }
