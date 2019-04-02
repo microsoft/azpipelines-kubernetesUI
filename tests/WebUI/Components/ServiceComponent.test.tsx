@@ -1,10 +1,10 @@
 import { V1Service } from "@kubernetes/client-node";
 import * as String_Utils from "azure-devops-ui/Core/Util/String";
 import * as React from "react";
-import { KubeResourceType, KubeServiceBase } from "../../../src/Contracts/KubeServiceBase";
 import { ServiceDetails } from "../../../src/WebUI/Services/ServiceDetails";
 import { IServiceItem } from "../../../src/WebUI/Types";
 import { mount } from "../../TestCore";
+import { MockKubeService } from "../MockKubeService";
 
 describe("ServiceDetails component tests", () => {
 
@@ -61,12 +61,6 @@ describe("ServiceDetails component tests", () => {
         creationTimestamp: createdDate,
         service: serviceObj as V1Service
     } as IServiceItem;
-
-    class MockKubeService extends KubeServiceBase {
-        public fetch(resourceType: KubeResourceType): Promise<any> {
-            return Promise.resolve({});
-        }
-    }
 
     const kubeService = new MockKubeService();
 
