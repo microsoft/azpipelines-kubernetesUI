@@ -47,6 +47,7 @@ import { IKubeService } from "../../Contracts/Contracts";
 export interface IWorkloadDetailsProperties extends IVssComponentProperties {
     item?: V1ReplicaSet | V1DaemonSet | V1StatefulSet;
     parentKind: string;
+    itemTypeKey: SelectedItemKeys
     getStatusProps: (item: V1ReplicaSet | V1DaemonSet | V1StatefulSet) => ({ statusProps: IStatusProps | undefined, podsTooltip: string })
 }
 
@@ -312,7 +313,7 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
                     parentItemKind: this.props.parentKind,
                     pods: this.state.pods,
                     parentItemName: this.state.item!.metadata.name,
-                    onBackClick: () => selectionActionCreator.selectItem({ item: this.state.item, showSelectedItem: true, itemUID: this.state.item!.metadata.uid, selectedItemType: this.props.parentKind })
+                    onBackClick: () => selectionActionCreator.selectItem({ item: this.state.item, showSelectedItem: true, itemUID: this.state.item!.metadata.uid, selectedItemType: this.props.itemTypeKey })
                 } as IPodDetailsSelectionProperties
             }
         );
