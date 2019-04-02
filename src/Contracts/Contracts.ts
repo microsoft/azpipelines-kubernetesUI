@@ -5,7 +5,6 @@
 
 import * as K8sTypes from "@kubernetes/client-node";
 import { IImageDetails } from "./Types";
-import { IStatusProps, Statuses } from "azure-devops-ui/Status";
 
 export interface IKubeService {
     getPods(labelSelector?: string): Promise<K8sTypes.V1PodList>;
@@ -19,6 +18,8 @@ export interface IKubeService {
     getDaemonSets(): Promise<K8sTypes.V1DaemonSetList>;
 
     getStatefulSets(): Promise<K8sTypes.V1StatefulSetList>;
+
+    getPodLog(podName: string): Promise<string>;
 }
 
 export enum KubeImage {

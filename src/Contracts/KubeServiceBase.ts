@@ -4,7 +4,6 @@
 */
 
 import * as K8sTypes from "@kubernetes/client-node";
-
 import { IKubeService } from "./Contracts";
 
 export enum KubeResourceType {
@@ -17,7 +16,7 @@ export enum KubeResourceType {
 }
 
 export abstract class KubeServiceBase implements IKubeService {
-    getPods(labelSelector?:string): Promise<K8sTypes.V1PodList> {
+    getPods(labelSelector?: string): Promise<K8sTypes.V1PodList> {
         return this.fetch(KubeResourceType.Pods, labelSelector);
     }
 
@@ -33,13 +32,15 @@ export abstract class KubeServiceBase implements IKubeService {
         return this.fetch(KubeResourceType.ReplicaSets);
     }
 
-    getDaemonSets() : Promise<K8sTypes.V1DaemonSetList> {
-        return this.fetch(KubeResourceType.DaemonSets)
+    getDaemonSets(): Promise<K8sTypes.V1DaemonSetList> {
+        return this.fetch(KubeResourceType.DaemonSets);
     }
 
-    getStatefulSets() : Promise<K8sTypes.V1StatefulSetList> {
-        return this.fetch(KubeResourceType.StatefulSets)
+    getStatefulSets(): Promise<K8sTypes.V1StatefulSetList> {
+        return this.fetch(KubeResourceType.StatefulSets);
     }
 
-    abstract fetch(resourceType: KubeResourceType, labelSelector?:string): Promise<any>;
+    abstract getPodLog(podName: string): Promise<string>;
+
+    abstract fetch(resourceType: KubeResourceType, labelSelector?: string): Promise<any>;
 }
