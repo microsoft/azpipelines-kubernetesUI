@@ -250,9 +250,10 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
     private _getSelectedItemPodsView(): JSX.Element | null {
         const selectedItem = this.state.selectedItem;
         const selectedItemType = this.state.selectedItemType;
+        const isEmptyItemAllowed = ![SelectedItemKeys.ServiceItemKey, SelectedItemKeys.OrphanPodKey, SelectedItemKeys.PodDetailsKey].some(s => s === selectedItemType);
         // ToDo :: Currently for imageDetails type, the selected item will be undefined, hence adding below check. Remove this once we have data from imageService
         if (selectedItemType
-            && !(selectedItem && ([SelectedItemKeys.ServiceItemKey, SelectedItemKeys.OrphanPodKey, SelectedItemKeys.PodDetailsKey].some(s => s == selectedItemType)))
+            && (selectedItem || isEmptyItemAllowed)
             && this._selectedItemViewMap.hasOwnProperty(selectedItemType)) {
             return this._selectedItemViewMap[selectedItemType](selectedItem, this.state.selectedItemProperties);
         }
@@ -262,13 +263,15 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
 
     private _getWorkloadPodsViewComponent(
         item: V1ReplicaSet | V1DaemonSet | V1StatefulSet,
-        defaultType: string,
+        defaultTypeString: string,
+        selectedItemType: SelectedItemKeys,
         getStatusProps: (item: V1ReplicaSet | V1DaemonSet | V1StatefulSet) => { statusProps: IStatusProps | undefined, pods: string, podsTooltip: string }
     ): JSX.Element | null {
         return (
             <WorkloadDetails
                 item={item}
-                parentKind={(item && item.kind) || defaultType}
+                parentKind={(item && item.kind) || defaultTypeString}
+                itemTypeKey={selectedItemType}
                 getStatusProps={getStatusProps}
             />
         );
@@ -358,20 +361,32 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
     }
 
     private _setSelectedKeyPodsViewMap = () => {
-        this._selectedItemViewMap[SelectedItemKeys.ReplicaSetKey] = (item) => this._getWorkloadPodsViewComponent(item, "ReplicaSet", (item) => {
-            const status = (item as V1ReplicaSet).status;
-            return Utils.getPodsStatusProps(status.readyReplicas, status.replicas);
-        });
+        this._selectedItemViewMap[SelectedItemKeys.ReplicaSetKey] = (item) => this._getWorkloadPodsViewComponent(
+            item,
+            "ReplicaSet",
+            SelectedItemKeys.ReplicaSetKey,
+            (item) => {
+                const status = (item as V1ReplicaSet).status;
+                return Utils.getPodsStatusProps(status.readyReplicas, status.replicas);
+            });
 
-        this._selectedItemViewMap[SelectedItemKeys.StatefulSetKey] = (item) => this._getWorkloadPodsViewComponent(item, "StatefulSet", (item) => {
-            const status = (item as V1StatefulSet).status;
-            return Utils.getPodsStatusProps(status.readyReplicas, status.replicas);
-        });
+        this._selectedItemViewMap[SelectedItemKeys.StatefulSetKey] = (item) => this._getWorkloadPodsViewComponent(
+            item,
+            "StatefulSet",
+            SelectedItemKeys.StatefulSetKey,
+            (item) => {
+                const status = (item as V1StatefulSet).status;
+                return Utils.getPodsStatusProps(status.readyReplicas, status.replicas);
+            });
 
-        this._selectedItemViewMap[SelectedItemKeys.DaemonSetKey] = (item) => this._getWorkloadPodsViewComponent(item, "DaemonSet", (item) => {
-            const status = (item as V1DaemonSet).status;
-            return Utils.getPodsStatusProps(status.numberAvailable, status.desiredNumberScheduled);
-        });
+        this._selectedItemViewMap[SelectedItemKeys.DaemonSetKey] = (item) => this._getWorkloadPodsViewComponent(
+            item,
+            "DaemonSet",
+            SelectedItemKeys.DaemonSetKey,
+            (item) => {
+                const status = (item as V1DaemonSet).status;
+                return Utils.getPodsStatusProps(status.numberAvailable, status.desiredNumberScheduled);
+            });
 
         this._selectedItemViewMap[SelectedItemKeys.OrphanPodKey] = (pod) => {
             const { statusProps, tooltip } = Utils.generatePodStatusProps(pod.status);
