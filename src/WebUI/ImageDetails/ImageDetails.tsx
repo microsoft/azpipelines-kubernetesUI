@@ -7,7 +7,7 @@ import { BaseComponent, css } from "@uifabric/utilities";
 import { Ago } from "azure-devops-ui/Ago";
 import { CardContent, CustomCard } from "azure-devops-ui/Card";
 import { format, localeFormat } from "azure-devops-ui/Core/Util/String";
-import { CustomHeader, HeaderIcon, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
+import { CustomHeader, HeaderIcon, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize, HeaderDescription } from "azure-devops-ui/Header";
 import { LabelGroup, WrappingBehavior } from "azure-devops-ui/Label";
 import { Page } from "azure-devops-ui/Page";
 import { ColumnFill, ITableColumn, SimpleTableCell as renderSimpleTableCell, Table, TableColumnStyle } from "azure-devops-ui/Table";
@@ -48,6 +48,7 @@ export class ImageDetails extends BaseComponent<IImageDetailsProperties, IImageD
     private _getMainHeading(): JSX.Element | null {
         const imageDetails = this.props.imageDetails;
         this._displayImageName = Utils.extractDisplayImageName(imageDetails.imageName);
+        const jobName: string = format("{0} #{1} on {2}", imageDetails.jobName || "", imageDetails.pipelineVersion || "", imageDetails.pipelineName || "");
         return (
             <CustomHeader className="image-details-header">
                 <HeaderIcon
@@ -61,6 +62,9 @@ export class ImageDetails extends BaseComponent<IImageDetailsProperties, IImageD
                             {this._displayImageName}
                         </HeaderTitle>
                     </HeaderTitleRow>
+                    <HeaderDescription className={"text-ellipsis"}>
+                        {jobName}
+                    </HeaderDescription>
                 </HeaderTitleArea>
             </CustomHeader>
         );
@@ -123,17 +127,17 @@ export class ImageDetails extends BaseComponent<IImageDetailsProperties, IImageD
         const imageType: string = imageDetails.imageType || "";
         const mediaType: string = imageDetails.mediaType || "";
         const registryName: string = this._getRegistryName();
-        const imageSize: string = ""; // ToDo: Size is currently not available in imageDetails.
-        const labels: string[] = imageDetails.tags || [];
-        const jobName: string = format("#{0} on {1}", imageDetails.buildId || "", imageDetails.buildDefinitionName || ""); // ToDo: JobName is currently not available in imageDetails.
+        const imageSize: string = imageDetails.imageSize;
+        const labels: string[] = this._getImageLabels(imageDetails.layerInfo);
+        const tags: string[] = imageDetails.tags || [];
 
         digest && imageDetailsRows.push({ key: Resources.DigestText, value: digest });
         imageType && imageDetailsRows.push({ key: Resources.ImageTypeText, value: imageType });
+        tags && tags.length > 0 && imageDetailsRows.push({ key: Resources.TagsText, value: tags });
         mediaType && imageDetailsRows.push({ key: Resources.MediaTypeText, value: mediaType });
         registryName && imageDetailsRows.push({ key: Resources.RegistryText, value: registryName });
         imageSize && imageDetailsRows.push({ key: Resources.ImageSizeText, value: imageSize });
         labels && labels.length > 0 && imageDetailsRows.push({ key: Resources.LabelsText, value: labels });
-        jobName && imageDetailsRows.push({ key: Resources.JobText, value: jobName });
 
         return new ArrayItemProvider<any>(imageDetailsRows);
     }
@@ -148,6 +152,7 @@ export class ImageDetails extends BaseComponent<IImageDetailsProperties, IImageD
         const contentClassName = "image-o-v-col-content";
         switch (key) {
             case Resources.LabelsText:
+            case Resources.TagsText:
                 props = {
                     columnIndex: columnIndex,
                     children:
@@ -261,14 +266,15 @@ export class ImageDetails extends BaseComponent<IImageDetailsProperties, IImageD
 
     private static _renderLayersSizeCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IImageLayer>, imageLayer: IImageLayer): JSX.Element {
         // Currently size data is not present in imageLayer
-        const textToRender = "-";
+        const textToRender = imageLayer.size || "-";
         const itemToRender = defaultColumnRenderer(textToRender);
         return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
     private static _renderLayersAgeCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IImageLayer>, imageLayer: IImageLayer): JSX.Element {
         // Currently created data is not present in imageLayer
-        const itemToRender = <Ago date={new Date()} format={AgoFormat.Extended} />;
+        const layerCreatedOn = imageLayer.createdOn ? new Date(imageLayer.createdOn) : new Date();
+        const itemToRender = <Ago date={layerCreatedOn} format={AgoFormat.Extended} />;
         return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
@@ -279,6 +285,18 @@ export class ImageDetails extends BaseComponent<IImageDetailsProperties, IImageD
         }
 
         return "";
+    }
+
+    private _getImageLabels(layerInfo: IImageLayer[]): string[] {
+        let labels: string[] = [];
+        for (const layer of layerInfo) {
+            const directive = layer.directive;
+            if (directive.toLowerCase() === "label") {
+                labels.push(layer.arguments);
+            }
+        }
+
+        return labels;
     }
 
     private _displayImageName: string;
