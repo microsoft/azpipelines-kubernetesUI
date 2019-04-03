@@ -33,6 +33,7 @@ export class ServicesFilterBar extends BaseComponent<IServiceFilterBarProps> {
                     };
                 }}
                 className={this.props.className || ""}
+                addBottomPadding={true}
             />
         );
     }

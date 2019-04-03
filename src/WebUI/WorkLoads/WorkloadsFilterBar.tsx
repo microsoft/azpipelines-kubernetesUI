@@ -14,7 +14,7 @@ import { KubeResourceType } from "../../Contracts/KubeServiceBase";
 
 export interface IWorkloadsFilterBarProps extends IVssComponentProperties {
     filter: Filter;
-    filterToggled: ObservableValue<boolean>,
+    filterToggled: ObservableValue<boolean>;
 }
 
 export class WorkloadsFilterBar extends BaseComponent<IWorkloadsFilterBarProps> {
@@ -26,6 +26,7 @@ export class WorkloadsFilterBar extends BaseComponent<IWorkloadsFilterBarProps> 
             listItemsFn={this._listItems}
             filterToggled={this.props.filterToggled}
             className={this.props.className || ""}
+            addBottomPadding={true}
         />);
     }
 
