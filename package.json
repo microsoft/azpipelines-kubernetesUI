@@ -1,6 +1,6 @@
 {
   "name": "@azurepipelines/azdevops-kube-summary",
-  "version": "2.3.3",
+  "version": "3.0.1",
   "description": "Azure DevOps Kubernetes Summary",
   "engines": {
     "node": ">=8.4.0",
@@ -36,7 +36,7 @@
   ],
   "dependencies": {
     "@kubernetes/client-node": "~0.8.1",
-    "azure-devops-ui": "1.149.3",
+    "azure-devops-ui": "1.149.5",
     "history": "^4.7.2",
     "js-yaml": "3.13.0",
     "monaco-editor": "0.16.2",
