@@ -428,7 +428,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
 
     private static _getFilteredFirstObject(itemList: { items?: { metadata: V1ObjectMeta }[] } | undefined, uid: string): any {
         const filteredItems = ((itemList || {}).items || []).filter(r => r.metadata.uid === uid);
-        return filteredItems && filteredItems.length > 0 ? filteredItems[0] : {} as any;
+        return filteredItems && filteredItems.length > 0 ? filteredItems[0] : undefined
     }
     
     private _getFilterHeaderBar(): JSX.Element {
