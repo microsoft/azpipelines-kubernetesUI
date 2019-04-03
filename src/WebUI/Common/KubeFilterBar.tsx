@@ -31,7 +31,8 @@ export interface IFilterComponentProperties extends IVssComponentProperties {
     pickListPlaceHolder: string;
     filterToggled: ObservableValue<boolean>;
     pickListItemsFn: () => any[];
-    listItemsFn: (item:any) => IPickListItem;
+    listItemsFn: (item: any) => IPickListItem;
+    addBottomPadding?: boolean;
 }
 
 export class KubeFilterBar extends BaseComponent<IFilterComponentProperties, {}> {
@@ -53,6 +54,7 @@ export class KubeFilterBar extends BaseComponent<IFilterComponentProperties, {}>
                         getListItem={this.props.listItemsFn}
                     />
                 </FilterBar>
+                {this.props.addBottomPadding && <div className="page-content-top" />}
             </ConditionalChildren>
         );
     }
