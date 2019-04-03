@@ -248,7 +248,12 @@ export function renderPodsStatusTableCell(
     return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender, undefined, podsCountString ? "bolt-table-cell-content-with-link" : "");
 }
 
-export function onPodsColumnClicked(pods: V1Pod[], item: V1ReplicaSet | V1StatefulSet | V1DaemonSet | V1Pod, itemKind: string, selectionActionCreator: SelectionActionsCreator): void {
+export function onPodsColumnClicked(
+    pods: V1Pod[],
+    item: V1ReplicaSet | V1StatefulSet | V1DaemonSet | V1Pod,
+    itemKind: string,
+    itemTypeKey: SelectedItemKeys,
+    selectionActionCreator: SelectionActionsCreator): void {
     const selectedPod = pods.find(p => Utils.generatePodStatusProps(p.status).statusProps === Statuses.Failed) || pods[0];
 
     // Item kind "Pod" implies that the type is an orphan pod
@@ -256,7 +261,7 @@ export function onPodsColumnClicked(pods: V1Pod[], item: V1ReplicaSet | V1Statef
         pods: pods,
         parentItemKind: itemKind,
         parentItemName: item.metadata.name,
-        onBackClick: () => { item && selectionActionCreator.selectItem({ item: item, itemUID: item.metadata.uid, selectedItemType: SelectedItemKeys.ReplicaSetKey, showSelectedItem: true }) }
+        onBackClick: () => { item && selectionActionCreator.selectItem({ item: item, itemUID: item.metadata.uid, selectedItemType: itemTypeKey, showSelectedItem: true }) }
     } as IPodDetailsSelectionProperties;
 
     selectionActionCreator.selectItem({

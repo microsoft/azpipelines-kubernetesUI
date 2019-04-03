@@ -43,6 +43,7 @@ import { WorkloadsPivot } from "../Workloads/WorkloadsPivot";
 import { WorkloadsStore } from "../Workloads/WorkloadsStore";
 import "./KubeSummary.scss";
 import { KubeZeroData } from "./KubeZeroData";
+import { PodsStore } from "../Pods/PodsStore";
 
 const workloadsPivotItemKey: string = "workloads";
 const servicesPivotItemKey: string = "services";
@@ -106,6 +107,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         this._selectionStore = StoreManager.GetStore<SelectionStore>(SelectionStore);
         // ensure workload store is created before get Deployments action
         this._workloadsStore = StoreManager.GetStore<WorkloadsStore>(WorkloadsStore);
+        this._podsStore = StoreManager.GetStore<PodsStore>(PodsStore);
 
         this._workloadsActionCreator = ActionsCreatorManager.GetActionCreator<WorkloadsActionsCreator>(WorkloadsActionsCreator);
         this._selectionActionCreator = ActionsCreatorManager.GetActionCreator<SelectionActionsCreator>(SelectionActionsCreator);
@@ -412,15 +414,15 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         this._objectFinder[SelectedItemKeys.ReplicaSetKey] = (uid) => KubeSummary._getFilteredFirstObject(this._workloadsStore.getState().replicaSetList, uid);
         this._objectFinder[SelectedItemKeys.StatefulSetKey] = (uid) => KubeSummary._getFilteredFirstObject(this._workloadsStore.getState().statefulSetList, uid);
         this._objectFinder[SelectedItemKeys.DaemonSetKey] = (uid) => KubeSummary._getFilteredFirstObject(this._workloadsStore.getState().daemonSetList, uid);
+        this._objectFinder[SelectedItemKeys.PodDetailsKey] = (uid) => KubeSummary._getFilteredFirstObject(this._podsStore.getState().podsList, uid);
         this._objectFinder[SelectedItemKeys.ServiceItemKey] = (uid) => {
             const filteredServices = KubeSummary._getFilteredFirstObject(this._servicesStore.getState().serviceList, uid);
             return ServicesTable.getServiceItems(filteredServices)[0];
         };
     }
 
-    private static _getFilteredFirstObject(itemList: any, uid: string): any {
-        itemList = (itemList || {}) as any;
-        const filteredItems = (itemList.items || []).filter(r => r.metadata.uid === uid);
+    private static _getFilteredFirstObject(itemList: { items?: { metadata: V1ObjectMeta }[] } | undefined, uid: string): any {
+        const filteredItems = ((itemList || {}).items || []).filter(r => r.metadata.uid === uid);
         return filteredItems && filteredItems.length > 0 ? filteredItems[0] : undefined
     }
 
@@ -452,6 +454,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
     private _selectionStore: SelectionStore;
     private _workloadsActionCreator: WorkloadsActionsCreator;
     private _workloadsStore: WorkloadsStore;
+    private _podsStore: PodsStore
     private _servicesStore: ServicesStore;
     private _historyService: History;
     private _historyUnlisten: UnregisterCallback;
