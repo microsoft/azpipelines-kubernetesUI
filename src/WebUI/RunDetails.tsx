@@ -1,12 +1,21 @@
 import * as React from "react";
-import { Utils } from "./Utils";
+import { Utils, IMetadataAnnotationPipeline } from "./Utils";
 import { localeFormat } from "azure-devops-ui/Core/Util/String";
 import * as Resources from "./Resources";
 import { Link } from "azure-devops-ui/Link";
 import "./RunDetails.scss"
 
-export function getRunDetailsText(annotations: { [key: string]: string }, createdAgo?: string): React.ReactNode {
-    const pipelineDetails = Utils.getPipelineDetails(annotations);
+export function getRunDetailsText(annotations?: { [key: string]: string }, jobAndPipelineDetails?: IMetadataAnnotationPipeline, createdAgo?: string): React.ReactNode {
+    let pipelineDetails: IMetadataAnnotationPipeline = {} as IMetadataAnnotationPipeline;
+    if (jobAndPipelineDetails) {
+        pipelineDetails = jobAndPipelineDetails;
+    }
+    else if (annotations) {
+        pipelineDetails = Utils.getPipelineDetails(annotations);
+    }
+    else {
+        return "";
+    }
 
     if (!createdAgo && !pipelineDetails.jobName) {
         return null;
@@ -35,23 +44,23 @@ export function getRunDetailsText(annotations: { [key: string]: string }, create
         const indexOfRun = runText.indexOf("{0}");
 
         second = (<>
-            {runText.substring(0, indexOfRun - 1)}
-            {runElement}
-            {runText.substring(indexOfRun + 3)}
+            { runText.substring(0, indexOfRun - 1) }
+            {runElement }
+        { runText.substring(indexOfRun + 3) }
         </>);
     }
 
     return (
         <>
-            {first}
+        { first }
             {
-                second
-                    ? <>
-                        <span className={"runs-bullet"}>•</span>
-                        {second}
+        second
+            ? <>
+            <span className={"runs-bullet"}>•</span>
+                        {second }
                     </>
                     : undefined
-            }
+    }
         </>
     )
 
