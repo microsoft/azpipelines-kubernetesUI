@@ -3,7 +3,8 @@
     Licensed under the MIT license.
 */
 
-import { BaseComponent, css } from "@uifabric/utilities";
+import { BaseComponent } from "@uifabric/utilities";
+import { css } from "azure-devops-ui/Util";
 import { Ago } from "azure-devops-ui/Ago";
 import { CardContent, CustomCard } from "azure-devops-ui/Card";
 import { format, localeFormat } from "azure-devops-ui/Core/Util/String";

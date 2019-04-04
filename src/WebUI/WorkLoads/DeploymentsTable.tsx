@@ -4,12 +4,12 @@
 */
 
 import { V1Deployment, V1DeploymentList, V1ObjectMeta, V1Pod, V1ReplicaSet, V1ReplicaSetList } from "@kubernetes/client-node";
-import { BaseComponent, format } from "@uifabric/utilities";
+import { BaseComponent } from "@uifabric/utilities";
 import { Ago } from "azure-devops-ui/Ago";
 import { CardContent, CustomCard } from "azure-devops-ui/Card";
 import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
-import { equals } from "azure-devops-ui/Core/Util/String";
+import { equals, format } from "azure-devops-ui/Core/Util/String";
 import { CustomHeader, HeaderDescription, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
 import { Link } from "azure-devops-ui/Link";
 import { ITableColumn, Table } from "azure-devops-ui/Table";
