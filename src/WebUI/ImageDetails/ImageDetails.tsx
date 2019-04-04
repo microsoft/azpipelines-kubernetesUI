@@ -7,7 +7,8 @@ import { BaseComponent, css } from "@uifabric/utilities";
 import { Ago } from "azure-devops-ui/Ago";
 import { CardContent, CustomCard } from "azure-devops-ui/Card";
 import { format, localeFormat } from "azure-devops-ui/Core/Util/String";
-import { CustomHeader, HeaderIcon, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
+import * as Date_Utils from "azure-devops-ui/Utilities/Date";
+import { CustomHeader, HeaderIcon, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize, HeaderDescription } from "azure-devops-ui/Header";
 import { LabelGroup, WrappingBehavior } from "azure-devops-ui/Label";
 import { Page } from "azure-devops-ui/Page";
 import { ColumnFill, ITableColumn, SimpleTableCell as renderSimpleTableCell, Table, TableColumnStyle } from "azure-devops-ui/Table";
@@ -22,6 +23,8 @@ import "./ImageDetails.scss";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
 import { AgoFormat } from "azure-devops-ui/Utilities/Date";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
+import { Tags } from "../Common/Tags";
+import { getRunDetailsText } from "../RunDetails";
 
 export interface IImageDetailsProperties extends IVssComponentProperties {
     imageDetails: IImageDetails;
@@ -48,6 +51,17 @@ export class ImageDetails extends BaseComponent<IImageDetailsProperties, IImageD
     private _getMainHeading(): JSX.Element | null {
         const imageDetails = this.props.imageDetails;
         this._displayImageName = Utils.extractDisplayImageName(imageDetails.imageName);
+        this._labels = this._getImageLabels(imageDetails.layerInfo);
+        const runUrl = this._constructPipelineRunUrl(this._labels, imageDetails.runId);
+        const pipelineDetails = {
+            jobName: imageDetails.jobName,
+            pipelineName: imageDetails.pipelineName,
+            runName: imageDetails.pipelineVersion,
+            runUrl: runUrl
+        };
+        const imageCreatedOn = imageDetails.createTime ? new Date(imageDetails.createTime) : new Date();
+        const agoTime = Date_Utils.ago(imageCreatedOn, Date_Utils.AgoFormat.Compact);
+        const jobName = getRunDetailsText(undefined, pipelineDetails, agoTime);
         return (
             <CustomHeader className="image-details-header">
                 <HeaderIcon
@@ -61,6 +75,9 @@ export class ImageDetails extends BaseComponent<IImageDetailsProperties, IImageD
                             {this._displayImageName}
                         </HeaderTitle>
                     </HeaderTitleRow>
+                    <HeaderDescription className={"text-ellipsis"}>
+                        {jobName}
+                    </HeaderDescription>
                 </HeaderTitleArea>
             </CustomHeader>
         );
@@ -123,17 +140,17 @@ export class ImageDetails extends BaseComponent<IImageDetailsProperties, IImageD
         const imageType: string = imageDetails.imageType || "";
         const mediaType: string = imageDetails.mediaType || "";
         const registryName: string = this._getRegistryName();
-        const imageSize: string = ""; // ToDo: Size is currently not available in imageDetails.
-        const labels: string[] = imageDetails.tags || [];
-        const jobName: string = format("#{0} on {1}", imageDetails.buildId || "", imageDetails.buildDefinitionName || ""); // ToDo: JobName is currently not available in imageDetails.
+        const imageSize: string = imageDetails.imageSize;
+        const labels: string[] = this._labels;
+        const tags: string[] = imageDetails.tags || [];
 
         digest && imageDetailsRows.push({ key: Resources.DigestText, value: digest });
         imageType && imageDetailsRows.push({ key: Resources.ImageTypeText, value: imageType });
+        tags && tags.length > 0 && imageDetailsRows.push({ key: Resources.TagsText, value: tags });
         mediaType && imageDetailsRows.push({ key: Resources.MediaTypeText, value: mediaType });
         registryName && imageDetailsRows.push({ key: Resources.RegistryText, value: registryName });
         imageSize && imageDetailsRows.push({ key: Resources.ImageSizeText, value: imageSize });
         labels && labels.length > 0 && imageDetailsRows.push({ key: Resources.LabelsText, value: labels });
-        jobName && imageDetailsRows.push({ key: Resources.JobText, value: jobName });
 
         return new ArrayItemProvider<any>(imageDetailsRows);
     }
@@ -148,13 +165,11 @@ export class ImageDetails extends BaseComponent<IImageDetailsProperties, IImageD
         const contentClassName = "image-o-v-col-content";
         switch (key) {
             case Resources.LabelsText:
+            case Resources.TagsText:
                 props = {
                     columnIndex: columnIndex,
                     children:
-                    <LabelGroup
-                        labelProps={Utils.getUILabelModelArray(value)}
-                        wrappingBehavior={WrappingBehavior.freeFlow}
-                    />,
+                    <Tags items={value} />,
                     tableColumn: tableColumn,
                     contentClassName: css(contentClassName, "image-labelgroups")
                 };
@@ -261,14 +276,15 @@ export class ImageDetails extends BaseComponent<IImageDetailsProperties, IImageD
 
     private static _renderLayersSizeCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IImageLayer>, imageLayer: IImageLayer): JSX.Element {
         // Currently size data is not present in imageLayer
-        const textToRender = "-";
+        const textToRender = imageLayer.size || "-";
         const itemToRender = defaultColumnRenderer(textToRender);
         return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
     private static _renderLayersAgeCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IImageLayer>, imageLayer: IImageLayer): JSX.Element {
         // Currently created data is not present in imageLayer
-        const itemToRender = <Ago date={new Date()} format={AgoFormat.Extended} />;
+        const layerCreatedOn = imageLayer.createdOn ? new Date(imageLayer.createdOn) : new Date();
+        const itemToRender = <Ago date={layerCreatedOn} format={AgoFormat.Compact} />;
         return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
@@ -281,5 +297,84 @@ export class ImageDetails extends BaseComponent<IImageDetailsProperties, IImageD
         return "";
     }
 
+    private _getImageLabels(layerInfo: IImageLayer[]): string[] {
+        let labels: string[] = [];
+        for (const layer of layerInfo) {
+            const directive = layer.directive;
+            if (directive.toLowerCase() === "label") {
+                labels.push(layer.arguments);
+            }
+        }
+
+        return labels;
+    }
+
+    private _constructPipelineRunUrl(labels: string[], runId: number): string {
+        // These strings are the ones that are added as labels during docker build task
+        const teamFoundationCollectionUriMatch = "system.teamfoundationcollectionuri=";
+        const teamProjectMatch = "system.teamproject=";
+        const buildNumberMatch = "build.buildnumber=";
+        const releaseWebUrlMatch = "release.releaseweburl=";
+        let teamFoundationCollectionUri = "";
+        let teamProject = "";
+        let buildNumber = "";
+        let releaseWebUrl = "";
+
+        for (const label of labels) {
+            releaseWebUrl = this._getMatchingUrlString(label, releaseWebUrlMatch);
+        }
+
+        // For release pipeline, the releaseWebUrl is added as a tag during docker build
+        if (!!releaseWebUrl) {
+            return releaseWebUrl;
+        }
+
+        // For build pipeline we construct url from bits found by searching each of the labels
+        for (const label of labels) {
+            teamFoundationCollectionUri = this._getMatchingUrlString(label, teamFoundationCollectionUriMatch);
+            if (!!teamFoundationCollectionUri) {
+                break;
+            }
+        }
+
+        if (!teamFoundationCollectionUri) {
+            return "";
+        }
+
+        for (const label of labels) {
+            teamProject = this._getMatchingUrlString(label, teamProjectMatch);
+            if (!!teamProject) {
+                break;
+            }
+        }
+
+        if (!teamProject) {
+            return "";
+        }
+
+        for (const label of labels) {
+            buildNumber = this._getMatchingUrlString(label, buildNumberMatch);
+            if (!!buildNumber) {
+                break;
+            }
+        }
+
+        if (!buildNumber) {
+            return "";
+        }
+
+        return format("{0}{1}/_build?buildId={2}", teamFoundationCollectionUri, teamProject, runId.toString());
+    }
+
+    private _getMatchingUrlString(label: string, match: string): string {
+        const index = label.indexOf(match);
+        if (index >= 0) {
+            return label.substring(index + match.length, label.length);
+        }
+
+        return "";
+    }
+
     private _displayImageName: string;
+    private _labels: string[];
 }

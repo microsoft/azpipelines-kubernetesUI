@@ -188,7 +188,7 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
                             </HeaderTitleRow>
                             <HeaderDescription className={"text-ellipsis"}>
                                 {
-                                   getRunDetailsText(metadata.annotations, agoTime)
+                                    getRunDetailsText(metadata.annotations, undefined, agoTime)
                                 }
                             </HeaderDescription>
                         </HeaderTitleArea>
