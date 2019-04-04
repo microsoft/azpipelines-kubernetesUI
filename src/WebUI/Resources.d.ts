@@ -90,3 +90,4 @@ export declare const LayersText: string;
 export declare const CommandText: string;
 export declare const SizeText: string;
 export declare const SummaryHeaderSubTextFormat: string;
+export declare const TagsText: string;

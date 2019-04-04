@@ -91,4 +91,5 @@ define("Environments/Providers/Kubernetes/Resources", ["require", "exports"], fu
     exports.CommandText = "Command";
     exports.SizeText = "Size";
     exports.SummaryHeaderSubTextFormat = "{0} (cluster)";
+    exports.TagsText = "Tags";
 });
