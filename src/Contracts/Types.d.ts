@@ -19,6 +19,7 @@ export interface IImageDetails {
     pipelineId: string;
     jobName: string;
     imageSize: string;
+    createTime?: Date;
 }
 
 export interface IImageLayer {
