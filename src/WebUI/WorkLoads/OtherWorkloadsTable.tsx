@@ -247,7 +247,7 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
         const relevantPods = (podslist && podslist.items && podslist.items.filter(p => (payload && Utils.isOwnerMatched(p.metadata, payload.metadata.uid)) || false))
 
         let type = "";
-        switch (payload.kind) {
+        switch (workload.kind) {
             case SelectedItemKeys.DaemonSetKey:
                 type = "DaemonSet";
                 break;
@@ -261,7 +261,7 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
                 type = "Pod";
                 break;
         }
-        const _onPodsClicked = (relevantPods && payload) ? (() => onPodsColumnClicked(relevantPods, payload, type, this._selectionActionCreator)) : undefined;
+        const _onPodsClicked = (relevantPods && payload) ? (() => onPodsColumnClicked(relevantPods, payload, type, workload.kind as SelectedItemKeys, this._selectionActionCreator)) : undefined;
 
         return renderPodsStatusTableCell(rowIndex, columnIndex, tableColumn, pods, statusProps, podsTooltip, _onPodsClicked);
     }

@@ -260,7 +260,7 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
         const podslist = StoreManager.GetStore<PodsStore>(PodsStore).getState().podsList;
         const relevantPods = (podslist && podslist.items && podslist.items.filter(p => (replicaSet && Utils.isOwnerMatched(p.metadata, replicaSet.metadata.uid)) || false))
 
-        const _onPodsClicked = (relevantPods && replicaSet) ? (() => onPodsColumnClicked(relevantPods, replicaSet, "ReplicaSet", this._selectionActionCreator)) : undefined;
+        const _onPodsClicked = (relevantPods && replicaSet) ? (() => onPodsColumnClicked(relevantPods, replicaSet, "ReplicaSet", SelectedItemKeys.ReplicaSetKey, this._selectionActionCreator)) : undefined;
 
         return renderPodsStatusTableCell(rowIndex, columnIndex, tableColumn, deployment.pods, deployment.statusProps, deployment.podsTooltip, _onPodsClicked);
     }
