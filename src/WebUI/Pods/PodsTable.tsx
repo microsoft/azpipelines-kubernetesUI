@@ -4,7 +4,8 @@
 */
 
 import { V1Pod, V1OwnerReference } from "@kubernetes/client-node";
-import { BaseComponent, css } from "@uifabric/utilities";
+import { BaseComponent } from "@uifabric/utilities";
+import { css } from "azure-devops-ui/Util";
 import { Ago } from "azure-devops-ui/Ago";
 import { CardContent, CustomCard } from "azure-devops-ui/Card";
 import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";

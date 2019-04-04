@@ -4,7 +4,8 @@
 */
 
 import * as React from "react";
-import { BaseComponent, css } from "@uifabric/utilities/lib";
+import { BaseComponent } from "@uifabric/utilities";
+import { css } from "azure-devops-ui/Util";
 import { IStatusProps, Status, StatusSize } from "azure-devops-ui/Status";
 import { IVssComponentProperties } from "../Types";
 import { Tooltip } from "azure-devops-ui/TooltipEx";

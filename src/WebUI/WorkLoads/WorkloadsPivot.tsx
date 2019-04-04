@@ -4,7 +4,8 @@
 */
 
 import { V1PodList } from "@kubernetes/client-node";
-import { BaseComponent, css } from "@uifabric/utilities";
+import { BaseComponent } from "@uifabric/utilities";
+import { css } from "azure-devops-ui/Util";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { format } from "azure-devops-ui/Core/Util/String";
 import { Filter, IFilterItemState, IFilterState } from "azure-devops-ui/Utilities/Filter";

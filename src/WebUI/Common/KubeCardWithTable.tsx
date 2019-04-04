@@ -4,7 +4,8 @@
 */
 
 import { V1DaemonSet, V1Pod, V1ReplicaSet, V1StatefulSet } from "@kubernetes/client-node";
-import { BaseComponent, css } from "@uifabric/utilities";
+import { BaseComponent } from "@uifabric/utilities";
+import { css } from "azure-devops-ui/Util";
 import { CardContent, CustomCard } from "azure-devops-ui/Card";
 import { ITableRow, TableColumnStyle } from "azure-devops-ui/Components/Table/Table.Props";
 import { format } from "azure-devops-ui/Core/Util/String";

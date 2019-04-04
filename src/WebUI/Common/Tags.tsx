@@ -3,7 +3,8 @@
     Licensed under the MIT license.
 */
 import { IVssComponentProperties } from "../Types";
-import { BaseComponent, css } from "@uifabric/utilities";
+import { BaseComponent } from "@uifabric/utilities";
+import { css } from "azure-devops-ui/Util";
 import React = require("react");
 import { Utils } from "../Utils";
 import { Pill, PillSize } from "azure-devops-ui/Pill";
