@@ -19,7 +19,7 @@ jobs:
   - task: NodeTool@0
     displayName: 'Use Node version'
     inputs:
-      versionSpec: '8.4'
+      versionSpec: '8.5'
 
   - task: Npm@1
     displayName: 'npm install'
