@@ -4,84 +4,29 @@
 */
 
 import { BaseComponent } from "@uifabric/utilities";
-import { css } from "azure-devops-ui/Util";
 import { CardContent, CustomCard } from "azure-devops-ui/Card";
+import { css } from "azure-devops-ui/Util";
 import * as React from "react";
+import { getContentReaderComponent } from "../Common/KubeConsumer";
 import { IVssComponentProperties } from "../Types";
 
-// basic editor functionality
-import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
-// languages supported in editor
-import "monaco-editor/esm/vs/basic-languages/yaml/yaml.contribution";
-// additional functionality of editor
-import "monaco-editor/esm/vs/editor/browser/controller/coreCommands";
-import "monaco-editor/esm/vs/editor/contrib/find/findController";
-import "monaco-editor/esm/vs/editor/contrib/message/messageController";
-
-export interface IReaderProps extends IVssComponentProperties {
+export interface IPodReaderProps extends IVssComponentProperties {
     text: string;
-    options?: monaco.editor.IEditorConstructionOptions;
+    options?: any; /* monaco.editor.IEditorConstructionOptions */
     contentClassName?: string;
 }
 
-export class PodContentReader extends BaseComponent<IReaderProps> {
+export class PodContentReader extends BaseComponent<IPodReaderProps> {
     public render(): JSX.Element {
         return (
             // monaco-editor class added here to have the same theme as monaco.
             <CustomCard className={css(this.props.className || "", "monaco-editor", "k8s-card-padding", "flex-grow")}>
                 <CardContent className={css(this.props.contentClassName || "", "reader-content")} contentPadding={false}>
                     <div className="reader-outer" style={{ width: "100%", height: "500px", position: "relative" }}>
-                        <div
-                            id="k8s-monaco-reader"
-                            className="reader-inner flex-row flex-center absolute-fill"
-                            ref={this._createEditor}
-                        />
+                        {getContentReaderComponent({ ...this.props })}
                     </div>
                 </CardContent>
             </CustomCard>
         );
     }
-
-    public componentDidMount(): void {
-        window.addEventListener("resize", this._onResizeHandler);
-    }
-
-    public componentWillUnmount(): void {
-        window.removeEventListener("resize", this._onResizeHandler);
-        this._disposeEditor();
-    }
-
-    private _onResizeHandler = () => {
-        if (this._editor) {
-            this._editor.layout();
-        }
-    }
-
-    private _createEditor = (innerRef) => {
-        if (innerRef) {
-            const text = this.props.text || "";
-            this._disposeEditor();
-
-            this._editor = monaco.editor.create(innerRef, {
-                readOnly: true,
-                renderWhitespace: "all",
-                scrollbar: { horizontalScrollbarSize: 16 },
-                lineNumbers: "on",
-                extraEditorClassName: "k8s-monaco-editor",
-                theme: "vs",
-                language: "yaml",
-                ...this.props.options,
-                value: text
-            });
-        }
-    }
-
-    private _disposeEditor(): void {
-        if (this._editor) {
-            this._editor.dispose();
-            this._editor = undefined;
-        }
-    }
-
-    private _editor: monaco.editor.IStandaloneCodeEditor | undefined;
 }
