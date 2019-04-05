@@ -239,7 +239,7 @@ export class Utils {
     }
 
     public static getImageResourceUrl(image: string, digest: string): string {
-        const sha256Text = "@sha256";
+        const sha256Text = "@sha256:";
         const result = image.split("/");
         if (result.length <= 0) {
             return "";
