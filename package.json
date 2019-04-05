@@ -13,7 +13,7 @@
   "scripts": {
     "clean": "rimraf ./dist && rimraf ./_bundles",
     "compile": "npm run clean && npm run compilesrc && npm run copy-all",
-    "build": "npm run compile && webpack --mode production && npm pack",
+    "build": "npm run compile && node buildpackage.js",
     "copy-all": "npm run copy-scss && npm run copy-resources && npm run copy-images",
     "copy-scss": "copyfiles -u 1 src/**/*.scss ./dist",
     "copy-resources": "copyfiles -u 1 src/**/Resources.js ./dist",
@@ -54,6 +54,7 @@
     "@types/react": "16.8.2",
     "@types/react-dom": "16.8.2",
     "base64-inline-loader": "^1.1.1",
+    "copy-dir": "^0.4.0",
     "copy-webpack-plugin": "^4.6.0",
     "copyfiles": "^2.1.0",
     "css-loader": "^1.0.1",
