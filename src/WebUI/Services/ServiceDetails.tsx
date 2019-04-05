@@ -3,7 +3,7 @@
     Licensed under the MIT license.
 */
 
-import { V1Pod } from "@kubernetes/client-node";
+import { V1Pod, V1Service } from "@kubernetes/client-node";
 import { BaseComponent } from "@uifabric/utilities";
 import { CardContent, CustomCard } from "azure-devops-ui/Card";
 import { localeFormat } from "azure-devops-ui/Core/Util/String";
@@ -14,6 +14,7 @@ import { ITableColumn, renderSimpleCell, Table } from "azure-devops-ui/Table";
 import * as Date_Utils from "azure-devops-ui/Utilities/Date";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
+import * as queryString from "query-string";
 import { renderTableCell } from "../Common/KubeCardWithTable";
 import { KubeSummary } from "../Common/KubeSummary";
 import { KubeZeroData } from "../Common/KubeZeroData";
@@ -30,13 +31,17 @@ import { IServiceItem, IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
 import "./ServiceDetails.scss";
 import { ServicesStore } from "./ServicesStore";
+import { ServicesActionsCreator } from "./ServicesActionsCreator";
+import { createBrowserHistory } from "history";
+import { getServiceItems } from "./ServiceUtils";
 
 export interface IServiceDetailsProperties extends IVssComponentProperties {
-    service: IServiceItem;
+    service: IServiceItem | undefined;
     parentKind: string;
 }
 
 export interface IServiceDetailsState {
+    service: IServiceItem | undefined;
     pods: Array<V1Pod>;
     selectedPod: V1Pod | null;
     showSelectedPod: boolean;
@@ -48,30 +53,56 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
     constructor(props: IServiceDetailsProperties) {
         super(props, {});
         this.state = {
+            service: props.service,
             pods: [],
             selectedPod: null,
             showSelectedPod: false
         };
-        this._servicesStore = StoreManager.GetStore<ServicesStore>(ServicesStore);
-        this._podsActionsCreator = ActionsCreatorManager.GetActionCreator<PodsActionsCreator>(PodsActionsCreator);
 
-        const svc = this.props.service && this.props.service.service;
-        // service currently only supports equals with "and" operator. The generator generates that condition.
-        const labelSelector: string = Utils.generateEqualsConditionLabelSelector(svc && svc.spec && svc.spec.selector || {});
-        this._podsActionsCreator.getPods(KubeSummary.getKubeService(), labelSelector);
+        this._podsActionsCreator = ActionsCreatorManager.GetActionCreator<PodsActionsCreator>(PodsActionsCreator);
+        this._servicesStore = StoreManager.GetStore<ServicesStore>(ServicesStore);
+        const fetchServiceDetails = (svc: V1Service) => {
+            // service currently only supports equals with "and" operator. The generator generates that condition.
+            const labelSelector: string = Utils.generateEqualsConditionLabelSelector(svc && svc.spec && svc.spec.selector || {});
+            this._podsActionsCreator.getPods(KubeSummary.getKubeService(), labelSelector);
+        }
+
+        if (!props.service) {
+            ActionsCreatorManager.GetActionCreator<ServicesActionsCreator>(ServicesActionsCreator).getServices(KubeSummary.getKubeService());
+            const getServicesHandler = () => {
+                this._servicesStore.removeListener(ServicesEvents.ServicesFetchedEvent, getServicesHandler);
+                const history = createBrowserHistory();
+                const queryParams = queryString.parse(history.location.search);
+                const servicesList = this._servicesStore.getState().serviceList;
+                const services = (servicesList && servicesList.items) || [];
+                const selectedService = services.find(s => s.metadata.uid === queryParams.uid);
+                if (selectedService) {
+                    fetchServiceDetails(selectedService);
+                    this.setState({
+                        service: getServiceItems([selectedService])[0]
+                    });
+                }
+
+            }
+
+            this._servicesStore.addListener(ServicesEvents.ServicesFetchedEvent, getServicesHandler);
+        } else if (props.service.service) {
+            fetchServiceDetails(props.service.service);
+        }
+
         this._servicesStore.addListener(ServicesEvents.ServicePodsFetchedEvent, this._onPodsFetched);
     }
 
     public render(): JSX.Element {
-        if (this.state.selectedPod && this.state.showSelectedPod) {
-            const service = this.props.service && this.props.service.service;
+        if (this.state.service && this.state.selectedPod && this.state.showSelectedPod) {
+            const service = this.state.service.service;
             const serviceName = service && service.metadata ? service.metadata.name : "";
             return (
                 <PodsDetails
                     pods={this.state.pods}
                     parentName={serviceName}
                     selectedPod={this.state.selectedPod}
-                    parentKind={this.props.parentKind}
+                    parentKind={this.state.service.kind || this.props.parentKind}
                     onBackButtonClick={this._setSelectedPodStateFalse}
                 />
             );
@@ -93,7 +124,7 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
     }
 
     private _getMainHeading(): JSX.Element | null {
-        const item = this.props.service;
+        const item = this.state.service;
         if (item) {
             const statusProps = item.type === LoadBalancerText && !item.externalIP ? Statuses.Running : Statuses.Success;
             return <PageTopHeader title={item.package} statusProps={statusProps} />;
@@ -103,7 +134,7 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
     }
 
     private _getServiceDetails(): JSX.Element | null {
-        const item = this.props.service;
+        const item = this.state.service;
         if (item && item.service) {
             const tableItems: IServiceItem[] = [ServiceDetails._getServiceDetailsObject(item)];
             const agoTime = Date_Utils.ago(new Date(item.creationTimestamp), Date_Utils.AgoFormat.Compact);
