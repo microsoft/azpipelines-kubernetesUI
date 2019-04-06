@@ -24,11 +24,16 @@ export class SelectionActionsCreator extends ActionCreatorBase {
         let routeValues: queryString.OutputParams = queryString.parse(this._historyService.location.search);
         routeValues["type"] = payload.selectedItemType;
         routeValues["uid"] = payload.itemUID;
+
+        if (!!payload.selectedItemType) {
+            delete routeValues["view"];
+        }
+
         this._historyService.push({
             pathname: this._historyService.location.pathname,
             search: queryString.stringify(routeValues)
         });
-        
+
         this._actions.selectItem.invoke(payload);
     }
 
