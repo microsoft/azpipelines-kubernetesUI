@@ -252,16 +252,12 @@ export function onPodsColumnClicked(
     pods: V1Pod[],
     item: V1ReplicaSet | V1StatefulSet | V1DaemonSet | V1Pod,
     itemKind: string,
-    itemTypeKey: SelectedItemKeys,
     selectionActionCreator: SelectionActionsCreator): void {
     const selectedPod = pods.find(p => Utils.generatePodStatusProps(p.status).statusProps === Statuses.Failed) || pods[0];
 
     // Item kind "Pod" implies that the type is an orphan pod
     const properties = itemKind === "Pod" ? undefined : {
-        pods: pods,
-        parentItemKind: itemKind,
-        parentItemName: item.metadata.name,
-        onBackClick: () => { item && selectionActionCreator.selectItem({ item: item, itemUID: item.metadata.uid, selectedItemType: itemTypeKey, showSelectedItem: true }) }
+        parentUid: item.metadata.uid
     } as IPodDetailsSelectionProperties;
 
     selectionActionCreator.selectItem({

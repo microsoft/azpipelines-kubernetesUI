@@ -246,22 +246,8 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
         const podslist = StoreManager.GetStore<PodsStore>(PodsStore).getState().podsList;
         const relevantPods = (podslist && podslist.items && podslist.items.filter(p => (payload && Utils.isOwnerMatched(p.metadata, payload.metadata.uid)) || false))
 
-        let type = "";
-        switch (workload.kind) {
-            case SelectedItemKeys.DaemonSetKey:
-                type = "DaemonSet";
-                break;
-            case SelectedItemKeys.ReplicaSetKey:
-                type = "ReplicaSet";
-                break;
-            case SelectedItemKeys.StatefulSetKey:
-                type = "StatefulSet";
-                break;
-            case SelectedItemKeys.OrphanPodKey:
-                type = "Pod";
-                break;
-        }
-        const _onPodsClicked = (relevantPods && payload) ? (() => onPodsColumnClicked(relevantPods, payload, type, workload.kind as SelectedItemKeys, this._selectionActionCreator)) : undefined;
+        let type = Utils.getKindFromItemTypeKey(workload.kind as SelectedItemKeys);
+        const _onPodsClicked = (relevantPods && payload) ? (() => onPodsColumnClicked(relevantPods, payload, type, this._selectionActionCreator)) : undefined;
 
         return renderPodsStatusTableCell(rowIndex, columnIndex, tableColumn, pods, statusProps, podsTooltip, _onPodsClicked);
     }
