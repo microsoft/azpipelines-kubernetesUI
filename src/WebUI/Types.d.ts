@@ -71,10 +71,9 @@ export interface ISetWorkloadTypeItem {
 }
 
 export interface IPodDetailsSelectionProperties {
-    pods: V1Pod[];
-    parentItemKind: string;
-    parentItemName: string;
-    onBackClick: () => void;
+    parentUid: string;
+    serviceSelector?: string;
+    serviceName?: string;
 }
 
 export interface IVssComponentProperties extends IBaseProps {

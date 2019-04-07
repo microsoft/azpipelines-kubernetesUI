@@ -11,6 +11,7 @@ import { ILabelModel } from "azure-devops-ui/Label";
 import { IStatusProps, Statuses } from "azure-devops-ui/Status";
 import { PodPhase } from "../Contracts/Contracts";
 import * as Resources from "./Resources";
+import { SelectedItemKeys } from "./Constants";
 
 const pipelineNameAnnotationKey: string = "azure-pipelines/pipeline";
 const pipelineRunIdAnnotationKey: string = "azure-pipelines/execution";
@@ -31,7 +32,7 @@ export class Utils {
     public static isOwnerMatched(objectMeta: V1ObjectMeta, ownerUIdLowerCase: string): boolean {
         return objectMeta.ownerReferences
             && objectMeta.ownerReferences.length > 0
-            && objectMeta.ownerReferences[0].uid.toLowerCase() === ownerUIdLowerCase;
+            && objectMeta.ownerReferences.some(o => o.uid.toLowerCase() === ownerUIdLowerCase);
     }
 
     public static getUILabelModelArray(items: { [key: string]: string }): ObservableArray<ILabelModel> {
@@ -273,5 +274,35 @@ export class Utils {
 
     public static extractDisplayImageName(imageId: string): string {
         return Utils.getImageResourceUrlParameter(imageId, matchPatternForImageName);
+    }
+
+    /**
+     * We will deprecate this function as soon as we decide on a better mapping. Temporarily using this
+     * @param kind 
+     */
+    public static getItemTypeKeyFromKind(kind: string): SelectedItemKeys | "" {
+        switch (kind) {
+            case "ReplicaSet": return SelectedItemKeys.ReplicaSetKey;
+            case "DaemonSet": return SelectedItemKeys.DaemonSetKey;
+            case "StatefulSet": return SelectedItemKeys.StatefulSetKey;
+            case "Service": return SelectedItemKeys.ServiceItemKey;
+            case "Pod": return SelectedItemKeys.OrphanPodKey;
+            default: return "";
+        }
+    }
+
+    /**
+     * We will deprecate this function as soon as we decide on a better mapping. Temporarily using this
+     * @param typeKey 
+     */
+    public static getKindFromItemTypeKey(typeKey: SelectedItemKeys): string {
+        switch (typeKey) {
+            case SelectedItemKeys.DaemonSetKey: return "DaemonSet";
+            case SelectedItemKeys.ReplicaSetKey: return "ReplicaSet";
+            case SelectedItemKeys.StatefulSetKey: return "StatefulSet";
+            case SelectedItemKeys.OrphanPodKey: return "Pod";
+            case SelectedItemKeys.ServiceItemKey: return "Service";
+            default: return "";
+        }
     }
 }
