@@ -101,8 +101,7 @@ export class ImageDetails extends BaseComponent<IImageDetailsProperties, IImageD
                 className: "image-details-value",
                 minWidth: 400,
                 renderCell: ImageDetails._renderValueCell
-            },
-            ColumnFill
+            }
         ];
 
         const tableItems = this._getImageDetailsRowsData(imageDetails);
@@ -219,6 +218,7 @@ export class ImageDetails extends BaseComponent<IImageDetailsProperties, IImageD
                         columns={ImageDetails._getImageLayersColumns()}
                         showHeader={true}
                         showLines={true}
+                        singleClickActivation={false}
                     />
                 </CardContent>
             </CustomCard>
