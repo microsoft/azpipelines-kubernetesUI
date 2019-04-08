@@ -186,11 +186,10 @@ export class Utils {
             const podStatus = pod.status;
             if (podStatus.containerStatuses && podStatus.containerStatuses.length > 0) {
                 for (const containerStatus of podStatus.containerStatuses) {
-                    // Separate out image and digest from imageId
-                    let imgName = Utils.getImageResourceUrlParameter(containerStatus.imageID, matchPatternForImageName);
-                    let digest = Utils.getImageResourceUrlParameter(containerStatus.imageID, matchPatternForDigest);
                     // Construct the query URL as per Grafeas format
-                    imageIds.push(Utils.getImageResourceUrl(imgName, digest));
+                    let imgId = Utils.getImageResourceUrl(containerStatus.imageID);
+                    if (imgId && (imageIds.length == 0 || imageIds.indexOf(imgId) < 0))
+                        imageIds.push(imgId);
                 }
             }
         }
@@ -207,12 +206,9 @@ export class Utils {
                 if (podStatus.containerStatuses && podStatus.containerStatuses.length > 0) {
                     // Return the imageId for the first matching pod
                     const containerStatusForGivenImage = podStatus.containerStatuses.find(status => status.name.toLowerCase() === containerName.toLowerCase());
-                    if (containerStatusForGivenImage) {
-                        // Separate out image and digest from imageId
-                        let imgName = Utils.getImageResourceUrlParameter(containerStatusForGivenImage.imageID, matchPatternForImageName);
-                        let digest = Utils.getImageResourceUrlParameter(containerStatusForGivenImage.imageID, matchPatternForDigest);
+                    if (containerStatusForGivenImage && containerStatusForGivenImage.imageID) {
                         // Construct the query URL as per Grafeas format
-                        return Utils.getImageResourceUrl(imgName, digest);
+                        return Utils.getImageResourceUrl(containerStatusForGivenImage.imageID);
                     }
                 }
             }
@@ -238,37 +234,37 @@ export class Utils {
         return "";
     }
 
-    public static getImageResourceUrl(image: string, digest: string): string {
+    public static getImageResourceUrl(imageId: string): string {
         const sha256Text = "@sha256:";
-        const result = image.split("/");
-        if (result.length <= 0) {
+        const separator = "://";
+        let indexOfSeparator = imageId.indexOf(separator);
+        let image = indexOfSeparator >= 0 ? imageId.substr(indexOfSeparator + separator.length) : imageId;
+        const digest = Utils.getImageResourceUrlParameter(imageId, matchPatternForDigest);
+
+        // This match pattern is copied over from DockerV2 task to maintain parity between image Urls
+        let match = image.match(/^(?:([^\/]+)\/)?(?:([^\/]+)\/)?([^@:\/]+)(?:[@:](.+))?$/);
+        if (!match) {
             return "";
         }
 
-        let registry = result[0];
-        let imgNamespace = result.length > 1 ? result[1] : "";
-        let repository = result.length > 2 ? result[2] : "";
-        let tag = result.length > 3 ? result[3] : "";
+        let registry = match[1];
+        let imgNamespace = match[2];
+        let repository = match[3];
 
-        if (!imgNamespace && !(invalidCharPatternInNamespace).test(registry)) {
+        if (!imgNamespace && registry && !/[:.]/.test(registry)) {
             imgNamespace = registry;
-            registry = "";
-        }
-
-        if (!registry) {
             registry = "docker.io";
         }
 
-        if (!imgNamespace) {
+        if (!imgNamespace && !registry) {
+            registry = "docker.io";
             imgNamespace = "library";
         }
 
-        if (repository) {
-            return format("https://{0}/{1}/{2}/{3}{4}", registry, imgNamespace, repository, sha256Text, digest);
-        }
-        else {
-            return format("https://{0}/{1}{2}{3}", registry, imgNamespace, sha256Text, digest);
-        }
+        registry = registry ? registry + "/" : "";
+        imgNamespace = imgNamespace ? imgNamespace + "/" : "";
+
+        return format("https://{0}{1}{2}{3}{4}", registry, imgNamespace, repository, sha256Text, digest);
     }
 
     public static extractDisplayImageName(imageId: string): string {

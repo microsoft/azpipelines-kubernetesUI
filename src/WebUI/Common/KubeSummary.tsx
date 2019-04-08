@@ -44,6 +44,7 @@ import { WorkloadsStore } from "../Workloads/WorkloadsStore";
 import "./KubeSummary.scss";
 import { KubeZeroData } from "./KubeZeroData";
 import { PodsStore } from "../Pods/PodsStore";
+import { getServiceItems } from "../Services/ServiceUtils";
 import { setContentReaderComponent } from "./KubeConsumer";
 
 const workloadsPivotItemKey: string = "workloads";
@@ -96,10 +97,17 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         this._historyService = createBrowserHistory();
         const queryParams = queryString.parse(this._historyService.location.search)
 
+        let selectedPivot = workloadsPivotItemKey;
+
+        // If type is not present, and view is present, load corresponding tab
+        if (!queryParams.type && !!queryParams.view) {
+            selectedPivot = queryParams.view as string;
+        }
+
         // Take namespace from deployment store and rest from selection store
         this.state = {
             namespace: this.props.namespace || "",
-            selectedPivotKey: workloadsPivotItemKey,
+            selectedPivotKey: selectedPivot,
             showSelectedItem: queryParams.uid ? true : false,
             selectedItem: undefined,
             selectedItemType: queryParams.type as string || "",
@@ -240,7 +248,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
             <>
                 <TabBar
                     selectedTabId={this.state.selectedPivotKey || workloadsPivotItemKey}
-                    onSelectedTabChanged={(key: string) => { this.setState({ selectedPivotKey: key }); }}
+                    onSelectedTabChanged={(key: string) => { this._selectTab(key); }}
                     renderAdditionalContent={() => { return this._getFilterHeaderBar(); }}
                     disableSticky={false}
                 >
@@ -257,7 +265,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
     private _getSelectedItemPodsView(): JSX.Element | null {
         const selectedItem = this.state.selectedItem;
         const selectedItemType = this.state.selectedItemType;
-        const isEmptyItemAllowed = ![SelectedItemKeys.ServiceItemKey, SelectedItemKeys.OrphanPodKey, SelectedItemKeys.PodDetailsKey].some(s => s === selectedItemType);
+        const isEmptyItemAllowed = ![SelectedItemKeys.OrphanPodKey, SelectedItemKeys.PodDetailsKey].some(s => s === selectedItemType);
         // ToDo :: Currently for imageDetails type, the selected item will be undefined, hence adding below check. Remove this once we have data from imageService
         if (selectedItemType
             && (selectedItem || isEmptyItemAllowed)
@@ -294,6 +302,18 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
                 onBackButtonClick={selectionProperties.onBackClick}
                 selectedPod={item} />)
             : null;
+    }
+
+    private _selectTab(pivotItemKey: string): void {
+        let routeValues: queryString.OutputParams = queryString.parse(this._historyService.location.search);
+        routeValues["view"] = pivotItemKey;
+
+        this._historyService.replace({
+            pathname: this._historyService.location.pathname,
+            search: queryString.stringify(routeValues)
+        });
+
+        this.setState({ selectedPivotKey: pivotItemKey });
     }
 
     private _onSelectionStoreChanged = () => {
@@ -400,7 +420,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
             return <PodsRightPanel key={pod.metadata.uid} pod={pod} podStatusProps={statusProps} statusTooltip={tooltip} />;
         };
 
-        this._selectedItemViewMap[SelectedItemKeys.ServiceItemKey] = (service) => { return <ServiceDetails service={service} parentKind={service.kind || "Service"} />; };
+        this._selectedItemViewMap[SelectedItemKeys.ServiceItemKey] = (service) => { return <ServiceDetails service={service} parentKind={(service && service.kind) || "Service"} />; };
         this._selectedItemViewMap[SelectedItemKeys.ImageDetailsKey] = (item) => { return <ImageDetails imageDetails={item} onBackButtonClick={this._setSelectionStateFalse} />; };
         this._selectedItemViewMap[SelectedItemKeys.PodDetailsKey] = (item, properties?) => this._getPodDetailsComponent(item, properties as IPodDetailsSelectionProperties);
     }
@@ -422,7 +442,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         this._objectFinder[SelectedItemKeys.PodDetailsKey] = (uid) => KubeSummary._getFilteredFirstObject(this._podsStore.getState().podsList, uid);
         this._objectFinder[SelectedItemKeys.ServiceItemKey] = (uid) => {
             const filteredServices = KubeSummary._getFilteredFirstObject(this._servicesStore.getState().serviceList, uid);
-            return ServicesTable.getServiceItems(filteredServices)[0];
+            return filteredServices ? getServiceItems(filteredServices)[0] : undefined;
         };
     }
 
@@ -455,7 +475,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
     }
 
     private _selectedItemViewMap: { [selectedItemKey: string]: (selectedItem: any, properties?: { [key: string]: any }) => JSX.Element | null } = {};
-    private _objectFinder: { [selectedItemKey: string]: (name: string) => V1ReplicaSet | V1DaemonSet | V1StatefulSet | IServiceItem } = {};
+    private _objectFinder: { [selectedItemKey: string]: (name: string) => V1ReplicaSet | V1DaemonSet | V1StatefulSet | IServiceItem | undefined } = {};
     private _selectionStore: SelectionStore;
     private _workloadsActionCreator: WorkloadsActionsCreator;
     private _workloadsStore: WorkloadsStore;
