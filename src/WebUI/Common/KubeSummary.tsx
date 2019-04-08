@@ -45,6 +45,7 @@ import "./KubeSummary.scss";
 import { KubeZeroData } from "./KubeZeroData";
 import { PodsStore } from "../Pods/PodsStore";
 import { getServiceItems } from "../Services/ServiceUtils";
+import { setContentReaderComponent } from "./KubeConsumer";
 
 const workloadsPivotItemKey: string = "workloads";
 const servicesPivotItemKey: string = "services";
@@ -72,6 +73,9 @@ export interface IKubeSummaryProps extends IVssComponentProperties {
     clusterName?: string;
     telemteryService?: ITelemetryService;
     getImageLocation?: (image: KubeImage) => string | undefined;
+    // props has text and reader options.
+    // reader options are of type monaco.editor.IEditorConstructionOptions
+    getContentReaderComponent?: (props?: any) => React.ReactNode;
 }
 
 export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesContainerState> {
@@ -79,6 +83,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         super(props, {});
         KubeSummary._imageService = this.props.imageService;
         KubeSummary._kubeservice = this.props.kubeService;
+        setContentReaderComponent(this.props.getContentReaderComponent);
 
         this._initializeFactorySettings();
         const workloadsFilter = new Filter();
