@@ -13,7 +13,9 @@
   "scripts": {
     "clean": "rimraf ./dist && rimraf ./_bundles",
     "compile": "npm run clean && npm run compilesrc && npm run copy-all",
-    "build": "npm run compile && node buildpackage.js",
+    "build": "npm run compile && node buildpackage.js webAppPackage",
+    "build-azdevops": "npm run compile && node buildpackage.js azDevOpsPackage",
+    "build-all": "npm run compile && node buildpackage.js azDevOpsPackage webAppPackage",
     "copy-all": "npm run copy-scss && npm run copy-resources && npm run copy-images",
     "copy-scss": "copyfiles -u 1 src/**/*.scss ./dist",
     "copy-resources": "copyfiles -u 1 src/**/Resources.js ./dist",
