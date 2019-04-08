@@ -8,7 +8,7 @@ import { BaseComponent } from "@uifabric/utilities";
 import { ConditionalChildren } from "azure-devops-ui/ConditionalChildren";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { localeFormat } from "azure-devops-ui/Core/Util/String";
-import { Header, TitleSize } from "azure-devops-ui/Header";
+import { Header, TitleSize, IHeaderProps } from "azure-devops-ui/Header";
 import { HeaderCommandBarWithFilter } from "azure-devops-ui/HeaderCommandBar";
 import { Page } from "azure-devops-ui/Page";
 import { IStatusProps } from "azure-devops-ui/Status";
@@ -66,12 +66,42 @@ export interface IKubernetesContainerState {
 }
 
 export interface IKubeSummaryProps extends IVssComponentProperties {
+    /**
+     * Header title of the kube summary page
+     */
     title: string;
+
+    /**
+     * Instance of IKubeService which would be used to query information
+     */
     kubeService: IKubeService;
+
+    /**
+     * Instance of IImageService. This is optional
+     */
     imageService?: IImageService;
+
+    /**
+     * Namespace of the kubernetes objects being displayed
+     */
     namespace?: string;
+
+    /**
+     * Cluster name of the kubernetes objects being displayed
+     */
     clusterName?: string;
+
+    /**
+     * Instance of ITelemetryService
+     */
     telemteryService?: ITelemetryService;
+
+    /**
+     * Callback to be invoked to go back from KubeSummary
+     * If provided, a back button will be added to header
+     */
+    onTitleBackClick?: () => void;
+
     getImageLocation?: (image: KubeImage) => string | undefined;
     // props has text and reader options.
     // reader options are of type monaco.editor.IEditorConstructionOptions
@@ -219,17 +249,24 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
 
     private _getMainContent(): JSX.Element {
         const pageContent = this.state.resourceSize > 0 ? this._getMainPivot() : this._getZeroData();
+        const headerProps: IHeaderProps = {
+            title: this.props.title,
+            titleSize: TitleSize.Large,
+            className: "content-main-heading",
+            description: this.props.clusterName
+                ? localeFormat(Resources.SummaryHeaderSubTextFormat, this.props.clusterName)
+                : localeFormat(Resources.NamespaceHeadingText, this.state.namespace || "")
+        };
+
+        if (this.props.onTitleBackClick) {
+            headerProps.titleIconProps = { iconName: "Back", onClick: this.props.onTitleBackClick, className: "cursor-pointer" };
+        }
+
         // must be short syntax or React.Fragment, do not use div here to include heading and content.
         return (
             <>
-                <Header
-                    title={this.props.title}
-                    titleSize={TitleSize.Large}
-                    className={"content-main-heading"}
-                    description={this.props.clusterName
-                        ? localeFormat(Resources.SummaryHeaderSubTextFormat, this.props.clusterName)
-                        : localeFormat(Resources.NamespaceHeadingText, this.state.namespace || "")}
-                />
+                <Header {...headerProps} />
+                
                 {pageContent}
             </>
         );
