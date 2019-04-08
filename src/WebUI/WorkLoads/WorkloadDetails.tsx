@@ -24,7 +24,6 @@ import { Tags } from "../Common/Tags";
 import { StoreManager } from "../FluxCommon/StoreManager";
 import { ImageDetails } from "../ImageDetails/ImageDetails";
 import { ImageDetailsStore } from "../ImageDetails/ImageDetailsStore";
-import { PodsDetails } from "../Pods/PodsDetails";
 import { PodsStore } from "../Pods/PodsStore";
 import { PodsTable } from "../Pods/PodsTable";
 import * as Resources from "../Resources";
@@ -86,7 +85,7 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
             if (queryParams.type) {
                 // function to make sure we get the item for the view if present, or we make a call and set up a store listener to fetch that item
                 const getItem = (getItemList: () => (V1ReplicaSetList | V1StatefulSetList | V1DaemonSetList | undefined), actionCreatorFunc: (k: IKubeService) => void, storeEvent: string) => {
-                    
+
                     // function to search the relevant item from the item list provided
                     const searchItem = () => {
                         const itemList = getItemList();
@@ -305,15 +304,12 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
         const selectionActionCreator = ActionsCreatorManager.GetActionCreator<SelectionActionsCreator>(SelectionActionsCreator);
         selectionActionCreator.selectItem(
             {
-                item: pod,
+                item: undefined,
                 itemUID: pod.metadata.uid,
                 selectedItemType: SelectedItemKeys.PodDetailsKey,
                 showSelectedItem: true,
                 properties: {
-                    parentItemKind: this.props.parentKind,
-                    pods: this.state.pods,
-                    parentItemName: this.state.item!.metadata.name,
-                    onBackClick: () => selectionActionCreator.selectItem({ item: this.state.item, showSelectedItem: true, itemUID: this.state.item!.metadata.uid, selectedItemType: this.props.itemTypeKey })
+                    parentUid: this.state.item!.metadata.uid,
                 } as IPodDetailsSelectionProperties
             }
         );

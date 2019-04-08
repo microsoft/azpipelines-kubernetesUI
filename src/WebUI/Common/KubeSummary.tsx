@@ -34,7 +34,6 @@ import { SelectionStore } from "../Selection/SelectionStore";
 import { ServiceDetails } from "../Services/ServiceDetails";
 import { ServicesPivot } from "../Services/ServicesPivot";
 import { ServicesStore } from "../Services/ServicesStore";
-import { ServicesTable } from "../Services/ServicesTable";
 import { IPodDetailsSelectionProperties, IServiceItem, IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
 import { WorkloadDetails } from "../Workloads/WorkloadDetails";
@@ -59,7 +58,8 @@ export interface IKubernetesContainerState {
     selectedItem?: V1ReplicaSet | V1DaemonSet | V1StatefulSet | V1Pod | IServiceItem | IImageDetails;
     showSelectedItem?: boolean;
     selectedItemType?: string;
-    selectedItemProperties?: { [key: string]: string };
+    selectedItemUid?: string;
+    selectedItemProperties?: { [key: string]: any };
     resourceSize: number;
     workloadsFilter: Filter;
     svcFilter: Filter;
@@ -109,6 +109,8 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
             namespace: this.props.namespace || "",
             selectedPivotKey: selectedPivot,
             showSelectedItem: queryParams.uid ? true : false,
+            selectedItemUid: queryParams.uid as string,
+            selectedItemProperties: queryParams as { [key: string]: any },
             selectedItem: undefined,
             selectedItemType: queryParams.type as string || "",
             resourceSize: 0,
@@ -179,10 +181,10 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
             const typeName: string = routeValues["type"] as string;
             const objectId: string = routeValues["uid"] as string;
             const selectedItem = this._objectFinder[typeName](objectId);
-            this.setState({ selectedItemType: typeName, selectedItem: selectedItem, showSelectedItem: true });
+            this.setState({ selectedItemType: typeName, selectedItem: selectedItem, showSelectedItem: true, selectedItemUid: objectId, selectedItemProperties: routeValues });
         }
         else {
-            this.setState({ selectedItemType: "", selectedItem: undefined, showSelectedItem: false });
+            this.setState({ selectedItemType: "", selectedItem: undefined, showSelectedItem: false, selectedItemUid: undefined });
         }
     }
 
@@ -265,12 +267,12 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
     private _getSelectedItemPodsView(): JSX.Element | null {
         const selectedItem = this.state.selectedItem;
         const selectedItemType = this.state.selectedItemType;
-        const isEmptyItemAllowed = ![SelectedItemKeys.OrphanPodKey, SelectedItemKeys.PodDetailsKey].some(s => s === selectedItemType);
+        const isEmptyItemAllowed = ![SelectedItemKeys.OrphanPodKey].some(s => s === selectedItemType);
         // ToDo :: Currently for imageDetails type, the selected item will be undefined, hence adding below check. Remove this once we have data from imageService
         if (selectedItemType
             && (selectedItem || isEmptyItemAllowed)
             && this._selectedItemViewMap.hasOwnProperty(selectedItemType)) {
-            return this._selectedItemViewMap[selectedItemType](selectedItem, this.state.selectedItemProperties);
+            return this._selectedItemViewMap[selectedItemType](selectedItem, this.state.selectedItemUid, this.state.selectedItemProperties);
         }
 
         return null;
@@ -292,15 +294,14 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         );
     }
 
-    private _getPodDetailsComponent(item: V1Pod, properties?: IPodDetailsSelectionProperties): JSX.Element | null {
+    private _getPodDetailsComponent(podUid?: string, properties?: IPodDetailsSelectionProperties): JSX.Element | null {
         const selectionProperties = properties as IPodDetailsSelectionProperties;
         return selectionProperties ? (
             <PodsDetails
-                pods={selectionProperties.pods}
-                parentKind={selectionProperties.parentItemKind}
-                parentName={selectionProperties.parentItemName}
-                onBackButtonClick={selectionProperties.onBackClick}
-                selectedPod={item} />)
+                parentUid={selectionProperties.parentUid}
+                serviceName={selectionProperties.serviceName}
+                serviceSelector={selectionProperties.serviceSelector}
+                selectedPodUid={podUid} />)
             : null;
     }
 
@@ -324,6 +325,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
                 showSelectedItem: selectionStoreState.showSelectedItem,
                 selectedItem: item,
                 selectedItemType: selectionStoreState.selectedItemType,
+                selectedItemUid: selectionStoreState.itemUID,
                 selectedItemProperties: selectionStoreState.properties
             });
         }
@@ -344,28 +346,32 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
                     if (replicaSets) {
                         item = getMatchingItem(replicaSets.items);
                     }
-                    invokedFunc = () => KubeSummary.getKubeService().getReplicaSets();
+                    if (!item) {
+                        invokedFunc = () => KubeSummary.getKubeService().getReplicaSets();
+                    }
                     break;
                 case SelectedItemKeys.StatefulSetKey:
                     const statefulSets = this._workloadsStore.getState().statefulSetList;
                     if (statefulSets) {
                         item = getMatchingItem(statefulSets.items);
                     }
-                    invokedFunc = () => KubeSummary.getKubeService().getStatefulSets();
+                    if (!item) {
+                        invokedFunc = () => KubeSummary.getKubeService().getStatefulSets();
+                    }
                     break;
                 case SelectedItemKeys.DaemonSetKey:
                     const daemonSets = this._workloadsStore.getState().daemonSetList;
                     if (daemonSets) {
                         item = getMatchingItem(daemonSets.items);
                     }
-                    invokedFunc = () => KubeSummary.getKubeService().getDaemonSets();
+
+                    if (!item) {
+                        invokedFunc = () => KubeSummary.getKubeService().getDaemonSets();
+                    }
                     break;
             }
 
-            if (item) {
-                setStateWithSelection(item);
-            }
-            else if (invokedFunc) {
+            if (invokedFunc) {
                 invokedFunc().then(list => {
                     // If the selection has been modified while this promise was being resolved, don't do anything
                     if (selectionStoreState.itemUID !== this._selectionStore.getState().itemUID) {
@@ -380,6 +386,9 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
                         setStateWithSelection(item);
                     }
                 });
+            }
+            else {
+                setStateWithSelection(item);
             }
         }
         else {
@@ -422,7 +431,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
 
         this._selectedItemViewMap[SelectedItemKeys.ServiceItemKey] = (service) => { return <ServiceDetails service={service} parentKind={(service && service.kind) || "Service"} />; };
         this._selectedItemViewMap[SelectedItemKeys.ImageDetailsKey] = (item) => { return <ImageDetails imageDetails={item} onBackButtonClick={this._setSelectionStateFalse} />; };
-        this._selectedItemViewMap[SelectedItemKeys.PodDetailsKey] = (item, properties?) => this._getPodDetailsComponent(item, properties as IPodDetailsSelectionProperties);
+        this._selectedItemViewMap[SelectedItemKeys.PodDetailsKey] = (item, uid, properties?) => this._getPodDetailsComponent(uid, properties as IPodDetailsSelectionProperties);
     }
 
     private _setSelectionStateFalse = () => {
@@ -441,8 +450,8 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         this._objectFinder[SelectedItemKeys.DaemonSetKey] = (uid) => KubeSummary._getFilteredFirstObject(this._workloadsStore.getState().daemonSetList, uid);
         this._objectFinder[SelectedItemKeys.PodDetailsKey] = (uid) => KubeSummary._getFilteredFirstObject(this._podsStore.getState().podsList, uid);
         this._objectFinder[SelectedItemKeys.ServiceItemKey] = (uid) => {
-            const filteredServices = KubeSummary._getFilteredFirstObject(this._servicesStore.getState().serviceList, uid);
-            return filteredServices ? getServiceItems(filteredServices)[0] : undefined;
+            const filteredService = KubeSummary._getFilteredFirstObject(this._servicesStore.getState().serviceList, uid);
+            return filteredService ? getServiceItems([filteredService])[0] : undefined;
         };
     }
 
@@ -474,7 +483,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         KubeFactory.getImageLocation = this.props.getImageLocation || KubeFactory.getImageLocation;
     }
 
-    private _selectedItemViewMap: { [selectedItemKey: string]: (selectedItem: any, properties?: { [key: string]: any }) => JSX.Element | null } = {};
+    private _selectedItemViewMap: { [selectedItemKey: string]: (selectedItem: any, selectedItemUid?: string, properties?: { [key: string]: any }) => JSX.Element | null } = {};
     private _objectFinder: { [selectedItemKey: string]: (name: string) => V1ReplicaSet | V1DaemonSet | V1StatefulSet | IServiceItem | undefined } = {};
     private _selectionStore: SelectionStore;
     private _workloadsActionCreator: WorkloadsActionsCreator;
