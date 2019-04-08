@@ -1,24 +1,22 @@
-const path = require('path');
-const webpack = require('webpack');
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
-const TerserPlugin = require('terser-webpack-plugin');
+const path = require("path");
+const TerserPlugin = require("terser-webpack-plugin");
 
 module.exports = {
   entry: {
-    'azdevops-kube-summary': './src/index.ts',
-    'azdevops-kube-summary.min': './src/index.ts'
+    "azdevops-kube-summary": "./src/index.ts",
+    "azdevops-kube-summary.min": "./src/index.ts"
   },
   output: {
-    path: path.resolve(__dirname, '_bin/webAppPackage/_bundles'),
-    filename: '[name].js',
-    libraryTarget: 'umd',
-    library: 'webapp-kube-summary',
+    path: path.resolve(__dirname, "_bin/webAppPackage/_bundles"),
+    filename: "[name].js",
+    libraryTarget: "umd",
+    library: "webapp-kube-summary",
     umdNamedDefine: true
   },
   resolve: {
-    extensions: ['.ts', '.tsx', '.js']
+    extensions: [".ts", ".tsx", ".js"]
   },
-  devtool: 'source-map',
+  devtool: "source-map",
   optimization: {
     minimizer: [
       new TerserPlugin({
@@ -45,24 +43,24 @@ module.exports = {
       {
         test: /\.woff$/,
         use: [{
-          loader: 'base64-inline-loader'
+          loader: "base64-inline-loader"
         }]
       },
       {
         test: /\.html$/,
         loader: "file-loader"
       },
-      { test: /\.(png|jpg|svg)$/, loader: 'file-loader' },
+      { test: /\.(png|jpg|svg)$/, loader: "file-loader" },
     ]
   },
   node: {
-    fs: 'empty',
-    tls: 'mock',
-    child_process: 'empty',
-    net: 'empty'
+    fs: "empty",
+    tls: "mock",
+    child_process: "empty",
+    net: "empty"
   },
   externals: {
-    "react": 'react',
-    "react-dom": 'react-dom'
+    "react": "react",
+    "react-dom": "react-dom"
   }
 }
