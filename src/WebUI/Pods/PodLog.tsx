@@ -42,7 +42,7 @@ export class PodLog extends BaseComponent<IPodLogProps, IPodLogState> {
     public componentDidMount(): void {
         const service = KubeSummary.getKubeService();
         const podName = this.props.pod.metadata.name;
-        const spec = this.props.pod.spec || {};
+        const spec = this.props.pod.spec || undefined;
         const podContainerName = spec && spec.containers && spec.containers.length > 0 && spec.containers[0].name || "";
 
         service && service.getPodLog && service.getPodLog(podName, podContainerName).then(logContent => {
