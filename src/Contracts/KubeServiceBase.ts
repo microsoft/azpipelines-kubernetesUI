@@ -40,7 +40,7 @@ export abstract class KubeServiceBase implements IKubeService {
         return this.fetch(KubeResourceType.StatefulSets);
     }
 
-    abstract getPodLog(podName: string): Promise<string>;
+    abstract getPodLog(podName: string, podContainerName?: string): Promise<string>;
 
     abstract fetch(resourceType: KubeResourceType, labelSelector?: string): Promise<any>;
 }
