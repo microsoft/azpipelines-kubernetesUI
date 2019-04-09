@@ -251,7 +251,7 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
     }
 
     private static _renderReplicaSetNameCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IDeploymentReplicaSetItem>, deployment: IDeploymentReplicaSetItem): JSX.Element {
-        const itemToRender = defaultColumnRenderer(deployment.replicaSetName || "", "fontWeightSemiBold");
+        const itemToRender = defaultColumnRenderer(deployment.replicaSetName || "", "fontWeightSemiBold font-weight-semibold");
         return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
@@ -272,7 +272,7 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
         const itemToRender = hasImageDetails ?
             <Tooltip overflowOnly>
                 <Link
-                    className="fontSizeM text-ellipsis bolt-table-link"
+                    className="fontSizeM font-size-m text-ellipsis bolt-table-link"
                     rel={"noopener noreferrer"}
                     excludeTabStop
                     onClick={() => this._onImageClick(imageId)}

@@ -97,7 +97,7 @@ export class PodsLeftPanel extends BaseComponent<IPodsLeftPanelProperties> {
                     <Header
                         title={Resources.PodsListHeaderText}
                         titleSize={TitleSize.Small}
-                        className={"pod-left-panel-table-header fontWeightSemiBold"}
+                        className={"pod-left-panel-table-header fontWeightSemiBold font-weight-semibold"}
                     />
                     <Table
                         itemProvider={new ArrayItemProvider<V1Pod>(this.props.pods)}
@@ -118,7 +118,7 @@ export class PodsLeftPanel extends BaseComponent<IPodsLeftPanelProperties> {
         pod: V1Pod,
         selectedIndex: number
     ): JSX.Element {
-        const contentClassName = rowIndex === selectedIndex ? "fontWeightSemiBold" : "";
+        const contentClassName = rowIndex === selectedIndex ? "fontWeightSemiBold font-weight-semibold" : "";
         const { statusProps, tooltip } = Utils.generatePodStatusProps(pod.status);
         return renderPodNameWithStatusTableCell(rowIndex, columnIndex, tableColumn, pod.metadata.name, statusProps, tooltip, contentClassName);
     }

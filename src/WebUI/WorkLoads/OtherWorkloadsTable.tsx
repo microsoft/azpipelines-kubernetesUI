@@ -211,10 +211,10 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
                 tableColumn={tableColumn}
                 line1={
                     <Tooltip overflowOnly={true} text={workload.name}>
-                        <span className="fontWeightSemiBold text-ellipsis">{workload.name}</span>
+                        <span className="fontWeightSemiBold font-weight-semibold text-ellipsis">{workload.name}</span>
                     </Tooltip>
                 }
-                line2={<span className="fontSize secondary-text text-ellipsis">{OtherWorkloads._getSetType(workload.kind)}</span>}
+                line2={<span className="fontSize font-size secondary-text text-ellipsis">{OtherWorkloads._getSetType(workload.kind)}</span>}
             />
         );
     }
@@ -227,7 +227,7 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
         const itemToRender = hasImageDetails ?
             <Tooltip overflowOnly={true}>
                 <Link
-                    className="fontSizeM text-ellipsis bolt-table-link"
+                    className="fontSizeM font-size-m text-ellipsis bolt-table-link"
                     excludeTabStop={true}
                     onClick={() => this._onImageClick(imageId)}>
                     {imageText}

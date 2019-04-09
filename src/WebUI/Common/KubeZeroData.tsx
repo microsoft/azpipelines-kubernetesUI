@@ -162,7 +162,7 @@ export class KubeZeroData extends BaseComponent<IKubeZeroDataProps> {
                         className="k8s-zero-service-pods-data k8s-zero-data-max-width"
                         secondaryText={
                             <>
-                                <div className="body-xl fontWeightSemiBold">{Resources.NoPodsText}</div>
+                                <div className="body-xl fontWeightSemiBold font-weight-semibold">{Resources.NoPodsText}</div>
                                 <div>{Resources.NoPodsForSvcText}</div>
                                 <Link
                                     href={HyperLinks.LinkToPodsUsingLabelsLink}
