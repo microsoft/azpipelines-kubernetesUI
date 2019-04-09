@@ -225,7 +225,7 @@ export function renderPodsStatusTableCell(
         </>
     );
 
-    const classNames = "fontSizeM flex-center flex-row text-ellipsis";
+    const classNames = "fontSizeM font-size-m flex-center flex-row text-ellipsis";
 
     const itemToRender = podsCountString ? (
         // show tooltip always if specified, otherwise show only when element overflows
