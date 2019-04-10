@@ -41,7 +41,7 @@ export class KubeFilterBar extends BaseComponent<IFilterComponentProperties, {}>
         return (
             <ConditionalChildren renderChildren={this.props.filterToggled}>
                 <FilterBar filter={this.props.filter} className={this.props.className || ""}>
-                    <KeywordFilterBarItem filterItemKey={NameKey} placeholder={localeFormat(Resources.FindByNameText, this.props.keywordPlaceHolder)} />
+                    <KeywordFilterBarItem filterItemKey={NameKey} className={"keyword-search"} placeholder={localeFormat(Resources.FindByNameText, this.props.keywordPlaceHolder)} />
                     <PickListFilterBarItem
                         placeholder={this.props.pickListPlaceHolder}
                         showPlaceholderAsLabel={true}

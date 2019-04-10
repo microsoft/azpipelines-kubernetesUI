@@ -38,6 +38,7 @@ import { SelectionActionsCreator } from "../Selection/SelectionActionCreator";
 export interface IServiceDetailsProperties extends IVssComponentProperties {
     service: IServiceItem | undefined;
     parentKind: string;
+    notifyViewChanged?: (viewTree: { id: string, displayName: string, url: string }[]) => void;
 }
 
 export interface IServiceDetailsState {
@@ -54,6 +55,17 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
             service: props.service,
             pods: []
         };
+
+        const notifyViewChanged = (service: V1Service) => {
+            if (service.metadata && props.notifyViewChanged) {
+                const metadata = service.metadata;
+                props.notifyViewChanged([{ id: SelectedItemKeys.ServiceItemKey + metadata.uid, displayName: metadata.name, url: window.location.href }]);
+            }
+        }
+
+        if (props.service && props.service.service) {
+            notifyViewChanged(props.service.service);
+        }
 
         this._podsActionsCreator = ActionsCreatorManager.GetActionCreator<PodsActionsCreator>(PodsActionsCreator);
         this._servicesStore = StoreManager.GetStore<ServicesStore>(ServicesStore);
@@ -73,6 +85,7 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
                 const services = (servicesList && servicesList.items) || [];
                 const selectedService = services.find(s => s.metadata.uid === queryParams.uid);
                 if (selectedService) {
+                    notifyViewChanged(selectedService);
                     fetchServiceDetails(selectedService);
                     this.setState({
                         service: getServiceItems([selectedService])[0]
