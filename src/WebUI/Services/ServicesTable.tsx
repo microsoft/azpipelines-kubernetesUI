@@ -199,11 +199,11 @@ export class ServicesTable extends BaseComponent<IServicesComponentProperties> {
                 tableColumn={tableColumn}
                 line1={
                     <Tooltip overflowOnly={true} text={service.package}>
-                        <div className="fontWeightSemiBold text-ellipsis">{service.package}</div>
+                        <div className="fontWeightSemiBold font-weight-semibold text-ellipsis">{service.package}</div>
                     </Tooltip>
                 }
                 line2={
-                    <div className="fontSize secondary-text text-ellipsis">{service.type}</div>
+                    <div className="fontSize font-size secondary-text text-ellipsis">{service.type}</div>
                 }
                 iconProps={{
                     render: (className?: string) => {

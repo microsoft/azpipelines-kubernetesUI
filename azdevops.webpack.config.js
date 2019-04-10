@@ -79,7 +79,7 @@ module.exports = {
         return callback(null, "VSSUI" + request.substr(azDevOpsUIPrefix.length, request.length - azDevOpsUIPrefix.length - propsPostfix.length));
       }
       else if (request.startsWith(azDevOpsUIPrefix)) {
-        // replace "azure-devops-ui/Core" with VSSUI
+        // replace "azure-devops-ui" with VSSUI
         return callback(null, "VSSUI" + request.substr(azDevOpsUIPrefix.length));
       }
       else {

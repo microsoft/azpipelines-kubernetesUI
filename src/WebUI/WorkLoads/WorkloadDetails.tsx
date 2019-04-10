@@ -239,7 +239,7 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
         const itemToRender = hasImageDetails ?
             <Tooltip overflowOnly>
                 <Link
-                    className="fontSizeM text-ellipsis bolt-table-link"
+                    className="fontSizeM font-size-m text-ellipsis bolt-table-link"
                     rel={"noopener noreferrer"}
                     excludeTabStop
                     onClick={() => this._showImageDetails(imageId)}

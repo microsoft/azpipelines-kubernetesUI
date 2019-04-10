@@ -176,7 +176,7 @@ export class PodOverview extends BaseComponent<IPodOverviewProps> {
         const itemToRender = hasImageDetails ?
             <Tooltip overflowOnly>
                 <Link
-                    className="fontSizeM text-ellipsis bolt-table-link"
+                    className="fontSizeM font-size-m text-ellipsis bolt-table-link"
                     rel={"noopener noreferrer"}
                     excludeTabStop
                     onClick={() => showImageDetails(imageId)}

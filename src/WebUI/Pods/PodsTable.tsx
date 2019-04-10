@@ -151,7 +151,7 @@ export class PodsTable extends BaseComponent<IPodsTableProperties> {
 
     private static _renderPodNameCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod): JSX.Element {
         const { statusProps, tooltip } = Utils.generatePodStatusProps(pod.status);
-        return renderPodNameWithStatusTableCell(rowIndex, columnIndex, tableColumn, pod.metadata.name, statusProps, tooltip);
+        return renderPodNameWithStatusTableCell(rowIndex, columnIndex, tableColumn, pod.metadata.name, statusProps, tooltip, "fontWeightSemiBold font-weight-semibold");
     }
 
     private static _renderPodWorkload(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod): JSX.Element {
@@ -162,7 +162,7 @@ export class PodsTable extends BaseComponent<IPodsTableProperties> {
                 {
                     controllerOwner ?
                         (<Link
-                            className="fontSizeM text-ellipsis bolt-table-link"
+                            className="fontSizeM font-size-m text-ellipsis bolt-table-link"
                             rel={"noopener noreferrer"}
                             excludeTabStop
                             onClick={() => PodsTable._onWorkloadClicked(pod, controllerOwner)}
