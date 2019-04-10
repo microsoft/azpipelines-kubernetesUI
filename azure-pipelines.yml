@@ -30,7 +30,7 @@ jobs:
     displayName: 'Build source'
     inputs:
       command: custom
-      customCommand: 'run build'
+      customCommand: 'run build-all'
 
   - task: Npm@1
     displayName: 'Run UTs'
