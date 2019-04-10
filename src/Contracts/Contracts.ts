@@ -19,7 +19,7 @@ export interface IKubeService {
 
     getStatefulSets(): Promise<K8sTypes.V1StatefulSetList>;
 
-    getPodLog(podName: string): Promise<string>;
+    getPodLog(podName: string, podContainerName?: string): Promise<string>;
 }
 
 export enum KubeImage {
