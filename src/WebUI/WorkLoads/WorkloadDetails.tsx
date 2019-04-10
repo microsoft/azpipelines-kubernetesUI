@@ -267,7 +267,7 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
                 const agoTime = Date_Utils.ago(new Date(metadata.creationTimestamp), Date_Utils.AgoFormat.Compact);
 
                 return (
-                    <CustomCard className="workload-details-card k8s-card-padding flex-grow bolt-card-no-vertical-padding">
+                    <CustomCard className="workload-details-card k8s-card-padding bolt-table-card flex-grow bolt-card-no-vertical-padding">
                         <CustomHeader>
                             <HeaderTitleArea>
                                 <HeaderTitleRow>

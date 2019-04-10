@@ -138,7 +138,7 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
                 : localeFormat(Resources.CreatedAgo, agoTime);
 
             return (
-                <CustomCard className="service-details-card k8s-card-padding flex-grow bolt-card-no-vertical-padding">
+                <CustomCard className="service-details-card k8s-card-padding bolt-table-card flex-grow bolt-card-no-vertical-padding">
                     <CustomHeader>
                         <HeaderTitleArea>
                             <HeaderTitleRow>

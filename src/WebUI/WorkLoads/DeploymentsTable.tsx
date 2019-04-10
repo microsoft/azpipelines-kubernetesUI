@@ -103,7 +103,7 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
             const key = format("workloads-d-t-{0}", index);
             const deploymentCard = (
                 <CustomCard
-                    className="deployment-replica-with-pod-list k8s-card-padding flex-grow bolt-card-no-vertical-padding"
+                    className="deployment-replica-with-pod-list k8s-card-padding bolt-table-card flex-grow bolt-card-no-vertical-padding"
                     key={key}
                 >
                     <CustomHeader>

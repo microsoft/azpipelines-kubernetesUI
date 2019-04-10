@@ -20,7 +20,7 @@ export class PodContentReader extends BaseComponent<IPodReaderProps> {
     public render(): JSX.Element {
         return (
             // monaco-editor class added here to have the same theme as monaco.
-            <CustomCard className={css(this.props.className || "", "monaco-editor", "k8s-card-padding", "flex-grow")}>
+            <CustomCard className={css(this.props.className || "", "bolt-table-card", "monaco-editor", "k8s-card-padding", "flex-grow")}>
                 <CardContent className={css(this.props.contentClassName || "", "reader-content")} contentPadding={false}>
                     <div className="reader-outer" style={{ width: "100%", height: "500px", position: "relative" }}>
                         {getContentReaderComponent({ ...this.props })}
