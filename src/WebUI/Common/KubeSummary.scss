@@ -3,4 +3,9 @@
     .k8s-card-padding+.k8s-card-padding {
         margin-top: 16px;
     }
+
+    /*Css to adjust the alignment of text between picklist and text search. Revisit when we move from picklist to dropdown (fabric-free)*/
+    .keyword-search.bolt-text-field{
+        padding-bottom: 8px;
+    }
 }

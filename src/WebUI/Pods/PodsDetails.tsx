@@ -29,6 +29,7 @@ export interface IPodsDetailsProperties extends IVssComponentProperties {
     serviceSelector?: string;
     serviceName?: string;
     selectedPodUid?: string;
+    notifyViewChanged?: (viewTree: { id: string, displayName: string, url: string }[]) => void;
 }
 
 export interface IPodsDetailsState {
@@ -43,6 +44,28 @@ export class PodsDetails extends BaseComponent<IPodsDetailsProperties, IPodsDeta
     constructor(props: IPodsDetailsProperties) {
         super(props);
         this._history = createBrowserHistory();
+
+        const notifyViewChanged = (parentName: string | undefined, parentKind: string | undefined) => {
+            // In pod details, we show all pods in the parent. So the view owner is the parent, not the pod
+            if (parentName && parentKind && props.notifyViewChanged) {
+                const clonedQueryParams = { ...queryString.parse(this._history.location.search) };
+                delete clonedQueryParams["parentUid"];
+                delete clonedQueryParams["serviceSelector"];
+                delete clonedQueryParams["serviceName"];
+                const itemTypeKey = Utils.getItemTypeKeyFromKind(parentKind);
+                clonedQueryParams["type"] = itemTypeKey;
+                clonedQueryParams["uid"] = props.parentUid;
+                const paramsString = queryString.stringify(clonedQueryParams);
+                const url = this._history.location.pathname + "?" + paramsString;
+
+                props.notifyViewChanged([{
+                    id: itemTypeKey + props.parentUid,
+                    displayName: parentName,
+                    url: url
+                }]);
+            }
+        }
+
         const podsStore = StoreManager.GetStore<PodsStore>(PodsStore);
         let parentKind: string | undefined = undefined, parentName: string | undefined = undefined, filteredPods: V1Pod[] | undefined = [], selectedPod: V1Pod | undefined = undefined;
         const podsList = props.serviceSelector ? podsStore.getState().podListByLabel[props.serviceSelector] : podsStore.getState().podsList;
@@ -115,6 +138,7 @@ export class PodsDetails extends BaseComponent<IPodsDetailsProperties, IPodsDeta
             selectedPod = properties.selectedPod;
         }
 
+        notifyViewChanged(parentName, parentKind);
         this.state = {
             parentKind: parentKind,
             parentName: parentName,

@@ -102,6 +102,11 @@ export interface IKubeSummaryProps extends IVssComponentProperties {
      */
     onTitleBackClick?: () => void;
 
+    /**
+     * Callback to notify when the view tree structure has changed
+     */
+    onViewChanged?: (viewTree: { id: string, displayName: string, url: string }[]) => void;
+
     getImageLocation?: (image: KubeImage) => string | undefined;
     // props has text and reader options.
     // reader options are of type monaco.editor.IEditorConstructionOptions
@@ -214,6 +219,10 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
             this.setState({ selectedItemType: typeName, selectedItem: selectedItem, showSelectedItem: true, selectedItemUid: objectId, selectedItemProperties: routeValues });
         }
         else {
+            if (this.props.onViewChanged) {
+                this.props.onViewChanged([]);
+            }
+
             this.setState({ selectedItemType: "", selectedItem: undefined, showSelectedItem: false, selectedItemUid: undefined });
         }
     }
@@ -266,7 +275,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         return (
             <>
                 <Header {...headerProps} />
-                
+
                 {pageContent}
             </>
         );
@@ -327,6 +336,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
                 parentKind={(item && item.kind) || defaultTypeString}
                 itemTypeKey={selectedItemType}
                 getStatusProps={getStatusProps}
+                notifyViewChanged={this.props.onViewChanged}
             />
         );
     }
@@ -338,7 +348,8 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
                 parentUid={selectionProperties.parentUid}
                 serviceName={selectionProperties.serviceName}
                 serviceSelector={selectionProperties.serviceSelector}
-                selectedPodUid={podUid} />)
+                selectedPodUid={podUid}
+                notifyViewChanged={this.props.onViewChanged} />)
             : null;
     }
 
@@ -356,6 +367,10 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
 
     private _onSelectionStoreChanged = () => {
         const selectionStoreState = this._selectionStore.getState();
+
+        if (!selectionStoreState.showSelectedItem && this.props.onViewChanged) {
+            this.props.onViewChanged([]);
+        }
 
         const setStateWithSelection = (item: V1ReplicaSet | V1DaemonSet | V1StatefulSet | IServiceItem | V1Pod | IImageDetails | undefined) => {
             this.setState({
@@ -466,7 +481,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
             return <PodsRightPanel key={pod.metadata.uid} pod={pod} podStatusProps={statusProps} statusTooltip={tooltip} />;
         };
 
-        this._selectedItemViewMap[SelectedItemKeys.ServiceItemKey] = (service) => { return <ServiceDetails service={service} parentKind={(service && service.kind) || "Service"} />; };
+        this._selectedItemViewMap[SelectedItemKeys.ServiceItemKey] = (service) => { return <ServiceDetails service={service} parentKind={(service && service.kind) || "Service"} notifyViewChanged={this.props.onViewChanged} />; };
         this._selectedItemViewMap[SelectedItemKeys.ImageDetailsKey] = (item) => { return <ImageDetails imageDetails={item} onBackButtonClick={this._setSelectionStateFalse} />; };
         this._selectedItemViewMap[SelectedItemKeys.PodDetailsKey] = (item, uid, properties?) => this._getPodDetailsComponent(uid, properties as IPodDetailsSelectionProperties);
     }
