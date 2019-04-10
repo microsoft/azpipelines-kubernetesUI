@@ -46,8 +46,9 @@ import { IKubeService } from "../../Contracts/Contracts";
 export interface IWorkloadDetailsProperties extends IVssComponentProperties {
     item?: V1ReplicaSet | V1DaemonSet | V1StatefulSet;
     parentKind: string;
-    itemTypeKey: SelectedItemKeys
-    getStatusProps: (item: V1ReplicaSet | V1DaemonSet | V1StatefulSet) => ({ statusProps: IStatusProps | undefined, podsTooltip: string })
+    itemTypeKey: SelectedItemKeys;
+    getStatusProps: (item: V1ReplicaSet | V1DaemonSet | V1StatefulSet) => ({ statusProps: IStatusProps | undefined, podsTooltip: string });
+    notifyViewChanged?: (viewTree: { id: string, displayName: string, url: string }[]) => void;
 }
 
 export interface IWorkloadDetailsState {
@@ -73,6 +74,13 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
         this._podsStore.addListener(PodsEvents.PodsFetchedEvent, this._onPodsUpdated);
 
         this._workloadsStore = StoreManager.GetStore<WorkloadsStore>(WorkloadsStore);
+
+        const notifyViewChanged = (item: V1ReplicaSet | V1DaemonSet | V1StatefulSet) => {
+            if (item.metadata && props.notifyViewChanged) {
+                const metadata = item.metadata;
+                props.notifyViewChanged([{ id: props.itemTypeKey + metadata.uid, displayName: metadata.name, url: window.location.href }]);
+            }
+        }
 
         let item = props.item;
         if (!props.item) {
@@ -102,6 +110,9 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
                             const item = searchItem();
                             this._workloadsStore.removeListener(storeEvent, subscription);
 
+                            if (item) {
+                                notifyViewChanged(item as any);
+                            }
                             this.setState({ item: item as (V1ReplicaSet | V1DaemonSet | V1StatefulSet) });
                         }
 
@@ -124,6 +135,10 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
                         break;
                 }
             }
+        }
+
+        if (item) {
+            notifyViewChanged(item);
         }
 
         this._imageDetailsStore = StoreManager.GetStore<ImageDetailsStore>(ImageDetailsStore);
