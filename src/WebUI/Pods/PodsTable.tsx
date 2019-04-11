@@ -52,7 +52,7 @@ export class PodsTable extends BaseComponent<IPodsTableProperties> {
 
         if (filteredPods.length > 0) {
             filteredPods.forEach(pod => {
-                const key = (pod.status.message ? pod.status.reason : pod.status.phase).toLowerCase();
+                const key = pod.status.message ? pod.status.reason : pod.status.phase;
                 if (key in this._statusCount) {
                     this._statusCount[key] += 1;
                 } else {
