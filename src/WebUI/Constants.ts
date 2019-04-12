@@ -36,6 +36,7 @@ export namespace ServicesEvents {
 
 export namespace PodsEvents {
     export const PodsFetchedEvent: string = "ALL_PODS_FETCHED_EVENT";
+    export const LabelledPodsFetchedEvent: string = "LABELLED_PODS_FETCHED_EVENT";
 }
 
 export namespace ImageDetailsEvents {

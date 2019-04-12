@@ -44,9 +44,7 @@ export interface IPodsTableProperties extends IVssComponentProperties {
 
 export class PodsTable extends BaseComponent<IPodsTableProperties> {
     public render(): React.ReactNode {
-        // original value for this property --> this.props.showWorkloadColumn || false
-        // we will disable till we have full details on navigation
-        const showWorkloadColumn = false;
+        const showWorkloadColumn = this.props.showWorkloadColumn || false;
         const filteredPods: V1Pod[] = (this.props.podsToRender || []).filter((pod) => {
             return Utils.filterByName(pod.metadata.name, this.props.nameFilter);
         });
@@ -105,15 +103,6 @@ export class PodsTable extends BaseComponent<IPodsTableProperties> {
             renderCell: PodsTable._renderPodNameCell
         });
 
-        columns.push({
-            id: "podStatus",
-            name: Resources.StatusText,
-            width: new ObservableValue(showWorkloadColumn ? 220 : 256),
-            renderCell: (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod) => {
-                const textToRender: string = pod.status.message ? pod.status.reason : pod.status.phase;
-                return renderSimpleCell(rowIndex, columnIndex, tableColumn as any, { "podStatus": textToRender });
-            }
-        });
 
         if (showWorkloadColumn) {
             columns.push({
@@ -123,6 +112,16 @@ export class PodsTable extends BaseComponent<IPodsTableProperties> {
                 renderCell: PodsTable._renderPodWorkload
             });
         }
+        
+        columns.push({
+            id: "podStatus",
+            name: Resources.StatusText,
+            width: new ObservableValue(showWorkloadColumn ? 220 : 256),
+            renderCell: (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod) => {
+                const textToRender: string = pod.status.message ? pod.status.reason : pod.status.phase;
+                return renderSimpleCell(rowIndex, columnIndex, tableColumn as any, { "podStatus": textToRender });
+            }
+        });
 
         columns.push({
             id: podAgeKey,

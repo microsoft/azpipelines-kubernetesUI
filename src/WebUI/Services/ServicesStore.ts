@@ -7,7 +7,7 @@ import { StoreBase } from "../FluxCommon/Store";
 import { ActionsHubManager } from "../FluxCommon/ActionsHubManager";
 import { V1ServiceList, V1PodList, V1Pod } from "@kubernetes/client-node";
 import { ServicesActions } from "./ServicesActions";
-import { PodsActions } from "../Pods/PodsActions";
+import { PodsActions, IPodListWithLabel } from "../Pods/PodsActions";
 import { ServicesEvents } from "../Constants";
 
 export interface IServicesStoreState {
@@ -53,8 +53,8 @@ export class ServicesStore extends StoreBase {
         }
     }
 
-    private _setAssociatedPodsList = (podsList: V1PodList): void => {
-        this._state.podsList = podsList && podsList.items;
+    private _setAssociatedPodsList = (payload: IPodListWithLabel): void => {
+        this._state.podsList = payload.podsList && payload.podsList.items;
         this.emit(ServicesEvents.ServicePodsFetchedEvent, this);
     }
 

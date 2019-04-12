@@ -40,7 +40,7 @@ describe("Utils isOwnerMatched Tests", () => {
                 ]
             },
             "f310d74e-ebfd-11e8-ac56-829606b05f65",
-            false
+            true
         ],
     ];
 

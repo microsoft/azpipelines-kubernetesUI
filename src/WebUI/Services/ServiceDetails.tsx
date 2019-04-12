@@ -3,7 +3,7 @@
     Licensed under the MIT license.
 */
 
-import { V1Pod } from "@kubernetes/client-node";
+import { V1Pod, V1Service } from "@kubernetes/client-node";
 import { BaseComponent } from "@uifabric/utilities";
 import { CardContent, CustomCard } from "azure-devops-ui/Card";
 import { localeFormat } from "azure-devops-ui/Core/Util/String";
@@ -14,32 +14,36 @@ import { ITableColumn, renderSimpleCell, Table } from "azure-devops-ui/Table";
 import * as Date_Utils from "azure-devops-ui/Utilities/Date";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
+import * as queryString from "query-string";
 import { renderTableCell } from "../Common/KubeCardWithTable";
 import { KubeSummary } from "../Common/KubeSummary";
 import { KubeZeroData } from "../Common/KubeZeroData";
 import { PageTopHeader } from "../Common/PageTopHeader";
 import { Tags } from "../Common/Tags";
-import { ServicesEvents } from "../Constants";
+import { ServicesEvents, SelectedItemKeys } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
 import { PodsActionsCreator } from "../Pods/PodsActionsCreator";
-import { PodsDetails } from "../Pods/PodsDetails";
 import { PodsTable } from "../Pods/PodsTable";
 import * as Resources from "../Resources";
-import { IServiceItem, IVssComponentProperties } from "../Types";
+import { IServiceItem, IVssComponentProperties, IPodDetailsSelectionProperties } from "../Types";
 import { Utils } from "../Utils";
 import "./ServiceDetails.scss";
 import { ServicesStore } from "./ServicesStore";
+import { ServicesActionsCreator } from "./ServicesActionsCreator";
+import { createBrowserHistory } from "history";
+import { getServiceItems } from "./ServiceUtils";
+import { SelectionActionsCreator } from "../Selection/SelectionActionCreator";
 
 export interface IServiceDetailsProperties extends IVssComponentProperties {
-    service: IServiceItem;
+    service: IServiceItem | undefined;
     parentKind: string;
+    notifyViewChanged?: (viewTree: { id: string, displayName: string, url: string }[]) => void;
 }
 
 export interface IServiceDetailsState {
+    service: IServiceItem | undefined;
     pods: Array<V1Pod>;
-    selectedPod: V1Pod | null;
-    showSelectedPod: boolean;
 }
 
 const LoadBalancerText: string = "LoadBalancer";
@@ -48,35 +52,57 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
     constructor(props: IServiceDetailsProperties) {
         super(props, {});
         this.state = {
-            pods: [],
-            selectedPod: null,
-            showSelectedPod: false
+            service: props.service,
+            pods: []
         };
-        this._servicesStore = StoreManager.GetStore<ServicesStore>(ServicesStore);
-        this._podsActionsCreator = ActionsCreatorManager.GetActionCreator<PodsActionsCreator>(PodsActionsCreator);
 
-        const svc = this.props.service && this.props.service.service;
-        // service currently only supports equals with "and" operator. The generator generates that condition.
-        const labelSelector: string = Utils.generateEqualsConditionLabelSelector(svc && svc.spec && svc.spec.selector || {});
-        this._podsActionsCreator.getPods(KubeSummary.getKubeService(), labelSelector);
+        const notifyViewChanged = (service: V1Service) => {
+            if (service.metadata && props.notifyViewChanged) {
+                const metadata = service.metadata;
+                props.notifyViewChanged([{ id: SelectedItemKeys.ServiceItemKey + metadata.uid, displayName: metadata.name, url: window.location.href }]);
+            }
+        }
+
+        if (props.service && props.service.service) {
+            notifyViewChanged(props.service.service);
+        }
+
+        this._podsActionsCreator = ActionsCreatorManager.GetActionCreator<PodsActionsCreator>(PodsActionsCreator);
+        this._servicesStore = StoreManager.GetStore<ServicesStore>(ServicesStore);
+        const fetchServiceDetails = (svc: V1Service) => {
+            // service currently only supports equals with "and" operator. The generator generates that condition.
+            const labelSelector: string = Utils.generateEqualsConditionLabelSelector(svc && svc.spec && svc.spec.selector || {});
+            this._podsActionsCreator.getPods(KubeSummary.getKubeService(), labelSelector);
+        }
+
+        if (!props.service) {
+            ActionsCreatorManager.GetActionCreator<ServicesActionsCreator>(ServicesActionsCreator).getServices(KubeSummary.getKubeService());
+            const getServicesHandler = () => {
+                this._servicesStore.removeListener(ServicesEvents.ServicesFetchedEvent, getServicesHandler);
+                const history = createBrowserHistory();
+                const queryParams = queryString.parse(history.location.search);
+                const servicesList = this._servicesStore.getState().serviceList;
+                const services = (servicesList && servicesList.items) || [];
+                const selectedService = services.find(s => s.metadata.uid === queryParams.uid);
+                if (selectedService) {
+                    notifyViewChanged(selectedService);
+                    fetchServiceDetails(selectedService);
+                    this.setState({
+                        service: getServiceItems([selectedService])[0]
+                    });
+                }
+
+            }
+
+            this._servicesStore.addListener(ServicesEvents.ServicesFetchedEvent, getServicesHandler);
+        } else if (props.service.service) {
+            fetchServiceDetails(props.service.service);
+        }
+
         this._servicesStore.addListener(ServicesEvents.ServicePodsFetchedEvent, this._onPodsFetched);
     }
 
     public render(): JSX.Element {
-        if (this.state.selectedPod && this.state.showSelectedPod) {
-            const service = this.props.service && this.props.service.service;
-            const serviceName = service && service.metadata ? service.metadata.name : "";
-            return (
-                <PodsDetails
-                    pods={this.state.pods}
-                    parentName={serviceName}
-                    selectedPod={this.state.selectedPod}
-                    parentKind={this.props.parentKind}
-                    onBackButtonClick={this._setSelectedPodStateFalse}
-                />
-            );
-        }
-
         return (
             <Page className="service-details-page flex flex-grow">
                 {this._getMainHeading()}
@@ -93,7 +119,7 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
     }
 
     private _getMainHeading(): JSX.Element | null {
-        const item = this.props.service;
+        const item = this.state.service;
         if (item) {
             const statusProps = item.type === LoadBalancerText && !item.externalIP ? Statuses.Running : Statuses.Success;
             return <PageTopHeader title={item.package} statusProps={statusProps} />;
@@ -103,7 +129,7 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
     }
 
     private _getServiceDetails(): JSX.Element | null {
-        const item = this.props.service;
+        const item = this.state.service;
         if (item && item.service) {
             const tableItems: IServiceItem[] = [ServiceDetails._getServiceDetailsObject(item)];
             const agoTime = Date_Utils.ago(new Date(item.creationTimestamp), Date_Utils.AgoFormat.Compact);
@@ -166,17 +192,21 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
     }
 
     private _onSelectedPodInvoked = (event: React.SyntheticEvent<HTMLElement>, pod: V1Pod) => {
-        this.setState({
-            showSelectedPod: true,
-            selectedPod: pod
-        });
-    }
-
-    private _setSelectedPodStateFalse = () => {
-        this.setState({
-            showSelectedPod: false,
-            selectedPod: null
-        });
+        const selectionActionCreator = ActionsCreatorManager.GetActionCreator<SelectionActionsCreator>(SelectionActionsCreator);
+        const service = this.state.service!.service!;
+        selectionActionCreator.selectItem(
+            {
+                item: pod,
+                itemUID: pod.metadata.uid,
+                selectedItemType: SelectedItemKeys.PodDetailsKey,
+                showSelectedItem: true,
+                properties: {
+                    parentUid: service.metadata.uid,
+                    serviceSelector: Utils.generateEqualsConditionLabelSelector((service.spec && service.spec.selector) || {}),
+                    serviceName: service.metadata.name,
+                } as IPodDetailsSelectionProperties
+            }
+        );
     }
 
     private static _getServiceDetailsObject(item: IServiceItem): any {

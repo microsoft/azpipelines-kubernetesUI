@@ -24,6 +24,7 @@ import { SelectionActionsCreator } from "../Selection/SelectionActionCreator";
 import { ISelectionPayload } from "../Selection/SelectionActions";
 import { IServiceItem, IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
+import { getServiceItems } from "./ServiceUtils";
 
 const loadBalancerKey: string = "LoadBalancer";
 
@@ -47,7 +48,7 @@ export class ServicesTable extends BaseComponent<IServicesComponentProperties> {
             });
 
         if (filteredSvc.length > 0) {
-            const serviceItems = ServicesTable.getServiceItems(filteredSvc);
+            const serviceItems = getServiceItems(filteredSvc);
             return (
                 <Card className="services-list-card flex-grow bolt-card-no-vertical-padding"
                     contentProps={{ contentPadding: false }}>
@@ -70,25 +71,6 @@ export class ServicesTable extends BaseComponent<IServicesComponentProperties> {
         }
     }
 
-    public static getServiceItems(serviceList: V1Service[]): IServiceItem[] {
-        let items: IServiceItem[] = [];
-        serviceList.forEach(service => {
-            items.push({
-                package: service.metadata.name,
-                type: service.spec.type,
-                clusterIP: service.spec.clusterIP || "-",
-                externalIP: this._getExternalIP(service) || "-",
-                port: this._getPort(service) || "",
-                creationTimestamp: service.metadata.creationTimestamp || new Date(),
-                uid: service.metadata.uid.toLowerCase(),
-                pipeline: Utils.getPipelineText(service.metadata.annotations),
-                service: service,
-                kind: service.kind || "Service"
-            });
-        });
-
-        return items;
-    }
 
     private _openServiceItem = (event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>, selectedItem: IServiceItem) => {
         if (selectedItem) {
@@ -101,32 +83,6 @@ export class ServicesTable extends BaseComponent<IServicesComponentProperties> {
 
             this._selectionActionCreator.selectItem(payload);
         }
-    }
-
-    private static _getExternalIP(service: V1Service): string {
-        return service.status
-            && service.status.loadBalancer
-            && service.status.loadBalancer.ingress
-            && service.status.loadBalancer.ingress.length > 0
-            && service.status.loadBalancer.ingress[0].ip
-            || "";
-    }
-
-    private static _getPort(service: V1Service): string {
-        if (service.spec
-            && service.spec.ports
-            && service.spec.ports.length > 0) {
-            const ports = service.spec.ports.map(port => this._formatPortString(port));
-            return ports.join(", ");
-        }
-
-        return "";
-    }
-
-    private static _formatPortString(servicePort: V1ServicePort): string {
-        const nodePort = servicePort.nodePort ? ":" + servicePort.nodePort : "";
-        // example: 80:2080/TCP, if nodeport. 80/TCP, if no nodeport
-        return localeFormat("{0}{1}/{2}", servicePort.port, nodePort, servicePort.protocol);
     }
 
     private static _getColumns(): ITableColumn<IServiceItem>[] {

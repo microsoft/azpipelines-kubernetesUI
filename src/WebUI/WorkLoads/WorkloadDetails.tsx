@@ -3,7 +3,7 @@
     Licensed under the MIT license.
 */
 
-import { V1ObjectMeta, V1Pod, V1PodTemplateSpec, V1LabelSelector } from "@kubernetes/client-node";
+import { V1ObjectMeta, V1Pod, V1PodTemplateSpec, V1LabelSelector, V1ReplicaSet, V1DaemonSet, V1StatefulSet, V1ReplicaSetList, V1DaemonSetList, V1StatefulSetList } from "@kubernetes/client-node";
 import { BaseComponent } from "@uifabric/utilities";
 import { CardContent, CustomCard } from "azure-devops-ui/Card";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
@@ -24,27 +24,35 @@ import { Tags } from "../Common/Tags";
 import { StoreManager } from "../FluxCommon/StoreManager";
 import { ImageDetails } from "../ImageDetails/ImageDetails";
 import { ImageDetailsStore } from "../ImageDetails/ImageDetailsStore";
-import { PodsDetails } from "../Pods/PodsDetails";
 import { PodsStore } from "../Pods/PodsStore";
 import { PodsTable } from "../Pods/PodsTable";
 import * as Resources from "../Resources";
-import { IVssComponentProperties } from "../Types";
+import { IVssComponentProperties, IPodDetailsSelectionProperties } from "../Types";
 import { Utils, IMetadataAnnotationPipeline } from "../Utils";
 import "./WorkloadDetails.scss";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
 import { KubeSummary } from "../Common/KubeSummary";
 import { getRunDetailsText } from "../RunDetails";
+import { createBrowserHistory } from "history";
+import * as queryString from "query-string";
+import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
+import { PodsActionsCreator } from "../Pods/PodsActionsCreator";
+import { SelectionActionsCreator } from "../Selection/SelectionActionCreator";
+import { SelectedItemKeys, WorkloadsEvents, PodsEvents } from "../Constants";
+import { WorkloadsActionsCreator } from "./WorkloadsActionsCreator";
+import { WorkloadsStore } from "./WorkloadsStore";
+import { IKubeService } from "../../Contracts/Contracts";
 
 export interface IWorkloadDetailsProperties extends IVssComponentProperties {
-    parentMetaData: V1ObjectMeta;
-    podTemplate: V1PodTemplateSpec;
-    selector: V1LabelSelector | undefined;
+    item?: V1ReplicaSet | V1DaemonSet | V1StatefulSet;
     parentKind: string;
-    statusProps?: IStatusProps;
-    statusTooltip?: string;
+    itemTypeKey: SelectedItemKeys;
+    getStatusProps: (item: V1ReplicaSet | V1DaemonSet | V1StatefulSet) => ({ statusProps: IStatusProps | undefined, podsTooltip: string });
+    notifyViewChanged?: (viewTree: { id: string, displayName: string, url: string }[]) => void;
 }
 
 export interface IWorkloadDetailsState {
+    item: V1ReplicaSet | V1DaemonSet | V1StatefulSet | undefined;
     pods: Array<V1Pod>;
     selectedPod: V1Pod | null;
     showSelectedPod: boolean;
@@ -61,29 +69,92 @@ export interface IWorkLoadDetailsItem {
 export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, IWorkloadDetailsState> {
     constructor(props: IWorkloadDetailsProperties) {
         super(props, {});
+        this._podsStore = StoreManager.GetStore<PodsStore>(PodsStore);
+
+        this._podsStore.addListener(PodsEvents.PodsFetchedEvent, this._onPodsUpdated);
+
+        this._workloadsStore = StoreManager.GetStore<WorkloadsStore>(WorkloadsStore);
+
+        const notifyViewChanged = (item: V1ReplicaSet | V1DaemonSet | V1StatefulSet) => {
+            if (item.metadata && props.notifyViewChanged) {
+                const metadata = item.metadata;
+                props.notifyViewChanged([{ id: props.itemTypeKey + metadata.uid, displayName: metadata.name, url: window.location.href }]);
+            }
+        }
+
+        let item = props.item;
+        if (!props.item) {
+            const kubeService = KubeSummary.getKubeService();
+            ActionsCreatorManager.GetActionCreator<PodsActionsCreator>(PodsActionsCreator).getPods(kubeService);
+            const workloadsActionCreator = ActionsCreatorManager.GetActionCreator<WorkloadsActionsCreator>(WorkloadsActionsCreator);
+
+            const history = createBrowserHistory();
+            const queryParams = queryString.parse(history.location.search);
+            if (queryParams.type) {
+                // function to make sure we get the item for the view if present, or we make a call and set up a store listener to fetch that item
+                const getItem = (getItemList: () => (V1ReplicaSetList | V1StatefulSetList | V1DaemonSetList | undefined), actionCreatorFunc: (k: IKubeService) => void, storeEvent: string) => {
+
+                    // function to search the relevant item from the item list provided
+                    const searchItem = () => {
+                        const itemList = getItemList();
+                        if (itemList && itemList.items) {
+                            return (itemList.items as { metadata: V1ObjectMeta }[]).find(i => i.metadata.uid === queryParams.uid)
+                        }
+
+                    }
+
+                    let itemToReturn: any = searchItem();
+
+                    if (!itemToReturn) {
+                        const subscription = () => {
+                            const item = searchItem();
+                            this._workloadsStore.removeListener(storeEvent, subscription);
+
+                            if (item) {
+                                notifyViewChanged(item as any);
+                            }
+                            this.setState({ item: item as (V1ReplicaSet | V1DaemonSet | V1StatefulSet) });
+                        }
+
+                        actionCreatorFunc(kubeService);
+                        this._workloadsStore.addListener(storeEvent, subscription)
+                    }
+
+                    return itemToReturn;
+                }
+
+                switch (queryParams.type) {
+                    case SelectedItemKeys.ReplicaSetKey:
+                        item = getItem(() => this._workloadsStore.getState().replicaSetList, (k) => workloadsActionCreator.getReplicaSets(k), WorkloadsEvents.ReplicaSetsFetchedEvent);
+                        break;
+                    case SelectedItemKeys.DaemonSetKey:
+                        item = getItem(() => this._workloadsStore.getState().daemonSetList, (k) => workloadsActionCreator.getDaemonSets(k), WorkloadsEvents.DaemonSetsFetchedEvent);
+                        break;
+                    case SelectedItemKeys.StatefulSetKey:
+                        item = getItem(() => this._workloadsStore.getState().statefulSetList, (k) => workloadsActionCreator.getStatefulSets(k), WorkloadsEvents.StatefulSetsFetchedEvent);
+                        break;
+                }
+            }
+        }
+
+        if (item) {
+            notifyViewChanged(item);
+        }
+
+        this._imageDetailsStore = StoreManager.GetStore<ImageDetailsStore>(ImageDetailsStore);
+
         this.state = {
+            item: item,
             pods: [],
             selectedPod: null,
             showSelectedPod: false,
             showImageDetails: false,
             selectedImageDetails: undefined
         };
-        this._podsStore = StoreManager.GetStore<PodsStore>(PodsStore);
-        this._imageDetailsStore = StoreManager.GetStore<ImageDetailsStore>(ImageDetailsStore);
     }
 
     public render(): JSX.Element {
-        if (this.state.selectedPod && this.state.showSelectedPod) {
-            const parentName = this.props.parentMetaData.name || "";
-            return (<PodsDetails
-                pods={this.state.pods}
-                parentName={parentName}
-                parentKind={this.props.parentKind}
-                selectedPod={this.state.selectedPod}
-                onBackButtonClick={this._setSelectedPodStateFalse}
-            />);
-        }
-        else if (this.state.showImageDetails && this.state.selectedImageDetails) {
+        if (this.state.showImageDetails && this.state.selectedImageDetails) {
             return <ImageDetails
                 imageDetails={this.state.selectedImageDetails}
                 onBackButtonClick={this._hideImageDetails} />;
@@ -101,28 +172,33 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
     }
 
     public componentDidMount(): void {
-        const podList = this._podsStore.getState().podsList;
-        const pods: V1Pod[] = (podList && podList.items || []).filter(pod => {
-            return Utils.isOwnerMatched(pod.metadata, this.props.parentMetaData.uid);
-        });
+        if (this.state.item) {
+            const podList = this._podsStore.getState().podsList;
+            const pods: V1Pod[] = (podList && podList.items || []).filter(pod => {
+                return Utils.isOwnerMatched(pod.metadata, this.state.item!.metadata.uid);
+            });
 
-        this.setState({
-            pods: pods,
-            selectedPod: pods && pods.length > 0 ? pods[0] : null
-        });
+            this.setState({
+                pods: pods,
+                selectedPod: pods && pods.length > 0 ? pods[0] : null
+            });
+        }
+    }
+
+    public componentWillUnmount(): void {
+        this._podsStore.removeChangedListener(this._onPodsUpdated);
     }
 
     private _getMainHeading(): JSX.Element | null {
-        const metadata = this.props.parentMetaData;
-        return !metadata ? null
-            : <PageTopHeader title={metadata.name} statusProps={this.props.statusProps} statusTooltip={this.props.statusTooltip} />;
-    }
+        if (this.state.item) {
+            const metadata = this.state.item.metadata;
+            const { statusProps, podsTooltip } = this.props.getStatusProps(this.state.item);
 
-    private _setSelectedPodStateFalse = () => {
-        this.setState({
-            showSelectedPod: false,
-            selectedPod: null
-        });
+            return !metadata ? null
+                : <PageTopHeader title={metadata.name} statusProps={statusProps} statusTooltip={podsTooltip} />;
+        }
+
+        return null;
     }
 
     private _showImageDetails = (imageId: string) => {
@@ -140,6 +216,15 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
             showImageDetails: false,
             selectedImageDetails: undefined
         });
+    }
+
+    private _onPodsUpdated = () => {
+        const podList = this._podsStore.getState().podsList;
+        if (podList && podList.items) {
+            this.setState({
+                pods: podList.items.filter(p => this.state.item && Utils.isOwnerMatched(p.metadata, this.state.item.metadata.uid))
+            });
+        }
     }
 
     private _getColumns = (): ITableColumn<IWorkLoadDetailsItem>[] => {
@@ -171,40 +256,45 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
     }
 
     private _getWorkloadDetails(): JSX.Element | null {
-        const metadata = this.props.parentMetaData;
-        if (metadata) {
-            const pipelineDetails = Utils.getPipelineDetails(metadata.annotations);
-            const tableItems: IWorkLoadDetailsItem[] = [{ podTemplate: this.props.podTemplate, parentMetaData: metadata, selector: this.props.selector }];
-            const agoTime = Date_Utils.ago(new Date(metadata.creationTimestamp), Date_Utils.AgoFormat.Compact);
+        if (this.state.item) {
+            const metadata = this.state.item.metadata;
+            if (metadata) {
+                const tableItems: IWorkLoadDetailsItem[] = [{
+                    podTemplate: this.state.item.spec && this.state.item.spec.template,
+                    parentMetaData: metadata,
+                    selector: this.state.item.spec && this.state.item.spec.selector
+                }];
+                const agoTime = Date_Utils.ago(new Date(metadata.creationTimestamp), Date_Utils.AgoFormat.Compact);
 
-            return (
-                <CustomCard className="workload-details-card k8s-card-padding flex-grow bolt-card-no-vertical-padding">
-                    <CustomHeader>
-                        <HeaderTitleArea>
-                            <HeaderTitleRow>
-                                <HeaderTitle className="text-ellipsis" titleSize={TitleSize.Medium} >
-                                    {localeFormat(Resources.WorkloadDetails, this.props.parentKind)}
-                                </HeaderTitle>
-                            </HeaderTitleRow>
-                            <HeaderDescription className={"text-ellipsis"}>
-                                {
-                                    getRunDetailsText(metadata.annotations, undefined, agoTime)
-                                }
-                            </HeaderDescription>
-                        </HeaderTitleArea>
-                    </CustomHeader>
-                    <CardContent className="workload-full-details-table" contentPadding={false}>
-                        <Table
-                            id="workload-full-details-table"
-                            showHeader={true}
-                            showLines={false}
-                            singleClickActivation={false}
-                            itemProvider={new ArrayItemProvider<IWorkLoadDetailsItem>(tableItems)}
-                            columns={this._getColumns()}
-                        />
-                    </CardContent>
-                </CustomCard>
-            );
+                return (
+                    <CustomCard className="workload-details-card k8s-card-padding flex-grow bolt-card-no-vertical-padding">
+                        <CustomHeader>
+                            <HeaderTitleArea>
+                                <HeaderTitleRow>
+                                    <HeaderTitle className="text-ellipsis" titleSize={TitleSize.Medium} >
+                                        {localeFormat(Resources.WorkloadDetails, this.props.parentKind)}
+                                    </HeaderTitle>
+                                </HeaderTitleRow>
+                                <HeaderDescription className={"text-ellipsis"}>
+                                    {
+                                        getRunDetailsText(metadata.annotations, undefined, agoTime)
+                                    }
+                                </HeaderDescription>
+                            </HeaderTitleArea>
+                        </CustomHeader>
+                        <CardContent className="workload-full-details-table" contentPadding={false}>
+                            <Table
+                                id="workload-full-details-table"
+                                showHeader={true}
+                                showLines={false}
+                                singleClickActivation={false}
+                                itemProvider={new ArrayItemProvider<IWorkLoadDetailsItem>(tableItems)}
+                                columns={this._getColumns()}
+                            />
+                        </CardContent>
+                    </CustomCard>
+                );
+            }
         }
 
         return null;
@@ -226,10 +316,18 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
     }
 
     private _onSelectedPodInvoked = (event: React.SyntheticEvent<HTMLElement>, pod: V1Pod) => {
-        this.setState({
-            showSelectedPod: true,
-            selectedPod: pod
-        });
+        const selectionActionCreator = ActionsCreatorManager.GetActionCreator<SelectionActionsCreator>(SelectionActionsCreator);
+        selectionActionCreator.selectItem(
+            {
+                item: undefined,
+                itemUID: pod.metadata.uid,
+                selectedItemType: SelectedItemKeys.PodDetailsKey,
+                showSelectedItem: true,
+                properties: {
+                    parentUid: this.state.item!.metadata.uid,
+                } as IPodDetailsSelectionProperties
+            }
+        );
     }
 
     private _renderImageCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IWorkLoadDetailsItem>, tableItem: IWorkLoadDetailsItem): JSX.Element => {
@@ -263,5 +361,6 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
     }
 
     private _podsStore: PodsStore;
+    private _workloadsStore: WorkloadsStore;
     private _imageDetailsStore: ImageDetailsStore;
 }

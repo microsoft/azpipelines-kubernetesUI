@@ -3,6 +3,7 @@
     Licensed under the MIT license.
 */
 
+import * as queryString from "query-string";
 import { V1Pod } from "@kubernetes/client-node";
 import { BaseComponent } from "@uifabric/utilities";
 import { MessageCard, MessageCardSeverity } from "azure-devops-ui/MessageCard";
@@ -21,6 +22,7 @@ import { Utils } from "../Utils";
 import { PodLog } from "./PodLog";
 import { PodOverview } from "./PodOverview";
 import { PodYaml } from "./PodYaml";
+import { History, createBrowserHistory } from "history";
 
 export interface IPodRightPanelProps extends IVssComponentProperties {
     pod: V1Pod;
@@ -38,8 +40,19 @@ export interface IPodsRightPanelState {
 export class PodsRightPanel extends BaseComponent<IPodRightPanelProps, IPodsRightPanelState> {
     constructor(props: IPodRightPanelProps) {
         super(props, {});
+
+        this._historyService = createBrowserHistory();
+        const queryParams = queryString.parse(this._historyService.location.search)
+
+        let selectedPivot = PodsRightPanelTabsKeys.PodsDetailsKey;
+
+        // If view is present, load corresponding tab
+        if (!!queryParams.view) {
+            selectedPivot = queryParams.view as PodsRightPanelTabsKeys;
+        }
+
         this.state = {
-            selectedTab: "",
+            selectedTab: selectedPivot,
             selectedImageDetails: undefined,
             showImageDetails: (imageId: string) => {
                 const imageService = KubeSummary.getImageService();
@@ -100,6 +113,14 @@ export class PodsRightPanel extends BaseComponent<IPodRightPanelProps, IPodsRigh
     }
 
     private _onSelectedTabChanged = (selectedTab: string): void => {
+        let routeValues: queryString.OutputParams = queryString.parse(this._historyService.location.search);
+        routeValues["view"] = selectedTab;
+
+        this._historyService.replace({
+            pathname: this._historyService.location.pathname,
+            search: queryString.stringify(routeValues)
+        });
+
         this.setState({
             selectedTab: selectedTab
         });
@@ -140,4 +161,6 @@ export class PodsRightPanel extends BaseComponent<IPodRightPanelProps, IPodsRigh
             selectedImageDetails: undefined
         });
     }
+
+    private _historyService: History;
 }

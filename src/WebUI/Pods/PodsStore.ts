@@ -6,11 +6,12 @@
 import { StoreBase } from "../FluxCommon/Store";
 import { ActionsHubManager } from "../FluxCommon/ActionsHubManager";
 import { V1PodList, V1Pod } from "@kubernetes/client-node";
-import { PodsActions } from "./PodsActions";
+import { PodsActions, IPodListWithLabel } from "./PodsActions";
 import { PodsEvents } from "../Constants";
 
 export interface IPodsStoreState {
     podsList?: V1PodList;
+    podListByLabel: { [label: string]: V1PodList };
 }
 
 export class PodsStore extends StoreBase {
@@ -21,14 +22,16 @@ export class PodsStore extends StoreBase {
     public initialize(instanceId?: string): void {
         super.initialize(instanceId);
 
-        this._state = { podsList: undefined };
+        this._state = { podsList: undefined, podListByLabel: {} };
 
         this._actions = ActionsHubManager.GetActionsHub<PodsActions>(PodsActions);
         this._actions.podsFetched.addListener(this._setPodsList);
+        this._actions.podsFetchedByLabel.addListener(this._setPodsListByLabel)
     }
 
     public disposeInternal(): void {
         this._actions.podsFetched.removeListener(this._setPodsList);
+        this._actions.podsFetchedByLabel.addListener(this._setPodsListByLabel)
     }
 
     public getState(): IPodsStoreState {
@@ -38,6 +41,11 @@ export class PodsStore extends StoreBase {
     private _setPodsList = (podsList: V1PodList): void => {
         this._state.podsList = podsList;
         this.emit(PodsEvents.PodsFetchedEvent, this);
+    }
+
+    private _setPodsListByLabel = (payload: IPodListWithLabel): void => {
+        this._state.podListByLabel[payload.labelSelector] = payload.podsList;
+        this.emit(PodsEvents.LabelledPodsFetchedEvent, this);
     }
 
     private _state: IPodsStoreState;
