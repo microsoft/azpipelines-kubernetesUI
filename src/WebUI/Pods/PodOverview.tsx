@@ -35,7 +35,7 @@ export class PodOverview extends BaseComponent<IPodOverviewProps> {
     public render(): JSX.Element {
         const podDetails = PodOverview._getPodDetails(this.props.pod, this.props.showImageDetails);
         return (
-            <CustomCard className="pod-overview-card k8s-card-padding flex-grow bolt-card-no-vertical-padding">
+            <CustomCard className="pod-overview-card k8s-card-padding flex-grow bolt-table-card bolt-card-no-vertical-padding">
                 <CustomHeader>
                     <HeaderTitleArea>
                         <HeaderTitleRow>

@@ -202,7 +202,7 @@ export class ImageDetails extends BaseComponent<IImageDetailsProperties, IImageD
     private _getImageLayers(): JSX.Element | null {
         const imageDetails = this.props.imageDetails;
         return (
-            <CustomCard className="image-layers-card k8s-card-padding flex-grow bolt-card-no-vertical-padding">
+            <CustomCard className="image-layers-card k8s-card-padding bolt-table-card flex-grow bolt-card-no-vertical-padding">
                 <CustomHeader>
                     <HeaderTitleArea>
                         <HeaderTitleRow>

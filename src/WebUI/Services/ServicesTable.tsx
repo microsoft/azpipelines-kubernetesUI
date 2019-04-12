@@ -50,7 +50,7 @@ export class ServicesTable extends BaseComponent<IServicesComponentProperties> {
         if (filteredSvc.length > 0) {
             const serviceItems = getServiceItems(filteredSvc);
             return (
-                <Card className="services-list-card flex-grow bolt-card-no-vertical-padding"
+                <Card className="services-list-card flex-grow bolt-table-card bolt-card-no-vertical-padding"
                     contentProps={{ contentPadding: false }}>
                     <Table
                         id="services-list-table"

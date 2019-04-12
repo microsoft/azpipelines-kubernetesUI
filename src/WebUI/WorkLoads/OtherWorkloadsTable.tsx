@@ -31,7 +31,6 @@ import { SelectionActionsCreator } from "../Selection/SelectionActionCreator";
 import { ISelectionPayload } from "../Selection/SelectionActions";
 import { ISetWorkloadTypeItem, IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
-import "./OtherWorkloadsTable.scss";
 import { WorkloadsActionsCreator } from "./WorkloadsActionsCreator";
 import { WorkloadsStore } from "./WorkloadsStore";
 
@@ -84,7 +83,7 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
 
         if (filteredSet.length > 0) {
             return (
-                <CustomCard className="workloads-other-content k8s-card-padding flex-grow bolt-card-no-vertical-padding">
+                <CustomCard className="workloads-other-content k8s-card-padding flex-grow bolt-table-card bolt-card-no-vertical-padding">
                     <CustomHeader>
                         <HeaderTitleArea>
                             <HeaderTitleRow>

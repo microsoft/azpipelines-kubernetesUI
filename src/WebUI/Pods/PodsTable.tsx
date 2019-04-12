@@ -24,7 +24,6 @@ import { SelectionActions, ISelectionPayload } from "../Selection/SelectionActio
 import { IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
 import { AgoFormat } from "azure-devops-ui/Utilities/Date";
-import "./PodsTable.scss";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { SelectionActionsCreator } from "../Selection/SelectionActionCreator";
@@ -61,7 +60,7 @@ export class PodsTable extends BaseComponent<IPodsTableProperties> {
             });
 
             return (
-                <CustomCard className="pods-associated k8s-card-padding flex-grow bolt-card-no-vertical-padding">
+                <CustomCard className="pods-associated k8s-card-padding flex-grow bolt-table-card bolt-card-no-vertical-padding">
                     <CustomHeader>
                         <HeaderTitleArea>
                             <HeaderTitleRow>
