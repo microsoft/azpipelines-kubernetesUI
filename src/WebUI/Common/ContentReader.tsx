@@ -53,6 +53,7 @@ export class ContentReader extends React.Component<IReaderProps> {
             this._editor = monaco.editor.create(innerRef, {
                 readOnly: true,
                 renderWhitespace: "all",
+                minimap: { enabled: false },
                 scrollbar: { horizontalScrollbarSize: 16 },
                 lineNumbers: "on",
                 extraEditorClassName: "k8s-monaco-editor",
