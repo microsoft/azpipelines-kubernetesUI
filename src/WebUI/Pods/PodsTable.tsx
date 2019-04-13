@@ -4,7 +4,8 @@
 */
 
 import { V1Pod, V1OwnerReference } from "@kubernetes/client-node";
-import { BaseComponent, css } from "@uifabric/utilities";
+import { BaseComponent } from "@uifabric/utilities";
+import { css } from "azure-devops-ui/Util";
 import { Ago } from "azure-devops-ui/Ago";
 import { CardContent, CustomCard } from "azure-devops-ui/Card";
 import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
@@ -51,7 +52,7 @@ export class PodsTable extends BaseComponent<IPodsTableProperties> {
 
         if (filteredPods.length > 0) {
             filteredPods.forEach(pod => {
-                const key = (pod.status.message ? pod.status.reason : pod.status.phase).toLowerCase();
+                const key = pod.status.message ? pod.status.reason : pod.status.phase;
                 if (key in this._statusCount) {
                     this._statusCount[key] += 1;
                 } else {
@@ -215,7 +216,7 @@ export class PodsTable extends BaseComponent<IPodsTableProperties> {
         }
 
         keys.forEach(key => {
-            const suffix = subText ? localeFormat(" . {0}", subText) : "";
+            const suffix = subText ? localeFormat(" · {0}", subText) : "";
             subText = localeFormat("{0} {1}{2}", podStatuses[key], key, suffix);
         });
 
