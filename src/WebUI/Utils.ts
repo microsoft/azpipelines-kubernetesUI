@@ -150,7 +150,7 @@ export class Utils {
         if (podSpec && podSpec.containers && podSpec.containers.length > 0) {
             podSpec.containers.forEach(container => {
                 if (images.indexOf(container.image) < 0) {
-                    images.push(container.image);
+                    images.push(Utils.appendDefaultTagToImageName(container.image));
                 }
             });
 
@@ -167,7 +167,7 @@ export class Utils {
 
     public static getFirstImageName(podSpec: V1PodSpec | undefined): string {
         if (podSpec && podSpec.containers && podSpec.containers.length > 0) {
-            return podSpec.containers[0].image;
+            return Utils.appendDefaultTagToImageName(podSpec.containers[0].image);
         }
 
         return "";
@@ -269,7 +269,16 @@ export class Utils {
     }
 
     public static extractDisplayImageName(imageId: string): string {
-        return Utils.getImageResourceUrlParameter(imageId, matchPatternForImageName);
+        let imageName = Utils.getImageResourceUrlParameter(imageId, matchPatternForImageName);
+        return Utils.appendDefaultTagToImageName(imageName);
+    }
+
+    public static appendDefaultTagToImageName(imageName: string): string {
+        if(!/:/.test(imageName)) {
+            imageName = format("{0}:latest", imageName);
+        }
+
+        return imageName;
     }
 
     /**
