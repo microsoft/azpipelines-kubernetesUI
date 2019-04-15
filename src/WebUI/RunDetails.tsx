@@ -21,11 +21,12 @@ export function getRunDetailsText(annotations?: { [key: string]: string }, jobAn
         return null;
     }
 
+    const trimmedJobName = pipelineDetails.jobName && pipelineDetails.jobName.replace(/^"|"$/g, "");
     const first = createdAgo
-        ? (pipelineDetails.jobName
-            ? localeFormat(Resources.ServiceCreatedWithPipelineText, createdAgo, pipelineDetails.jobName)
+        ? (trimmedJobName
+            ? localeFormat(Resources.ServiceCreatedWithPipelineText, createdAgo, trimmedJobName)
             : localeFormat(Resources.CreatedAgo, createdAgo))
-        : pipelineDetails.jobName;
+        : trimmedJobName;
 
     const runElement = pipelineDetails.runName
         ? (pipelineDetails.runUrl
@@ -44,23 +45,23 @@ export function getRunDetailsText(annotations?: { [key: string]: string }, jobAn
         const indexOfRun = runText.indexOf("{0}");
 
         second = (<>
-            { runText.substring(0, indexOfRun - 1) }
-            {runElement }
-        { runText.substring(indexOfRun + 3) }
+            {runText.substring(0, indexOfRun - 1)}
+            {runElement}
+            {runText.substring(indexOfRun + 3)}
         </>);
     }
 
     return (
         <>
-        { first }
+            {first}
             {
-        second
-            ? <>
-            <span className={"runs-bullet"}>•</span>
-                        {second }
+                second
+                    ? <>
+                        <span className={"runs-bullet"}>•</span>
+                        {second}
                     </>
                     : undefined
-    }
+            }
         </>
     )
 
