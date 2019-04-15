@@ -28,6 +28,7 @@ import { ImageDetailsStore } from "../ImageDetails/ImageDetailsStore";
 import { getRunDetailsText } from "../RunDetails";
 
 export interface IPodOverviewProps extends IPodRightPanelProps {
+    pod: V1Pod;
     showImageDetails?: (imageId: string) => void;
 }
 
@@ -134,7 +135,7 @@ export class PodOverview extends BaseComponent<IPodOverviewProps> {
                 props = {
                     columnIndex: columnIndex,
                     children:
-                    <Tags items={value} />,
+                        <Tags items={value} />,
                     tableColumn: tableColumn,
                     contentClassName: css("pod-labels-pill", contentClassName)
                 };
