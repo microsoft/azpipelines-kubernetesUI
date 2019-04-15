@@ -36,6 +36,7 @@ import { createBrowserHistory } from "history";
 import { getServiceItems } from "./ServiceUtils";
 import { SelectionActionsCreator } from "../Selection/SelectionActionCreator";
 import { PodsStore } from "../Pods/PodsStore";
+import { getRunDetailsText } from "../RunDetails";
 
 export interface IServiceDetailsProperties extends IVssComponentProperties {
     service: IServiceItem | undefined;
@@ -138,9 +139,6 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
         if (item && item.service) {
             const tableItems: IServiceItem[] = [ServiceDetails._getServiceDetailsObject(item)];
             const agoTime = Date_Utils.ago(new Date(item.creationTimestamp), Date_Utils.AgoFormat.Compact);
-            const pipelineText = item.pipeline
-                ? localeFormat(Resources.ServiceCreatedWithPipelineText, agoTime, item.pipeline)
-                : localeFormat(Resources.CreatedAgo, agoTime);
 
             return (
                 <CustomCard className="service-details-card k8s-card-padding bolt-table-card flex-grow bolt-card-no-vertical-padding">
@@ -152,7 +150,9 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
                                 </HeaderTitle>
                             </HeaderTitleRow>
                             <HeaderDescription className={"text-ellipsis"}>
-                                {pipelineText}
+                                {
+                                    getRunDetailsText(item.service.metadata.annotations, undefined, agoTime)
+                                }
                             </HeaderDescription>
                         </HeaderTitleArea>
                     </CustomHeader>
@@ -166,7 +166,7 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
                             columns={ServiceDetails._getColumns()}
                         />
                     </CardContent>
-                </CustomCard>
+                </CustomCard >
             );
         }
 
