@@ -38,19 +38,14 @@ export class PodsLeftPanel extends BaseComponent<IPodsLeftPanelProperties> {
     }
 
     public componentDidMount() {
-        const selectedPodName = this.props.selectedPodName;
-        if (!this._hasSelected) {
-            if (selectedPodName) {
-                this._selectedRow = (this.props.pods || []).findIndex(pod => pod.metadata.name === selectedPodName);
-            }
+        if (this.props.pods && this.props.pods.length) {
+            this._selectPod();
+        }
+    }
 
-            if (this._selectedRow === -1 || this._selectedRow >= (this.props.pods || []).length) {
-                this._selectedRow = 0;
-            }
-
-            // select the first pod in left panel by default
-            this._selection.select(this._selectedRow);
-            this._hasSelected = true;
+    public componentDidUpdate(prevProps: IPodsLeftPanelProperties): void {
+        if (!(prevProps.pods && prevProps.pods.length) && (this.props.pods && this.props.pods.length)) {
+            this._selectPod();
         }
     }
 
@@ -121,6 +116,23 @@ export class PodsLeftPanel extends BaseComponent<IPodsLeftPanelProperties> {
         const contentClassName = rowIndex === selectedIndex ? "fontWeightSemiBold font-weight-semibold" : "";
         const { statusProps, tooltip } = Utils.generatePodStatusProps(pod.status);
         return renderPodNameWithStatusTableCell(rowIndex, columnIndex, tableColumn, pod.metadata.name, statusProps, tooltip, contentClassName);
+    }
+
+    private _selectPod(): void {
+        const selectedPodName = this.props.selectedPodName;
+        if (!this._hasSelected) {
+            if (selectedPodName) {
+                this._selectedRow = (this.props.pods || []).findIndex(pod => pod.metadata.name === selectedPodName);
+            }
+
+            if (this._selectedRow === -1 || this._selectedRow >= (this.props.pods || []).length) {
+                this._selectedRow = 0;
+            }
+
+            // select the first pod in left panel by default
+            this._selection.select(this._selectedRow);
+            this._hasSelected = true;
+        }
     }
 
     private _selection: IListSelection = new ListSelection();
