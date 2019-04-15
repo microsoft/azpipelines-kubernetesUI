@@ -113,6 +113,8 @@ export class PodsDetails extends BaseComponent<IPodsDetailsProperties, IPodsDeta
                 const fetchedPodList = props.serviceSelector ? podsStore.getState().podListByLabel[props.serviceSelector] : podsStore.getState().podsList;
                 if (fetchedPodList && fetchedPodList.items) {
                     const properties = getPodProperties(fetchedPodList.items);
+                    // Adding breadcrumb when parent object is fetched on pod view refresh
+                    notifyViewChanged(properties.parentName, properties.parentKind);
                     this.setState({
                         parentKind: properties.parentKind,
                         parentName: properties.parentName,
