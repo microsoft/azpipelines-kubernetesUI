@@ -16,7 +16,8 @@
 // only services are zero
 .k8s-zero-services-data,
 // zero associated pods
-.k8s-zero-service-pods-data {
+.k8s-zero-service-pods-data,
+.k8s-zero-workload-pods-data {
     margin-bottom: 80px;
 }
 
