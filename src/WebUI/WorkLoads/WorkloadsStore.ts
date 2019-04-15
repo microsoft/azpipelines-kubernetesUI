@@ -7,7 +7,7 @@ import { V1DaemonSetList, V1DeploymentList, V1Pod, V1PodList, V1ReplicaSetList, 
 import { WorkloadsEvents } from "../Constants";
 import { ActionsHubManager } from "../FluxCommon/ActionsHubManager";
 import { StoreBase } from "../FluxCommon/Store";
-import { PodsActions } from "../Pods/PodsActions";
+import { PodsActions, IPodsPayload } from "../Pods/PodsActions";
 import { WorkloadsActions } from "./WorkloadsActions";
 
 export interface IWorkloadsStoreState {
@@ -100,9 +100,9 @@ export class WorkloadsStore extends StoreBase {
         }
     }
 
-    private _setOrphanPodsList = (podsList: V1PodList): void => {
+    private _setOrphanPodsList = (payload: IPodsPayload): void => {
         let orphanPods: V1Pod[] = [];
-        podsList && podsList.items && podsList.items.forEach(pod => {
+        payload.podsList && payload.podsList.items && payload.podsList.items.forEach(pod => {
             if (!pod.metadata.ownerReferences) {
                 orphanPods.push(pod);
             }

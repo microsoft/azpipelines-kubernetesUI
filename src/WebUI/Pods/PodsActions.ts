@@ -6,9 +6,13 @@
 import { ActionsHubBase, Action } from "../FluxCommon/Actions";
 import { V1PodList } from "@kubernetes/client-node";
 
-export interface IPodListWithLabel {
-    labelSelector: string;
+export interface IPodsPayload {
     podsList: V1PodList;
+    podsLoading: boolean;
+}
+
+export interface IPodListWithLabel extends IPodsPayload {
+    labelSelector: string;
 }
 
 export class PodsActions extends ActionsHubBase {
@@ -17,11 +21,11 @@ export class PodsActions extends ActionsHubBase {
     }
 
     public initialize(): void {
-        this._podsFetched = new Action<V1PodList>();
+        this._podsFetched = new Action<IPodsPayload>();
         this._podsFetchedByLabel = new Action<IPodListWithLabel>();
     }
 
-    public get podsFetched(): Action<V1PodList> {
+    public get podsFetched(): Action<IPodsPayload> {
         return this._podsFetched;
     }
 
@@ -29,6 +33,6 @@ export class PodsActions extends ActionsHubBase {
         return this._podsFetchedByLabel;
     }
 
-    private _podsFetched: Action<V1PodList>;
+    private _podsFetched: Action<IPodsPayload>;
     private _podsFetchedByLabel: Action<IPodListWithLabel>;
 }

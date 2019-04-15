@@ -92,4 +92,6 @@ define("Environments/Providers/Kubernetes/Resources", ["require", "exports"], fu
     exports.SizeText = "Size";
     exports.SummaryHeaderSubTextFormat = "{0} (cluster)";
     exports.TagsText = "Tags";
+    exports.LoadingPodsSpinnerLabel = "Loading pods...";
+    exports.LoadingServicesSpinnerLabel = "Loading services...";
 });

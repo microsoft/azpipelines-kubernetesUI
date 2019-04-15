@@ -15,6 +15,7 @@ import { ITableColumn, Table } from "azure-devops-ui/Table";
 import * as Date_Utils from "azure-devops-ui/Utilities/Date";
 import { Link } from "azure-devops-ui/Link";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
+import { Spinner, SpinnerSize } from "azure-devops-ui/Spinner";
 import * as React from "react";
 import { IImageDetails } from "../../Contracts/Types";
 import { defaultColumnRenderer, renderTableCell } from "../Common/KubeCardWithTable";
@@ -58,6 +59,7 @@ export interface IWorkloadDetailsState {
     showSelectedPod: boolean;
     showImageDetails: boolean;
     selectedImageDetails: IImageDetails | undefined;
+    podsLoading?: boolean;
 }
 
 export interface IWorkLoadDetailsItem {
@@ -200,7 +202,7 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
 
         return null;
     }
-
+    
     private _showImageDetails = (imageId: string) => {
         const imageService = KubeSummary.getImageService();
         imageService && imageService.getImageDetails(imageId).then(imageDetails => {
@@ -219,10 +221,12 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
     }
 
     private _onPodsUpdated = () => {
-        const podList = this._podsStore.getState().podsList;
+        const podsStoreState = this._podsStore.getState();
+        const podList = podsStoreState.podsList;
         if (podList && podList.items) {
             this.setState({
-                pods: podList.items.filter(p => this.state.item && Utils.isOwnerMatched(p.metadata, this.state.item.metadata.uid))
+                pods: podList.items.filter(p => this.state.item && Utils.isOwnerMatched(p.metadata, this.state.item.metadata.uid)),
+                podsLoading: podsStoreState.podsLoading
             });
         }
     }
@@ -301,6 +305,13 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
     }
 
     private _getAssociatedPods(): JSX.Element | null {
+        const podsStoreState = this._podsStore.getState();
+        if (podsStoreState.podsLoading) {
+            return <Spinner className={"flex flex-grow loading-pods"}
+                size={SpinnerSize.large}
+                label={Resources.LoadingPodsSpinnerLabel} />;
+        }
+
         if (this.state.pods.length === 0) {
             return KubeZeroData.getWorkloadAssociatedPodsZeroData();
         }

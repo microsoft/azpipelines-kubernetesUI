@@ -6,6 +6,7 @@
 import { V1Pod } from "@kubernetes/client-node";
 import { BaseComponent } from "@uifabric/utilities";
 import { SplitterElementPosition, Splitter } from "azure-devops-ui/Splitter";
+import { Spinner, SpinnerSize } from "azure-devops-ui/Spinner";
 import * as React from "react";
 import * as Resources from "../Resources";
 import { IVssComponentProperties, IPodDetailsSelectionProperties } from "../Types";
@@ -36,6 +37,7 @@ export interface IPodsDetailsState {
     pods?: V1Pod[];
     parentName?: string;
     parentKind?: string;
+    podsLoading?: boolean;
     selectedPod: V1Pod | null | undefined;
     selectedImageDetails: IImageDetails | undefined;
 }
@@ -66,9 +68,9 @@ export class PodsDetails extends BaseComponent<IPodsDetailsProperties, IPodsDeta
             }
         }
 
-        const podsStore = StoreManager.GetStore<PodsStore>(PodsStore);
+        this._podsStore = StoreManager.GetStore<PodsStore>(PodsStore);
         let parentKind: string | undefined = undefined, parentName: string | undefined = undefined, filteredPods: V1Pod[] | undefined = [], selectedPod: V1Pod | undefined = undefined;
-        const podsList = props.serviceSelector ? podsStore.getState().podListByLabel[props.serviceSelector] : podsStore.getState().podsList;
+        const podsList = props.serviceSelector ? this._podsStore.getState().podListByLabel[props.serviceSelector] : this._podsStore.getState().podsList;
 
         const getPodProperties = (pods: V1Pod[]): { parentKind?: string, parentName?: string, pods?: V1Pod[], selectedPod?: V1Pod } => {
             if (pods) {
@@ -109,20 +111,22 @@ export class PodsDetails extends BaseComponent<IPodsDetailsProperties, IPodsDeta
 
             const storeEventName = props.serviceSelector ? PodsEvents.LabelledPodsFetchedEvent : PodsEvents.PodsFetchedEvent;
             const podsFetchHandler = () => {
-                podsStore.removeListener(storeEventName, podsFetchHandler);
-                const fetchedPodList = props.serviceSelector ? podsStore.getState().podListByLabel[props.serviceSelector] : podsStore.getState().podsList;
+                this._podsStore.removeListener(storeEventName, podsFetchHandler);
+                const podsStoreState = this._podsStore.getState();
+                const fetchedPodList = props.serviceSelector ? podsStoreState.podListByLabel[props.serviceSelector] : podsStoreState.podsList;
                 if (fetchedPodList && fetchedPodList.items) {
                     const properties = getPodProperties(fetchedPodList.items);
                     this.setState({
                         parentKind: properties.parentKind,
                         parentName: properties.parentName,
                         pods: properties.pods,
-                        selectedPod: properties.selectedPod
+                        selectedPod: properties.selectedPod,
+                        podsLoading: podsStoreState.podsLoading
                     });
                 }
             }
 
-            podsStore.addListener(storeEventName, podsFetchHandler);
+            this._podsStore.addListener(storeEventName, podsFetchHandler);
             if (props.serviceSelector) {
                 podsActionCreator.getPods(KubeSummary.getKubeService(), props.serviceSelector);
             }
@@ -155,6 +159,12 @@ export class PodsDetails extends BaseComponent<IPodsDetailsProperties, IPodsDeta
                 onBackButtonClick={this._hideImageDetails} />;
         }
 
+        if (this.state.podsLoading) {
+            return <Spinner className={"flex flex-grow loading-pods"}
+                size={SpinnerSize.large}
+                label={Resources.LoadingPodsSpinnerLabel} />;
+        }
+
         let selectedPod = this.state.selectedPod;
         if (!selectedPod && this.state.pods && this.state.pods.length > 0) {
             selectedPod = this.state.pods[0];
@@ -178,65 +188,67 @@ export class PodsDetails extends BaseComponent<IPodsDetailsProperties, IPodsDeta
 
         return (
             <>
-                {
-                    leftPanel
-                        ? (<Splitter
-                            fixedElement={SplitterElementPosition.Near}
-                            initialFixedSize={this._initialFixedSize}
-                            minFixedSize={this._initialFixedSize}
-                            onRenderFarElement={() => rightPanel}
-                            onRenderNearElement={() => leftPanel}
-                            nearElementClassName="pods-details-left-pane"
-                        />)
+            {
+                leftPanel
+                    ?(<Splitter
+                            fixedElement= { SplitterElementPosition.Near }
+        initialFixedSize = { this._initialFixedSize }
+        minFixedSize = { this._initialFixedSize }
+        onRenderFarElement = {() => rightPanel
+    }
+    onRenderNearElement = {() => leftPanel
+}
+nearElementClassName = "pods-details-left-pane"
+    />)
                         : rightPanel
                 }
             </>
         );
     }
 
-
     private _onPodSelectionChange = (event: React.SyntheticEvent<HTMLElement>, selectedPod: V1Pod): void => {
-        let routeValues: queryString.OutputParams = queryString.parse(this._history.location.search);
-        routeValues["uid"] = selectedPod.metadata.uid;
+    let routeValues: queryString.OutputParams = queryString.parse(this._history.location.search);
+    routeValues["uid"] = selectedPod.metadata.uid;
 
-        this._history.replace({
-            pathname: this._history.location.pathname,
-            search: queryString.stringify(routeValues)
-        });
+    this._history.replace({
+        pathname: this._history.location.pathname,
+        search: queryString.stringify(routeValues)
+    });
 
 
-        this.setState({
-            selectedPod: selectedPod
-        });
-    }
+    this.setState({
+        selectedPod: selectedPod
+    });
+}
 
     private _onParentBackButtonClick = () => {
-        const selectionActionCreator = ActionsCreatorManager.GetActionCreator<SelectionActionsCreator>(SelectionActionsCreator);
-        selectionActionCreator.selectItem({
-            itemUID: this.props.parentUid,
-            selectedItemType: Utils.getItemTypeKeyFromKind(this.state.parentKind || ""),
-            showSelectedItem: true,
-            item: undefined,
-            properties: { parentUid: "", serviceSelector: "", serviceName: "" } as IPodDetailsSelectionProperties // This will delete these values if they are present in the url
-        })
-    }
+    const selectionActionCreator = ActionsCreatorManager.GetActionCreator<SelectionActionsCreator>(SelectionActionsCreator);
+    selectionActionCreator.selectItem({
+        itemUID: this.props.parentUid,
+        selectedItemType: Utils.getItemTypeKeyFromKind(this.state.parentKind || ""),
+        showSelectedItem: true,
+        item: undefined,
+        properties: { parentUid: "", serviceSelector: "", serviceName: "" } as IPodDetailsSelectionProperties // This will delete these values if they are present in the url
+    })
+}
 
     // ToDO:: Handle GetImageDetails via ImageStore to avoid multiple calls to API from UI
     private _showImageDetails = (imageId: string) => {
-        const imageService = KubeSummary.getImageService();
-        imageService && imageService.getImageDetails(imageId).then(imageDetails => {
-            this.setState({
-                selectedImageDetails: imageDetails
-            });
+    const imageService = KubeSummary.getImageService();
+    imageService && imageService.getImageDetails(imageId).then(imageDetails => {
+        this.setState({
+            selectedImageDetails: imageDetails
         });
-    }
+    });
+}
 
     private _hideImageDetails = () => {
-        this.setState({
-            selectedImageDetails: undefined
-        });
-    }
+    this.setState({
+        selectedImageDetails: undefined
+    });
+}
 
     private _initialFixedSize: number = 320;
     private _history: History;
+    private _podsStore: PodsStore;
 }

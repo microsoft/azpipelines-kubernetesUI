@@ -13,6 +13,7 @@ import { Statuses } from "azure-devops-ui/Status";
 import { ITableColumn, renderSimpleCell, Table } from "azure-devops-ui/Table";
 import * as Date_Utils from "azure-devops-ui/Utilities/Date";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
+import { Spinner, SpinnerSize } from "azure-devops-ui/Spinner";
 import * as React from "react";
 import * as queryString from "query-string";
 import { renderTableCell } from "../Common/KubeCardWithTable";
@@ -20,7 +21,7 @@ import { KubeSummary } from "../Common/KubeSummary";
 import { KubeZeroData } from "../Common/KubeZeroData";
 import { PageTopHeader } from "../Common/PageTopHeader";
 import { Tags } from "../Common/Tags";
-import { ServicesEvents, SelectedItemKeys } from "../Constants";
+import { ServicesEvents, PodsEvents, SelectedItemKeys } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
 import { PodsActionsCreator } from "../Pods/PodsActionsCreator";
@@ -34,6 +35,7 @@ import { ServicesActionsCreator } from "./ServicesActionsCreator";
 import { createBrowserHistory } from "history";
 import { getServiceItems } from "./ServiceUtils";
 import { SelectionActionsCreator } from "../Selection/SelectionActionCreator";
+import { PodsStore } from "../Pods/PodsStore";
 
 export interface IServiceDetailsProperties extends IVssComponentProperties {
     service: IServiceItem | undefined;
@@ -44,6 +46,7 @@ export interface IServiceDetailsProperties extends IVssComponentProperties {
 export interface IServiceDetailsState {
     service: IServiceItem | undefined;
     pods: Array<V1Pod>;
+    podsLoading?: boolean;
 }
 
 const LoadBalancerText: string = "LoadBalancer";
@@ -53,7 +56,8 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
         super(props, {});
         this.state = {
             service: props.service,
-            pods: []
+            pods: [],
+            podsLoading: true
         };
 
         const notifyViewChanged = (service: V1Service) => {
@@ -69,6 +73,7 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
 
         this._podsActionsCreator = ActionsCreatorManager.GetActionCreator<PodsActionsCreator>(PodsActionsCreator);
         this._servicesStore = StoreManager.GetStore<ServicesStore>(ServicesStore);
+        this._podsStore = StoreManager.GetStore<PodsStore>(PodsStore);
         const fetchServiceDetails = (svc: V1Service) => {
             // service currently only supports equals with "and" operator. The generator generates that condition.
             const labelSelector: string = Utils.generateEqualsConditionLabelSelector(svc && svc.spec && svc.spec.selector || {});
@@ -170,12 +175,20 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
 
     private _onPodsFetched = (): void => {
         const pods = this._servicesStore.getState().podsList;
+        const podsLoading = this._podsStore.getState().podsLoading;
         this.setState({
-            pods: pods || []
+            pods: pods || [],
+            podsLoading: podsLoading
         });
     }
 
     private _getAssociatedPods(): JSX.Element | null {
+        if (this.state.podsLoading) {
+            return <Spinner className={"flex flex-grow loading-pods"}
+                size={SpinnerSize.large}
+                label={Resources.LoadingPodsSpinnerLabel} />;
+        }
+
         if (!this.state.pods || this.state.pods.length === 0) {
             return KubeZeroData.getServiceAssociatedPodsZeroData();
         }
@@ -284,4 +297,5 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
 
     private _servicesStore: ServicesStore;
     private _podsActionsCreator: PodsActionsCreator;
+    private _podsStore: PodsStore;
 }
