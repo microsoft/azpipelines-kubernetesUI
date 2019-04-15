@@ -201,6 +201,7 @@ export class ImageDetails extends BaseComponent<IImageDetailsProperties, IImageD
 
     private _getImageLayers(): JSX.Element | null {
         const imageDetails = this.props.imageDetails;
+        const layerInfo = this._sortByCreatedDate(imageDetails.layerInfo);
         return (
             <CustomCard className="image-layers-card k8s-card-padding bolt-table-card flex-grow bolt-card-no-vertical-padding">
                 <CustomHeader>
@@ -215,7 +216,7 @@ export class ImageDetails extends BaseComponent<IImageDetailsProperties, IImageD
                 <CardContent className="image-layer-details" contentPadding={false}>
                     <Table
                         id="image-layers-table"
-                        itemProvider={new ArrayItemProvider<IImageLayer>(imageDetails.layerInfo)}
+                        itemProvider={new ArrayItemProvider<IImageLayer>(layerInfo)}
                         columns={ImageDetails._getImageLayersColumns()}
                         showHeader={true}
                         showLines={true}
@@ -224,6 +225,20 @@ export class ImageDetails extends BaseComponent<IImageDetailsProperties, IImageD
                 </CardContent>
             </CustomCard>
         );
+    }
+
+    private getTime(date?: Date) {
+        return date != null ? date.getTime() : 0;
+    }
+
+
+    private _sortByCreatedDate(layerInfo : IImageLayer[]): IImageLayer[] {
+        layerInfo.sort((a: IImageLayer, b: IImageLayer) => {
+            // Most recent layer to be shown first
+            return this.getTime(b.createdOn) - this.getTime(a.createdOn);
+        });
+
+        return layerInfo;
     }
 
     private static _getImageLayersColumns(): ITableColumn<IImageLayer>[] {
@@ -277,7 +292,11 @@ export class ImageDetails extends BaseComponent<IImageDetailsProperties, IImageD
 
     private static _renderLayersSizeCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IImageLayer>, imageLayer: IImageLayer): JSX.Element {
         // Currently size data is not present in imageLayer
-        const textToRender = imageLayer.size || "-";
+        let textToRender = imageLayer.size;
+        if(!textToRender || textToRender.toUpperCase() === "0B"){
+            textToRender = "-";
+        }
+
         const itemToRender = defaultColumnRenderer(textToRender);
         return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
