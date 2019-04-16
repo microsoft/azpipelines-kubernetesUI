@@ -147,14 +147,12 @@ export class PodsRightPanel extends BaseComponent<IPodRightPanelProps, IPodsRigh
     }
 
     private _getHeader(): JSX.Element | null {
-        return this.state.pod ? (
-            <PageTopHeader
-                title={(this.state.pod.metadata && this.state.pod.metadata.name) || ""}
-                statusProps={this.state.podStatusProps}
-                statusTooltip={this.state.statusTooltip}
-                className={"pod-right-panel-header"}
-            />
-        ) : null;
+        return (<PageTopHeader
+            title={(this.state.pod!.metadata && this.state.pod!.metadata.name) || ""}
+            statusProps={this.state.podStatusProps}
+            statusTooltip={this.state.statusTooltip}
+            className={"pod-right-panel-header"}
+        />);
     }
 
     private _onSelectedTabChanged = (selectedTab: string): void => {
