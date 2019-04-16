@@ -1,6 +1,6 @@
 {
   "name": "@azurepipelines/azdevops-kube-summary",
-  "version": "3.2.0",
+  "version": "3.5.0",
   "description": "Azure DevOps Kubernetes Summary",
   "engines": {
     "node": ">=8.5.0",
@@ -11,7 +11,7 @@
     "url": "git+https://github.com/Microsoft/azpipelines-kubernetesUI.git"
   },
   "scripts": {
-    "clean": "rimraf ./dist && rimraf ./_bundles",
+    "clean": "rimraf ./dist && rimraf ./_bundles && rimraf ./_bin",
     "compile": "npm run clean && npm run compilesrc && npm run copy-all",
     "build": "npm run compile && node buildpackage.js webAppPackage",
     "build-azdevops": "npm run compile && node buildpackage.js azDevOpsPackage",

@@ -7,6 +7,7 @@ import { V1Pod } from "@kubernetes/client-node";
 import { BaseComponent } from "@uifabric/utilities";
 import { MessageCard, MessageCardSeverity } from "azure-devops-ui/MessageCard";
 import { Page } from "azure-devops-ui/Page";
+import { Spinner } from "azure-devops-ui/Spinner";
 import { IStatusProps, Statuses } from "azure-devops-ui/Status";
 import { Tab, TabBar, TabSize } from "azure-devops-ui/Tabs";
 import { css } from "azure-devops-ui/Util";
@@ -16,33 +17,32 @@ import * as React from "react";
 import { IImageDetails } from "../../Contracts/Types";
 import { KubeSummary } from "../Common/KubeSummary";
 import { PageTopHeader } from "../Common/PageTopHeader";
-import { PodsRightPanelTabsKeys, PodsEvents } from "../Constants";
+import { PodsEvents, PodsRightPanelTabsKeys } from "../Constants";
+import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
+import { StoreManager } from "../FluxCommon/StoreManager";
 import { ImageDetails } from "../ImageDetails/ImageDetails";
 import * as Resources from "../Resources";
 import { IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
 import { PodLog } from "./PodLog";
 import { PodOverview } from "./PodOverview";
-import "./PodsRightPanel.scss";
-import { PodYaml } from "./PodYaml";
-import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { PodsActionsCreator } from "./PodsActionsCreator";
-import { StoreManager } from "../FluxCommon/StoreManager";
+import "./PodsRightPanel.scss";
 import { PodsStore } from "./PodsStore";
-import { Spinner } from "azure-devops-ui/Spinner";
+import { PodYaml } from "./PodYaml";
 
 export interface IPodRightPanelProps extends IVssComponentProperties {
     pod: V1Pod | undefined;
     podUid?: string;
-    podStatusProps?: IStatusProps,
-    statusTooltip?: string,
+    podStatusProps?: IStatusProps;
+    statusTooltip?: string;
     showImageDetails?: (imageId: string) => void;
 }
 
 export interface IPodsRightPanelState {
-    pod: V1Pod | undefined
-    podStatusProps?: IStatusProps,
-    statusTooltip?: string,
+    pod: V1Pod | undefined;
+    podStatusProps?: IStatusProps;
+    statusTooltip?: string;
     selectedTab: string;
     selectedImageDetails: IImageDetails | undefined;
     showImageDetails?: (imageId: string) => void;
@@ -53,7 +53,7 @@ export class PodsRightPanel extends BaseComponent<IPodRightPanelProps, IPodsRigh
         super(props, {});
 
         this._historyService = createBrowserHistory();
-        const queryParams = queryString.parse(this._historyService.location.search)
+        const queryParams = queryString.parse(this._historyService.location.search);
 
         let selectedPivot = PodsRightPanelTabsKeys.PodsDetailsKey;
 
@@ -81,7 +81,7 @@ export class PodsRightPanel extends BaseComponent<IPodRightPanelProps, IPodsRigh
                 }
 
                 podsStore.removeListener(PodsEvents.PodsFetchedEvent, onPodsFetched);
-            }
+            };
 
             podsStore.addListener(PodsEvents.PodsFetchedEvent, onPodsFetched);
             podsActionCreator.getPods(KubeSummary.getKubeService());
@@ -187,19 +187,19 @@ export class PodsRightPanel extends BaseComponent<IPodRightPanelProps, IPodsRigh
 
     private _getSelectedTabContent(): React.ReactNode {
         if (this.state.pod) {
-            const selectedTab = this.state.selectedTab;
-            // For OrphanPod, the imageDetails view show/hide state is controlled via Right panel itself,
-            // unlike other PodDetails views where the parent controls the show/hide of image details
-            const showImageDetails = this.props.showImageDetails || this.state.showImageDetails;
-            switch (selectedTab) {
+            const componentProps = { key: this.state.pod.metadata.uid, pod: this.state.pod };
+            switch (this.state.selectedTab) {
                 case PodsRightPanelTabsKeys.PodsLogsKey:
-                    return <PodLog key={this.state.pod.metadata.uid} pod={this.state.pod} />;
+                    return <PodLog {...componentProps} />;
 
                 case PodsRightPanelTabsKeys.PodsYamlKey:
-                    return <PodYaml key={this.state.pod.metadata.uid} pod={this.state.pod} />;
+                    return <PodYaml {...componentProps} />;
 
                 default:
-                    return <PodOverview key={this.state.pod.metadata.uid} pod={this.state.pod} showImageDetails={showImageDetails} />;
+                    // For OrphanPod, the imageDetails view show/hide state is controlled via Right panel itself,
+                    // unlike other PodDetails views where the parent controls the show/hide of image details
+                    const imageDetails = this.props.showImageDetails || this.state.showImageDetails;
+                    return <PodOverview {...componentProps} showImageDetails={imageDetails} />;
             }
         }
     }
