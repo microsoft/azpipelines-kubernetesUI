@@ -91,3 +91,5 @@ export declare const CommandText: string;
 export declare const SizeText: string;
 export declare const SummaryHeaderSubTextFormat: string;
 export declare const TagsText: string;
+export declare const LoadingPodsSpinnerLabel: string;
+export declare const LoadingServicesSpinnerLabel: string;
