@@ -11,7 +11,7 @@ import { PodsEvents } from "../Constants";
 
 export interface IPodsStoreState {
     podsList?: V1PodList;
-    podsLoading?: boolean;
+    isLoading?: boolean;
     podListByLabel: { [label: string]: V1PodList };
 }
 
@@ -23,7 +23,7 @@ export class PodsStore extends StoreBase {
     public initialize(instanceId?: string): void {
         super.initialize(instanceId);
 
-        this._state = { podsList: undefined, podListByLabel: {}, podsLoading: true };
+        this._state = { podsList: undefined, podListByLabel: {}, isLoading: true };
 
         this._actions = ActionsHubManager.GetActionsHub<PodsActions>(PodsActions);
         this._actions.podsFetched.addListener(this._setPodsList);
@@ -41,13 +41,13 @@ export class PodsStore extends StoreBase {
 
     private _setPodsList = (payload: IPodsPayload): void => {
         this._state.podsList = payload.podsList;
-        this._state.podsLoading = payload.podsLoading;
+        this._state.isLoading = payload.isLoading;
         this.emit(PodsEvents.PodsFetchedEvent, this);
     }
 
     private _setPodsListByLabel = (payload: IPodListWithLabel): void => {
         this._state.podListByLabel[payload.labelSelector] = payload.podsList;
-        this._state.podsLoading = payload.podsLoading;
+        this._state.isLoading = payload.isLoading;
         this.emit(PodsEvents.LabelledPodsFetchedEvent, this);
     }
 

@@ -26,7 +26,7 @@ import "./ServicesPivot.scss";
 
 export interface IServicesPivotState {
     serviceList?: V1ServiceList;
-    servicesLoading?: boolean;
+    isLoading?: boolean;
 }
 
 export interface IServicesPivotProps extends IVssComponentProperties {
@@ -45,7 +45,7 @@ export class ServicesPivot extends BaseComponent<IServicesPivotProps, IServicesP
         const storeState = this._store.getState();
         this.state = {
             serviceList: storeState.serviceList,
-            servicesLoading: storeState.servicesLoading
+            isLoading: storeState.isLoading
         };
 
         this._actionCreator.getServices(KubeSummary.getKubeService());
@@ -53,16 +53,16 @@ export class ServicesPivot extends BaseComponent<IServicesPivotProps, IServicesP
     }
 
     public render(): React.ReactNode {
-        if (this.state.servicesLoading) {
+        if (this.state.isLoading) {
             return <Spinner className={"flex flex-grow loading-services"} size={SpinnerSize.large} label={Resources.LoadingServicesSpinnerLabel} />;
         }
 
         return (
             <>
-            { this._getFilterBar() }
-            < div className= { css("services-pivot-data", "k8s-pivot-data")} >
-                { this._getContent() }
-                </div >
+                {this._getFilterBar()}
+                <div className={css("services-pivot-data", "k8s-pivot-data")}>
+                    {this._getContent()}
+                </div>
             </>
         );
     }
@@ -75,7 +75,7 @@ export class ServicesPivot extends BaseComponent<IServicesPivotProps, IServicesP
         const storeState = this._store.getState();
         this.setState({
             serviceList: storeState.serviceList,
-            servicesLoading: storeState.servicesLoading
+            isLoading: storeState.isLoading
         });
     }
 

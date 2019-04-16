@@ -46,7 +46,7 @@ export interface IServiceDetailsProperties extends IVssComponentProperties {
 export interface IServiceDetailsState {
     service: IServiceItem | undefined;
     pods: Array<V1Pod>;
-    podsLoading?: boolean;
+    arePodsLoading?: boolean;
 }
 
 const LoadBalancerText: string = "LoadBalancer";
@@ -57,7 +57,7 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
         this.state = {
             service: props.service,
             pods: [],
-            podsLoading: true
+            arePodsLoading: true
         };
 
         const notifyViewChanged = (service: V1Service) => {
@@ -175,15 +175,15 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
 
     private _onPodsFetched = (): void => {
         const pods = this._servicesStore.getState().podsList;
-        const podsLoading = this._podsStore.getState().podsLoading;
+        const arePodsLoading = this._podsStore.getState().isLoading;
         this.setState({
             pods: pods || [],
-            podsLoading: podsLoading
+            arePodsLoading: arePodsLoading
         });
     }
 
     private _getAssociatedPods(): JSX.Element | null {
-        if (this.state.podsLoading) {
+        if (this.state.arePodsLoading) {
             return <Spinner className={"flex flex-grow loading-pods"}
                 size={SpinnerSize.large}
                 label={Resources.LoadingPodsSpinnerLabel} />;

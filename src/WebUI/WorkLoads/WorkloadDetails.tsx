@@ -59,7 +59,7 @@ export interface IWorkloadDetailsState {
     showSelectedPod: boolean;
     showImageDetails: boolean;
     selectedImageDetails: IImageDetails | undefined;
-    podsLoading?: boolean;
+    arePodsLoading?: boolean;
 }
 
 export interface IWorkLoadDetailsItem {
@@ -226,7 +226,7 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
         if (podList && podList.items) {
             this.setState({
                 pods: podList.items.filter(p => this.state.item && Utils.isOwnerMatched(p.metadata, this.state.item.metadata.uid)),
-                podsLoading: podsStoreState.podsLoading
+                arePodsLoading: podsStoreState.isLoading
             });
         }
     }
@@ -306,7 +306,7 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
 
     private _getAssociatedPods(): JSX.Element | null {
         const podsStoreState = this._podsStore.getState();
-        if (podsStoreState.podsLoading) {
+        if (podsStoreState.isLoading) {
             return <Spinner className={"flex flex-grow loading-pods"}
                 size={SpinnerSize.large}
                 label={Resources.LoadingPodsSpinnerLabel} />;

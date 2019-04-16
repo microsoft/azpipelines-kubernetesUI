@@ -8,7 +8,7 @@ import { V1PodList } from "@kubernetes/client-node";
 
 export interface IPodsPayload {
     podsList: V1PodList;
-    podsLoading: boolean;
+    isLoading: boolean;
 }
 
 export interface IPodListWithLabel extends IPodsPayload {

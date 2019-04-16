@@ -37,7 +37,7 @@ export interface IPodsDetailsState {
     pods?: V1Pod[];
     parentName?: string;
     parentKind?: string;
-    podsLoading?: boolean;
+    isLoading?: boolean;
     selectedPod: V1Pod | null | undefined;
     selectedImageDetails: IImageDetails | undefined;
 }
@@ -121,7 +121,7 @@ export class PodsDetails extends BaseComponent<IPodsDetailsProperties, IPodsDeta
                         parentName: properties.parentName,
                         pods: properties.pods,
                         selectedPod: properties.selectedPod,
-                        podsLoading: podsStoreState.podsLoading
+                        isLoading: podsStoreState.isLoading
                     });
                 }
             }
@@ -159,7 +159,7 @@ export class PodsDetails extends BaseComponent<IPodsDetailsProperties, IPodsDeta
                 onBackButtonClick={this._hideImageDetails} />;
         }
 
-        if (this.state.podsLoading) {
+        if (this.state.isLoading) {
             return <Spinner className={"flex flex-grow loading-pods"}
                 size={SpinnerSize.large}
                 label={Resources.LoadingPodsSpinnerLabel} />;
@@ -188,18 +188,16 @@ export class PodsDetails extends BaseComponent<IPodsDetailsProperties, IPodsDeta
 
         return (
             <>
-            {
-                leftPanel
-                    ?(<Splitter
-                            fixedElement= { SplitterElementPosition.Near }
-        initialFixedSize = { this._initialFixedSize }
-        minFixedSize = { this._initialFixedSize }
-        onRenderFarElement = {() => rightPanel
-    }
-    onRenderNearElement = {() => leftPanel
-}
-nearElementClassName = "pods-details-left-pane"
-    />)
+                {
+                    leftPanel
+                        ? (<Splitter
+                            fixedElement={SplitterElementPosition.Near}
+                            initialFixedSize={this._initialFixedSize}
+                            minFixedSize={this._initialFixedSize}
+                            onRenderFarElement={() => rightPanel}
+                            onRenderNearElement={() => leftPanel}
+                            nearElementClassName="pods-details-left-pane"
+                        />)
                         : rightPanel
                 }
             </>

@@ -22,10 +22,10 @@ export class PodsActionsCreator extends ActionCreatorBase {
         kubeService && kubeService.getPods(labelSelector || undefined).then(podList => {
             this._extendPodMetadataInList(podList);
             if (labelSelector) {
-                this._actions.podsFetchedByLabel.invoke({ podsList: podList, labelSelector: labelSelector, podsLoading: false });
+                this._actions.podsFetchedByLabel.invoke({ podsList: podList, labelSelector: labelSelector, isLoading: false });
             }
             else {
-                this._actions.podsFetched.invoke({ podsList: podList, podsLoading: false });
+                this._actions.podsFetched.invoke({ podsList: podList, isLoading: false });
             }
         });
     }
