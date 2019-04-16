@@ -45,6 +45,7 @@ import { KubeZeroData } from "./KubeZeroData";
 import { PodsStore } from "../Pods/PodsStore";
 import { getServiceItems } from "../Services/ServiceUtils";
 import { setContentReaderComponent } from "./KubeConsumer";
+import { ServicesActionsCreator } from "../Services/ServicesActionsCreator";
 
 const workloadsPivotItemKey: string = "workloads";
 const servicesPivotItemKey: string = "services";
@@ -171,6 +172,10 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         // so we can show nameSpace in heading and namespace is obtained from deployment metadata
         // this data also helpful in deciding to show zero data or workloads
         this._workloadsActionCreator.getDeployments(KubeSummary.getKubeService());
+
+        if (selectedPivot === servicesPivotItemKey) {
+            ActionsCreatorManager.GetActionCreator<ServicesActionsCreator>(ServicesActionsCreator).getServices(KubeSummary.getKubeService());
+        }
     }
 
     public render(): React.ReactNode {
