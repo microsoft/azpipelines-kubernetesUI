@@ -19,7 +19,7 @@ import { PodsStore } from "./PodsStore";
 import { StoreManager } from "../FluxCommon/StoreManager";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { PodsActionsCreator } from "./PodsActionsCreator";
-import { PodsEvents } from "../Constants";
+import { PodsEvents, PodsRightPanelTabsKeys } from "../Constants";
 import { Utils } from "../Utils";
 import { History, createBrowserHistory } from "history";
 import * as queryString from "query-string";
@@ -66,7 +66,7 @@ export class PodsDetails extends BaseComponent<IPodsDetailsProperties, IPodsDeta
                     url: url
                 }]);
             }
-        }
+        };
 
         this._podsStore = StoreManager.GetStore<PodsStore>(PodsStore);
         let parentKind: string | undefined = undefined, parentName: string | undefined = undefined, filteredPods: V1Pod[] | undefined = [], selectedPod: V1Pod | undefined = undefined;
@@ -99,12 +99,12 @@ export class PodsDetails extends BaseComponent<IPodsDetailsProperties, IPodsDeta
                         parentName: parentName,
                         pods: filteredPods,
                         selectedPod: selectedPod
-                    }
+                    };
                 }
             }
 
             return {};
-        }
+        };
 
         if (!podsList || !podsList.items) {
             const podsActionCreator = ActionsCreatorManager.GetActionCreator<PodsActionsCreator>(PodsActionsCreator);
@@ -126,7 +126,7 @@ export class PodsDetails extends BaseComponent<IPodsDetailsProperties, IPodsDeta
                         isLoading: podsStoreState.isLoading
                     });
                 }
-            }
+            };
 
             this._podsStore.addListener(storeEventName, podsFetchHandler);
             if (props.serviceSelector) {
@@ -184,6 +184,7 @@ export class PodsDetails extends BaseComponent<IPodsDetailsProperties, IPodsDeta
 
         const rightPanel = (selectedPod ?
             <PodsRightPanel
+                key={selectedPod.metadata.uid}
                 pod={selectedPod}
                 showImageDetails={this._showImageDetails} />
             : <div className="zero-pods-text-container">{Resources.NoPodsFoundText}</div>);
@@ -206,47 +207,48 @@ export class PodsDetails extends BaseComponent<IPodsDetailsProperties, IPodsDeta
         );
     }
 
-    private _onPodSelectionChange = (event: React.SyntheticEvent<HTMLElement>, selectedPod: V1Pod): void => {
-    let routeValues: queryString.OutputParams = queryString.parse(this._history.location.search);
-    routeValues["uid"] = selectedPod.metadata.uid;
+    private _onPodSelectionChange = (event: React.SyntheticEvent<HTMLElement>, selectedPod: V1Pod, selectedView: string): void => {
+        let routeValues: queryString.OutputParams = queryString.parse(this._history.location.search);
+        routeValues["uid"] = selectedPod.metadata.uid;
+        routeValues["view"] = selectedView || PodsRightPanelTabsKeys.PodsDetailsKey;
 
-    this._history.replace({
-        pathname: this._history.location.pathname,
-        search: queryString.stringify(routeValues)
-    });
+        this._history.replace({
+            pathname: this._history.location.pathname,
+            search: queryString.stringify(routeValues)
+        });
 
 
-    this.setState({
-        selectedPod: selectedPod
-    });
-}
+        this.setState({
+            selectedPod: selectedPod
+        });
+    }
 
     private _onParentBackButtonClick = () => {
-    const selectionActionCreator = ActionsCreatorManager.GetActionCreator<SelectionActionsCreator>(SelectionActionsCreator);
-    selectionActionCreator.selectItem({
-        itemUID: this.props.parentUid,
-        selectedItemType: Utils.getItemTypeKeyFromKind(this.state.parentKind || ""),
-        showSelectedItem: true,
-        item: undefined,
-        properties: { parentUid: "", serviceSelector: "", serviceName: "" } as IPodDetailsSelectionProperties // This will delete these values if they are present in the url
-    })
-}
+        const selectionActionCreator = ActionsCreatorManager.GetActionCreator<SelectionActionsCreator>(SelectionActionsCreator);
+        selectionActionCreator.selectItem({
+            itemUID: this.props.parentUid,
+            selectedItemType: Utils.getItemTypeKeyFromKind(this.state.parentKind || ""),
+            showSelectedItem: true,
+            item: undefined,
+            properties: { parentUid: "", serviceSelector: "", serviceName: "" } as IPodDetailsSelectionProperties // This will delete these values if they are present in the url
+        });
+    }
 
     // ToDO:: Handle GetImageDetails via ImageStore to avoid multiple calls to API from UI
     private _showImageDetails = (imageId: string) => {
-    const imageService = KubeSummary.getImageService();
-    imageService && imageService.getImageDetails(imageId).then(imageDetails => {
-        this.setState({
-            selectedImageDetails: imageDetails
+        const imageService = KubeSummary.getImageService();
+        imageService && imageService.getImageDetails(imageId).then(imageDetails => {
+            this.setState({
+                selectedImageDetails: imageDetails
+            });
         });
-    });
-}
+    }
 
     private _hideImageDetails = () => {
-    this.setState({
-        selectedImageDetails: undefined
-    });
-}
+        this.setState({
+            selectedImageDetails: undefined
+        });
+    }
 
     private _initialFixedSize: number = 320;
     private _history: History;
