@@ -3,13 +3,15 @@
     Licensed under the MIT license.
 */
 
-import * as queryString from "query-string";
 import { V1Pod } from "@kubernetes/client-node";
 import { BaseComponent } from "@uifabric/utilities";
 import { MessageCard, MessageCardSeverity } from "azure-devops-ui/MessageCard";
 import { Page } from "azure-devops-ui/Page";
 import { IStatusProps, Statuses } from "azure-devops-ui/Status";
 import { Tab, TabBar, TabSize } from "azure-devops-ui/Tabs";
+import { css } from "azure-devops-ui/Util";
+import { createBrowserHistory, History } from "history";
+import * as queryString from "query-string";
 import * as React from "react";
 import { IImageDetails } from "../../Contracts/Types";
 import { KubeSummary } from "../Common/KubeSummary";
@@ -21,13 +23,13 @@ import { IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
 import { PodLog } from "./PodLog";
 import { PodOverview } from "./PodOverview";
+import "./PodsRightPanel.scss";
 import { PodYaml } from "./PodYaml";
-import { History, createBrowserHistory } from "history";
 
 export interface IPodRightPanelProps extends IVssComponentProperties {
     pod: V1Pod;
-    podStatusProps?: IStatusProps,
-    statusTooltip?: string,
+    podStatusProps?: IStatusProps;
+    statusTooltip?: string;
     showImageDetails?: (imageId: string) => void;
 }
 
@@ -72,8 +74,12 @@ export class PodsRightPanel extends BaseComponent<IPodRightPanelProps, IPodsRigh
                 onBackButtonClick={this._hideImageDetails} />;
         }
 
+        return this._showPodDetails();
+    }
+
+    private _showPodDetails(): JSX.Element {
         return (
-            <Page className="pods-right-panel-container flex flex-grow">
+            <Page className="pods-right-panel-container pod-overview-full-size flex flex-grow">
                 {this._getHeader()}
                 <TabBar
                     className={"pods-right-tab-bar"}
@@ -94,7 +100,7 @@ export class PodsRightPanel extends BaseComponent<IPodRightPanelProps, IPodsRigh
                         id={PodsRightPanelTabsKeys.PodsYamlKey}
                     />
                 </TabBar>
-                <div className="pod-details-right-content page-content page-content-top">
+                <div className="pod-details-right-content pod-overview-full-size page-content page-content-top">
                     {this._getPageContent()}
                 </div>
             </Page>
@@ -129,10 +135,11 @@ export class PodsRightPanel extends BaseComponent<IPodRightPanelProps, IPodsRigh
     private _getPageContent(): React.ReactNode {
         const { statusProps, tooltip } = Utils.generatePodStatusProps(this.props.pod.status);
         const podErrorMessage: string = statusProps !== Statuses.Success ? tooltip : "";
+        const mainContentClass = this._getMainContentClassName(!!podErrorMessage);
         return (
             <>
                 {podErrorMessage && <MessageCard severity={MessageCardSeverity.Error}>{podErrorMessage}</MessageCard>}
-                <div className={podErrorMessage ? "page-content-top" : ""}>
+                <div className={css(podErrorMessage ? "page-content-top" : "", mainContentClass)}>
                     {this._getSelectedTabContent()}
                 </div>
             </>
@@ -140,11 +147,7 @@ export class PodsRightPanel extends BaseComponent<IPodRightPanelProps, IPodsRigh
     }
 
     private _getSelectedTabContent(): React.ReactNode {
-        const selectedTab = this.state.selectedTab;
-        // For OrphanPod, the imageDetails view show/hide state is controlled via Right panel itself,
-        // unlike other PodDetails views where the parent controls the show/hide of image details
-        const showImageDetails = this.props.showImageDetails || this.state.showImageDetails;
-        switch (selectedTab) {
+        switch (this.state.selectedTab) {
             case PodsRightPanelTabsKeys.PodsLogsKey:
                 return <PodLog key={this.props.pod.metadata.uid} pod={this.props.pod} />;
 
@@ -152,8 +155,20 @@ export class PodsRightPanel extends BaseComponent<IPodRightPanelProps, IPodsRigh
                 return <PodYaml key={this.props.pod.metadata.uid} pod={this.props.pod} />;
 
             default:
+                // For OrphanPod, the imageDetails view show/hide state is controlled via Right panel itself,
+                // unlike other PodDetails views where the parent controls the show/hide of image details
+                const showImageDetails = this.props.showImageDetails || this.state.showImageDetails;
                 return <PodOverview key={this.props.pod.metadata.uid} pod={this.props.pod} showImageDetails={showImageDetails} />;
         }
+    }
+
+    private _getMainContentClassName(hasMessageCard?: boolean): string {
+        // required to adjust the card size based on error message card in the pod overview.
+        if (this.state.selectedTab === PodsRightPanelTabsKeys.PodsDetailsKey) {
+            return "";
+        }
+
+        return css("full-size", hasMessageCard ? "pod-overview-error-height" : "pod-overview-full-size");
     }
 
     private _hideImageDetails = () => {

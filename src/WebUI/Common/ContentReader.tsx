@@ -3,6 +3,9 @@
     Licensed under the MIT license.
 */
 
+import { CardContent } from "azure-devops-ui/Components/Card/CardContent";
+import { CustomCard } from "azure-devops-ui/Components/Card/CustomCard";
+import { css } from "azure-devops-ui/Util";
 import * as React from "react";
 
 // basic editor functionality
@@ -17,16 +20,25 @@ import "monaco-editor/esm/vs/editor/contrib/message/messageController";
 export interface IReaderProps {
     text: string;
     options?: monaco.editor.IEditorConstructionOptions;
+    contentClassName?: string;
+    className?: string;
 }
 
 export class ContentReader extends React.Component<IReaderProps> {
     public render(): JSX.Element {
         return (
-            <div
-                id="k8s-monaco-reader"
-                className="reader-inner flex-row flex-center absolute-fill"
-                ref={this._createEditor}
-            />
+            // monaco-editor class added here to have the same theme as monaco.
+            <CustomCard className={css(this.props.className || "", "monaco-editor", "k8s-card-padding", "flex-grow")}>
+                <CardContent className={css(this.props.contentClassName || "", "k8s-reader-content")} contentPadding={false}>
+                    <div className="k8s-reader-outer" style={{ width: "100%", position: "relative" }}>
+                        <div
+                            id="k8s-monaco-reader"
+                            className="reader-inner flex-row flex-center absolute-fill"
+                            ref={this._createEditor}
+                        />
+                    </div>
+                </CardContent>
+            </CustomCard>
         );
     }
 
@@ -53,6 +65,9 @@ export class ContentReader extends React.Component<IReaderProps> {
             this._editor = monaco.editor.create(innerRef, {
                 readOnly: true,
                 renderWhitespace: "all",
+                fontSize: 13,
+                lineHeight: 20,
+                minimap: { enabled: false },
                 scrollbar: { horizontalScrollbarSize: 16 },
                 lineNumbers: "on",
                 extraEditorClassName: "k8s-monaco-editor",
