@@ -313,10 +313,8 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
     private _getSelectedItemPodsView(): JSX.Element | null {
         const selectedItem = this.state.selectedItem;
         const selectedItemType = this.state.selectedItemType;
-        const isEmptyItemAllowed = ![SelectedItemKeys.OrphanPodKey].some(s => s === selectedItemType);
         // ToDo :: Currently for imageDetails type, the selected item will be undefined, hence adding below check. Remove this once we have data from imageService
         if (selectedItemType
-            && (selectedItem || isEmptyItemAllowed)
             && this._selectedItemViewMap.hasOwnProperty(selectedItemType)) {
             return this._selectedItemViewMap[selectedItemType](selectedItem, this.state.selectedItemUid, this.state.selectedItemProperties);
         }
@@ -476,9 +474,9 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
                 return Utils.getPodsStatusProps(status.numberAvailable, status.desiredNumberScheduled);
             });
 
-        this._selectedItemViewMap[SelectedItemKeys.OrphanPodKey] = (pod) => {
-            const { statusProps, tooltip } = Utils.generatePodStatusProps(pod.status);
-            return <PodsRightPanel key={pod.metadata.uid} pod={pod} podStatusProps={statusProps} statusTooltip={tooltip} />;
+        this._selectedItemViewMap[SelectedItemKeys.OrphanPodKey] = (pod, uid) => {
+            const { statusProps, tooltip } = pod ? Utils.generatePodStatusProps(pod.status) : { statusProps: undefined, tooltip: undefined };
+            return <PodsRightPanel pod={pod} podStatusProps={statusProps} statusTooltip={tooltip} podUid={uid} />;
         };
 
         this._selectedItemViewMap[SelectedItemKeys.ServiceItemKey] = (service) => { return <ServiceDetails service={service} parentKind={(service && service.kind) || "Service"} notifyViewChanged={this.props.onViewChanged} />; };
@@ -500,6 +498,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         this._objectFinder[SelectedItemKeys.ReplicaSetKey] = (uid) => KubeSummary._getFilteredFirstObject(this._workloadsStore.getState().replicaSetList, uid);
         this._objectFinder[SelectedItemKeys.StatefulSetKey] = (uid) => KubeSummary._getFilteredFirstObject(this._workloadsStore.getState().statefulSetList, uid);
         this._objectFinder[SelectedItemKeys.DaemonSetKey] = (uid) => KubeSummary._getFilteredFirstObject(this._workloadsStore.getState().daemonSetList, uid);
+        this._objectFinder[SelectedItemKeys.OrphanPodKey] = (uid) => KubeSummary._getFilteredFirstObject(this._podsStore.getState().podsList, uid);
         this._objectFinder[SelectedItemKeys.PodDetailsKey] = (uid) => KubeSummary._getFilteredFirstObject(this._podsStore.getState().podsList, uid);
         this._objectFinder[SelectedItemKeys.ServiceItemKey] = (uid) => {
             const filteredService = KubeSummary._getFilteredFirstObject(this._servicesStore.getState().serviceList, uid);

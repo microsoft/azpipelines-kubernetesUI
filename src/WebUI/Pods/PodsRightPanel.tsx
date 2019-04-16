@@ -16,7 +16,7 @@ import * as React from "react";
 import { IImageDetails } from "../../Contracts/Types";
 import { KubeSummary } from "../Common/KubeSummary";
 import { PageTopHeader } from "../Common/PageTopHeader";
-import { PodsRightPanelTabsKeys } from "../Constants";
+import { PodsRightPanelTabsKeys, PodsEvents } from "../Constants";
 import { ImageDetails } from "../ImageDetails/ImageDetails";
 import * as Resources from "../Resources";
 import { IVssComponentProperties } from "../Types";
@@ -25,15 +25,24 @@ import { PodLog } from "./PodLog";
 import { PodOverview } from "./PodOverview";
 import "./PodsRightPanel.scss";
 import { PodYaml } from "./PodYaml";
+import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
+import { PodsActionsCreator } from "./PodsActionsCreator";
+import { StoreManager } from "../FluxCommon/StoreManager";
+import { PodsStore } from "./PodsStore";
+import { Spinner } from "azure-devops-ui/Spinner";
 
 export interface IPodRightPanelProps extends IVssComponentProperties {
-    pod: V1Pod;
-    podStatusProps?: IStatusProps;
-    statusTooltip?: string;
+    pod: V1Pod | undefined;
+    podUid?: string;
+    podStatusProps?: IStatusProps,
+    statusTooltip?: string,
     showImageDetails?: (imageId: string) => void;
 }
 
 export interface IPodsRightPanelState {
+    pod: V1Pod | undefined
+    podStatusProps?: IStatusProps,
+    statusTooltip?: string,
     selectedTab: string;
     selectedImageDetails: IImageDetails | undefined;
     showImageDetails?: (imageId: string) => void;
@@ -53,7 +62,35 @@ export class PodsRightPanel extends BaseComponent<IPodRightPanelProps, IPodsRigh
             selectedPivot = queryParams.view as PodsRightPanelTabsKeys;
         }
 
+        if (!props.pod && props.podUid) {
+            // This case will only occur when opening orphaned pods
+            const podsActionCreator = ActionsCreatorManager.GetActionCreator<PodsActionsCreator>(PodsActionsCreator);
+            const podsStore = StoreManager.GetStore<PodsStore>(PodsStore);
+            const onPodsFetched = () => {
+                const podList = podsStore.getState().podsList;
+                if (podList && podList.items) {
+                    const pod = podList.items.find(i => i.metadata.uid === props.podUid);
+                    if (pod) {
+                        const { statusProps, tooltip } = Utils.generatePodStatusProps(pod.status);
+                        this.setState({
+                            pod: pod,
+                            podStatusProps: statusProps,
+                            statusTooltip: tooltip
+                        });
+                    }
+                }
+
+                podsStore.removeListener(PodsEvents.PodsFetchedEvent, onPodsFetched);
+            }
+
+            podsStore.addListener(PodsEvents.PodsFetchedEvent, onPodsFetched);
+            podsActionCreator.getPods(KubeSummary.getKubeService());
+        }
+
         this.state = {
+            pod: props.pod,
+            podStatusProps: props.podStatusProps,
+            statusTooltip: props.statusTooltip,
             selectedTab: selectedPivot,
             selectedImageDetails: undefined,
             showImageDetails: (imageId: string) => {
@@ -79,43 +116,43 @@ export class PodsRightPanel extends BaseComponent<IPodRightPanelProps, IPodsRigh
 
     private _showPodDetails(): JSX.Element {
         return (
-            <Page className="pods-right-panel-container pod-overview-full-size flex flex-grow">
-                {this._getHeader()}
-                <TabBar
-                    className={"pods-right-tab-bar"}
-                    selectedTabId={this.state.selectedTab || PodsRightPanelTabsKeys.PodsDetailsKey}
-                    onSelectedTabChanged={this._onSelectedTabChanged}
-                    tabSize={TabSize.Tall}
-                >
-                    <Tab
-                        name={Resources.OverviewText}
-                        id={PodsRightPanelTabsKeys.PodsDetailsKey}
-                    />
-                    <Tab
-                        name={Resources.LogsText}
-                        id={PodsRightPanelTabsKeys.PodsLogsKey}
-                    />
-                    <Tab
-                        name={Resources.YamlText}
-                        id={PodsRightPanelTabsKeys.PodsYamlKey}
-                    />
-                </TabBar>
-                <div className="pod-details-right-content pod-overview-full-size page-content page-content-top">
-                    {this._getPageContent()}
-                </div>
-            </Page>
+            this.state.pod ? (
+                <Page className="pods-right-panel-container pod-overview-full-size flex flex-grow">
+                    {this._getHeader()}
+                    <TabBar
+                        className={"pods-right-tab-bar"}
+                        selectedTabId={this.state.selectedTab || PodsRightPanelTabsKeys.PodsDetailsKey}
+                        onSelectedTabChanged={this._onSelectedTabChanged}
+                        tabSize={TabSize.Tall}
+                    >
+                        <Tab
+                            name={Resources.OverviewText}
+                            id={PodsRightPanelTabsKeys.PodsDetailsKey}
+                        />
+                        <Tab
+                            name={Resources.LogsText}
+                            id={PodsRightPanelTabsKeys.PodsLogsKey}
+                        />
+                        <Tab
+                            name={Resources.YamlText}
+                            id={PodsRightPanelTabsKeys.PodsYamlKey}
+                        />
+                    </TabBar>
+                    <div className="pod-details-right-content pod-overview-full-size page-content page-content-top">
+                        {this._getPageContent()}
+                    </div>
+                </Page>)
+                : <Spinner className={"flex-grow flex-center"} label={Resources.LoadingText} />
         );
     }
 
     private _getHeader(): JSX.Element | null {
-        return (
-            <PageTopHeader
-                title={(this.props.pod.metadata && this.props.pod.metadata.name) || ""}
-                statusProps={this.props.podStatusProps}
-                statusTooltip={this.props.statusTooltip}
-                className={"pod-right-panel-header"}
-            />
-        );
+        return (<PageTopHeader
+            title={(this.state.pod!.metadata && this.state.pod!.metadata.name) || ""}
+            statusProps={this.state.podStatusProps}
+            statusTooltip={this.state.statusTooltip}
+            className={"pod-right-panel-header"}
+        />);
     }
 
     private _onSelectedTabChanged = (selectedTab: string): void => {
@@ -133,32 +170,37 @@ export class PodsRightPanel extends BaseComponent<IPodRightPanelProps, IPodsRigh
     }
 
     private _getPageContent(): React.ReactNode {
-        const { statusProps, tooltip } = Utils.generatePodStatusProps(this.props.pod.status);
-        const podErrorMessage: string = statusProps !== Statuses.Success ? tooltip : "";
-        const mainContentClass = this._getMainContentClassName(!!podErrorMessage);
-        return (
-            <>
-                {podErrorMessage && <MessageCard severity={MessageCardSeverity.Error}>{podErrorMessage}</MessageCard>}
-                <div className={css(podErrorMessage ? "page-content-top" : "", mainContentClass)}>
-                    {this._getSelectedTabContent()}
-                </div>
-            </>
-        );
+        if (this.state.pod) {
+            const { statusProps, tooltip } = Utils.generatePodStatusProps(this.state.pod.status);
+            const podErrorMessage: string = statusProps !== Statuses.Success ? tooltip : "";
+            const mainContentClass = this._getMainContentClassName(!!podErrorMessage);
+            return (
+                <>
+                    {podErrorMessage && <MessageCard severity={MessageCardSeverity.Error}>{podErrorMessage}</MessageCard>}
+                    <div className={css(podErrorMessage ? "page-content-top" : "", mainContentClass)}>
+                        {this._getSelectedTabContent()}
+                    </div>
+                </>
+            );
+        }
     }
 
     private _getSelectedTabContent(): React.ReactNode {
-        switch (this.state.selectedTab) {
-            case PodsRightPanelTabsKeys.PodsLogsKey:
-                return <PodLog key={this.props.pod.metadata.uid} pod={this.props.pod} />;
+        if (this.state.pod) {
+            const selectedTab = this.state.selectedTab;
+            // For OrphanPod, the imageDetails view show/hide state is controlled via Right panel itself,
+            // unlike other PodDetails views where the parent controls the show/hide of image details
+            const showImageDetails = this.props.showImageDetails || this.state.showImageDetails;
+            switch (selectedTab) {
+                case PodsRightPanelTabsKeys.PodsLogsKey:
+                    return <PodLog key={this.state.pod.metadata.uid} pod={this.state.pod} />;
 
-            case PodsRightPanelTabsKeys.PodsYamlKey:
-                return <PodYaml key={this.props.pod.metadata.uid} pod={this.props.pod} />;
+                case PodsRightPanelTabsKeys.PodsYamlKey:
+                    return <PodYaml key={this.state.pod.metadata.uid} pod={this.state.pod} />;
 
-            default:
-                // For OrphanPod, the imageDetails view show/hide state is controlled via Right panel itself,
-                // unlike other PodDetails views where the parent controls the show/hide of image details
-                const showImageDetails = this.props.showImageDetails || this.state.showImageDetails;
-                return <PodOverview key={this.props.pod.metadata.uid} pod={this.props.pod} showImageDetails={showImageDetails} />;
+                default:
+                    return <PodOverview key={this.state.pod.metadata.uid} pod={this.state.pod} showImageDetails={showImageDetails} />;
+            }
         }
     }
 
