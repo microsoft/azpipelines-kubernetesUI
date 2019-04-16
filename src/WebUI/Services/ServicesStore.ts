@@ -13,6 +13,7 @@ import { ServicesEvents } from "../Constants";
 export interface IServicesStoreState {
     serviceList?: V1ServiceList
     podsList?: V1Pod[];
+    isLoading?: boolean;
 }
 
 export class ServicesStore extends StoreBase {
@@ -23,7 +24,7 @@ export class ServicesStore extends StoreBase {
     public initialize(instanceId?: string): void {
         super.initialize(instanceId);
 
-        this._state = { serviceList: undefined, podsList: [] };
+        this._state = { serviceList: undefined, podsList: [], isLoading: true };
 
         this._servicesActions = ActionsHubManager.GetActionsHub<ServicesActions>(ServicesActions);
         this._podsActions = ActionsHubManager.GetActionsHub<PodsActions>(PodsActions);
@@ -47,6 +48,7 @@ export class ServicesStore extends StoreBase {
 
     private _servicesFetched = (serviceList: V1ServiceList): void => {
         this._state.serviceList = serviceList;
+        this._state.isLoading = false;
         this.emit(ServicesEvents.ServicesFetchedEvent, this);
         if (this._state.serviceList && this._state.serviceList.items && this._state.serviceList.items.length > 0) {
             this.emit(ServicesEvents.ServicesFoundEvent, this);
