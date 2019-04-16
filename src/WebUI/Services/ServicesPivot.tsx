@@ -8,6 +8,7 @@ import { BaseComponent } from "@uifabric/utilities";
 import { css } from "azure-devops-ui/Util";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { Filter, IFilterItemState, IFilterState } from "azure-devops-ui/Utilities/Filter";
+import { Spinner, SpinnerSize } from "azure-devops-ui/Spinner";
 import * as React from "react";
 import { NameKey, TypeKey } from "../Common/KubeFilterBar";
 import { KubeSummary } from "../Common/KubeSummary";
@@ -20,9 +21,12 @@ import { IVssComponentProperties } from "../Types";
 import { ServicesActionsCreator } from "./ServicesActionsCreator";
 import { ServicesFilterBar } from "./ServicesFilterBar";
 import { ServicesStore } from "./ServicesStore";
+import * as Resources from "../Resources";
+import "./ServicesPivot.scss";
 
 export interface IServicesPivotState {
     serviceList?: V1ServiceList;
+    isLoading?: boolean;
 }
 
 export interface IServicesPivotProps extends IVssComponentProperties {
@@ -38,8 +42,10 @@ export class ServicesPivot extends BaseComponent<IServicesPivotProps, IServicesP
         this._actionCreator = ActionsCreatorManager.GetActionCreator<ServicesActionsCreator>(ServicesActionsCreator);
         this._store = StoreManager.GetStore<ServicesStore>(ServicesStore);
 
+        const storeState = this._store.getState();
         this.state = {
-            serviceList: undefined
+            serviceList: storeState.serviceList,
+            isLoading: storeState.isLoading
         };
 
         this._actionCreator.getServices(KubeSummary.getKubeService());
@@ -47,6 +53,10 @@ export class ServicesPivot extends BaseComponent<IServicesPivotProps, IServicesP
     }
 
     public render(): React.ReactNode {
+        if (this.state.isLoading) {
+            return <Spinner className={"flex flex-grow loading-services"} size={SpinnerSize.large} label={Resources.LoadingServicesSpinnerLabel} />;
+        }
+
         return (
             <>
                 {this._getFilterBar()}
@@ -63,7 +73,10 @@ export class ServicesPivot extends BaseComponent<IServicesPivotProps, IServicesP
 
     private _onServicesFetched = (): void => {
         const storeState = this._store.getState();
-        this.setState({ serviceList: storeState.serviceList });
+        this.setState({
+            serviceList: storeState.serviceList,
+            isLoading: storeState.isLoading
+        });
     }
 
     private _getContent(): JSX.Element {
