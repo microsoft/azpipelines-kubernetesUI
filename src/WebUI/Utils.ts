@@ -310,4 +310,19 @@ export class Utils {
             default: return "";
         }
     }
+
+    public static copyToClipboard(text: string) {
+        const listener = (e: Event) => {
+            const clipboardData = (<ClipboardEvent>e).clipboardData;
+            if (clipboardData) {
+                clipboardData.setData("text/plain", text);
+                e.preventDefault();
+            }
+        };
+
+        // Add a listener to the copy event, and add it to the clipboard. Then remove the handler immediately, as it prevents default
+        document.addEventListener("copy", listener);
+        document.execCommand("copy");
+        document.removeEventListener("copy", listener);
+    }
 }
