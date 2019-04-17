@@ -15,6 +15,7 @@ import * as Date_Utils from "azure-devops-ui/Utilities/Date";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import { createBrowserHistory } from "history";
 import * as queryString from "query-string";
+import * as React from "react";
 import { renderTableCell, renderExternalIpCell } from "../Common/KubeCardWithTable";
 import { KubeSummary } from "../Common/KubeSummary";
 import { KubeZeroData } from "../Common/KubeZeroData";
