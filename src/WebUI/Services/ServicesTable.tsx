@@ -13,9 +13,10 @@ import { localeFormat } from "azure-devops-ui/Core/Util/String";
 import { IStatusProps, Status, Statuses, StatusSize } from "azure-devops-ui/Status";
 import { ITableColumn, Table, TwoLineTableCell, renderSimpleCell } from "azure-devops-ui/Table";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
+import { Button } from "azure-devops-ui/Button";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
-import { renderTableCell } from "../Common/KubeCardWithTable";
+import { renderTableCell, renderExternalIpCell } from "../Common/KubeCardWithTable";
 import { KubeZeroData } from "../Common/KubeZeroData";
 import { SelectedItemKeys } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
@@ -25,6 +26,7 @@ import { ISelectionPayload } from "../Selection/SelectionActions";
 import { IServiceItem, IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
 import { getServiceItems } from "./ServiceUtils";
+import "./ServiceDetails.scss";
 
 const loadBalancerKey: string = "LoadBalancer";
 
@@ -34,9 +36,16 @@ export interface IServicesComponentProperties extends IVssComponentProperties {
     nameFilter?: string;
 }
 
-export class ServicesTable extends BaseComponent<IServicesComponentProperties> {
+export interface IServicesTableState {
+    hoverRowIndex: number;
+}
+
+export class ServicesTable extends BaseComponent<IServicesComponentProperties, IServicesTableState> {
     constructor(props: IServicesComponentProperties) {
         super(props, {});
+        this.state = {
+            hoverRowIndex: -1
+        };
 
         this._selectionActionCreator = ActionsCreatorManager.GetActionCreator<SelectionActionsCreator>(SelectionActionsCreator);
     }
@@ -59,7 +68,7 @@ export class ServicesTable extends BaseComponent<IServicesComponentProperties> {
                         singleClickActivation={true}
                         itemProvider={new ArrayItemProvider<IServiceItem>(serviceItems)}
                         pageSize={filteredSvc.length}
-                        columns={ServicesTable._getColumns()}
+                        columns={this._getColumns()}
                         onActivate={(event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>) => {
                             this._openServiceItem(event, tableRow, serviceItems[tableRow.index]);
                         }}
@@ -85,7 +94,7 @@ export class ServicesTable extends BaseComponent<IServicesComponentProperties> {
         }
     }
 
-    private static _getColumns(): ITableColumn<IServiceItem>[] {
+    private _getColumns = (): ITableColumn<IServiceItem>[] => {
         let columns: ITableColumn<any>[] = [];
 
         // negative widths are interpreted as percentages.
@@ -94,7 +103,7 @@ export class ServicesTable extends BaseComponent<IServicesComponentProperties> {
             id: "package",
             name: Resources.NameText,
             width: -70,
-            renderCell: ServicesTable._renderPackageKeyCell
+            renderCell: this._renderPackageKeyCell
         });
 
         columns.push({
@@ -108,7 +117,7 @@ export class ServicesTable extends BaseComponent<IServicesComponentProperties> {
             id: "externalIP",
             name: Resources.ExternalIPText,
             width: new ObservableValue(172),
-            renderCell: renderSimpleCell
+            renderCell: (rowIndex, columnIndex, tableColumn, service) => renderExternalIpCell(rowIndex, columnIndex, tableColumn, service, this._setHoverRowIndex, this.state.hoverRowIndex)
         });
 
         columns.push({
@@ -122,19 +131,25 @@ export class ServicesTable extends BaseComponent<IServicesComponentProperties> {
             id: "creationTimestamp",
             name: Resources.AgeText,
             width: -15,
-            renderCell: ServicesTable._renderAgeCell
+            renderCell: this._renderAgeCell
         });
 
         return columns;
     }
 
-    private static _renderPackageKeyCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, service: IServiceItem): JSX.Element => {
+    private _renderPackageKeyCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, service: IServiceItem): JSX.Element => {
         return ServicesTable._getServiceStatusWithName(service, columnIndex, tableColumn);
     }
 
-    private static _renderAgeCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, service: IServiceItem): JSX.Element => {
+    private _renderAgeCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, service: IServiceItem): JSX.Element => {
         const itemToRender = <Ago date={new Date(service.creationTimestamp)} />;
         return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
+    }
+
+    private _setHoverRowIndex = (hoverRowIndex: number): void => {
+        this.setState({
+            hoverRowIndex: hoverRowIndex
+        });
     }
 
     private static _getServiceStatusWithName(service: IServiceItem, columnIndex: number, tableColumn: ITableColumn<IServiceItem>): JSX.Element {
