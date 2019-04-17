@@ -6,37 +6,35 @@
 import { V1Pod, V1Service } from "@kubernetes/client-node";
 import { BaseComponent } from "@uifabric/utilities";
 import { CardContent, CustomCard } from "azure-devops-ui/Card";
-import { localeFormat } from "azure-devops-ui/Core/Util/String";
 import { CustomHeader, HeaderDescription, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
 import { Page } from "azure-devops-ui/Page";
+import { Spinner, SpinnerSize } from "azure-devops-ui/Spinner";
 import { Statuses } from "azure-devops-ui/Status";
 import { ITableColumn, renderSimpleCell, Table } from "azure-devops-ui/Table";
 import * as Date_Utils from "azure-devops-ui/Utilities/Date";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
-import { Spinner, SpinnerSize } from "azure-devops-ui/Spinner";
-import * as React from "react";
+import { createBrowserHistory } from "history";
 import * as queryString from "query-string";
+import * as React from "react";
 import { renderTableCell } from "../Common/KubeCardWithTable";
 import { KubeSummary } from "../Common/KubeSummary";
 import { KubeZeroData } from "../Common/KubeZeroData";
 import { PageTopHeader } from "../Common/PageTopHeader";
 import { Tags } from "../Common/Tags";
-import { ServicesEvents, PodsEvents, SelectedItemKeys } from "../Constants";
+import { SelectedItemKeys, ServicesEvents } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
 import { PodsActionsCreator } from "../Pods/PodsActionsCreator";
 import { PodsTable } from "../Pods/PodsTable";
 import * as Resources from "../Resources";
-import { IServiceItem, IVssComponentProperties, IPodDetailsSelectionProperties } from "../Types";
+import { getRunDetailsText } from "../RunDetails";
+import { SelectionActionsCreator } from "../Selection/SelectionActionCreator";
+import { IPodDetailsSelectionProperties, IServiceItem, IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
 import "./ServiceDetails.scss";
-import { ServicesStore } from "./ServicesStore";
 import { ServicesActionsCreator } from "./ServicesActionsCreator";
-import { createBrowserHistory } from "history";
+import { ServicesStore } from "./ServicesStore";
 import { getServiceItems } from "./ServiceUtils";
-import { SelectionActionsCreator } from "../Selection/SelectionActionCreator";
-import { PodsStore } from "../Pods/PodsStore";
-import { getRunDetailsText } from "../RunDetails";
 
 export interface IServiceDetailsProperties extends IVssComponentProperties {
     service: IServiceItem | undefined;
@@ -66,7 +64,7 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
                 const metadata = service.metadata;
                 props.notifyViewChanged([{ id: SelectedItemKeys.ServiceItemKey + metadata.uid, displayName: metadata.name, url: window.location.href }]);
             }
-        }
+        };
 
         if (props.service && props.service.service) {
             notifyViewChanged(props.service.service);
@@ -74,12 +72,11 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
 
         this._podsActionsCreator = ActionsCreatorManager.GetActionCreator<PodsActionsCreator>(PodsActionsCreator);
         this._servicesStore = StoreManager.GetStore<ServicesStore>(ServicesStore);
-        this._podsStore = StoreManager.GetStore<PodsStore>(PodsStore);
         const fetchServiceDetails = (svc: V1Service) => {
             // service currently only supports equals with "and" operator. The generator generates that condition.
             const labelSelector: string = Utils.generateEqualsConditionLabelSelector(svc && svc.spec && svc.spec.selector || {});
             this._podsActionsCreator.getPods(KubeSummary.getKubeService(), labelSelector);
-        }
+        };
 
         if (!props.service) {
             ActionsCreatorManager.GetActionCreator<ServicesActionsCreator>(ServicesActionsCreator).getServices(KubeSummary.getKubeService());
@@ -98,7 +95,7 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
                     });
                 }
 
-            }
+            };
 
             this._servicesStore.addListener(ServicesEvents.ServicesFetchedEvent, getServicesHandler);
         } else if (props.service.service) {
@@ -174,11 +171,10 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
     }
 
     private _onPodsFetched = (): void => {
-        const pods = this._servicesStore.getState().podsList;
-        const arePodsLoading = this._podsStore.getState().isLoading;
+        const servicesStoreState = this._servicesStore.getState();
         this.setState({
-            pods: pods || [],
-            arePodsLoading: arePodsLoading
+            pods: servicesStoreState.podsList || [],
+            arePodsLoading: servicesStoreState.arePodsLoading
         });
     }
 
@@ -297,5 +293,4 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
 
     private _servicesStore: ServicesStore;
     private _podsActionsCreator: PodsActionsCreator;
-    private _podsStore: PodsStore;
 }
