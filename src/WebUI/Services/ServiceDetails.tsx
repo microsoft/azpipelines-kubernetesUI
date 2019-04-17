@@ -16,7 +16,7 @@ import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import { Spinner, SpinnerSize } from "azure-devops-ui/Spinner";
 import * as React from "react";
 import * as queryString from "query-string";
-import { renderTableCell } from "../Common/KubeCardWithTable";
+import { renderTableCell, renderExternalIpCell } from "../Common/KubeCardWithTable";
 import { KubeSummary } from "../Common/KubeSummary";
 import { KubeZeroData } from "../Common/KubeZeroData";
 import { PageTopHeader } from "../Common/PageTopHeader";
@@ -47,6 +47,7 @@ export interface IServiceDetailsState {
     service: IServiceItem | undefined;
     pods: Array<V1Pod>;
     arePodsLoading?: boolean;
+    hoverRowIndex: number;
 }
 
 const LoadBalancerText: string = "LoadBalancer";
@@ -57,7 +58,8 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
         this.state = {
             service: props.service,
             pods: [],
-            arePodsLoading: true
+            arePodsLoading: true,
+            hoverRowIndex: -1
         };
 
         const notifyViewChanged = (service: V1Service) => {
@@ -161,7 +163,7 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
                             showLines={false}
                             singleClickActivation={false}
                             itemProvider={new ArrayItemProvider<IServiceItem>(tableItems)}
-                            columns={ServiceDetails._getColumns()}
+                            columns={this._getColumns()}
                         />
                     </CardContent>
                 </CustomCard >
@@ -231,7 +233,7 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
         };
     }
 
-    private static _getColumns(): ITableColumn<IServiceItem>[] {
+    private _getColumns = (): ITableColumn<IServiceItem>[] => {
         const columns: ITableColumn<any>[] = [
             {
                 id: "type",
@@ -252,7 +254,7 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
                 name: Resources.ExternalIPText,
                 width: -100,
                 minWidth: 104,
-                renderCell: renderSimpleCell
+                renderCell: (rowIndex, columnIndex, tableColumn, item) => renderExternalIpCell(rowIndex, columnIndex, tableColumn, item, this._setHoverRowIndex, this.state.hoverRowIndex)
             },
             {
                 id: "port",
@@ -273,23 +275,29 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
                 name: Resources.SelectorText,
                 width: -100,
                 minWidth: 120,
-                renderCell: ServiceDetails._renderTags
+                renderCell: this._renderTags
             },
             {
                 id: "labels",
                 name: Resources.LabelsText,
                 width: -100,
                 minWidth: 312,
-                renderCell: ServiceDetails._renderTags
+                renderCell: this._renderTags
             }
         ];
 
         return columns;
     }
 
-    private static _renderTags(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, item: any): JSX.Element {
+    private _renderTags(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, item: any): JSX.Element {
         const itemToRender: React.ReactNode = <Tags items={item[tableColumn.id]} />;
         return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
+    }
+
+    private _setHoverRowIndex = (hoverRowIndex: number): void => {
+        this.setState({
+            hoverRowIndex: hoverRowIndex
+        });
     }
 
     private _servicesStore: ServicesStore;
