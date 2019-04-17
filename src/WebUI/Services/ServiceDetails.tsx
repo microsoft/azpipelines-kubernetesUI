@@ -174,7 +174,7 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
         const servicesStoreState = this._servicesStore.getState();
         this.setState({
             pods: servicesStoreState.podsList || [],
-            arePodsLoading: servicesStoreState.isLoading
+            arePodsLoading: servicesStoreState.arePodsLoading
         });
     }
 
