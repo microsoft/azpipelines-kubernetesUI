@@ -36,7 +36,6 @@ import { createBrowserHistory } from "history";
 import { getServiceItems } from "./ServiceUtils";
 import { SelectionActionsCreator } from "../Selection/SelectionActionCreator";
 import { getRunDetailsText } from "../RunDetails";
-import { PodsStore } from "../Pods/PodsStore";
 
 export interface IServiceDetailsProperties extends IVssComponentProperties {
     service: IServiceItem | undefined;
@@ -66,7 +65,7 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
                 const metadata = service.metadata;
                 props.notifyViewChanged([{ id: SelectedItemKeys.ServiceItemKey + metadata.uid, displayName: metadata.name, url: window.location.href }]);
             }
-        }
+        };
 
         if (props.service && props.service.service) {
             notifyViewChanged(props.service.service);
@@ -74,12 +73,11 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
 
         this._podsActionsCreator = ActionsCreatorManager.GetActionCreator<PodsActionsCreator>(PodsActionsCreator);
         this._servicesStore = StoreManager.GetStore<ServicesStore>(ServicesStore);
-        this._podsStore = StoreManager.GetStore<PodsStore>(PodsStore);
         const fetchServiceDetails = (svc: V1Service) => {
             // service currently only supports equals with "and" operator. The generator generates that condition.
             const labelSelector: string = Utils.generateEqualsConditionLabelSelector(svc && svc.spec && svc.spec.selector || {});
             this._podsActionsCreator.getPods(KubeSummary.getKubeService(), labelSelector);
-        }
+        };
 
         if (!props.service) {
             ActionsCreatorManager.GetActionCreator<ServicesActionsCreator>(ServicesActionsCreator).getServices(KubeSummary.getKubeService());
@@ -98,7 +96,7 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
                     });
                 }
 
-            }
+            };
 
             this._servicesStore.addListener(ServicesEvents.ServicesFetchedEvent, getServicesHandler);
         } else if (props.service.service) {
@@ -174,11 +172,10 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
     }
 
     private _onPodsFetched = (): void => {
-        const pods = this._servicesStore.getState().podsList;
-        const arePodsLoading = this._podsStore.getState().isLoading;
+        const servicesStoreState = this._servicesStore.getState();
         this.setState({
-            pods: pods || [],
-            arePodsLoading: arePodsLoading
+            pods: servicesStoreState.podsList || [],
+            arePodsLoading: servicesStoreState.arePodsLoading
         });
     }
 
@@ -297,5 +294,4 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
 
     private _servicesStore: ServicesStore;
     private _podsActionsCreator: PodsActionsCreator;
-    private _podsStore: PodsStore;
 }

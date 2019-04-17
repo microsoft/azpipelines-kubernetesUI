@@ -11,6 +11,8 @@ import { IListSelection, ListSelection } from "azure-devops-ui/List";
 import { ITableColumn, Table } from "azure-devops-ui/Table";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
+import { createBrowserHistory } from "history";
+import * as queryString from "query-string";
 import * as React from "react";
 import { renderPodNameWithStatusTableCell } from "../Common/KubeCardWithTable";
 import * as Resources from "../Resources";
@@ -23,7 +25,7 @@ export interface IPodsLeftPanelProperties extends IVssComponentProperties {
     parentName: string;
     selectedPodName?: string;
     parentKind: string;
-    onSelectionChange?: (event: React.SyntheticEvent<HTMLElement>, selectedItem: V1Pod) => void;
+    onSelectionChange?: (event: React.SyntheticEvent<HTMLElement>, selectedItem: V1Pod, selectedView: string) => void;
     onBackButtonClick?: () => void;
 }
 
@@ -37,7 +39,7 @@ export class PodsLeftPanel extends BaseComponent<IPodsLeftPanelProperties> {
         );
     }
 
-    public componentDidMount() {
+    public componentDidMount(): void {
         if (this.props.pods && this.props.pods.length) {
             this._selectPod();
         }
@@ -51,8 +53,11 @@ export class PodsLeftPanel extends BaseComponent<IPodsLeftPanelProperties> {
 
     private _onSelectionChange = (event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>) => {
         this._selectedRow = tableRow.index;
+        const historyService = createBrowserHistory();
+        const queryParams = queryString.parse(historyService.location.search);
+        const selectedView = queryParams["view"];
         if (this.props.onSelectionChange) {
-            this.props.onSelectionChange(event, this.props.pods[tableRow.index]);
+            this.props.onSelectionChange(event, this.props.pods[tableRow.index], (typeof selectedView === "string") ? selectedView : "");
         }
     }
 

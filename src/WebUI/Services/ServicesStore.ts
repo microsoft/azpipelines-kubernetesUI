@@ -14,6 +14,7 @@ export interface IServicesStoreState {
     serviceList?: V1ServiceList
     podsList?: V1Pod[];
     isLoading?: boolean;
+    arePodsLoading?: boolean;
 }
 
 export class ServicesStore extends StoreBase {
@@ -24,7 +25,7 @@ export class ServicesStore extends StoreBase {
     public initialize(instanceId?: string): void {
         super.initialize(instanceId);
 
-        this._state = { serviceList: undefined, podsList: [], isLoading: true };
+        this._state = { serviceList: undefined, podsList: [], isLoading: true, arePodsLoading: true };
 
         this._servicesActions = ActionsHubManager.GetActionsHub<ServicesActions>(ServicesActions);
         this._podsActions = ActionsHubManager.GetActionsHub<PodsActions>(PodsActions);
@@ -57,6 +58,7 @@ export class ServicesStore extends StoreBase {
 
     private _setAssociatedPodsList = (payload: IPodListWithLabel): void => {
         this._state.podsList = payload.podsList && payload.podsList.items;
+        this._state.arePodsLoading = payload.isLoading;
         this.emit(ServicesEvents.ServicePodsFetchedEvent, this);
     }
 
