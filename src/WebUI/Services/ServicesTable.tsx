@@ -142,7 +142,8 @@ export class ServicesTable extends BaseComponent<IServicesComponentProperties> {
         let tooltipText: string = "";
         if (service.type === loadBalancerKey) {
             tooltipText = Resources.ExternalIPAllocated;
-            if (!service.externalIP) {
+            // either no externalIP or the value is "-", then service is running.
+            if (!service.externalIP || service.externalIP === "-") {
                 tooltipText = Resources.ExternalIPAllocPending;
                 statusProps = Statuses.Running;
             }

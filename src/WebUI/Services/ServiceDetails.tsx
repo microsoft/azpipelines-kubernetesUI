@@ -125,7 +125,8 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
     private _getMainHeading(): JSX.Element | null {
         const item = this.state.service;
         if (item) {
-            const statusProps = item.type === LoadBalancerText && !item.externalIP ? Statuses.Running : Statuses.Success;
+            // either no externalIP or the value is "-", then service is running.
+            const statusProps = item.type === LoadBalancerText && (!item.externalIP || item.externalIP === "-") ? Statuses.Running : Statuses.Success;
             return <PageTopHeader title={item.package} statusProps={statusProps} />;
         }
 
