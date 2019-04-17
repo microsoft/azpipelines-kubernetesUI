@@ -93,3 +93,4 @@ export declare const SummaryHeaderSubTextFormat: string;
 export declare const TagsText: string;
 export declare const LoadingPodsSpinnerLabel: string;
 export declare const LoadingServicesSpinnerLabel: string;
+export declare const CopyExternalIp: string;

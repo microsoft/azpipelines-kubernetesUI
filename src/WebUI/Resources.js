@@ -94,4 +94,5 @@ define("Environments/Providers/Kubernetes/Resources", ["require", "exports"], fu
     exports.TagsText = "Tags";
     exports.LoadingPodsSpinnerLabel = "Loading associated pods...";
     exports.LoadingServicesSpinnerLabel = "Loading services...";
+    exports.CopyExternalIp = "Copy External IP to clipboard";
 });
