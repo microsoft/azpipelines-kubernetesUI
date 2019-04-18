@@ -223,7 +223,7 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
     private static _getServiceDetailsObject(item: IServiceItem): any {
         return {
             type: item.type,
-            clusterIP: item.clusterIP,
+            clusterIP: item.clusterIP || "-",
             externalIP: item.externalIP,
             port: item.port,
             sessionAffinity: item.service ? item.service.spec.sessionAffinity : "",
