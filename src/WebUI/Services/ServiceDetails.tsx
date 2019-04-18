@@ -6,36 +6,35 @@
 import { V1Pod, V1Service } from "@kubernetes/client-node";
 import { BaseComponent } from "@uifabric/utilities";
 import { CardContent, CustomCard } from "azure-devops-ui/Card";
-import { localeFormat } from "azure-devops-ui/Core/Util/String";
 import { CustomHeader, HeaderDescription, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
 import { Page } from "azure-devops-ui/Page";
+import { Spinner, SpinnerSize } from "azure-devops-ui/Spinner";
 import { Statuses } from "azure-devops-ui/Status";
 import { ITableColumn, renderSimpleCell, Table } from "azure-devops-ui/Table";
 import * as Date_Utils from "azure-devops-ui/Utilities/Date";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
-import { Spinner, SpinnerSize } from "azure-devops-ui/Spinner";
-import * as React from "react";
+import { createBrowserHistory } from "history";
 import * as queryString from "query-string";
-import { renderTableCell, defaultColumnRenderer } from "../Common/KubeCardWithTable";
+import * as React from "react";
+import { renderExternalIpCell, renderTableCell } from "../Common/KubeCardWithTable";
 import { KubeSummary } from "../Common/KubeSummary";
 import { KubeZeroData } from "../Common/KubeZeroData";
 import { PageTopHeader } from "../Common/PageTopHeader";
 import { Tags } from "../Common/Tags";
-import { ServicesEvents, PodsEvents, SelectedItemKeys } from "../Constants";
+import { SelectedItemKeys, ServicesEvents } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
 import { PodsActionsCreator } from "../Pods/PodsActionsCreator";
 import { PodsTable } from "../Pods/PodsTable";
 import * as Resources from "../Resources";
-import { IServiceItem, IVssComponentProperties, IPodDetailsSelectionProperties } from "../Types";
+import { getRunDetailsText } from "../RunDetails";
+import { SelectionActionsCreator } from "../Selection/SelectionActionCreator";
+import { IPodDetailsSelectionProperties, IServiceItem, IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
 import "./ServiceDetails.scss";
-import { ServicesStore } from "./ServicesStore";
 import { ServicesActionsCreator } from "./ServicesActionsCreator";
-import { createBrowserHistory } from "history";
+import { ServicesStore } from "./ServicesStore";
 import { getServiceItems } from "./ServiceUtils";
-import { SelectionActionsCreator } from "../Selection/SelectionActionCreator";
-import { getRunDetailsText } from "../RunDetails";
 
 export interface IServiceDetailsProperties extends IVssComponentProperties {
     service: IServiceItem | undefined;
@@ -47,6 +46,7 @@ export interface IServiceDetailsState {
     service: IServiceItem | undefined;
     pods: Array<V1Pod>;
     arePodsLoading?: boolean;
+    hoverRowIndex: number;
 }
 
 const LoadBalancerText: string = "LoadBalancer";
@@ -57,7 +57,8 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
         this.state = {
             service: props.service,
             pods: [],
-            arePodsLoading: true
+            arePodsLoading: true,
+            hoverRowIndex: -1
         };
 
         const notifyViewChanged = (service: V1Service) => {
@@ -161,7 +162,7 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
                             showLines={false}
                             singleClickActivation={false}
                             itemProvider={new ArrayItemProvider<IServiceItem>(tableItems)}
-                            columns={ServiceDetails._getColumns()}
+                            columns={this._getColumns()}
                         />
                     </CardContent>
                 </CustomCard >
@@ -231,7 +232,7 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
         };
     }
 
-    private static _getColumns(): ITableColumn<IServiceItem>[] {
+    private _getColumns = (): ITableColumn<IServiceItem>[] => {
         const columns: ITableColumn<any>[] = [
             {
                 id: "type",
@@ -245,14 +246,14 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
                 name: Resources.ClusterIPText,
                 width: -100,
                 minWidth: 104,
-                renderCell: ServiceDetails._renderIP
+                renderCell: renderSimpleCell
             },
             {
                 id: "externalIP",
                 name: Resources.ExternalIPText,
                 width: -100,
                 minWidth: 104,
-                renderCell: ServiceDetails._renderIP
+                renderCell: (rowIndex, columnIndex, tableColumn, item) => renderExternalIpCell(rowIndex, columnIndex, tableColumn, item, this._setHoverRowIndex, this.state.hoverRowIndex)
             },
             {
                 id: "port",
@@ -273,28 +274,29 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
                 name: Resources.SelectorText,
                 width: -100,
                 minWidth: 120,
-                renderCell: ServiceDetails._renderTags
+                renderCell: this._renderTags
             },
             {
                 id: "labels",
                 name: Resources.LabelsText,
                 width: -100,
                 minWidth: 312,
-                renderCell: ServiceDetails._renderTags
+                renderCell: this._renderTags
             }
         ];
 
         return columns;
     }
 
-    private static _renderIP(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, item: any): JSX.Element {
-        const itemToRender = defaultColumnRenderer(item[tableColumn.id] || "-");
+    private _renderTags(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, item: any): JSX.Element {
+        const itemToRender: React.ReactNode = <Tags items={item[tableColumn.id]} />;
         return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
-    private static _renderTags(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, item: any): JSX.Element {
-        const itemToRender: React.ReactNode = <Tags items={item[tableColumn.id]} />;
-        return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
+    private _setHoverRowIndex = (hoverRowIndex: number): void => {
+        this.setState({
+            hoverRowIndex: hoverRowIndex
+        });
     }
 
     private _servicesStore: ServicesStore;

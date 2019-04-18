@@ -5,6 +5,7 @@
 
 import { V1DaemonSet, V1Pod, V1ReplicaSet, V1StatefulSet } from "@kubernetes/client-node";
 import { BaseComponent, css } from "@uifabric/utilities";
+import { Button } from "azure-devops-ui/Button";
 import { CardContent, CustomCard } from "azure-devops-ui/Card";
 import { ITableRow, TableColumnStyle } from "azure-devops-ui/Components/Table/Table.Props";
 import { format } from "azure-devops-ui/Core/Util/String";
@@ -16,6 +17,7 @@ import { Tooltip } from "azure-devops-ui/TooltipEx";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
 import { SelectedItemKeys } from "../Constants";
+import * as Resources from "../Resources";
 import { SelectionActionsCreator } from "../Selection/SelectionActionCreator";
 import { IPodDetailsSelectionProperties, IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
@@ -192,14 +194,14 @@ export function renderPodNameWithStatusTableCell(
                 render: (className?: string) => {
                     return (
                         <>
-                            {
-                                podStatusProps &&
-                                <Tooltip text={statusTooltip}>
-                                    <div className="flex-row">
-                                        <Status {...podStatusProps} className="icon-large-margin" size={StatusSize.m} />
-                                    </div>
-                                </Tooltip>
-                            }
+                        {
+                            podStatusProps &&
+                            <Tooltip text={statusTooltip}>
+                                <div className="flex-row">
+                                    <Status {...podStatusProps} className="icon-large-margin" size={StatusSize.m} />
+                                </div>
+                            </Tooltip>
+                        }
                         </>
                     );
                 }
@@ -267,4 +269,36 @@ export function onPodsColumnClicked(
         showSelectedItem: true,
         properties: properties
     });
+}
+
+export function renderExternalIpCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<any>, item: any, hoverHandler: (hoverRowIndex: number) => void, hoverRowIndex: number): JSX.Element {
+    const textToRender = item.externalIP;
+    if (textToRender) {
+        const itemToRender = (
+            <div
+                className="external-ip-cell"
+                onMouseOver={() => hoverHandler(rowIndex)}
+                onMouseLeave={() => hoverHandler(-1)}
+                onFocus={() => hoverHandler(rowIndex)}
+                onBlur={() => hoverHandler(-1)}
+                tabIndex={0}>
+                {textToRender}
+                {hoverRowIndex === rowIndex &&
+                    <Button
+                        onClick={(e) => {
+                            Utils.copyToClipboard(textToRender);
+                            e.preventDefault();
+                        }}
+                        tooltipProps={{ text: Resources.CopyExternalIp }}
+                        ariaLabel={Resources.CopyExternalIp}
+                        iconProps={{ iconName: "Copy" }}
+                        className="external-ip-copy-icon">
+                    </Button>}
+            </div>
+        );
+        return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
+    }
+    else {
+        return renderTableCell(rowIndex, columnIndex, tableColumn, textToRender || "-");
+    }
 }
