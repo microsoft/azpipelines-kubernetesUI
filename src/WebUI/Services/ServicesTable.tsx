@@ -3,19 +3,18 @@
     Licensed under the MIT license.
 */
 
-import { V1Service, V1ServiceList, V1ServicePort } from "@kubernetes/client-node";
+import { V1Service, V1ServiceList } from "@kubernetes/client-node";
 import { BaseComponent } from "@uifabric/utilities";
 import { Ago } from "azure-devops-ui/Ago";
 import { Card } from "azure-devops-ui/Card";
 import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
-import { localeFormat } from "azure-devops-ui/Core/Util/String";
 import { IStatusProps, Status, Statuses, StatusSize } from "azure-devops-ui/Status";
 import { ITableColumn, Table, TwoLineTableCell, renderSimpleCell } from "azure-devops-ui/Table";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
-import { renderTableCell } from "../Common/KubeCardWithTable";
+import { renderTableCell, defaultColumnRenderer } from "../Common/KubeCardWithTable";
 import { KubeZeroData } from "../Common/KubeZeroData";
 import { SelectedItemKeys } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
@@ -101,14 +100,14 @@ export class ServicesTable extends BaseComponent<IServicesComponentProperties> {
             id: "clusterIP",
             name: Resources.ClusterIPText,
             width: -15,
-            renderCell: renderSimpleCell
+            renderCell: ServicesTable._renderIP
         });
 
         columns.push({
             id: "externalIP",
             name: Resources.ExternalIPText,
             width: new ObservableValue(172),
-            renderCell: renderSimpleCell
+            renderCell: ServicesTable._renderIP
         });
 
         columns.push({
@@ -132,6 +131,11 @@ export class ServicesTable extends BaseComponent<IServicesComponentProperties> {
         return ServicesTable._getServiceStatusWithName(service, columnIndex, tableColumn);
     }
 
+    private static _renderIP(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, item: any): JSX.Element {
+        const itemToRender = defaultColumnRenderer(item[tableColumn.id] || "-");
+        return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
+    }
+
     private static _renderAgeCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, service: IServiceItem): JSX.Element => {
         const itemToRender = <Ago date={new Date(service.creationTimestamp)} />;
         return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
@@ -142,8 +146,7 @@ export class ServicesTable extends BaseComponent<IServicesComponentProperties> {
         let tooltipText: string = "";
         if (service.type === loadBalancerKey) {
             tooltipText = Resources.ExternalIPAllocated;
-            // either no externalIP or the value is "-", then service is running.
-            if (!service.externalIP || service.externalIP === "-") {
+            if (!service.externalIP) {
                 tooltipText = Resources.ExternalIPAllocPending;
                 statusProps = Statuses.Running;
             }

@@ -16,7 +16,7 @@ import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import { Spinner, SpinnerSize } from "azure-devops-ui/Spinner";
 import * as React from "react";
 import * as queryString from "query-string";
-import { renderTableCell } from "../Common/KubeCardWithTable";
+import { renderTableCell, defaultColumnRenderer } from "../Common/KubeCardWithTable";
 import { KubeSummary } from "../Common/KubeSummary";
 import { KubeZeroData } from "../Common/KubeZeroData";
 import { PageTopHeader } from "../Common/PageTopHeader";
@@ -125,8 +125,7 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
     private _getMainHeading(): JSX.Element | null {
         const item = this.state.service;
         if (item) {
-            // either no externalIP or the value is "-", then service is running.
-            const statusProps = item.type === LoadBalancerText && (!item.externalIP || item.externalIP === "-") ? Statuses.Running : Statuses.Success;
+            const statusProps = item.type === LoadBalancerText && !item.externalIP ? Statuses.Running : Statuses.Success;
             return <PageTopHeader title={item.package} statusProps={statusProps} />;
         }
 
@@ -246,14 +245,14 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
                 name: Resources.ClusterIPText,
                 width: -100,
                 minWidth: 104,
-                renderCell: renderSimpleCell
+                renderCell: ServiceDetails._renderIP
             },
             {
                 id: "externalIP",
                 name: Resources.ExternalIPText,
                 width: -100,
                 minWidth: 104,
-                renderCell: renderSimpleCell
+                renderCell: ServiceDetails._renderIP
             },
             {
                 id: "port",
@@ -286,6 +285,11 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
         ];
 
         return columns;
+    }
+
+    private static _renderIP(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, item: any): JSX.Element {
+        const itemToRender = defaultColumnRenderer(item[tableColumn.id] || "-");
+        return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
     private static _renderTags(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, item: any): JSX.Element {
