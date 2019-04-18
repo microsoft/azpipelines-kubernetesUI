@@ -351,7 +351,10 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
                     className="fontSizeM font-size-m text-ellipsis bolt-table-link"
                     rel={"noopener noreferrer"}
                     excludeTabStop
-                    onClick={() => this._showImageDetails(imageId)}
+                    onClick={(e) => {
+                        e.preventDefault();
+                        this._showImageDetails(imageId);
+                    }}
                 >
                     {imageText}
                 </Link>
