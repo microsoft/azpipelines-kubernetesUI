@@ -3,20 +3,18 @@
     Licensed under the MIT license.
 */
 
-import { V1Service, V1ServiceList, V1ServicePort } from "@kubernetes/client-node";
+import { V1Service, V1ServiceList } from "@kubernetes/client-node";
 import { BaseComponent } from "@uifabric/utilities";
 import { Ago } from "azure-devops-ui/Ago";
 import { Card } from "azure-devops-ui/Card";
 import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
-import { localeFormat } from "azure-devops-ui/Core/Util/String";
 import { IStatusProps, Status, Statuses, StatusSize } from "azure-devops-ui/Status";
-import { ITableColumn, Table, TwoLineTableCell, renderSimpleCell } from "azure-devops-ui/Table";
+import { ITableColumn, renderSimpleCell, Table, TwoLineTableCell } from "azure-devops-ui/Table";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
-import { Button } from "azure-devops-ui/Button";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
-import { renderTableCell, renderExternalIpCell } from "../Common/KubeCardWithTable";
+import { renderExternalIpCell, renderTableCell } from "../Common/KubeCardWithTable";
 import { KubeZeroData } from "../Common/KubeZeroData";
 import { SelectedItemKeys } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
@@ -25,8 +23,8 @@ import { SelectionActionsCreator } from "../Selection/SelectionActionCreator";
 import { ISelectionPayload } from "../Selection/SelectionActions";
 import { IServiceItem, IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
-import { getServiceItems } from "./ServiceUtils";
 import "./ServiceDetails.scss";
+import { getServiceItems } from "./ServiceUtils";
 
 const loadBalancerKey: string = "LoadBalancer";
 
