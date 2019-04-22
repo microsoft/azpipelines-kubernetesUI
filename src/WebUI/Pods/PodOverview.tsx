@@ -136,7 +136,7 @@ export class PodOverview extends BaseComponent<IPodOverviewProps> {
                 props = {
                     columnIndex: columnIndex,
                     children:
-                        <Tags items={value} />,
+                    <Tags items={value} />,
                     tableColumn: tableColumn,
                     contentClassName: css("pod-labels-pill", contentClassName)
                 };
@@ -182,7 +182,10 @@ export class PodOverview extends BaseComponent<IPodOverviewProps> {
                     className="fontSizeM font-size-m text-ellipsis bolt-table-link"
                     rel={"noopener noreferrer"}
                     excludeTabStop
-                    onClick={() => showImageDetails(imageId)}
+                    onClick={(e) => {
+                        e.preventDefault();
+                        showImageDetails(imageId);
+                    }}
                 >
                     {value}
                 </Link>

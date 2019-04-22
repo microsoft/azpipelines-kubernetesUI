@@ -275,11 +275,14 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
                     className="fontSizeM font-size-m text-ellipsis bolt-table-link"
                     rel={"noopener noreferrer"}
                     excludeTabStop
-                    onClick={() => this._onImageClick(imageId)}
+                    onClick={(e) => {
+                        e.preventDefault();
+                        this._onImageClick(imageId);
+                    }}
                 >
                     {textToRender}
                 </Link>
-            </Tooltip>
+            </Tooltip >
             : defaultColumnRenderer(textToRender);
 
         return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender, undefined, hasImageDetails ? "bolt-table-cell-content-with-link" : "");

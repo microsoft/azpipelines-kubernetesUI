@@ -228,7 +228,11 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
                 <Link
                     className="fontSizeM font-size-m text-ellipsis bolt-table-link"
                     excludeTabStop={true}
-                    onClick={() => this._onImageClick(imageId)}>
+                    onClick={(e) => {
+                        e.preventDefault();
+                        this._onImageClick(imageId);
+                    }}
+                >
                     {imageText}
                 </Link>
             </Tooltip> :
