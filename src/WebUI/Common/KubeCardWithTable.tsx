@@ -273,8 +273,8 @@ export function onPodsColumnClicked(
 }
 
 export function renderExternalIpCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<any>, item: any, hoverHandler: (hoverRowIndex: number) => void, hoverRowIndex: number): JSX.Element {
-    let textToRender = item.externalIP;
-    if (textToRender !== "-") {
+    const textToRender = item.externalIP;
+    if (textToRender) {
         const itemToRender = (
             <div
                 className="external-ip-cell"
@@ -297,9 +297,10 @@ export function renderExternalIpCell(rowIndex: number, columnIndex: number, tabl
                     </Button>}
             </div>
         );
+
         return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
     else {
-        return renderTableCell(rowIndex, columnIndex, tableColumn, textToRender);
+        return renderTableCell(rowIndex, columnIndex, tableColumn, textToRender || "-");
     }
 }

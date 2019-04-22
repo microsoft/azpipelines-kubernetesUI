@@ -125,12 +125,25 @@ export class Utils {
             statusProps = Statuses.Success;
         }
 
+        // check containers status and then conditions
+        // container state could be Waiting/Running/Terminated
+        // https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-and-container-status
         const failedContainerState = (status.containerStatuses || []).find(cs => !cs.ready && !cs.state.running);
         if (failedContainerState) {
             const failedState = failedContainerState.state;
             statusProps = Statuses.Failed;
-            tooltip = failedState.waiting && failedState.waiting.message
-                || failedState.terminated && failedState.terminated.message;
+            tooltip = failedState.waiting && (failedState.waiting.message || failedState.waiting.reason)
+                || failedState.terminated && (failedState.terminated.message || failedState.terminated.reason);
+        }
+        else {
+            // https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-conditions
+            // condition status could be True/False/Unknown
+            const hasConditionFailed = (c) => (typeof c.status === "string") && c.status.toLowerCase() !== "true" && (!!c.message || !!c.reason);
+            const failedCondition = (status.conditions || []).find(c => hasConditionFailed(c));
+            if (failedCondition) {
+                statusProps = Statuses.Failed;
+                tooltip = failedCondition.message || failedCondition.reason;
+            }
         }
 
         return { statusProps: statusProps, tooltip: tooltip };

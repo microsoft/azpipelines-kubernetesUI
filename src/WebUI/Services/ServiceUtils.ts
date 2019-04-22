@@ -10,7 +10,7 @@ export function getServiceItems(serviceList: V1Service[]): IServiceItem[] {
             package: service.metadata.name,
             type: service.spec.type,
             clusterIP: service.spec.clusterIP || "-",
-            externalIP: _getExternalIP(service) || "-",
+            externalIP: _getExternalIP(service),
             port: _getPort(service) || "",
             creationTimestamp: service.metadata.creationTimestamp || new Date(),
             uid: service.metadata.uid.toLowerCase(),
