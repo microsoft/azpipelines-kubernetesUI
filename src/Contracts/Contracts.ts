@@ -25,7 +25,9 @@ export interface IKubeService {
 export enum KubeImage {
     zeroData = "zeroData",
     zeroResults = "zeroResults",
-    zeroWorkloads = "zeroWorkloads"
+    zeroWorkloads = "zeroWorkloads",
+    resourceDeleted = "resourceDeleted",
+    resourceAccessDenied ="resourceAccessDenied"
 }
 
 export interface IImageService {
@@ -51,4 +53,10 @@ export enum PodPhase {
     Unknown = "Unknown",
     Completed = "Completed",
     CrashLoopBackOff = "CrashLoopBackOff",
+}
+
+export enum ResourceErrorType {
+    Deleted = "Deleted",
+    AccessDenied = "AccessDenied",
+    None = "None"
 }

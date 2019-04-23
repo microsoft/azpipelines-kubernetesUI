@@ -48,6 +48,7 @@ export namespace HyperLinks {
     export const WorkloadsLink: string = "https://go.microsoft.com/fwlink/?linkid=2083857";
     export const LinkToPodsUsingLabelsLink: string = "https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/";
     export const ServicesLink: string = "https://go.microsoft.com/fwlink/?linkid=2083858";
+    export const ResourceDeletedLink: string = "https://go.microsoft.com/fwlink/?linkid=2083857";
 }
 
 export namespace Scenarios{

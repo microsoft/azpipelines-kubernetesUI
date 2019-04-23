@@ -18,7 +18,7 @@ import { Filter, FILTER_CHANGE_EVENT, IFilterState } from "azure-devops-ui/Utili
 import { Action, createBrowserHistory, History, Location, UnregisterCallback } from "history";
 import * as queryString from "query-string";
 import * as React from "react";
-import { IImageService, IKubeService, KubeImage, ITelemetryService } from "../../Contracts/Contracts";
+import { IImageService, IKubeService, KubeImage, ITelemetryService, ResourceErrorType } from "../../Contracts/Contracts";
 import { IImageDetails } from "../../Contracts/Types";
 import { SelectedItemKeys, ServicesEvents, WorkloadsEvents } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
@@ -64,6 +64,7 @@ export interface IKubernetesContainerState {
     resourceSize: number;
     workloadsFilter: Filter;
     svcFilter: Filter;
+    resourceErrorType?: ResourceErrorType;
 }
 
 export interface IKubeSummaryProps extends IVssComponentProperties {
@@ -111,7 +112,18 @@ export interface IKubeSummaryProps extends IVssComponentProperties {
     /**
      * command items to be displayed in the header of the summary page
      */
-    summaryPageHeaderCommandItems?: IHeaderCommandBarItem[] | ObservableArray<IHeaderCommandBarItem>
+    summaryPageHeaderCommandItems?: IHeaderCommandBarItem[] | ObservableArray<IHeaderCommandBarItem>;
+
+    /*
+    * type of error when namespace or cluster deleted
+    * or with given auth config we will not be able to reach to Kubernetes cluster.
+    */
+    getResourceErrorType?: () => Promise<ResourceErrorType>;
+
+    /*
+    * will show as part of the error component as children for any custom actions
+    */
+    getResourceErrorActionComponent?: (props?: any) => React.ReactNode;
 
     getImageLocation?: (image: KubeImage) => string | undefined;
     // props has text and reader options.
@@ -156,7 +168,8 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
             selectedItemType: queryParams.type as string || "",
             resourceSize: 0,
             svcFilter: servicesFilter,
-            workloadsFilter: workloadsFilter
+            workloadsFilter: workloadsFilter,
+            resourceErrorType: ResourceErrorType.None
         };
 
         this._servicesStore = StoreManager.GetStore<ServicesStore>(ServicesStore);
@@ -198,6 +211,10 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
     }
 
     public componentDidMount(): void {
+        if (this.props.getResourceErrorType) {
+            this.props.getResourceErrorType().then(errorType => { this.setState({ resourceErrorType: errorType }); });
+        }
+
         // this needs to be called after the data is loaded so that we can decide which object is selected as per the URL
         setTimeout(() => {
             this._updateStateFromHistory(queryString.parse(this._historyService.location.search));
@@ -233,7 +250,12 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
                 this.props.onViewChanged([]);
             }
 
-            this.setState({ selectedItemType: "", selectedItem: undefined, showSelectedItem: false, selectedItemUid: undefined });
+            this.setState({
+                selectedItemType: "",
+                selectedItem: undefined,
+                showSelectedItem: false,
+                selectedItemUid: undefined
+            });
         }
     }
 
@@ -262,12 +284,14 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         const servicesSize = this._servicesStore.getServicesSize();
         const resourceSize = workloadSize + servicesSize;
         if (this.state.resourceSize <= 0 && resourceSize > 0) {
-            this.setState({ resourceSize: workloadSize + servicesSize });
+            this.setState({ resourceSize: resourceSize });
         }
     }
 
     private _getMainContent(): JSX.Element {
-        const pageContent = this.state.resourceSize > 0 ? this._getMainPivot() : this._getZeroData();
+        const pageContent = this.state.resourceErrorType !== ResourceErrorType.None
+            ? this._getErrorComponent()
+            : this.state.resourceSize > 0 ? this._getMainPivot() : this._getZeroData();
         const headerProps: IHeaderProps = {
             title: this.props.title,
             titleSize: TitleSize.Large,
@@ -290,6 +314,17 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
                 {pageContent}
             </>
         );
+    }
+
+    private _getErrorComponent(): JSX.Element | null {
+        switch (this.state.resourceErrorType) {
+            case ResourceErrorType.Deleted:
+                return KubeZeroData.getResourceDeletedErrorComponent();
+            case ResourceErrorType.AccessDenied:
+                return KubeZeroData.getResourceAccessDeniedErrorComponent();
+        }
+
+        return null;
     }
 
     private _getMainPivot(): JSX.Element {
