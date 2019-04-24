@@ -112,7 +112,7 @@ export interface IKubeSummaryProps extends IVssComponentProperties {
     /**
      * command items to be displayed in the header of the summary page
      */
-    summaryPageHeaderCommandItems?: IHeaderCommandBarItem[] | ObservableArray<IHeaderCommandBarItem>;
+    summaryPageHeaderCommandItems?: (props?: any) => IHeaderCommandBarItem[] | ObservableArray<IHeaderCommandBarItem>;
 
     /*
     * type of error when namespace or cluster deleted
@@ -292,6 +292,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         const pageContent = this.state.resourceErrorType !== ResourceErrorType.None
             ? this._getErrorComponent()
             : this.state.resourceSize > 0 ? this._getMainPivot() : this._getZeroData();
+        const cmdBarItemsFn = this.props.summaryPageHeaderCommandItems;
         const headerProps: IHeaderProps = {
             title: this.props.title,
             titleSize: TitleSize.Large,
@@ -299,7 +300,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
             description: this.props.clusterName
                 ? localeFormat(Resources.SummaryHeaderSubTextFormat, this.props.clusterName)
                 : localeFormat(Resources.NamespaceHeadingText, this.state.namespace || ""),
-            commandBarItems: this.props.summaryPageHeaderCommandItems
+            commandBarItems: cmdBarItemsFn && cmdBarItemsFn({ resourceErrorType: this.state.resourceErrorType })
         };
 
         if (this.props.onTitleBackClick) {
