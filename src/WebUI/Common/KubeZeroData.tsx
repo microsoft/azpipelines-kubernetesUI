@@ -84,8 +84,8 @@ export class KubeZeroData extends BaseComponent<IKubeZeroDataProps> {
                 className="k8s-resource-deleted-error"
                 primaryText={""}
                 secondaryText={
-                    <div className="flex-row">
-                        <div>{Resources.KubernetesResourceDeletedHelpText}</div>
+                    <div>
+                        {Resources.KubernetesResourceDeletedHelpText}
                         <Link
                             href={HyperLinks.ResourceDeletedLink}
                             target="_blank"
