@@ -16,6 +16,8 @@ import { SelectedItemKeys } from "./Constants";
 const pipelineNameAnnotationKey: string = "azure-pipelines/pipeline";
 const pipelineRunIdAnnotationKey: string = "azure-pipelines/execution";
 const pipelineRunUrlAnnotationKey: string = "azure-pipelines/executionuri";
+const newPipelineRunIdAnnotationKey: string = "azure-pipelines/run";
+const newPipelineRunUrlAnnotationKey: string = "azure-pipelines/runuri";
 const pipelineJobNameAnnotationKey: string = "azure-pipelines/jobName";
 const matchPatternForImageName = new RegExp(/\:\/\/(.+?)\@/);
 const matchPatternForDigest = new RegExp(/\@sha256\:(.+)/);
@@ -67,7 +69,7 @@ export class Utils {
             if (!pipelineName && keyVal === pipelineNameAnnotationKey) {
                 pipelineName = annotations[key];
             }
-            else if (!pipelineExecutionId && keyVal === pipelineRunIdAnnotationKey) {
+            else if (!pipelineExecutionId && (keyVal === pipelineRunIdAnnotationKey || keyVal === newPipelineRunIdAnnotationKey)) {
                 pipelineExecutionId = annotations[key];
             }
 
@@ -82,11 +84,13 @@ export class Utils {
             return {} as IMetadataAnnotationPipeline;
         }
 
+        const runName = annotations[newPipelineRunIdAnnotationKey] || annotations[pipelineRunIdAnnotationKey];
+        const runUrl = annotations[newPipelineRunUrlAnnotationKey] || annotations[pipelineRunUrlAnnotationKey];
         return {
             jobName: annotations[pipelineJobNameAnnotationKey],
             pipelineName: annotations[pipelineNameAnnotationKey],
-            runName: annotations[pipelineRunIdAnnotationKey],
-            runUrl: annotations[pipelineRunUrlAnnotationKey]
+            runName: runName,
+            runUrl: runUrl
         };
     }
 
