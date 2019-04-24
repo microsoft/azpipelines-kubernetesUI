@@ -316,15 +316,16 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
     }
 
     private _getErrorComponent(): React.ReactNode | JSX.Element | null | undefined {
-        switch (this.state.resourceErrorType) {
+        const errorType = this.state.resourceErrorType;
+        if (this.props.getResourceErrorActionComponent) {
+            return this.props.getResourceErrorActionComponent({ resourceErrorType: errorType });
+        }
+
+        switch (errorType) {
             case ResourceErrorType.Deleted:
-                return this.props.getResourceErrorActionComponent
-                    ? this.props.getResourceErrorActionComponent()
-                    : KubeZeroData.getResourceDeletedErrorComponent();
+                return KubeZeroData.getResourceDeletedErrorComponent();
             case ResourceErrorType.AccessDenied:
-                return this.props.getResourceErrorActionComponent
-                    ? this.props.getResourceErrorActionComponent()
-                    : KubeZeroData.getResourceAccessDeniedErrorComponent();
+                return KubeZeroData.getResourceAccessDeniedErrorComponent();
         }
 
         return undefined;
