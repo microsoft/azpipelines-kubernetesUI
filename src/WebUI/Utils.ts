@@ -84,8 +84,8 @@ export class Utils {
             return {} as IMetadataAnnotationPipeline;
         }
 
-        const runName = !!annotations[pipelineRunIdAnnotationKey] ? annotations[pipelineRunIdAnnotationKey] : annotations[newPipelineRunIdAnnotationKey];
-        const runUrl = !!annotations[pipelineRunUrlAnnotationKey] ? annotations[pipelineRunUrlAnnotationKey] : annotations[newPipelineRunUrlAnnotationKey];
+        const runName = annotations[newPipelineRunIdAnnotationKey] || annotations[pipelineRunIdAnnotationKey];
+        const runUrl = annotations[newPipelineRunUrlAnnotationKey] || annotations[pipelineRunUrlAnnotationKey];
         return {
             jobName: annotations[pipelineJobNameAnnotationKey],
             pipelineName: annotations[pipelineNameAnnotationKey],
