@@ -84,7 +84,7 @@ export class KubeZeroData extends BaseComponent<IKubeZeroDataProps> {
                 className="k8s-resource-deleted-error"
                 primaryText={""}
                 secondaryText={
-                    <>
+                    <div className="flex-row">
                         <div>{Resources.KubernetesResourceDeletedHelpText}</div>
                         <Link
                             href={HyperLinks.ResourceDeletedLink}
@@ -93,7 +93,7 @@ export class KubeZeroData extends BaseComponent<IKubeZeroDataProps> {
                         >
                             {Resources.LearnMoreText}
                         </Link>
-                    </>
+                    </div>
                 }
                 imageAltText={Resources.KubernetesResourceDeletedAltText}
                 imagePath={KubeFactory.getImageLocation(KubeImage.resourceDeleted) || ""}
@@ -105,7 +105,7 @@ export class KubeZeroData extends BaseComponent<IKubeZeroDataProps> {
         return (
             <ZeroData
                 className="k8s-resource-access-denied-error"
-                primaryText={Resources.KubernetesAuthValidationTitleText}
+                primaryText={""}
                 secondaryText={
                     <div>{Resources.KubernetesAuthValidationHelpText}</div>
                 }

@@ -121,7 +121,7 @@ export interface IKubeSummaryProps extends IVssComponentProperties {
     getResourceErrorType?: () => Promise<ResourceErrorType>;
 
     /*
-    * will show as part of the error component as children for any custom actions
+    * UI to show when Resource has an error.
     */
     getResourceErrorActionComponent?: (props?: any) => React.ReactNode;
 
@@ -310,21 +310,24 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         return (
             <>
                 <Header {...headerProps} />
-
                 {pageContent}
             </>
         );
     }
 
-    private _getErrorComponent(): JSX.Element | null {
+    private _getErrorComponent(): React.ReactNode | JSX.Element | null | undefined {
         switch (this.state.resourceErrorType) {
             case ResourceErrorType.Deleted:
-                return KubeZeroData.getResourceDeletedErrorComponent();
+                return this.props.getResourceErrorActionComponent
+                    ? this.props.getResourceErrorActionComponent()
+                    : KubeZeroData.getResourceDeletedErrorComponent();
             case ResourceErrorType.AccessDenied:
-                return KubeZeroData.getResourceAccessDeniedErrorComponent();
+                return this.props.getResourceErrorActionComponent
+                    ? this.props.getResourceErrorActionComponent()
+                    : KubeZeroData.getResourceAccessDeniedErrorComponent();
         }
 
-        return null;
+        return undefined;
     }
 
     private _getMainPivot(): JSX.Element {
