@@ -6,10 +6,10 @@
 import { V1DaemonSet, V1DaemonSetList, V1ObjectMeta, V1Pod, V1ReplicaSet, V1ReplicaSetList, V1StatefulSet, V1StatefulSetList } from "@kubernetes/client-node";
 import { BaseComponent } from "@uifabric/utilities";
 import { ConditionalChildren } from "azure-devops-ui/ConditionalChildren";
-import { ObservableValue } from "azure-devops-ui/Core/Observable";
+import { ObservableValue, ObservableArray } from "azure-devops-ui/Core/Observable";
 import { localeFormat } from "azure-devops-ui/Core/Util/String";
 import { Header, TitleSize, IHeaderProps } from "azure-devops-ui/Header";
-import { HeaderCommandBarWithFilter } from "azure-devops-ui/HeaderCommandBar";
+import { HeaderCommandBarWithFilter, IHeaderCommandBarItem } from "azure-devops-ui/HeaderCommandBar";
 import { Page } from "azure-devops-ui/Page";
 import { IStatusProps } from "azure-devops-ui/Status";
 import { Surface, SurfaceBackground } from "azure-devops-ui/Surface";
@@ -107,6 +107,11 @@ export interface IKubeSummaryProps extends IVssComponentProperties {
      * Callback to notify when the view tree structure has changed
      */
     onViewChanged?: (viewTree: { id: string, displayName: string, url: string }[]) => void;
+
+    /**
+     * command items to be displayed in the header of the summary page
+     */
+    summaryPageHeaderCommandItems?: IHeaderCommandBarItem[] | ObservableArray<IHeaderCommandBarItem>
 
     getImageLocation?: (image: KubeImage) => string | undefined;
     // props has text and reader options.
@@ -269,7 +274,8 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
             className: "content-main-heading",
             description: this.props.clusterName
                 ? localeFormat(Resources.SummaryHeaderSubTextFormat, this.props.clusterName)
-                : localeFormat(Resources.NamespaceHeadingText, this.state.namespace || "")
+                : localeFormat(Resources.NamespaceHeadingText, this.state.namespace || ""),
+            commandBarItems: this.props.summaryPageHeaderCommandItems
         };
 
         if (this.props.onTitleBackClick) {
