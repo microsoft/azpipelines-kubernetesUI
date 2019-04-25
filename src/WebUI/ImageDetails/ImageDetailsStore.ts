@@ -25,12 +25,12 @@ export class ImageDetailsStore extends StoreBase {
         this._actions.setHasImageDetails.removeListener(this._setHasImageDetailsData);
     }
 
-    public hasImageDetails(imageName: string): boolean {
+    public hasImageDetails(imageName: string): boolean | undefined {
         if (this._hasImageDetails && this._hasImageDetails.hasOwnProperty(imageName)) {
             return this._hasImageDetails[imageName];
         }
 
-        return false;
+        return undefined;
     }
 
     private _setHasImageDetailsData = (payload: { [key: string]: boolean } | undefined): void => {

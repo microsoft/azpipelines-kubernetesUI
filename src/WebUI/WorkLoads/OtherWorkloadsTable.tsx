@@ -9,7 +9,7 @@ import { Ago } from "azure-devops-ui/Ago";
 import { CardContent, CustomCard } from "azure-devops-ui/Card";
 import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
-import { equals } from "azure-devops-ui/Core/Util/String";
+import { equals, localeFormat } from "azure-devops-ui/Core/Util/String";
 import { CustomHeader, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
 import { Link } from "azure-devops-ui/Link";
 import { Statuses } from "azure-devops-ui/Status";
@@ -221,8 +221,13 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
     private _renderImageCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<ISetWorkloadTypeItem>, workload: ISetWorkloadTypeItem): JSX.Element => {
         const imageId = workload.imageId;
         const imageText = workload.imageDisplayText || "";
-        // ToDo :: Revisit link paddings
-        const hasImageDetails = StoreManager.GetStore<ImageDetailsStore>(ImageDetailsStore).hasImageDetails(imageId);
+        let imageDetailsUnavailableTooltipText = "";
+        const hasImageDetails: boolean | undefined = this._imageDetailsStore.hasImageDetails(imageId);
+        // If hasImageDetails is undefined, then image details promise has not resolved, so do not set imageDetailsUnavailable tooltip
+        if (hasImageDetails === false) {
+            imageDetailsUnavailableTooltipText = localeFormat("{0} | {1}",  workload.imageTooltip || imageText, Resources.ImageDetailsUnavailableText);
+        }
+        
         const itemToRender = hasImageDetails ?
             <Tooltip overflowOnly={true}>
                 <Link
@@ -235,10 +240,8 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
                 >
                     {imageText}
                 </Link>
-            </Tooltip> :
-            <Tooltip text={imageText} overflowOnly>
-                {defaultColumnRenderer(imageText || "")}
-            </Tooltip>;
+            </Tooltip> 
+            : defaultColumnRenderer(imageText, "", imageDetailsUnavailableTooltipText);
 
         return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender, undefined, "bolt-table-cell-content-with-link");
     }
