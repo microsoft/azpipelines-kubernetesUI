@@ -6,11 +6,12 @@
 import { V1DaemonSet, V1DaemonSetList, V1ObjectMeta, V1Pod, V1ReplicaSet, V1ReplicaSetList, V1StatefulSet, V1StatefulSetList } from "@kubernetes/client-node";
 import { BaseComponent } from "@uifabric/utilities";
 import { ConditionalChildren } from "azure-devops-ui/ConditionalChildren";
-import { ObservableValue, ObservableArray } from "azure-devops-ui/Core/Observable";
+import { ObservableArray, ObservableValue } from "azure-devops-ui/Core/Observable";
 import { localeFormat } from "azure-devops-ui/Core/Util/String";
-import { Header, TitleSize, IHeaderProps } from "azure-devops-ui/Header";
+import { Header, IHeaderProps, TitleSize } from "azure-devops-ui/Header";
 import { HeaderCommandBarWithFilter, IHeaderCommandBarItem } from "azure-devops-ui/HeaderCommandBar";
 import { Page } from "azure-devops-ui/Page";
+import { Spinner, SpinnerSize } from "azure-devops-ui/Spinner";
 import { IStatusProps } from "azure-devops-ui/Status";
 import { Surface, SurfaceBackground } from "azure-devops-ui/Surface";
 import { Tab, TabBar } from "azure-devops-ui/Tabs";
@@ -18,34 +19,34 @@ import { Filter, FILTER_CHANGE_EVENT, IFilterState } from "azure-devops-ui/Utili
 import { Action, createBrowserHistory, History, Location, UnregisterCallback } from "history";
 import * as queryString from "query-string";
 import * as React from "react";
-import { IImageService, IKubeService, KubeImage, ITelemetryService, ResourceErrorType } from "../../Contracts/Contracts";
+import { IImageService, IKubeService, ITelemetryService, KubeImage, ResourceErrorType } from "../../Contracts/Contracts";
 import { IImageDetails } from "../../Contracts/Types";
 import { SelectedItemKeys, ServicesEvents, WorkloadsEvents } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
 import { ImageDetails } from "../ImageDetails/ImageDetails";
+import { DefaultTelemetryService, KubeFactory } from "../KubeFactory";
 import { PodsDetails } from "../Pods/PodsDetails";
-import { KubeFactory, DefaultTelemetryService } from "../KubeFactory";
 import { PodsRightPanel } from "../Pods/PodsRightPanel";
+import { PodsStore } from "../Pods/PodsStore";
 import * as Resources from "../Resources";
 import { SelectionActionsCreator } from "../Selection/SelectionActionCreator";
 import { ISelectionPayload } from "../Selection/SelectionActions";
 import { SelectionStore } from "../Selection/SelectionStore";
 import { ServiceDetails } from "../Services/ServiceDetails";
+import { ServicesActionsCreator } from "../Services/ServicesActionsCreator";
 import { ServicesPivot } from "../Services/ServicesPivot";
 import { ServicesStore } from "../Services/ServicesStore";
+import { getServiceItems } from "../Services/ServiceUtils";
 import { IPodDetailsSelectionProperties, IServiceItem, IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
 import { WorkloadDetails } from "../Workloads/WorkloadDetails";
 import { WorkloadsActionsCreator } from "../Workloads/WorkloadsActionsCreator";
 import { WorkloadsPivot } from "../Workloads/WorkloadsPivot";
 import { WorkloadsStore } from "../Workloads/WorkloadsStore";
+import { setContentReaderComponent } from "./KubeConsumer";
 import "./KubeSummary.scss";
 import { KubeZeroData } from "./KubeZeroData";
-import { PodsStore } from "../Pods/PodsStore";
-import { getServiceItems } from "../Services/ServiceUtils";
-import { setContentReaderComponent } from "./KubeConsumer";
-import { ServicesActionsCreator } from "../Services/ServicesActionsCreator";
 
 const workloadsPivotItemKey: string = "workloads";
 const servicesPivotItemKey: string = "services";
@@ -126,6 +127,7 @@ export interface IKubeSummaryProps extends IVssComponentProperties {
     getResourceErrorActionComponent?: (props?: any) => React.ReactNode;
 
     getImageLocation?: (image: KubeImage) => string | undefined;
+
     // props has text and reader options.
     // reader options are of type monaco.editor.IEditorConstructionOptions
     getContentReaderComponent?: (props?: any) => React.ReactNode;
@@ -169,7 +171,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
             resourceSize: 0,
             svcFilter: servicesFilter,
             workloadsFilter: workloadsFilter,
-            resourceErrorType: ResourceErrorType.None
+            resourceErrorType: this.props.getResourceErrorType ? ResourceErrorType.NotInitialized : ResourceErrorType.None
         };
 
         this._servicesStore = StoreManager.GetStore<ServicesStore>(ServicesStore);
@@ -289,9 +291,7 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
     }
 
     private _getMainContent(): JSX.Element {
-        const pageContent = this.state.resourceErrorType !== ResourceErrorType.None
-            ? this._getErrorComponent()
-            : this.state.resourceSize > 0 ? this._getMainPivot() : this._getZeroData();
+        const pageContent = this._getPageContent();
         const cmdBarItemsFn = this.props.summaryPageHeaderCommandItems;
         const headerProps: IHeaderProps = {
             title: this.props.title,
@@ -307,16 +307,29 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
             headerProps.titleIconProps = { iconName: "Back", onClick: this.props.onTitleBackClick, className: "cursor-pointer" };
         }
 
-        // must be short syntax or React.Fragment, do not use div here to include heading and content.
         return (
-            <>
+            <React.Fragment>
                 <Header {...headerProps} />
                 {pageContent}
-            </>
+            </React.Fragment>
         );
     }
 
-    private _getErrorComponent(): React.ReactNode | JSX.Element | null | undefined {
+    private _getPageContent() {
+        // show spinner till we know there are no error scenarios
+        switch (this.state.resourceErrorType) {
+
+            case ResourceErrorType.NotInitialized:
+                return <Spinner className={"flex flex-grow"} size={SpinnerSize.large} label={Resources.LoadingText} />;
+            case ResourceErrorType.AccessDenied:
+            case ResourceErrorType.Deleted:
+                return this._getResourceErrorComponent();
+            default:
+                return this.state.resourceSize > 0 ? this._getMainPivot() : this._getZeroData();
+        }
+    }
+
+    private _getResourceErrorComponent(): React.ReactNode | JSX.Element | null | undefined {
         const errorType = this.state.resourceErrorType;
         if (this.props.getResourceErrorActionComponent) {
             return this.props.getResourceErrorActionComponent({ resourceErrorType: errorType });

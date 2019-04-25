@@ -58,5 +58,6 @@ export enum PodPhase {
 export enum ResourceErrorType {
     Deleted = "Deleted",
     AccessDenied = "AccessDenied",
-    None = "None"
+    None = "None",
+    NotInitialized = "NotInitialized"
 }
