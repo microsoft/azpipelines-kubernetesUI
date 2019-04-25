@@ -78,6 +78,43 @@ export class KubeZeroData extends BaseComponent<IKubeZeroDataProps> {
         );
     }
 
+    public static getResourceDeletedErrorComponent(): JSX.Element {
+        return (
+            <ZeroData
+                className="k8s-resource-deleted-error"
+                primaryText={""}
+                secondaryText={
+                    <div>
+                        {Resources.KubernetesResourceDeletedHelpText}
+                        <Link
+                            href={HyperLinks.ResourceDeletedLink}
+                            target="_blank"
+                            rel="nofollow noopener"
+                        >
+                            {Resources.LearnMoreText}
+                        </Link>
+                    </div>
+                }
+                imageAltText={Resources.KubernetesResourceDeletedAltText}
+                imagePath={KubeFactory.getImageLocation(KubeImage.resourceDeleted) || ""}
+            />
+        );
+    }
+
+    public static getResourceAccessDeniedErrorComponent(): JSX.Element {
+        return (
+            <ZeroData
+                className="k8s-resource-access-denied-error"
+                primaryText={""}
+                secondaryText={
+                    <div>{Resources.KubernetesAuthValidationHelpText}</div>
+                }
+                imageAltText={Resources.KubernetesAuthValidationTitleText}
+                imagePath={KubeFactory.getImageLocation(KubeImage.resourceAccessDenied) || ""}
+            />
+        );
+    }
+
     public static getNoResultsZeroData(): JSX.Element {
         return (
             <Card className="k8s-zero-data-filter-card k8s-card-padding flex-grow flex-center bolt-card-no-vertical-padding"

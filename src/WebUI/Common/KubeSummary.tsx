@@ -6,11 +6,12 @@
 import { V1DaemonSet, V1DaemonSetList, V1ObjectMeta, V1Pod, V1ReplicaSet, V1ReplicaSetList, V1StatefulSet, V1StatefulSetList } from "@kubernetes/client-node";
 import { BaseComponent } from "@uifabric/utilities";
 import { ConditionalChildren } from "azure-devops-ui/ConditionalChildren";
-import { ObservableValue, ObservableArray } from "azure-devops-ui/Core/Observable";
+import { ObservableArray, ObservableValue } from "azure-devops-ui/Core/Observable";
 import { localeFormat } from "azure-devops-ui/Core/Util/String";
-import { Header, TitleSize, IHeaderProps } from "azure-devops-ui/Header";
+import { Header, IHeaderProps, TitleSize } from "azure-devops-ui/Header";
 import { HeaderCommandBarWithFilter, IHeaderCommandBarItem } from "azure-devops-ui/HeaderCommandBar";
 import { Page } from "azure-devops-ui/Page";
+import { Spinner, SpinnerSize } from "azure-devops-ui/Spinner";
 import { IStatusProps } from "azure-devops-ui/Status";
 import { Surface, SurfaceBackground } from "azure-devops-ui/Surface";
 import { Tab, TabBar } from "azure-devops-ui/Tabs";
@@ -18,34 +19,34 @@ import { Filter, FILTER_CHANGE_EVENT, IFilterState } from "azure-devops-ui/Utili
 import { Action, createBrowserHistory, History, Location, UnregisterCallback } from "history";
 import * as queryString from "query-string";
 import * as React from "react";
-import { IImageService, IKubeService, KubeImage, ITelemetryService } from "../../Contracts/Contracts";
+import { IImageService, IKubeService, ITelemetryService, KubeImage, ResourceErrorType } from "../../Contracts/Contracts";
 import { IImageDetails } from "../../Contracts/Types";
 import { SelectedItemKeys, ServicesEvents, WorkloadsEvents } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
 import { ImageDetails } from "../ImageDetails/ImageDetails";
+import { DefaultTelemetryService, KubeFactory } from "../KubeFactory";
 import { PodsDetails } from "../Pods/PodsDetails";
-import { KubeFactory, DefaultTelemetryService } from "../KubeFactory";
 import { PodsRightPanel } from "../Pods/PodsRightPanel";
+import { PodsStore } from "../Pods/PodsStore";
 import * as Resources from "../Resources";
 import { SelectionActionsCreator } from "../Selection/SelectionActionCreator";
 import { ISelectionPayload } from "../Selection/SelectionActions";
 import { SelectionStore } from "../Selection/SelectionStore";
 import { ServiceDetails } from "../Services/ServiceDetails";
+import { ServicesActionsCreator } from "../Services/ServicesActionsCreator";
 import { ServicesPivot } from "../Services/ServicesPivot";
 import { ServicesStore } from "../Services/ServicesStore";
+import { getServiceItems } from "../Services/ServiceUtils";
 import { IPodDetailsSelectionProperties, IServiceItem, IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
 import { WorkloadDetails } from "../Workloads/WorkloadDetails";
 import { WorkloadsActionsCreator } from "../Workloads/WorkloadsActionsCreator";
 import { WorkloadsPivot } from "../Workloads/WorkloadsPivot";
 import { WorkloadsStore } from "../Workloads/WorkloadsStore";
+import { setContentReaderComponent } from "./KubeConsumer";
 import "./KubeSummary.scss";
 import { KubeZeroData } from "./KubeZeroData";
-import { PodsStore } from "../Pods/PodsStore";
-import { getServiceItems } from "../Services/ServiceUtils";
-import { setContentReaderComponent } from "./KubeConsumer";
-import { ServicesActionsCreator } from "../Services/ServicesActionsCreator";
 
 const workloadsPivotItemKey: string = "workloads";
 const servicesPivotItemKey: string = "services";
@@ -64,6 +65,7 @@ export interface IKubernetesContainerState {
     resourceSize: number;
     workloadsFilter: Filter;
     svcFilter: Filter;
+    resourceErrorType?: ResourceErrorType;
 }
 
 export interface IKubeSummaryProps extends IVssComponentProperties {
@@ -111,9 +113,21 @@ export interface IKubeSummaryProps extends IVssComponentProperties {
     /**
      * command items to be displayed in the header of the summary page
      */
-    summaryPageHeaderCommandItems?: IHeaderCommandBarItem[] | ObservableArray<IHeaderCommandBarItem>
+    summaryPageHeaderCommandItems?: (props?: any) => IHeaderCommandBarItem[] | ObservableArray<IHeaderCommandBarItem>;
+
+    /*
+    * type of error when namespace or cluster deleted
+    * or with given auth config we will not be able to reach to Kubernetes cluster.
+    */
+    getResourceErrorType?: () => Promise<ResourceErrorType>;
+
+    /*
+    * UI to show when Resource has an error.
+    */
+    getResourceErrorActionComponent?: (props?: any) => React.ReactNode;
 
     getImageLocation?: (image: KubeImage) => string | undefined;
+
     // props has text and reader options.
     // reader options are of type monaco.editor.IEditorConstructionOptions
     getContentReaderComponent?: (props?: any) => React.ReactNode;
@@ -156,7 +170,8 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
             selectedItemType: queryParams.type as string || "",
             resourceSize: 0,
             svcFilter: servicesFilter,
-            workloadsFilter: workloadsFilter
+            workloadsFilter: workloadsFilter,
+            resourceErrorType: this.props.getResourceErrorType ? ResourceErrorType.NotInitialized : ResourceErrorType.None
         };
 
         this._servicesStore = StoreManager.GetStore<ServicesStore>(ServicesStore);
@@ -198,6 +213,10 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
     }
 
     public componentDidMount(): void {
+        if (this.props.getResourceErrorType) {
+            this.props.getResourceErrorType().then(errorType => { this.setState({ resourceErrorType: errorType }); });
+        }
+
         // this needs to be called after the data is loaded so that we can decide which object is selected as per the URL
         setTimeout(() => {
             this._updateStateFromHistory(queryString.parse(this._historyService.location.search));
@@ -233,7 +252,12 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
                 this.props.onViewChanged([]);
             }
 
-            this.setState({ selectedItemType: "", selectedItem: undefined, showSelectedItem: false, selectedItemUid: undefined });
+            this.setState({
+                selectedItemType: "",
+                selectedItem: undefined,
+                showSelectedItem: false,
+                selectedItemUid: undefined
+            });
         }
     }
 
@@ -262,12 +286,13 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
         const servicesSize = this._servicesStore.getServicesSize();
         const resourceSize = workloadSize + servicesSize;
         if (this.state.resourceSize <= 0 && resourceSize > 0) {
-            this.setState({ resourceSize: workloadSize + servicesSize });
+            this.setState({ resourceSize: resourceSize });
         }
     }
 
     private _getMainContent(): JSX.Element {
-        const pageContent = this.state.resourceSize > 0 ? this._getMainPivot() : this._getZeroData();
+        const pageContent = this._getPageContent();
+        const cmdBarItemsFn = this.props.summaryPageHeaderCommandItems;
         const headerProps: IHeaderProps = {
             title: this.props.title,
             titleSize: TitleSize.Large,
@@ -275,21 +300,49 @@ export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesCon
             description: this.props.clusterName
                 ? localeFormat(Resources.SummaryHeaderSubTextFormat, this.props.clusterName)
                 : localeFormat(Resources.NamespaceHeadingText, this.state.namespace || ""),
-            commandBarItems: this.props.summaryPageHeaderCommandItems
+            commandBarItems: cmdBarItemsFn && cmdBarItemsFn({ resourceErrorType: this.state.resourceErrorType })
         };
 
         if (this.props.onTitleBackClick) {
             headerProps.titleIconProps = { iconName: "Back", onClick: this.props.onTitleBackClick, className: "cursor-pointer" };
         }
 
-        // must be short syntax or React.Fragment, do not use div here to include heading and content.
         return (
-            <>
+            <React.Fragment>
                 <Header {...headerProps} />
-
                 {pageContent}
-            </>
+            </React.Fragment>
         );
+    }
+
+    private _getPageContent() {
+        // show spinner till we know there are no error scenarios
+        switch (this.state.resourceErrorType) {
+
+            case ResourceErrorType.NotInitialized:
+                return <Spinner className={"flex flex-grow"} size={SpinnerSize.large} label={Resources.LoadingText} />;
+            case ResourceErrorType.AccessDenied:
+            case ResourceErrorType.Deleted:
+                return this._getResourceErrorComponent();
+            default:
+                return this.state.resourceSize > 0 ? this._getMainPivot() : this._getZeroData();
+        }
+    }
+
+    private _getResourceErrorComponent(): React.ReactNode | JSX.Element | null | undefined {
+        const errorType = this.state.resourceErrorType;
+        if (this.props.getResourceErrorActionComponent) {
+            return this.props.getResourceErrorActionComponent({ resourceErrorType: errorType });
+        }
+
+        switch (errorType) {
+            case ResourceErrorType.Deleted:
+                return KubeZeroData.getResourceDeletedErrorComponent();
+            case ResourceErrorType.AccessDenied:
+                return KubeZeroData.getResourceAccessDeniedErrorComponent();
+        }
+
+        return undefined;
     }
 
     private _getMainPivot(): JSX.Element {
