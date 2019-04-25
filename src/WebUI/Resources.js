@@ -99,4 +99,5 @@ define("Environments/Providers/Kubernetes/Resources", ["require", "exports"], fu
     exports.LoadingPodsSpinnerLabel = "Loading associated pods...";
     exports.LoadingServicesSpinnerLabel = "Loading services...";
     exports.CopyExternalIp = "Copy External IP to clipboard";
+    exports.ImageDetailsUnavailableText = "Image details available only for images built in Azure Pipelines";
 });

@@ -175,7 +175,14 @@ export class PodOverview extends BaseComponent<IPodOverviewProps> {
 
     private static _renderImageCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<any>, tableItem: any): JSX.Element => {
         const { key, value, valueTooltipText, imageId, showImageDetails } = tableItem;
-        const hasImageDetails: boolean = StoreManager.GetStore<ImageDetailsStore>(ImageDetailsStore).hasImageDetails(imageId);
+        const imageDetailsStore = StoreManager.GetStore<ImageDetailsStore>(ImageDetailsStore);
+        let imageDetailsUnavailableTooltipText = "";
+        const hasImageDetails: boolean | undefined = imageDetailsStore.hasImageDetails(imageId);
+        // If hasImageDetails is undefined, then image details promise has not resolved, so do not set imageDetailsUnavailable tooltip
+        if (hasImageDetails === false) {
+            imageDetailsUnavailableTooltipText = localeFormat("{0} | {1}", valueTooltipText || value, Resources.ImageDetailsUnavailableText);
+        }
+        
         const itemToRender = hasImageDetails ?
             <Tooltip overflowOnly>
                 <Link
@@ -190,7 +197,7 @@ export class PodOverview extends BaseComponent<IPodOverviewProps> {
                     {value}
                 </Link>
             </Tooltip>
-            : defaultColumnRenderer(value, undefined, valueTooltipText);
+            : defaultColumnRenderer(value, undefined, imageDetailsUnavailableTooltipText);
 
         return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender, undefined, hasImageDetails ? "bolt-table-cell-content-with-link" : "");
     }

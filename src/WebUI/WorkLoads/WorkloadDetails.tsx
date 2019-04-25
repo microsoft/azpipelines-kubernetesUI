@@ -39,10 +39,11 @@ import * as queryString from "query-string";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { PodsActionsCreator } from "../Pods/PodsActionsCreator";
 import { SelectionActionsCreator } from "../Selection/SelectionActionCreator";
-import { SelectedItemKeys, WorkloadsEvents, PodsEvents } from "../Constants";
+import { SelectedItemKeys, WorkloadsEvents, PodsEvents, ImageDetailsEvents } from "../Constants";
 import { WorkloadsActionsCreator } from "./WorkloadsActionsCreator";
 import { WorkloadsStore } from "./WorkloadsStore";
 import { IKubeService } from "../../Contracts/Contracts";
+import { ImageDetailsActionsCreator } from "../ImageDetails/ImageDetailsActionsCreator";
 
 export interface IWorkloadDetailsProperties extends IVssComponentProperties {
     item?: V1ReplicaSet | V1DaemonSet | V1StatefulSet;
@@ -60,6 +61,7 @@ export interface IWorkloadDetailsState {
     showImageDetails: boolean;
     selectedImageDetails: IImageDetails | undefined;
     arePodsLoading?: boolean;
+    imageList?: string[];
 }
 
 export interface IWorkLoadDetailsItem {
@@ -72,8 +74,10 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
     constructor(props: IWorkloadDetailsProperties) {
         super(props, {});
         this._podsStore = StoreManager.GetStore<PodsStore>(PodsStore);
+        this._imageDetailsStore = StoreManager.GetStore<ImageDetailsStore>(ImageDetailsStore);
 
         this._podsStore.addListener(PodsEvents.PodsFetchedEvent, this._onPodsUpdated);
+        this._imageDetailsStore.addListener(ImageDetailsEvents.HasImageDetailsEvent, this._setHasImageDetails);
 
         this._workloadsStore = StoreManager.GetStore<WorkloadsStore>(WorkloadsStore);
 
@@ -143,8 +147,6 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
             notifyViewChanged(item);
         }
 
-        this._imageDetailsStore = StoreManager.GetStore<ImageDetailsStore>(ImageDetailsStore);
-
         this.state = {
             item: item,
             pods: [],
@@ -187,8 +189,20 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
         }
     }
 
+    public componentDidUpdate(prevProps: IWorkloadDetailsProperties, prevState: IWorkloadDetailsState) {
+        // Fetch hasImageDetailsData if we directly refresh and land on WorkloadDetails
+        const imageService = KubeSummary.getImageService();
+        if (imageService && this.state.imageList && this.state.imageList.length > 0) {
+            const hasImageDetails: boolean | undefined = this._imageDetailsStore.hasImageDetails(this.state.imageList[0]);
+            if (hasImageDetails === undefined) {
+                ActionsCreatorManager.GetActionCreator<ImageDetailsActionsCreator>(ImageDetailsActionsCreator).setHasImageDetails(imageService, this.state.imageList);
+            }
+        }
+    }
+
     public componentWillUnmount(): void {
         this._podsStore.removeChangedListener(this._onPodsUpdated);
+        this._imageDetailsStore.removeListener(ImageDetailsEvents.HasImageDetailsEvent, this._setHasImageDetails);
     }
 
     private _getMainHeading(): JSX.Element | null {
@@ -202,7 +216,7 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
 
         return null;
     }
-    
+
     private _showImageDetails = (imageId: string) => {
         const imageService = KubeSummary.getImageService();
         imageService && imageService.getImageDetails(imageId).then(imageDetails => {
@@ -224,9 +238,11 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
         const podsStoreState = this._podsStore.getState();
         const podList = podsStoreState.podsList;
         if (podList && podList.items) {
+            const imageList = Utils.getImageIdsForPods(podList.items);
             this.setState({
                 pods: podList.items.filter(p => this.state.item && Utils.isOwnerMatched(p.metadata, this.state.item.metadata.uid)),
-                arePodsLoading: podsStoreState.isLoading
+                arePodsLoading: podsStoreState.isLoading,
+                imageList: imageList
             });
         }
     }
@@ -343,8 +359,14 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
 
     private _renderImageCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IWorkLoadDetailsItem>, tableItem: IWorkLoadDetailsItem): JSX.Element => {
         const imageId = Utils.getImageIdForWorkload(Utils.getFirstContainerName(tableItem.podTemplate.spec), this.state.pods);
-        const imageText = Utils.getFirstImageName(tableItem.podTemplate.spec) || "";
-        const hasImageDetails: boolean = this._imageDetailsStore.hasImageDetails(imageId);
+        const { imageText, imageTooltipText } = Utils.getImageText(tableItem.podTemplate.spec);
+        let imageDetailsUnavailableTooltipText = "";
+        const hasImageDetails: boolean | undefined = this._imageDetailsStore.hasImageDetails(imageId);
+        // If hasImageDetails is undefined, then image details promise has not resolved, so do not set imageDetailsUnavailable tooltip
+        if (hasImageDetails === false) {
+            imageDetailsUnavailableTooltipText = localeFormat("{0} | {1}", imageTooltipText || imageText, Resources.ImageDetailsUnavailableText);
+        }
+        
         const itemToRender = hasImageDetails ?
             <Tooltip overflowOnly>
                 <Link
@@ -359,7 +381,7 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
                     {imageText}
                 </Link>
             </Tooltip>
-            : defaultColumnRenderer(imageText);
+            : defaultColumnRenderer(imageText, "", imageDetailsUnavailableTooltipText);
 
         return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender, undefined, hasImageDetails ? "bolt-table-cell-content-with-link" : "");
     }
@@ -372,6 +394,10 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
         getItems: (tableItem: IWorkLoadDetailsItem) => { [key: string]: string }): JSX.Element {
         const itemToRender: React.ReactNode = <Tags items={getItems(tableItem)} />;
         return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
+    }
+
+    private _setHasImageDetails = (): void => {
+        this.setState({});
     }
 
     private _podsStore: PodsStore;
