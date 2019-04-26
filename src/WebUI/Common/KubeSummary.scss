@@ -1,15 +1,36 @@
 .kubernetes-container {
     // cards have margins
-    .k8s-card-padding+.k8s-card-padding {
+    .k8s-card-padding + .k8s-card-padding {
         margin-top: 16px;
     }
-
     /*Css to adjust the alignment of text between picklist and text search. Revisit when we move from picklist to dropdown (fabric-free)*/
-    .keyword-search.bolt-text-field{
+    .keyword-search.bolt-text-field {
         padding-bottom: 8px;
     }
 
     .loading-pods {
         height: 200px;
+    }
+
+    .details-card-content {
+        flex-wrap: wrap;
+        width: 100%;
+
+        .details-card-row-size {
+            padding-top: 6px;
+            padding-bottom: 6px;
+            position: relative;
+        }
+
+        .details-card-info-field-size {
+            width: 96px;
+            min-width: 96px;
+        }
+
+        .details-card-value-field-size {
+            position: absolute;
+            width: calc(100% - 136px); // 136px = label width 96px + left padding of card 20px + gap required between label and value 20px
+            margin-left: 136px;
+        }
     }
 }
