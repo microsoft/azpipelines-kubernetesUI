@@ -138,7 +138,7 @@ export class PodsDetails extends BaseComponent<IPodsDetailsProperties, IPodsDeta
 
             this._podsStore.addListener(storeEventName, podsFetchHandler);
             if (props.serviceSelector) {
-                podsActionCreator.getPods(KubeSummary.getKubeService(), props.serviceSelector);
+                podsActionCreator.getPods(KubeSummary.getKubeService(), props.serviceSelector, true);
             }
             else {
                 podsActionCreator.getPods(KubeSummary.getKubeService());

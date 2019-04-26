@@ -37,7 +37,7 @@ export class PodOverview extends BaseComponent<IPodOverviewProps> {
     public render(): JSX.Element {
         const podDetails = PodOverview._getPodDetails(this.props.pod, this.props.showImageDetails);
         return (
-            <CustomCard className="pod-overview-card k8s-card-padding flex-grow bolt-table-card bolt-card-no-vertical-padding">
+            <CustomCard className="pod-overview-card k8s-card-padding flex-grow bolt-card-no-vertical-padding">
                 <CustomHeader>
                     <HeaderTitleArea>
                         <HeaderTitleRow>
@@ -47,22 +47,14 @@ export class PodOverview extends BaseComponent<IPodOverviewProps> {
                         </HeaderTitleRow>
                     </HeaderTitleArea>
                 </CustomHeader>
-                <CardContent className="pod-full-details-table" contentPadding={false}>
-                    <Table
-                        id={format("pod-overview-{0}", this.props.pod.metadata.uid)}
-                        showHeader={false}
-                        showLines={false}
-                        singleClickActivation={false}
-                        itemProvider={podDetails}
-                        pageSize={podDetails.length}
-                        columns={PodOverview._getColumns()}
-                    />
+                <CardContent className="pod-full-details-table" contentPadding={true}>
+                    {this._getCardContent()}
                 </CardContent>
             </CustomCard>
         );
     }
 
-    private static _getPodDetails = (pod: V1Pod, showImageDetails?: (imageId: string) => void): ArrayItemProvider<any> => {
+    private static _getPodDetails = (pod: V1Pod, showImageDetails?: (imageId: string) => void): any[] => {
         const createTime = pod.metadata.creationTimestamp ? new Date(pod.metadata.creationTimestamp) : new Date().getTime();
         const statusReason = pod.status.reason ? localeFormat(" | {0}", pod.status.reason) : "";
         const statusText = localeFormat("{0}{1}", pod.status.phase, statusReason);
@@ -85,7 +77,7 @@ export class PodOverview extends BaseComponent<IPodOverviewProps> {
         statusText && podDetails.push({ key: Resources.StatusText, value: statusText });
         conditionsText && podDetails.push({ key: Resources.ConditionsText, value: conditionsText });
 
-        return new ArrayItemProvider<any>(podDetails);
+        return podDetails;
     }
 
     private static _getPodConditionsText(pod: V1Pod): string {
@@ -97,83 +89,54 @@ export class PodOverview extends BaseComponent<IPodOverviewProps> {
         return conditions.join("; ") || "";
     }
 
-    private static _renderKeyCell = (
-        rowIndex: number,
-        columnIndex: number,
-        tableColumn: ITableColumn<any>,
-        tableItem: any): JSX.Element => {
-        const itemToRender = (
-            <Tooltip overflowOnly>
-                <span className={css("text-ellipsis")}>
-                    {tableItem.key}
-                </span>
-            </Tooltip>
-        );
-        return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender, undefined, "pod-o-k-col-content");
-    }
-
-    private static _renderValueCell = (
-        rowIndex: number,
-        columnIndex: number,
-        tableColumn: ITableColumn<any>,
-        tableItem: any): JSX.Element => {
+    private static _renderValueCell = (tableItem: any): JSX.Element => {
         const { key, value, valueTooltipText } = tableItem;
-        const contentClassName = "pod-o-v-col-content";
-        let props: any = {};
         switch (key) {
             case Resources.Created:
-                props = {
-                    columnIndex: columnIndex,
-                    children: <Ago date={new Date(value)} format={AgoFormat.Extended} />,
-                    tableColumn: tableColumn,
-                    contentClassName: contentClassName
-                };
-
-                return renderSimpleTableCell(props);
+                return (
+                    <div className="text-ellipsis details-card-value-field-size">
+                        <Ago date={new Date(value)} format={AgoFormat.Extended} />
+                    </div>
+                );
 
             case Resources.LabelsText:
             case Resources.AnnotationsText:
-                props = {
-                    columnIndex: columnIndex,
-                    children:
-                    <Tags items={value} />,
-                    tableColumn: tableColumn,
-                    contentClassName: css("pod-labels-pill", contentClassName)
-                };
-
-                return renderSimpleTableCell(props);
+                return (
+                    <div className="text-ellipsis details-card-value-field-size">
+                        <Tags items={value} className="body-s" />
+                    </div>
+                );
 
             case Resources.ImageText:
-                return PodOverview._renderImageCell(rowIndex, columnIndex, tableColumn, tableItem);
+                return PodOverview._renderImageCell(tableItem);
 
             default:
                 const itemToRender = defaultColumnRenderer(value, undefined, valueTooltipText);
-                return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender, undefined, contentClassName);
+                return (
+                    <div className="text-ellipsis details-card-value-field-size">
+                        {itemToRender}
+                    </div>
+                );
         }
     }
 
-    private static _getColumns(): ITableColumn<any>[] {
-        return [
-            {
-                id: "key",
-                name: "key",
-                className: "pod-overview-key-col",
-                width: new ObservableValue(150),
-                columnStyle: TableColumnStyle.Tertiary,
-                renderCell: PodOverview._renderKeyCell
-            },
-            {
-                id: "value",
-                name: "value",
-                className: "pod-overview-value-col",
-                width: -100,
-                minWidth: 400,
-                renderCell: PodOverview._renderValueCell
-            }
-        ];
+    private _getCardContent = (): JSX.Element => {
+        const items = PodOverview._getPodDetails(this.props.pod, this.props.showImageDetails);
+        return (
+            <div className="flex-column details-card-content">
+                {items.map((item, index) => (
+                    <div className="flex-row details-card-row-size body-m" key={index}>
+                        <div className="text-ellipsis secondary-text details-card-info-field-size">
+                            {item.key}
+                        </div>
+                        {PodOverview._renderValueCell(item)}
+                    </div>))
+                }
+            </div>
+        );
     }
 
-    private static _renderImageCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<any>, tableItem: any): JSX.Element => {
+    private static _renderImageCell = (tableItem: any): JSX.Element => {
         const { key, value, valueTooltipText, imageId, showImageDetails } = tableItem;
         const imageDetailsStore = StoreManager.GetStore<ImageDetailsStore>(ImageDetailsStore);
         let imageDetailsUnavailableTooltipText = "";
@@ -182,7 +145,7 @@ export class PodOverview extends BaseComponent<IPodOverviewProps> {
         if (hasImageDetails === false) {
             imageDetailsUnavailableTooltipText = localeFormat("{0} | {1}", valueTooltipText || value, Resources.ImageDetailsUnavailableText);
         }
-        
+
         const itemToRender = hasImageDetails ?
             <Tooltip overflowOnly>
                 <Link
@@ -199,6 +162,10 @@ export class PodOverview extends BaseComponent<IPodOverviewProps> {
             </Tooltip>
             : defaultColumnRenderer(value, undefined, imageDetailsUnavailableTooltipText);
 
-        return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender, undefined, hasImageDetails ? "bolt-table-cell-content-with-link" : "");
+        return (
+            <div className="text-ellipsis details-card-value-field-size body-m">
+                {itemToRender}
+            </div>
+        );
     }
 }
