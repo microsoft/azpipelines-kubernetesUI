@@ -1,3 +1,53 @@
-.workload-details-card .workload-full-details-table {
-    padding-bottom: 10px;
+@import "azure-devops-ui/_coreStyles.scss";
+
+.workload-full-details-table {
+    padding-top: 24px;
+    padding-bottom: 20px;
+    width: 100%;
+    overflow-x: auto;
+}
+
+// devops special override
+.bolt-header-default + .workload-full-details-table {
+    padding-top: 8px;
+}
+
+.workload-column-key-padding {
+    padding-bottom: 4px;
+}
+
+.workload-tags-column-padding {
+    padding-left: 24px;
+}
+
+.workload-card-content .workload-image-padding {
+    padding: 0px;
+}
+
+.workload-image-column-size {
+    max-width: 300px;
+
+    // max-width: 1023px
+    @include small-screen() {
+        max-width: 200px;
+    }
+}
+
+.workload-tags-column-size {
+    max-width: 500px;
+
+    // max-width: 1919px
+    @include large-screen() {
+         max-width: 425px;
+    }
+
+    // max-width: 1365px
+    @include medium-screen() {
+        max-width: 350px;
+    }
+
+    // max-width: 1023px
+    @include small-screen() {
+        max-width: 200px;
+    }
 }
