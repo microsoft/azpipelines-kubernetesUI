@@ -77,7 +77,7 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
         const fetchServiceDetails = (svc: V1Service) => {
             // service currently only supports equals with "and" operator. The generator generates that condition.
             const labelSelector: string = Utils.generateEqualsConditionLabelSelector(svc && svc.spec && svc.spec.selector || {});
-            this._podsActionsCreator.getPods(KubeSummary.getKubeService(), labelSelector);
+            this._podsActionsCreator.getPods(KubeSummary.getKubeService(), labelSelector, true);
         };
 
         if (!props.service) {
