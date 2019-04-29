@@ -185,6 +185,9 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
                 selectedPod: pods && pods.length > 0 ? pods[0] : null
             });
         }
+
+        this._adjustWorkloadColumnDetailsSize();
+        window.addEventListener("resize", this._onResizeWindowHandler);
     }
 
     public componentDidUpdate(prevProps: IWorkloadDetailsProperties, prevState: IWorkloadDetailsState) {
@@ -199,8 +202,35 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
     }
 
     public componentWillUnmount(): void {
+        window.removeEventListener("resize", this._onResizeWindowHandler);
+        if (this._tagCssElement && document && document.head) {
+            document.head.removeChild(this._tagCssElement);
+            this._tagCssElement = undefined;
+        }
+
         this._podsStore.removeChangedListener(this._onPodsUpdated);
         this._imageDetailsStore.removeListener(ImageDetailsEvents.HasImageDetailsEvent, this._setHasImageDetails);
+    }
+
+    private _onResizeWindowHandler = (): void => {
+        this._adjustWorkloadColumnDetailsSize();
+    }
+
+    private _adjustWorkloadColumnDetailsSize(): void {
+        if (this._detailsCardRef) {
+            /* 300px for the first column and 24px as the padding for next 2 columns */
+            const remainingWidth = Math.max(this._detailsCardRef.clientWidth, 700) - 350;
+            const cssAdjustedContent = ".workload-card-content .workload-tags-column-size { max-width: " + Math.ceil(remainingWidth / 2) + "px; }";
+            if (!this._tagCssElement) {
+                this._tagCssElement = document.createElement("style");
+                this._tagCssElement.type = "text/css";
+                if (document && document.head) {
+                    document.head.appendChild(this._tagCssElement);
+                }
+            }
+
+            this._tagCssElement.innerText = cssAdjustedContent;
+        }
     }
 
     private _getMainHeading(): JSX.Element | null {
@@ -282,12 +312,16 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
         let workloadDetails: any[] = [];
         if (this.state.item) {
             workloadDetails.push({ key: Resources.ImageText, value: this.state.item.spec && this.state.item.spec.template });
-            workloadDetails.push({ key: Resources.LabelsText, value: this.state.item.metadata && this.state.item.metadata.labels || {} });
             workloadDetails.push({ key: Resources.SelectorText, value: this.state.item.spec && this.state.item.spec.selector && this.state.item.spec.selector.matchLabels || {} });
+            workloadDetails.push({ key: Resources.LabelsText, value: this.state.item.metadata && this.state.item.metadata.labels || {} });
         }
 
         return (
-            <div className="flex flex-row workload-card-content">
+            <div className="flex-row workload-card-content" ref={(detailsRef) => {
+                if (detailsRef) {
+                    this._detailsCardRef = detailsRef;
+                }
+            }}>
                 {
                     workloadDetails.map((item, index) => this._renderWorkloadCellContent(item, index))
                 }
@@ -298,7 +332,7 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
     private _renderWorkloadCellContent(item: any, index: number): JSX.Element | undefined {
         const { key, value } = item;
         const getColumnKey = (keyText?: string, keyClassName?: string) => (
-            <div className={css(keyClassName || "", "text-ellipsis secondary-text workload-column-key-padding")}>
+            <div className={css(keyClassName || "", "secondary-text workload-column-key-padding")}>
                 {keyText}
             </div>
         );
@@ -306,7 +340,7 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
         switch (key) {
             case Resources.ImageText:
                 return (
-                    <div className="flex flex-column workload-image-column-size body-m" key={index}>
+                    <div className="flex-column body-m workload-image-column-size" key={index}>
                         {getColumnKey(key)}
                         {this._renderImageCell(value)}
                     </div>
@@ -315,9 +349,9 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
             case Resources.LabelsText:
             case Resources.SelectorText:
                 return (
-                    <div className="flex flex-column workload-tags-column-padding" key={index}>
+                    <div className="flex-column workload-tags-column-padding" key={index}>
                         {getColumnKey(key, "body-m")}
-                        <Tags className="overflow-fade workload-tags-column-size" items={value} />
+                        <Tags className="workload-tags-column-size" items={value} />
                     </div>
                 );
 
@@ -339,16 +373,18 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
 
         const itemToRender = hasImageDetails ?
             <Tooltip overflowOnly>
-                <Link
-                    className="fontSizeM font-size-m text-ellipsis bolt-table-link workload-image-padding"
-                    rel={"noopener noreferrer"}
-                    onClick={(e) => {
-                        e.preventDefault();
-                        this._showImageDetails(imageId);
-                    }}
-                >
-                    {imageText}
-                </Link>
+                <div className="flex-row flex-center">
+                    <Link
+                        className="fontSizeM font-size-m text-ellipsis bolt-table-link workload-image-padding"
+                        rel={"noopener noreferrer"}
+                        onClick={(e) => {
+                            e.preventDefault();
+                            this._showImageDetails(imageId);
+                        }}
+                    >
+                        {imageText}
+                    </Link>
+                </div>
             </Tooltip>
             : defaultColumnRenderer(imageText, "", imageDetailsUnavailableTooltipText);
 
@@ -396,6 +432,8 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
         this.setState({});
     }
 
+    private _detailsCardRef: HTMLDivElement;
+    private _tagCssElement: HTMLStyleElement | undefined;
     private _podsStore: PodsStore;
     private _workloadsStore: WorkloadsStore;
     private _imageDetailsStore: ImageDetailsStore;

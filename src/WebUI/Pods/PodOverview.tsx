@@ -5,27 +5,23 @@
 
 import { V1Pod } from "@kubernetes/client-node";
 import { BaseComponent } from "@uifabric/utilities";
-import { css } from "azure-devops-ui/Util";
 import { Ago } from "azure-devops-ui/Ago";
 import { CardContent, CustomCard } from "azure-devops-ui/Card";
-import { ObservableValue } from "azure-devops-ui/Core/Observable";
-import { format, localeFormat } from "azure-devops-ui/Core/Util/String";
+import { localeFormat } from "azure-devops-ui/Core/Util/String";
 import { CustomHeader, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
-import { ITableColumn, SimpleTableCell as renderSimpleTableCell, Table, TableColumnStyle } from "azure-devops-ui/Table";
+import { Link } from "azure-devops-ui/Link";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
 import { AgoFormat } from "azure-devops-ui/Utilities/Date";
-import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
-import { defaultColumnRenderer, renderTableCell } from "../Common/KubeCardWithTable";
+import { defaultColumnRenderer } from "../Common/KubeCardWithTable";
 import { Tags } from "../Common/Tags";
+import { StoreManager } from "../FluxCommon/StoreManager";
+import { ImageDetailsStore } from "../ImageDetails/ImageDetailsStore";
 import * as Resources from "../Resources";
+import { getRunDetailsText } from "../RunDetails";
 import { Utils } from "../Utils";
 import "./PodOverview.scss";
 import { IPodRightPanelProps } from "./PodsRightPanel";
-import { Link } from "azure-devops-ui/Link";
-import { StoreManager } from "../FluxCommon/StoreManager";
-import { ImageDetailsStore } from "../ImageDetails/ImageDetailsStore";
-import { getRunDetailsText } from "../RunDetails";
 
 export interface IPodOverviewProps extends IPodRightPanelProps {
     // Overriding this to make sure we don't accept undefined
@@ -89,7 +85,7 @@ export class PodOverview extends BaseComponent<IPodOverviewProps> {
         return conditions.join("; ") || "";
     }
 
-    private static _renderValueCell = (tableItem: any): JSX.Element => {
+    private static _renderValueCell = (tableItem: any) => {
         const { key, value, valueTooltipText } = tableItem;
         switch (key) {
             case Resources.Created:
@@ -111,12 +107,7 @@ export class PodOverview extends BaseComponent<IPodOverviewProps> {
                 return PodOverview._renderImageCell(tableItem);
 
             default:
-                const itemToRender = defaultColumnRenderer(value, undefined, valueTooltipText);
-                return (
-                    <div className="text-ellipsis details-card-value-field-size">
-                        {itemToRender}
-                    </div>
-                );
+                return defaultColumnRenderer(value, "details-card-value-field-size", valueTooltipText);
         }
     }
 
