@@ -11,6 +11,7 @@ import { localeFormat } from "azure-devops-ui/Core/Util/String";
 import { CustomHeader, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
 import { Link } from "azure-devops-ui/Link";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
+import { css } from "azure-devops-ui/Util";
 import { AgoFormat } from "azure-devops-ui/Utilities/Date";
 import * as React from "react";
 import { defaultColumnRenderer } from "../Common/KubeCardWithTable";
@@ -116,8 +117,8 @@ export class PodOverview extends BaseComponent<IPodOverviewProps> {
         return (
             <div className="flex-column details-card-content">
                 {items.map((item, index) => (
-                    <div className="flex-row details-card-row-size body-m" key={index}>
-                        <div className="text-ellipsis secondary-text details-card-info-field-size">
+                    <div className={css(item.key === Resources.ImageText ? "pod-image-data" : "", "flex-row details-card-row-size body-m")} key={index}>
+                        <div className={css(item.key === Resources.ImageText ? "pod-image-key" : "", "text-ellipsis secondary-text details-card-info-field-size")}>
                             {item.key}
                         </div>
                         {PodOverview._renderValueCell(item)}
@@ -127,7 +128,7 @@ export class PodOverview extends BaseComponent<IPodOverviewProps> {
         );
     }
 
-    private static _renderImageCell = (tableItem: any): JSX.Element => {
+    private static _renderImageCell = (tableItem: any) => {
         const { key, value, valueTooltipText, imageId, showImageDetails } = tableItem;
         const imageDetailsStore = StoreManager.GetStore<ImageDetailsStore>(ImageDetailsStore);
         let imageDetailsUnavailableTooltipText = "";
@@ -137,26 +138,21 @@ export class PodOverview extends BaseComponent<IPodOverviewProps> {
             imageDetailsUnavailableTooltipText = localeFormat("{0} | {1}", valueTooltipText || value, Resources.ImageDetailsUnavailableText);
         }
 
-        const itemToRender = hasImageDetails ?
+        return hasImageDetails ?
             <Tooltip overflowOnly>
-                <Link
-                    className="fontSizeM font-size-m text-ellipsis bolt-table-link"
-                    rel={"noopener noreferrer"}
-                    excludeTabStop
-                    onClick={(e) => {
-                        e.preventDefault();
-                        showImageDetails(imageId);
-                    }}
-                >
-                    {value}
-                </Link>
+                <div className="pod-image-link details-card-value-field-size">
+                    <Link
+                        className="fontSizeM font-size-m text-ellipsis bolt-table-link"
+                        rel={"noopener noreferrer"}
+                        onClick={(e) => {
+                            e.preventDefault();
+                            showImageDetails(imageId);
+                        }}
+                    >
+                        {value}
+                    </Link>
+                </div>
             </Tooltip>
-            : defaultColumnRenderer(value, undefined, imageDetailsUnavailableTooltipText);
-
-        return (
-            <div className="text-ellipsis details-card-value-field-size body-m">
-                {itemToRender}
-            </div>
-        );
+            : defaultColumnRenderer(value, "pod-image-nolink details-card-value-field-size", imageDetailsUnavailableTooltipText);
     }
 }
