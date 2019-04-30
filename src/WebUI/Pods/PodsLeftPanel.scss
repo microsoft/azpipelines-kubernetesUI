@@ -1,6 +1,8 @@
+@import "azure-devops-ui/_coreStyles.scss";
+
 .pods-left-panel-row:not(.first-row) .bolt-list-cell {
     // This is required as we are doing a custom implementation of list row, and the border is not set by default
-    border-top: 1px solid rgba(0,0,0,.08);
+    border-top: 1px solid $transblack-8;
 }
 
 .pods-left-panel-row {
