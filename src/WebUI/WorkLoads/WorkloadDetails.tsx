@@ -185,9 +185,6 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
                 selectedPod: pods && pods.length > 0 ? pods[0] : null
             });
         }
-
-        this._adjustWorkloadColumnDetailsSize();
-        window.addEventListener("resize", this._onResizeWindowHandler);
     }
 
     public componentDidUpdate(prevProps: IWorkloadDetailsProperties, prevState: IWorkloadDetailsState) {
@@ -202,37 +199,9 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
     }
 
     public componentWillUnmount(): void {
-        window.removeEventListener("resize", this._onResizeWindowHandler);
-        if (this._tagCssElement && document && document.head) {
-            document.head.removeChild(this._tagCssElement);
-            this._tagCssElement = undefined;
-        }
-
         this._podsStore.removeChangedListener(this._onPodsUpdated);
         this._imageDetailsStore.removeListener(ImageDetailsEvents.HasImageDetailsEvent, this._setHasImageDetails);
     }
-
-    private _onResizeWindowHandler = (): void => {
-        this._adjustWorkloadColumnDetailsSize();
-    }
-
-    private _adjustWorkloadColumnDetailsSize(): void {
-        if (this._detailsCardRef) {
-            /* 300px for the first column and 24px as the padding for next 2 columns */
-            const remainingWidth = Math.max(this._detailsCardRef.clientWidth, 700) - 350;
-            const cssAdjustedContent = ".workload-card-content .workload-tags-column-size { max-width: " + Math.ceil(remainingWidth / 2) + "px; }";
-            if (!this._tagCssElement) {
-                this._tagCssElement = document.createElement("style");
-                this._tagCssElement.type = "text/css";
-                if (document && document.head) {
-                    document.head.appendChild(this._tagCssElement);
-                }
-            }
-
-            this._tagCssElement.innerText = cssAdjustedContent;
-        }
-    }
-
     private _getMainHeading(): JSX.Element | null {
         if (this.state.item) {
             const metadata = this.state.item.metadata;
@@ -317,11 +286,7 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
         }
 
         return (
-            <div className="flex-row workload-card-content" ref={(detailsRef) => {
-                if (detailsRef) {
-                    this._detailsCardRef = detailsRef;
-                }
-            }}>
+            <div className="flex-row workload-card-content">
                 {
                     workloadDetails.map((item, index) => this._renderWorkloadCellContent(item, index))
                 }
@@ -349,7 +314,7 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
             case Resources.LabelsText:
             case Resources.SelectorText:
                 return (
-                    <div className="flex-column workload-tags-column-padding" key={index}>
+                    <div className="flex-grow flex-column workload-tags-column-padding" key={index}>
                         {getColumnKey(key, "body-m")}
                         {/* temporary fix for the overflow fade */}
                         <Tags className="overflow-fade workload-tags-column-size" items={value} />
@@ -433,8 +398,6 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
         this.setState({});
     }
 
-    private _detailsCardRef: HTMLDivElement;
-    private _tagCssElement: HTMLStyleElement | undefined;
     private _podsStore: PodsStore;
     private _workloadsStore: WorkloadsStore;
     private _imageDetailsStore: ImageDetailsStore;
