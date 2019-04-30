@@ -7,14 +7,14 @@ import { V1Pod } from "@kubernetes/client-node";
 import { BaseComponent } from "@uifabric/utilities";
 import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
 import { Header, TitleSize } from "azure-devops-ui/Header";
-import { IListSelection, ListSelection } from "azure-devops-ui/List";
-import { ITableColumn, Table } from "azure-devops-ui/Table";
+import { IListSelection, ListSelection, List, IListItemDetails, ListItem } from "azure-devops-ui/List";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
+import { IStatusProps, Status, Statuses, StatusSize } from "azure-devops-ui/Status";
+import { css } from "azure-devops-ui/Util";
 import { createBrowserHistory } from "history";
 import * as queryString from "query-string";
 import * as React from "react";
-import { renderPodNameWithStatusTableCell } from "../Common/KubeCardWithTable";
 import * as Resources from "../Resources";
 import { IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
@@ -26,16 +26,20 @@ export interface IPodsLeftPanelProperties extends IVssComponentProperties {
     selectedPodName?: string;
     parentKind: string;
     onSelectionChange?: (event: React.SyntheticEvent<HTMLElement>, selectedItem: V1Pod, selectedView: string) => void;
-    onBackButtonClick?: () => void;
 }
 
 export class PodsLeftPanel extends BaseComponent<IPodsLeftPanelProperties> {
-    public render(): JSX.Element {
+    public render(): React.ReactNode {
         return (
-            <>
-                {this._getHeader()}
-                {this._getPodsList()}
-            </>
+            this.props.pods && this.props.pods.length > 0 ?
+                <List
+                    itemProvider={new ArrayItemProvider<V1Pod>(this.props.pods)}
+                    onSelect={this._onSelectionChange}
+                    selection={this._selection}
+                    renderRow={PodsLeftPanel._renderListRow}
+                    width="100%"
+                />
+                : null
         );
     }
 
@@ -61,66 +65,31 @@ export class PodsLeftPanel extends BaseComponent<IPodsLeftPanelProperties> {
         }
     }
 
-    private _getHeader(): JSX.Element | null {
-        // todo :: use m150 header for back button
-        return (
-            <Header
-                title={
-                    <Tooltip overflowOnly={true} text={this.props.parentName}>
-                        <div className="text-ellipsis">{this.props.parentName}</div>
-                    </Tooltip>
-                }
-                titleClassName="text-ellipsis"
-                titleIconProps={{ iconName: "Back", onClick: this.props.onBackButtonClick, className: "pod-left-panel-back-button" }}
-                titleSize={TitleSize.Large}
-                description={this.props.parentKind || ""}
-                className={"pod-left-panel-header"}
-            />
-        );
-    }
 
-    private _getPodsList(): JSX.Element | null {
-        let columns: ITableColumn<V1Pod>[] = [];
-        columns.push({
-            id: "podName",
-            name: Resources.PodsListHeaderText,
-            minWidth: 250,
-            width: -100,
-            renderCell: (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod) => {
-                return PodsLeftPanel._renderPodNameCell(rowIndex, columnIndex, tableColumn, pod, this._selectedRow);
-            }
-        });
-
-        return (
-            this.props.pods && this.props.pods.length > 0 ?
-                <>
-                    <Header
-                        title={Resources.PodsListHeaderText}
-                        titleSize={TitleSize.Small}
-                        className={"pod-left-panel-table-header fontWeightSemiBold font-weight-semibold"}
-                    />
-                    <Table
-                        itemProvider={new ArrayItemProvider<V1Pod>(this.props.pods)}
-                        columns={columns}
-                        showHeader={false}
-                        showLines={true}
-                        onSelect={this._onSelectionChange}
-                        selection={this._selection}
-                    />
-                </> : null
-        );
-    }
-
-    private static _renderPodNameCell(
-        rowIndex: number,
-        columnIndex: number,
-        tableColumn: ITableColumn<V1Pod>,
-        pod: V1Pod,
-        selectedIndex: number
-    ): JSX.Element {
-        const contentClassName = rowIndex === selectedIndex ? "fontWeightSemiBold font-weight-semibold" : "";
+    private static _renderListRow = (index: number, pod: V1Pod, details: IListItemDetails<V1Pod>, key?: string): JSX.Element => {
         const { statusProps, tooltip } = Utils.generatePodStatusProps(pod.status);
-        return renderPodNameWithStatusTableCell(rowIndex, columnIndex, tableColumn, pod.metadata.name, statusProps, tooltip, contentClassName);
+        const rowClassName = index === 0 ? css("pods-left-panel-row", "first-row") : "pods-left-panel-row";
+
+        return (
+            <ListItem className={rowClassName} key={key || "list-item" + index} index={index} details={details}>
+                <div className="pod-text-status-container flex-row flex-center h-scroll-hidden">
+                    <div className="pod-noshrink flex-noshrink" />
+                    <div className="pod-shrink flex-row flex-center flex-shrink">
+                        {
+                            statusProps &&
+                            <Tooltip text={tooltip}>
+                                <div className="flex-row">
+                                    <Status {...statusProps} className="icon-large-margin" size={StatusSize.m} />
+                                </div>
+                            </Tooltip>
+                        }
+                        <Tooltip overflowOnly={true} text={pod.metadata.name}>
+                            <div className="primary-text text-ellipsis">{pod.metadata.name}</div>
+                        </Tooltip>
+                    </div>
+                </div>
+            </ListItem>
+        );
     }
 
     private _selectPod(): void {

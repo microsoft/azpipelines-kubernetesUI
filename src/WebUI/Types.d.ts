@@ -101,3 +101,8 @@ export interface IVssComponentProperties extends IBaseProps {
      */
     [property: string]: IObservable<any> | any;
 }
+
+export interface IPodParentItem {
+    name: string;
+    kind: string;
+}
