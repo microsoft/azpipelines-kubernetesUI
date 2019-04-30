@@ -99,3 +99,4 @@ export declare const LoadingPodsSpinnerLabel: string;
 export declare const LoadingServicesSpinnerLabel: string;
 export declare const CopyExternalIp: string;
 export declare const ImageDetailsUnavailableText: string;
+export declare const PodDetailsSubheader: string;

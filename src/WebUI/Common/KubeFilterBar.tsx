@@ -9,7 +9,7 @@ import * as Resources from "../Resources";
 import { IVssComponentProperties } from "../Types";
 import { FilterBar } from "azure-devops-ui/FilterBar";
 import { KeywordFilterBarItem } from "azure-devops-ui/TextFilterBarItem";
-import { PickListFilterBarItem, IPickListItem } from "azure-devops-ui/PickList";
+//import { PickListFilterBarItem, IPickListItem } from "azure-devops-ui/PickList";
 import { Filter } from "azure-devops-ui/Utilities/Filter";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { ConditionalChildren } from "azure-devops-ui/ConditionalChildren";
@@ -31,7 +31,7 @@ export interface IFilterComponentProperties extends IVssComponentProperties {
     pickListPlaceHolder: string;
     filterToggled: ObservableValue<boolean>;
     pickListItemsFn: () => any[];
-    listItemsFn: (item: any) => IPickListItem;
+    //listItemsFn: (item: any) => IPickListItem;
     addBottomPadding?: boolean;
 }
 
@@ -42,7 +42,7 @@ export class KubeFilterBar extends BaseComponent<IFilterComponentProperties, {}>
             <ConditionalChildren renderChildren={this.props.filterToggled}>
                 <FilterBar filter={this.props.filter} className={this.props.className || ""}>
                     <KeywordFilterBarItem filterItemKey={NameKey} className={"keyword-search"} placeholder={localeFormat(Resources.FindByNameText, this.props.keywordPlaceHolder)} />
-                    <PickListFilterBarItem
+                    {/*<PickListFilterBarItem
                         placeholder={this.props.pickListPlaceHolder}
                         showPlaceholderAsLabel={true}
                         filterItemKey={TypeKey}
@@ -52,7 +52,7 @@ export class KubeFilterBar extends BaseComponent<IFilterComponentProperties, {}>
                         hideClearButton={false}
                         getPickListItems={this.props.pickListItemsFn}
                         getListItem={this.props.listItemsFn}
-                    />
+                    />*/}
                 </FilterBar>
                 {this.props.addBottomPadding && <div className="page-content-top" />}
             </ConditionalChildren>

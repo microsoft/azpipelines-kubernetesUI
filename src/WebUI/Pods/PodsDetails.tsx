@@ -7,6 +7,15 @@ import { V1Pod } from "@kubernetes/client-node";
 import { BaseComponent } from "@uifabric/utilities";
 import { Spinner, SpinnerSize } from "azure-devops-ui/Spinner";
 import { Splitter, SplitterElementPosition } from "azure-devops-ui/Splitter";
+import { DetailsPanel, MasterPanel, MasterPanelHeader } from "azure-devops-ui/MasterDetails";
+import {
+    BaseMasterDetailsContext,
+    IMasterDetailsContext,
+    IMasterDetailsContextLayer,
+    MasterDetailsContext
+} from "azure-devops-ui/MasterDetailsContext";
+import { ObservableValue } from "azure-devops-ui/Core/Observable";
+import { localeFormat } from "azure-devops-ui/Core/Util/String";
 import { createBrowserHistory, History } from "history";
 import * as queryString from "query-string";
 import * as React from "react";
@@ -18,7 +27,7 @@ import { StoreManager } from "../FluxCommon/StoreManager";
 import { ImageDetails } from "../ImageDetails/ImageDetails";
 import * as Resources from "../Resources";
 import { SelectionActionsCreator } from "../Selection/SelectionActionCreator";
-import { IPodDetailsSelectionProperties, IVssComponentProperties } from "../Types";
+import { IPodDetailsSelectionProperties, IVssComponentProperties, IPodParentItem } from "../Types";
 import { Utils } from "../Utils";
 import { PodsActionsCreator } from "./PodsActionsCreator";
 import { PodsLeftPanel } from "./PodsLeftPanel";
@@ -43,6 +52,7 @@ export interface IPodsDetailsState {
     selectedPod: V1Pod | null | undefined;
     selectedImageDetails: IImageDetails | undefined;
     imageList?: string[];
+    masterDetailsContext?: IMasterDetailsContext
 }
 
 export class PodsDetails extends BaseComponent<IPodsDetailsProperties, IPodsDetailsState> {
@@ -125,13 +135,18 @@ export class PodsDetails extends BaseComponent<IPodsDetailsProperties, IPodsDeta
                     const imageList = Utils.getImageIdsForPods(properties.pods || []);
                     // Adding breadcrumb when parent object is fetched on pod view refresh
                     notifyViewChanged(properties.parentName, properties.parentKind);
+                    const parentItem = {
+                        name: properties.parentName || "",
+                        kind:properties. parentKind || ""
+                    };
                     this.setState({
                         parentKind: properties.parentKind,
                         parentName: properties.parentName,
                         pods: properties.pods,
                         selectedPod: properties.selectedPod,
                         isLoading: podsStoreState.isLoading,
-                        imageList: imageList
+                        imageList: imageList,
+                        masterDetailsContext: new BaseMasterDetailsContext(this._getMasterDetailsContext(parentItem, properties.selectedPod, properties.pods), this._onParentBackButtonClick)
                     });
                 }
             };
@@ -153,12 +168,43 @@ export class PodsDetails extends BaseComponent<IPodsDetailsProperties, IPodsDeta
         }
 
         notifyViewChanged(parentName, parentKind);
+
+        const parentItem = {
+            name: parentName || "",
+            kind: parentKind || ""
+        };
         this.state = {
             parentKind: parentKind,
             parentName: parentName,
             pods: filteredPods,
             selectedPod: selectedPod,
-            selectedImageDetails: undefined
+            selectedImageDetails: undefined,
+            isLoading: !podsList || !podsList.items,
+            masterDetailsContext: new BaseMasterDetailsContext(this._getMasterDetailsContext(parentItem, selectedPod, filteredPods), this._onParentBackButtonClick)
+        };
+    }
+
+    private _getMasterDetailsContext(parent: IPodParentItem, selectedPod: V1Pod | undefined, pods: V1Pod[] | undefined): IMasterDetailsContextLayer<V1Pod, IPodParentItem> {
+        return {
+            key: "pod-details",
+            masterPanelContent: {
+                renderContent: (parentItem, selectedPod) => (<PodsLeftPanel
+                    pods={pods || []}
+                    parentName={parentItem.name}
+                    parentKind={parentItem.kind}
+                    selectedPodName={selectedPod && selectedPod.value ? selectedPod.value.metadata.name : ""}
+                    onSelectionChange={this._onPodSelectionChange} />),
+                renderHeader: () => <MasterPanelHeader title={parent.name} subTitle={localeFormat(Resources.PodDetailsSubheader, parent.kind)} />,
+                onBackButtonClick: this._onParentBackButtonClick
+            },
+            detailsContent: {
+                renderContent: (item: V1Pod) => <PodsRightPanel
+                    key={item.metadata.uid}
+                    pod={item}
+                    showImageDetails={this._showImageDetails} />
+            },
+            selectedMasterItem: new ObservableValue<V1Pod>(selectedPod || {} as V1Pod),
+            parentItem: parent
         };
     }
 
@@ -180,38 +226,14 @@ export class PodsDetails extends BaseComponent<IPodsDetailsProperties, IPodsDeta
             selectedPod = this.state.pods[0];
         }
 
-        const leftPanel = this.state.pods ? (
-            <PodsLeftPanel
-                pods={this.state.pods}
-                parentName={this.state.parentName || ""}
-                parentKind={this.state.parentKind || ""}
-                selectedPodName={selectedPod ? selectedPod.metadata.name : ""}
-                onSelectionChange={this._onPodSelectionChange}
-                onBackButtonClick={this._onParentBackButtonClick} />
-        ) : undefined;
-
-        const rightPanel = (selectedPod ?
-            <PodsRightPanel
-                key={selectedPod.metadata.uid}
-                pod={selectedPod}
-                showImageDetails={this._showImageDetails} />
-            : <div className="zero-pods-text-container">{Resources.NoPodsFoundText}</div>);
-
-        return (
-            <>
-                {
-                    leftPanel
-                        ? (<Splitter
-                            fixedElement={SplitterElementPosition.Near}
-                            initialFixedSize={this._initialFixedSize}
-                            minFixedSize={this._initialFixedSize}
-                            onRenderFarElement={() => rightPanel}
-                            onRenderNearElement={() => leftPanel}
-                            nearElementClassName="pods-details-left-pane"
-                        />)
-                        : rightPanel
-                }
-            </>
+        return (selectedPod && this.state.masterDetailsContext ?
+            <MasterDetailsContext.Provider value={this.state.masterDetailsContext}>
+                <div className="pod-details flex-row flex-grow scroll-hidden">
+                    <MasterPanel />
+                    <DetailsPanel />
+                </div>
+            </MasterDetailsContext.Provider>
+            : <div className="zero-pods-text-container">{Resources.NoPodsFoundText}</div>
         );
     }
 
@@ -240,9 +262,14 @@ export class PodsDetails extends BaseComponent<IPodsDetailsProperties, IPodsDeta
             search: queryString.stringify(routeValues)
         });
 
+        const parentItem = {
+            name: this.state.parentName || "",
+            kind: this.state.parentKind || ""
+        }
 
         this.setState({
-            selectedPod: selectedPod
+            selectedPod: selectedPod,
+            masterDetailsContext: new BaseMasterDetailsContext(this._getMasterDetailsContext(parentItem, selectedPod, this.state.pods), this._onParentBackButtonClick)
         });
     }
 
@@ -255,6 +282,8 @@ export class PodsDetails extends BaseComponent<IPodsDetailsProperties, IPodsDeta
             item: undefined,
             properties: { parentUid: "", serviceSelector: "", serviceName: "" } as IPodDetailsSelectionProperties // This will delete these values if they are present in the url
         });
+
+        return false;
     }
 
     // ToDO:: Handle GetImageDetails via ImageStore to avoid multiple calls to API from UI
