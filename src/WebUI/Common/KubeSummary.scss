@@ -1,4 +1,5 @@
 .kubernetes-container {
+
     // cards have margins
     .k8s-card-padding + .k8s-card-padding {
         margin-top: 16px;
@@ -20,17 +21,37 @@
             padding-top: 6px;
             padding-bottom: 6px;
             position: relative;
+
+            &.pod-image-data {
+                padding-top: 0px;
+                padding-bottom: 0px;
+            }
         }
 
         .details-card-info-field-size {
             width: 96px;
             min-width: 96px;
+
+            &.pod-image-key {
+                padding-top: 6px;
+                padding-bottom: 6px;
+            }
         }
 
         .details-card-value-field-size {
             position: absolute;
             width: calc(100% - 136px); // 136px = label width 96px + left padding of card 20px + gap required between label and value 20px
             margin-left: 136px;
+
+            &.pod-image-link {
+                padding: 6px;
+                margin-left: 124px;
+            }
+
+            &.pod-image-nolink {
+                padding: 6px;
+                margin-left: 130px;
+            }
         }
     }
 }

@@ -19,7 +19,7 @@ export class Tags extends BaseComponent<ITagsProperties> {
     darkColor: any;
     public render(): React.ReactNode {
         return (
-            <PillGroup className={css(this.props.className, "k8s-tags flex-row")} overflow={PillGroupOverflow.fade}>
+            <PillGroup className={css(this.props.className, "k8s-tags", "flex-row")} overflow={PillGroupOverflow.fade}>
                 {
                     Utils.getPillTags(this.props.items)
                         .map((tagText, index) => <Pill key={index} className="k8s-tag-pill" size={PillSize.compact}>{tagText}</Pill>)
