@@ -45,8 +45,6 @@ export interface IDeploymentsTableState {
 export class DeploymentsTable extends React.Component<IDeploymentsTableProperties, IDeploymentsTableState> {
     constructor(props: IDeploymentsTableProperties) {
         super(props, {});
-
-        KubeFactory.telemetryService.scenarioStart(Scenarios.Deployments);
         this._workloadsActionCreator = ActionsCreatorManager.GetActionCreator<WorkloadsActionsCreator>(WorkloadsActionsCreator);
         this._selectionActionCreator = ActionsCreatorManager.GetActionCreator<SelectionActionsCreator>(SelectionActionsCreator);
         this._imageDetailsStore = StoreManager.GetStore<ImageDetailsStore>(ImageDetailsStore);
@@ -58,10 +56,11 @@ export class DeploymentsTable extends React.Component<IDeploymentsTablePropertie
 
         this._store.addListener(WorkloadsEvents.ReplicaSetsFetchedEvent, this._onReplicaSetsFetched);
         this._imageDetailsStore.addListener(ImageDetailsEvents.HasImageDetailsEvent, this._setHasImageDetails);
+        KubeFactory.telemetryService.scenarioStart(Scenarios.Deployments);
     }
 
-    public componentDidUpdate(prevProps: IDeploymentsTableProperties, prevState: IDeploymentsTableState) {
-        this._markTTI(prevProps, prevState);
+    public componentDidMount() {
+        KubeFactory.telemetryService.scenarioEnd(Scenarios.Deployments);
     }
 
     public render(): React.ReactNode {
@@ -338,23 +337,6 @@ export class DeploymentsTable extends React.Component<IDeploymentsTablePropertie
         return null;
     }
 
-    private _markTTI(prevProps: IDeploymentsTableProperties, prevState: IDeploymentsTableState): void {
-        const prevReplicas = prevState.replicaSetList;
-        const currentReplicas = this.state.replicaSetList;
-        if ((!prevReplicas || !prevReplicas.items) && (currentReplicas && currentReplicas.items)) {
-            if (!this._isTTIMarked) {
-                // if previously replicaSet did not exist and is rendered just now
-                KubeFactory.telemetryService.scenarioEnd(Scenarios.Deployments, { isTTI: true })
-
-                KubeFactory.markTTI();
-                this._isTTIMarked = true;
-            }
-            else {
-                KubeFactory.telemetryService.scenarioEnd(Scenarios.Deployments);
-            }
-        }
-    }
-
     private _onImageClick = (imageId: string): void => {
         const imageService = KubeSummary.getImageService();
         imageService && imageService.getImageDetails(imageId).then(imageDetails => {
@@ -369,8 +351,6 @@ export class DeploymentsTable extends React.Component<IDeploymentsTablePropertie
             }
         });
     }
-
-    private _isTTIMarked: boolean = false;
 
     private _store: WorkloadsStore;
     private _workloadsActionCreator: WorkloadsActionsCreator;

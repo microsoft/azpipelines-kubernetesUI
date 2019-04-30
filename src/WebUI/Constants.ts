@@ -55,4 +55,13 @@ export namespace HyperLinks {
 export namespace Scenarios{
     const Prefix = "KubeSummary.";
     export const Deployments = Prefix + "Deployments";
+    export const Services = Prefix + "ServicesList";
+    export const OtherWorkloads = Prefix + "OtherWorkloads";
+    export const PodsList = Prefix + "PodsList";
+    export const ImageDetails = Prefix + "ImageDetails";
+    export const PodsDetails = Prefix + "PodsDetails";
+    export const ServiceDetails = Prefix + "ServiceDetails";
+    export const PodLogs = Prefix + "PodLogs";
+    export const WorkloadDetails = Prefix + "WorkloadDetails";
+    export const Workloads = Prefix + "Workloads";
 }

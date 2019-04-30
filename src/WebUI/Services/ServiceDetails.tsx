@@ -32,6 +32,8 @@ import "./ServiceDetails.scss";
 import { ServicesActionsCreator } from "./ServicesActionsCreator";
 import { ServicesStore } from "./ServicesStore";
 import { getServiceItems } from "./ServiceUtils";
+import { Scenarios } from "../Constants";
+import { KubeFactory } from "../KubeFactory";
 
 export interface IServiceDetailsProperties extends IVssComponentProperties {
     service: IServiceItem | undefined;
@@ -56,6 +58,7 @@ export class ServiceDetails extends React.Component<IServiceDetailsProperties, I
             arePodsLoading: true
         };
 
+        KubeFactory.telemetryService.scenarioStart(Scenarios.ServiceDetails);
         const notifyViewChanged = (service: V1Service) => {
             if (service.metadata && props.notifyViewChanged) {
                 const metadata = service.metadata;
@@ -116,6 +119,10 @@ export class ServiceDetails extends React.Component<IServiceDetailsProperties, I
 
     public componentWillUnmount(): void {
         this._servicesStore.removeListener(ServicesEvents.ServicePodsFetchedEvent, this._onPodsFetched);
+    }
+
+    public componentDidMount(): void {
+        KubeFactory.telemetryService.scenarioEnd(Scenarios.ServiceDetails);
     }
 
     private _getMainHeading(): JSX.Element | null {

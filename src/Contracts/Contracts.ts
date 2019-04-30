@@ -37,6 +37,7 @@ export interface IImageService {
 }
 
 export interface ITelemetryService {
+    markTimeToInteractive(scenarioName: string, additionalProperties?: { [key: string]: any }): void;
     onClickTelemetry(source: string, additionalProperties?: { [key: string]: any }): void;
     scenarioStart(scenarioName: string, additionalProperties?: { [key: string]: any }): void;
     scenarioEnd(scenarioName: string, additionalProperties?: { [key: string]: any }): void;

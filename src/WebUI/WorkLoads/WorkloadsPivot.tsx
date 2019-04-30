@@ -14,7 +14,7 @@ import { KubeZeroData } from "../Common//KubeZeroData";
 import { NameKey, TypeKey } from "../Common/KubeFilterBar";
 import { KubeSummary } from "../Common/KubeSummary";
 import "../Common/KubeSummary.scss";
-import { PodsEvents, WorkloadsEvents } from "../Constants";
+import { PodsEvents, WorkloadsEvents, Scenarios } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
 import { ImageDetailsActionsCreator } from "../ImageDetails/ImageDetailsActionsCreator";
@@ -27,6 +27,7 @@ import { OtherWorkloads } from "../Workloads/OtherWorkloadsTable";
 import { WorkloadsActionsCreator } from "./WorkloadsActionsCreator";
 import { WorkloadsFilterBar } from "./WorkloadsFilterBar";
 import { WorkloadsStore } from "./WorkloadsStore";
+import { KubeFactory } from "../KubeFactory";
 
 export interface IWorkloadsPivotState {
     workloadResourceSize: number;
@@ -62,6 +63,7 @@ export class WorkloadsPivot extends React.Component<IWorkloadsPivotProps, IWorkl
         this._workloadsActionCreator.getDeployments(KubeSummary.getKubeService());
         // fetch all pods in parent component as the podList is required in selected workload pods view
         this._podsActionCreator.getPods(KubeSummary.getKubeService());
+        KubeFactory.telemetryService.scenarioStart(Scenarios.Workloads);
     }
 
     public render(): React.ReactNode {
@@ -73,6 +75,10 @@ export class WorkloadsPivot extends React.Component<IWorkloadsPivotProps, IWorkl
                 </div>
             </>
         );
+    }
+
+    public componentDidMount(): void {
+        KubeFactory.telemetryService.scenarioEnd(Scenarios.Workloads);
     }
 
     public componentWillUnmount(): void {

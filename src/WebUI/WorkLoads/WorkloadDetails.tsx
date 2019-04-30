@@ -41,6 +41,8 @@ import { Utils } from "../Utils";
 import "./WorkloadDetails.scss";
 import { WorkloadsActionsCreator } from "./WorkloadsActionsCreator";
 import { WorkloadsStore } from "./WorkloadsStore";
+import { Scenarios } from "../Constants";
+import { KubeFactory } from "../KubeFactory";
 
 export interface IWorkloadDetailsProperties extends IVssComponentProperties {
     item?: V1ReplicaSet | V1DaemonSet | V1StatefulSet;
@@ -152,6 +154,7 @@ export class WorkloadDetails extends React.Component<IWorkloadDetailsProperties,
             showImageDetails: false,
             selectedImageDetails: undefined
         };
+        KubeFactory.telemetryService.scenarioStart(Scenarios.WorkloadDetails);
     }
 
     public render(): JSX.Element {
@@ -178,7 +181,7 @@ export class WorkloadDetails extends React.Component<IWorkloadDetailsProperties,
             const pods: V1Pod[] = (podList && podList.items || []).filter(pod => {
                 return Utils.isOwnerMatched(pod.metadata, this.state.item!.metadata.uid);
             });
-
+            KubeFactory.telemetryService.scenarioEnd(Scenarios.WorkloadDetails);
             this.setState({
                 pods: pods,
                 selectedPod: pods && pods.length > 0 ? pods[0] : null

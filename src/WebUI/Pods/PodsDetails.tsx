@@ -28,6 +28,8 @@ import { PodsActionsCreator } from "./PodsActionsCreator";
 import { PodsLeftPanel } from "./PodsLeftPanel";
 import { PodsRightPanel } from "./PodsRightPanel";
 import { PodsStore } from "./PodsStore";
+import { KubeFactory } from "../KubeFactory";
+import { Scenarios } from "../Constants";
 
 export interface IPodsDetailsProperties extends IVssComponentProperties {
     parentUid: string;
@@ -51,6 +53,7 @@ export interface IPodsDetailsState {
 export class PodsDetails extends React.Component<IPodsDetailsProperties, IPodsDetailsState> {
     constructor(props: IPodsDetailsProperties) {
         super(props);
+        KubeFactory.telemetryService.scenarioStart(Scenarios.PodsDetails);
         this._history = createBrowserHistory();
 
         const notifyViewChanged = (parentName: string | undefined, parentKind: string | undefined) => {
@@ -219,6 +222,9 @@ export class PodsDetails extends React.Component<IPodsDetailsProperties, IPodsDe
             selectedMasterItem: new ObservableValue<V1Pod>(selectedPod || {} as V1Pod),
             parentItem: parent
         };
+    }
+    public componentDidMount(): void {
+        KubeFactory.telemetryService.scenarioEnd(Scenarios.PodsDetails);
     }
 
     public render(): JSX.Element {

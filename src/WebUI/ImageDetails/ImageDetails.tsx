@@ -23,6 +23,8 @@ import { getRunDetailsText } from "../RunDetails";
 import { IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
 import "./ImageDetails.scss";
+import { KubeFactory } from "../KubeFactory";
+import { Scenarios } from "../Constants";
 
 export interface IImageDetailsProperties extends IVssComponentProperties {
     imageDetails: IImageDetails;
@@ -34,6 +36,14 @@ export interface IImageDetailsState {
 }
 
 export class ImageDetails extends React.Component<IImageDetailsProperties, IImageDetailsState> {
+    
+    constructor(props: IImageDetailsProperties) {
+        super(props);
+        KubeFactory.telemetryService.scenarioStart(Scenarios.ImageDetails);
+    }
+    public componentDidMount(): void {
+        KubeFactory.telemetryService.scenarioEnd(Scenarios.ImageDetails);
+    }
     public render(): JSX.Element {
         return (
             <Page className="image-details-content flex flex-grow">

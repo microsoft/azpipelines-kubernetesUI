@@ -5,8 +5,8 @@ export class KubeFactory {
         return KubeFactory._imageLocations.get(image) || KubeFactory._imageLocations.get(KubeImage.zeroData);
     }
 
-    public static markTTI = () => {
-        // Default implementation: Do nothing
+    public static markTTI = (scenarioName: string, additionalProperties?: { [key: string]: any; } | undefined) => {
+        KubeFactory.telemetryService.markTimeToInteractive(scenarioName, additionalProperties);
     }
 
     public static telemetryService: ITelemetryService;
@@ -21,6 +21,11 @@ export class KubeFactory {
 }
 
 export class DefaultTelemetryService implements ITelemetryService {
+    public markTimeToInteractive(scenarioName: string, additionalProperties?: { [key: string]: any; } | undefined): void {
+        console.log("Scenario ready for interaction " + scenarioName);
+        console.log(additionalProperties);
+    }
+
     public onClickTelemetry(source: string, additionalProperties?: { [key: string]: any; }): void {
         console.log("Item clicked " + source);
         console.log(additionalProperties);
