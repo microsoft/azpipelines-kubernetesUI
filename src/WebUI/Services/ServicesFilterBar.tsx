@@ -4,7 +4,7 @@
 */
 
 import { V1ServiceList } from "@kubernetes/client-node";
-import { BaseComponent } from "@uifabric/utilities";
+
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { Filter } from "azure-devops-ui/Utilities/Filter";
 import * as React from "react";
@@ -20,7 +20,7 @@ export interface IServiceFilterBarProps extends IVssComponentProperties {
     serviceList: V1ServiceList;
 }
 
-export class ServicesFilterBar extends BaseComponent<IServiceFilterBarProps> {
+export class ServicesFilterBar extends React.Component<IServiceFilterBarProps> {
     public render(): React.ReactNode {
         const svcTypes = this._generateSvcTypes();
         let items: IListBoxItem<{}>[] = [];

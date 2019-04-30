@@ -3,7 +3,7 @@
     Licensed under the MIT license.
 */
 
-import { BaseComponent } from "@uifabric/utilities";
+
 import { CustomHeader, HeaderIcon, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
 import { IStatusProps, Status, StatusSize } from "azure-devops-ui/Status";
 import * as React from "react";
@@ -16,7 +16,7 @@ export interface IPageTopHeader extends IVssComponentProperties {
     statusTooltip?: string;
 }
 
-export class PageTopHeader extends BaseComponent<IPageTopHeader> {
+export class PageTopHeader extends React.Component<IPageTopHeader> {
     public render(): React.ReactNode {
         const { title, statusProps } = this.props;
         return (

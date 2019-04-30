@@ -4,7 +4,7 @@
 */
 
 import { V1Deployment, V1DeploymentList, V1ObjectMeta, V1Pod, V1ReplicaSet, V1ReplicaSetList } from "@kubernetes/client-node";
-import { BaseComponent } from "@uifabric/utilities";
+
 import { Ago } from "azure-devops-ui/Ago";
 import { CardContent, CustomCard } from "azure-devops-ui/Card";
 import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
@@ -43,7 +43,7 @@ export interface IDeploymentsTableState {
     replicaSetList?: V1ReplicaSetList;
 }
 
-export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties, IDeploymentsTableState> {
+export class DeploymentsTable extends React.Component<IDeploymentsTableProperties, IDeploymentsTableState> {
     constructor(props: IDeploymentsTableProperties) {
         super(props, {});
 

@@ -42,7 +42,6 @@
     "history": "^4.7.2",
     "js-yaml": "3.13.1",
     "monaco-editor": "0.16.2",
-    "office-ui-fabric-react": "^6.172.0",
     "query-string": "^6.2.0",
     "react": "16.8.2",
     "react-dom": "16.8.2"

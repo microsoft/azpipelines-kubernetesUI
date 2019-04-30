@@ -3,7 +3,6 @@
     Licensed under the MIT license.
 */
 
-import { BaseComponent } from "@uifabric/utilities";
 import { Ago } from "azure-devops-ui/Ago";
 import { CardContent, CustomCard } from "azure-devops-ui/Card";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
@@ -33,7 +32,7 @@ export interface IImageDetailsState {
 
 }
 
-export class ImageDetails extends BaseComponent<IImageDetailsProperties, IImageDetailsState> {
+export class ImageDetails extends React.Component<IImageDetailsProperties, IImageDetailsState> {
     public render(): JSX.Element {
         return (
             <Page className="image-details-content flex flex-grow">

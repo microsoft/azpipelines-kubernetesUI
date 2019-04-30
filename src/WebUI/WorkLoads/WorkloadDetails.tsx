@@ -3,8 +3,7 @@
     Licensed under the MIT license.
 */
 
-import { V1DaemonSet, V1DaemonSetList, V1LabelSelector, V1ObjectMeta, V1Pod, V1PodTemplateSpec, V1ReplicaSet, V1ReplicaSetList, V1StatefulSet, V1StatefulSetList } from "@kubernetes/client-node";
-import { BaseComponent } from "@uifabric/utilities";
+import { V1ObjectMeta, V1Pod, V1PodTemplateSpec, V1LabelSelector, V1ReplicaSet, V1DaemonSet, V1StatefulSet, V1ReplicaSetList, V1DaemonSetList, V1StatefulSetList } from "@kubernetes/client-node";
 import { CardContent, CustomCard } from "azure-devops-ui/Card";
 import { localeFormat } from "azure-devops-ui/Core/Util/String";
 import { CustomHeader, HeaderDescription, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
@@ -68,7 +67,7 @@ export interface IWorkLoadDetailsItem {
     selector: V1LabelSelector | undefined;
 }
 
-export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, IWorkloadDetailsState> {
+export class WorkloadDetails extends React.Component<IWorkloadDetailsProperties, IWorkloadDetailsState> {
     constructor(props: IWorkloadDetailsProperties) {
         super(props, {});
         this._podsStore = StoreManager.GetStore<PodsStore>(PodsStore);

@@ -3,7 +3,7 @@
     Licensed under the MIT license.
 */
 
-import { BaseComponent } from "@uifabric/utilities";
+
 import * as Util_String from "azure-devops-ui/Core/Util/String";
 import * as React from "react";
 import { KubeSummary } from "../Common/KubeSummary";
@@ -22,7 +22,7 @@ interface IPodLogState {
     uid: string;
 }
 
-export class PodLog extends BaseComponent<IPodLogProps, IPodLogState> {
+export class PodLog extends React.Component<IPodLogProps, IPodLogState> {
     constructor(props: IPodLogProps) {
         super(props, {});
         this.state = { logContent: Resources.LoadingText, uid: this.props.pod.metadata.uid };

@@ -3,8 +3,7 @@
     Licensed under the MIT license.
 */
 
-import { V1OwnerReference, V1Pod } from "@kubernetes/client-node";
-import { BaseComponent } from "@uifabric/utilities";
+import { V1Pod, V1OwnerReference } from "@kubernetes/client-node";
 import { Ago } from "azure-devops-ui/Ago";
 import { CardContent, CustomCard } from "azure-devops-ui/Card";
 import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
@@ -42,7 +41,7 @@ export interface IPodsTableProperties extends IVssComponentProperties {
     contentClassName?: string;
 }
 
-export class PodsTable extends BaseComponent<IPodsTableProperties> {
+export class PodsTable extends React.Component<IPodsTableProperties> {
     public render(): React.ReactNode {
         const showWorkloadColumn = this.props.showWorkloadColumn || false;
         const filteredPods: V1Pod[] = (this.props.podsToRender || []).filter((pod) => {

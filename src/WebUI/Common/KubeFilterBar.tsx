@@ -3,7 +3,7 @@
     Licensed under the MIT license.
 */
 
-import { BaseComponent } from "@uifabric/utilities";
+
 import * as React from "react";
 import * as Resources from "../Resources";
 import { IVssComponentProperties } from "../Types";
@@ -37,7 +37,7 @@ export interface IFilterComponentProperties extends IVssComponentProperties {
     addBottomPadding?: boolean;
 }
 
-export class KubeFilterBar extends BaseComponent<IFilterComponentProperties, {}> {
+export class KubeFilterBar extends React.Component<IFilterComponentProperties, {}> {
 
     public render(): React.ReactNode {
         return (

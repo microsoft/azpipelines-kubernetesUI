@@ -4,7 +4,7 @@
 */
 
 import { V1Pod } from "@kubernetes/client-node";
-import { BaseComponent } from "@uifabric/utilities";
+
 import { MessageCard, MessageCardSeverity } from "azure-devops-ui/MessageCard";
 import { Page } from "azure-devops-ui/Page";
 import { Spinner } from "azure-devops-ui/Spinner";
@@ -48,7 +48,7 @@ export interface IPodsRightPanelState {
     showImageDetails?: (imageId: string) => void;
 }
 
-export class PodsRightPanel extends BaseComponent<IPodRightPanelProps, IPodsRightPanelState> {
+export class PodsRightPanel extends React.Component<IPodRightPanelProps, IPodsRightPanelState> {
     constructor(props: IPodRightPanelProps) {
         super(props, {});
 

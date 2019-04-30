@@ -4,7 +4,7 @@
 */
 
 import { V1Pod } from "@kubernetes/client-node";
-import { BaseComponent } from "@uifabric/utilities";
+
 import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
 import { Header, TitleSize } from "azure-devops-ui/Header";
 import { IListSelection, ListSelection, List, IListItemDetails, ListItem } from "azure-devops-ui/List";
@@ -28,7 +28,7 @@ export interface IPodsLeftPanelProperties extends IVssComponentProperties {
     onSelectionChange?: (event: React.SyntheticEvent<HTMLElement>, selectedItem: V1Pod, selectedView: string) => void;
 }
 
-export class PodsLeftPanel extends BaseComponent<IPodsLeftPanelProperties> {
+export class PodsLeftPanel extends React.Component<IPodsLeftPanelProperties> {
     public render(): React.ReactNode {
         return (
             this.props.pods && this.props.pods.length > 0 ?

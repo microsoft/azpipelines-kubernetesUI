@@ -4,7 +4,7 @@
 */
 
 import { V1Pod } from "@kubernetes/client-node";
-import { BaseComponent } from "@uifabric/utilities";
+
 import { Spinner, SpinnerSize } from "azure-devops-ui/Spinner";
 import { Splitter, SplitterElementPosition } from "azure-devops-ui/Splitter";
 import { DetailsPanel, MasterPanel, MasterPanelHeader } from "azure-devops-ui/MasterDetails";
@@ -55,7 +55,7 @@ export interface IPodsDetailsState {
     masterDetailsContext?: IMasterDetailsContext
 }
 
-export class PodsDetails extends BaseComponent<IPodsDetailsProperties, IPodsDetailsState> {
+export class PodsDetails extends React.Component<IPodsDetailsProperties, IPodsDetailsState> {
     constructor(props: IPodsDetailsProperties) {
         super(props);
         this._history = createBrowserHistory();

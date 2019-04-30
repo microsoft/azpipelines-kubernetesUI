@@ -4,7 +4,7 @@
 */
 
 import { V1DaemonSet, V1Pod, V1PodSpec, V1ReplicaSet, V1StatefulSet } from "@kubernetes/client-node";
-import { BaseComponent } from "@uifabric/utilities";
+
 import { Ago } from "azure-devops-ui/Ago";
 import { CardContent, CustomCard } from "azure-devops-ui/Card";
 import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
@@ -51,7 +51,7 @@ export interface IOtherWorkloadsState {
     orphanPods: V1Pod[];
 }
 
-export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOtherWorkloadsState> {
+export class OtherWorkloads extends React.Component<IOtherWorkloadsProperties, IOtherWorkloadsState> {
     constructor(props: IOtherWorkloadsProperties) {
         super(props, {});
 
