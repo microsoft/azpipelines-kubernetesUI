@@ -3,11 +3,11 @@
     Licensed under the MIT license.
 */
 
+import { createBrowserHistory } from "history";
+import * as queryString from "query-string";
 import { ActionCreatorBase } from "../FluxCommon/Actions";
 import { ActionsHubManager } from "../FluxCommon/ActionsHubManager";
-import { createBrowserHistory, History } from "history";
-import * as queryString from "query-string";
-import { SelectionActions, ISelectionPayload } from "./SelectionActions";
+import { ISelectionPayload, SelectionActions } from "./SelectionActions";
 
 export class SelectionActionsCreator extends ActionCreatorBase {
 
@@ -16,12 +16,14 @@ export class SelectionActionsCreator extends ActionCreatorBase {
     }
 
     public initialize(instanceId?: string): void {
-        this._historyService = createBrowserHistory();
         this._actions = ActionsHubManager.GetActionsHub<SelectionActions>(SelectionActions);
     }
 
     public selectItem(payload: ISelectionPayload): void {
-        let routeValues: queryString.OutputParams = queryString.parse(this._historyService.location.search);
+        // Create history service fresh here, because we need the fresh url location
+        // Unlike components, action creators are not re initialized on view mount
+        const historyService = createBrowserHistory();
+        let routeValues: queryString.OutputParams = queryString.parse(historyService.location.search);
         routeValues["type"] = payload.selectedItemType;
         routeValues["uid"] = payload.itemUID;
 
@@ -46,8 +48,8 @@ export class SelectionActionsCreator extends ActionCreatorBase {
             });
         }
 
-        this._historyService.push({
-            pathname: this._historyService.location.pathname,
+        historyService.push({
+            pathname: historyService.location.pathname,
             search: queryString.stringify(routeValues)
         });
 
@@ -55,5 +57,4 @@ export class SelectionActionsCreator extends ActionCreatorBase {
     }
 
     private _actions: SelectionActions;
-    private _historyService: History;
 }

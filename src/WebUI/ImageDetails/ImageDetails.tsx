@@ -4,28 +4,25 @@
 */
 
 
-import { css } from "azure-devops-ui/Util";
 import { Ago } from "azure-devops-ui/Ago";
 import { CardContent, CustomCard } from "azure-devops-ui/Card";
+import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { format, localeFormat } from "azure-devops-ui/Core/Util/String";
-import * as Date_Utils from "azure-devops-ui/Utilities/Date";
-import { CustomHeader, HeaderIcon, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize, HeaderDescription } from "azure-devops-ui/Header";
-import { LabelGroup, WrappingBehavior } from "azure-devops-ui/Label";
+import { CustomHeader, HeaderDescription, HeaderIcon, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
 import { Page } from "azure-devops-ui/Page";
-import { ColumnFill, ITableColumn, SimpleTableCell as renderSimpleTableCell, Table, TableColumnStyle } from "azure-devops-ui/Table";
+import { ITableColumn, Table } from "azure-devops-ui/Table";
+import * as Date_Utils from "azure-devops-ui/Utilities/Date";
+import { AgoFormat } from "azure-devops-ui/Utilities/Date";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
 import { IImageDetails, IImageLayer } from "../../Contracts/Types";
-import { renderTableCell, defaultColumnRenderer } from "../Common/KubeCardWithTable";
+import { defaultColumnRenderer, renderTableCell } from "../Common/KubeCardWithTable";
+import { Tags } from "../Common/Tags";
 import * as Resources from "../Resources";
+import { getRunDetailsText } from "../RunDetails";
 import { IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
 import "./ImageDetails.scss";
-import { Tooltip } from "azure-devops-ui/TooltipEx";
-import { AgoFormat } from "azure-devops-ui/Utilities/Date";
-import { ObservableValue } from "azure-devops-ui/Core/Observable";
-import { Tags } from "../Common/Tags";
-import { getRunDetailsText } from "../RunDetails";
 
 export interface IImageDetailsProperties extends IVssComponentProperties {
     imageDetails: IImageDetails;
@@ -126,7 +123,7 @@ export class ImageDetails extends React.Component<IImageDetailsProperties, IImag
         return imageDetailsRows;
     }
 
-    private static _renderValueCell = (tableItem: any): JSX.Element => {
+    private static _renderValueCell = (tableItem: any) => {
         const { key, value } = tableItem;
         switch (key) {
             case Resources.LabelsText:
@@ -138,12 +135,7 @@ export class ImageDetails extends React.Component<IImageDetailsProperties, IImag
                 );
 
             default:
-                const itemToRender = defaultColumnRenderer(value);
-                return (
-                    <div className="text-ellipsis details-card-value-field-size">
-                        {itemToRender}
-                    </div>
-                );
+                return defaultColumnRenderer(value, "details-card-value-field-size");
         }
     }
 
