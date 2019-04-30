@@ -16,7 +16,7 @@ import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import { createBrowserHistory } from "history";
 import * as queryString from "query-string";
 import * as React from "react";
-import { renderExternalIpCell, renderTableCell } from "../Common/KubeCardWithTable";
+import { renderTableCell, renderExternalIpCell } from "../Common/KubeCardWithTable";
 import { KubeSummary } from "../Common/KubeSummary";
 import { KubeZeroData } from "../Common/KubeZeroData";
 import { PageTopHeader } from "../Common/PageTopHeader";
@@ -77,7 +77,7 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
         const fetchServiceDetails = (svc: V1Service) => {
             // service currently only supports equals with "and" operator. The generator generates that condition.
             const labelSelector: string = Utils.generateEqualsConditionLabelSelector(svc && svc.spec && svc.spec.selector || {});
-            this._podsActionsCreator.getPods(KubeSummary.getKubeService(), labelSelector);
+            this._podsActionsCreator.getPods(KubeSummary.getKubeService(), labelSelector, true);
         };
 
         if (!props.service) {
@@ -140,7 +140,7 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
             const agoTime = Date_Utils.ago(new Date(item.creationTimestamp), Date_Utils.AgoFormat.Compact);
 
             return (
-                <CustomCard className="service-details-card k8s-card-padding flex-grow bolt-card-no-vertical-padding">
+                <CustomCard className="service-details-card k8s-card-padding bolt-table-card flex-grow bolt-card-no-vertical-padding">
                     <CustomHeader>
                         <HeaderTitleArea>
                             <HeaderTitleRow>
@@ -223,7 +223,7 @@ export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, ISe
     private static _getServiceDetailsObject(item: IServiceItem): any {
         return {
             type: item.type,
-            clusterIP: item.clusterIP,
+            clusterIP: item.clusterIP || "-",
             externalIP: item.externalIP,
             port: item.port,
             sessionAffinity: item.service ? item.service.spec.sessionAffinity : "",

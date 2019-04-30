@@ -1,4 +1,37 @@
-.workload-details-card .workload-full-details-table {
-    padding-top: 10px;
-    padding-bottom: 10px;
+.workload-full-details-table {
+    padding-top: 24px;
+    padding-bottom: 20px;
+    width: 100%;
+    overflow-x: auto;
+}
+
+// devops special override
+.bolt-header-default+.workload-full-details-table {
+    padding-top: 8px;
+}
+
+.workload-column-key-padding {
+    padding-bottom: 4px;
+}
+
+.workload-tags-column-padding {
+    margin-left: 24px;
+    min-width: 150px;
+}
+
+.workload-card-content {
+    width: 100%;
+
+    .workload-image-padding {
+        padding: 0px;
+    }
+}
+
+.workload-image-column-size {
+    width: 300px;
+    min-width: 300px;
+}
+
+.workload-tags-column-size {
+    min-width: 150px;
 }

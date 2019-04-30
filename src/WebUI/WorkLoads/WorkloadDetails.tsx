@@ -3,46 +3,45 @@
     Licensed under the MIT license.
 */
 
-import { V1ObjectMeta, V1Pod, V1PodTemplateSpec, V1LabelSelector, V1ReplicaSet, V1DaemonSet, V1StatefulSet, V1ReplicaSetList, V1DaemonSetList, V1StatefulSetList } from "@kubernetes/client-node";
+import { V1DaemonSet, V1DaemonSetList, V1LabelSelector, V1ObjectMeta, V1Pod, V1PodTemplateSpec, V1ReplicaSet, V1ReplicaSetList, V1StatefulSet, V1StatefulSetList } from "@kubernetes/client-node";
 import { BaseComponent } from "@uifabric/utilities";
 import { CardContent, CustomCard } from "azure-devops-ui/Card";
-import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { localeFormat } from "azure-devops-ui/Core/Util/String";
 import { CustomHeader, HeaderDescription, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
-import { Page } from "azure-devops-ui/Page";
-import { IStatusProps } from "azure-devops-ui/Status";
-import { ITableColumn, Table } from "azure-devops-ui/Table";
-import * as Date_Utils from "azure-devops-ui/Utilities/Date";
 import { Link } from "azure-devops-ui/Link";
-import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
+import { Page } from "azure-devops-ui/Page";
 import { Spinner, SpinnerSize } from "azure-devops-ui/Spinner";
+import { IStatusProps } from "azure-devops-ui/Status";
+import { Tooltip } from "azure-devops-ui/TooltipEx";
+import { css } from "azure-devops-ui/Util";
+import * as Date_Utils from "azure-devops-ui/Utilities/Date";
+import { createBrowserHistory } from "history";
+import * as queryString from "query-string";
 import * as React from "react";
+import { IKubeService } from "../../Contracts/Contracts";
 import { IImageDetails } from "../../Contracts/Types";
-import { defaultColumnRenderer, renderTableCell } from "../Common/KubeCardWithTable";
+import { defaultColumnRenderer } from "../Common/KubeCardWithTable";
+import { KubeSummary } from "../Common/KubeSummary";
 import { KubeZeroData } from "../Common/KubeZeroData";
 import { PageTopHeader } from "../Common/PageTopHeader";
 import { Tags } from "../Common/Tags";
+import { ImageDetailsEvents, PodsEvents, SelectedItemKeys, WorkloadsEvents } from "../Constants";
+import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
 import { ImageDetails } from "../ImageDetails/ImageDetails";
+import { ImageDetailsActionsCreator } from "../ImageDetails/ImageDetailsActionsCreator";
 import { ImageDetailsStore } from "../ImageDetails/ImageDetailsStore";
+import { PodsActionsCreator } from "../Pods/PodsActionsCreator";
 import { PodsStore } from "../Pods/PodsStore";
 import { PodsTable } from "../Pods/PodsTable";
 import * as Resources from "../Resources";
-import { IVssComponentProperties, IPodDetailsSelectionProperties } from "../Types";
-import { Utils, IMetadataAnnotationPipeline } from "../Utils";
-import "./WorkloadDetails.scss";
-import { Tooltip } from "azure-devops-ui/TooltipEx";
-import { KubeSummary } from "../Common/KubeSummary";
 import { getRunDetailsText } from "../RunDetails";
-import { createBrowserHistory } from "history";
-import * as queryString from "query-string";
-import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
-import { PodsActionsCreator } from "../Pods/PodsActionsCreator";
 import { SelectionActionsCreator } from "../Selection/SelectionActionCreator";
-import { SelectedItemKeys, WorkloadsEvents, PodsEvents } from "../Constants";
+import { IPodDetailsSelectionProperties, IVssComponentProperties } from "../Types";
+import { Utils } from "../Utils";
+import "./WorkloadDetails.scss";
 import { WorkloadsActionsCreator } from "./WorkloadsActionsCreator";
 import { WorkloadsStore } from "./WorkloadsStore";
-import { IKubeService } from "../../Contracts/Contracts";
 
 export interface IWorkloadDetailsProperties extends IVssComponentProperties {
     item?: V1ReplicaSet | V1DaemonSet | V1StatefulSet;
@@ -60,6 +59,7 @@ export interface IWorkloadDetailsState {
     showImageDetails: boolean;
     selectedImageDetails: IImageDetails | undefined;
     arePodsLoading?: boolean;
+    imageList?: string[];
 }
 
 export interface IWorkLoadDetailsItem {
@@ -72,8 +72,10 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
     constructor(props: IWorkloadDetailsProperties) {
         super(props, {});
         this._podsStore = StoreManager.GetStore<PodsStore>(PodsStore);
+        this._imageDetailsStore = StoreManager.GetStore<ImageDetailsStore>(ImageDetailsStore);
 
         this._podsStore.addListener(PodsEvents.PodsFetchedEvent, this._onPodsUpdated);
+        this._imageDetailsStore.addListener(ImageDetailsEvents.HasImageDetailsEvent, this._setHasImageDetails);
 
         this._workloadsStore = StoreManager.GetStore<WorkloadsStore>(WorkloadsStore);
 
@@ -143,8 +145,6 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
             notifyViewChanged(item);
         }
 
-        this._imageDetailsStore = StoreManager.GetStore<ImageDetailsStore>(ImageDetailsStore);
-
         this.state = {
             item: item,
             pods: [],
@@ -187,10 +187,21 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
         }
     }
 
-    public componentWillUnmount(): void {
-        this._podsStore.removeChangedListener(this._onPodsUpdated);
+    public componentDidUpdate(prevProps: IWorkloadDetailsProperties, prevState: IWorkloadDetailsState) {
+        // Fetch hasImageDetailsData if we directly refresh and land on WorkloadDetails
+        const imageService = KubeSummary.getImageService();
+        if (imageService && this.state.imageList && this.state.imageList.length > 0) {
+            const hasImageDetails: boolean | undefined = this._imageDetailsStore.hasImageDetails(this.state.imageList[0]);
+            if (hasImageDetails === undefined) {
+                ActionsCreatorManager.GetActionCreator<ImageDetailsActionsCreator>(ImageDetailsActionsCreator).setHasImageDetails(imageService, this.state.imageList);
+            }
+        }
     }
 
+    public componentWillUnmount(): void {
+        this._podsStore.removeChangedListener(this._onPodsUpdated);
+        this._imageDetailsStore.removeListener(ImageDetailsEvents.HasImageDetailsEvent, this._setHasImageDetails);
+    }
     private _getMainHeading(): JSX.Element | null {
         if (this.state.item) {
             const metadata = this.state.item.metadata;
@@ -202,7 +213,7 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
 
         return null;
     }
-    
+
     private _showImageDetails = (imageId: string) => {
         const imageService = KubeSummary.getImageService();
         imageService && imageService.getImageDetails(imageId).then(imageDetails => {
@@ -224,50 +235,19 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
         const podsStoreState = this._podsStore.getState();
         const podList = podsStoreState.podsList;
         if (podList && podList.items) {
+            const imageList = Utils.getImageIdsForPods(podList.items);
             this.setState({
                 pods: podList.items.filter(p => this.state.item && Utils.isOwnerMatched(p.metadata, this.state.item.metadata.uid)),
-                arePodsLoading: podsStoreState.isLoading
+                arePodsLoading: podsStoreState.isLoading,
+                imageList: imageList
             });
         }
-    }
-
-    private _getColumns = (): ITableColumn<IWorkLoadDetailsItem>[] => {
-        const columns: ITableColumn<IWorkLoadDetailsItem>[] = [
-            {
-                id: "w-image",
-                name: Resources.ImageText,
-                width: new ObservableValue(360),
-                minWidth: 250,
-                renderCell: this._renderImageCell
-            },
-            {
-                id: "w-labels",
-                name: Resources.LabelsText,
-                width: -50,
-                minWidth: 200,
-                renderCell: (r, c, col, item) => WorkloadDetails._renderCellWithTags(r, c, col, item, (item) => item.parentMetaData.labels)
-            },
-            {
-                id: "w-selector",
-                name: Resources.SelectorText,
-                width: -50,
-                minWidth: 200,
-                renderCell: (r, c, col, item) => WorkloadDetails._renderCellWithTags(r, c, col, item, (item) => (item.selector && item.selector.matchLabels) || {})
-            }
-        ];
-
-        return columns;
     }
 
     private _getWorkloadDetails(): JSX.Element | null {
         if (this.state.item) {
             const metadata = this.state.item.metadata;
             if (metadata) {
-                const tableItems: IWorkLoadDetailsItem[] = [{
-                    podTemplate: this.state.item.spec && this.state.item.spec.template,
-                    parentMetaData: metadata,
-                    selector: this.state.item.spec && this.state.item.spec.selector
-                }];
                 const agoTime = Date_Utils.ago(new Date(metadata.creationTimestamp), Date_Utils.AgoFormat.Compact);
 
                 return (
@@ -286,15 +266,8 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
                                 </HeaderDescription>
                             </HeaderTitleArea>
                         </CustomHeader>
-                        <CardContent className="workload-full-details-table" contentPadding={false}>
-                            <Table
-                                id="workload-full-details-table"
-                                showHeader={true}
-                                showLines={false}
-                                singleClickActivation={false}
-                                itemProvider={new ArrayItemProvider<IWorkLoadDetailsItem>(tableItems)}
-                                columns={this._getColumns()}
-                            />
+                        <CardContent className="workload-full-details-table">
+                            {this._getWorkloadDetailsCardContent()}
                         </CardContent>
                     </CustomCard>
                 );
@@ -302,6 +275,86 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
         }
 
         return null;
+    }
+
+    private _getWorkloadDetailsCardContent(): JSX.Element {
+        let workloadDetails: any[] = [];
+        if (this.state.item) {
+            workloadDetails.push({ key: Resources.ImageText, value: this.state.item.spec && this.state.item.spec.template });
+            workloadDetails.push({ key: Resources.SelectorText, value: this.state.item.spec && this.state.item.spec.selector && this.state.item.spec.selector.matchLabels || {} });
+            workloadDetails.push({ key: Resources.LabelsText, value: this.state.item.metadata && this.state.item.metadata.labels || {} });
+        }
+
+        return (
+            <div className="flex-row workload-card-content">
+                {
+                    workloadDetails.map((item, index) => this._renderWorkloadCellContent(item, index))
+                }
+            </div>
+        );
+    }
+
+    private _renderWorkloadCellContent(item: any, index: number): JSX.Element | undefined {
+        const { key, value } = item;
+        const getColumnKey = (keyText?: string, keyClassName?: string) => (
+            <div className={css(keyClassName || "", "secondary-text workload-column-key-padding")}>
+                {keyText}
+            </div>
+        );
+
+        switch (key) {
+            case Resources.ImageText:
+                return (
+                    <div className="flex-column body-m workload-image-column-size" key={index}>
+                        {getColumnKey(key)}
+                        {this._renderImageCell(value)}
+                    </div>
+                );
+
+            case Resources.LabelsText:
+            case Resources.SelectorText:
+                return (
+                    <div className="flex-grow flex-column workload-tags-column-padding" key={index}>
+                        {getColumnKey(key, "body-m")}
+                        {/* temporary fix for the overflow fade */}
+                        <Tags className="overflow-fade workload-tags-column-size" items={value} />
+                    </div>
+                );
+
+            default:
+                return undefined;
+        }
+    }
+
+    private _renderImageCell(itemValue: any): JSX.Element {
+        const imageId = Utils.getImageIdForWorkload(Utils.getFirstContainerName(itemValue.spec), this.state.pods);
+        const { imageText, imageTooltipText } = Utils.getImageText(itemValue.spec);
+        let imageDetailsUnavailableTooltipText: string = "";
+        const hasImageDetails: boolean | undefined = this._imageDetailsStore.hasImageDetails(imageId);
+        // if hasImageDetails is undefined, then image details promise has not resolved, so do not set imageDetailsUnavailable tooltip
+        if (hasImageDetails === false) {
+            const imageValueText = imageTooltipText || imageText;
+            imageDetailsUnavailableTooltipText = localeFormat("{0} | {1}", imageValueText, Resources.ImageDetailsUnavailableText);
+        }
+
+        const itemToRender = hasImageDetails ?
+            <Tooltip overflowOnly>
+                <div className="flex-row flex-center">
+                    <Link
+                        className="fontSizeM font-size-m text-ellipsis bolt-table-link workload-image-padding"
+                        rel={"noopener noreferrer"}
+                        onClick={(e) => {
+                            e.preventDefault();
+                            this._showImageDetails(imageId);
+                        }}
+                    >
+                        {imageText}
+                    </Link>
+                </div>
+            </Tooltip>
+            : defaultColumnRenderer(imageText, "", imageDetailsUnavailableTooltipText);
+
+        return itemToRender as JSX.Element;
     }
 
     private _getAssociatedPods(): JSX.Element | null {
@@ -341,34 +394,8 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
         );
     }
 
-    private _renderImageCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IWorkLoadDetailsItem>, tableItem: IWorkLoadDetailsItem): JSX.Element => {
-        const imageId = Utils.getImageIdForWorkload(Utils.getFirstContainerName(tableItem.podTemplate.spec), this.state.pods);
-        const imageText = Utils.getFirstImageName(tableItem.podTemplate.spec) || "";
-        const hasImageDetails: boolean = this._imageDetailsStore.hasImageDetails(imageId);
-        const itemToRender = hasImageDetails ?
-            <Tooltip overflowOnly>
-                <Link
-                    className="fontSizeM font-size-m text-ellipsis bolt-table-link"
-                    rel={"noopener noreferrer"}
-                    excludeTabStop
-                    onClick={() => this._showImageDetails(imageId)}
-                >
-                    {imageText}
-                </Link>
-            </Tooltip>
-            : defaultColumnRenderer(imageText);
-
-        return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender, undefined, hasImageDetails ? "bolt-table-cell-content-with-link" : "");
-    }
-
-    private static _renderCellWithTags(
-        rowIndex: number,
-        columnIndex: number,
-        tableColumn: ITableColumn<IWorkLoadDetailsItem>,
-        tableItem: IWorkLoadDetailsItem,
-        getItems: (tableItem: IWorkLoadDetailsItem) => { [key: string]: string }): JSX.Element {
-        const itemToRender: React.ReactNode = <Tags items={getItems(tableItem)} />;
-        return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
+    private _setHasImageDetails = (): void => {
+        this.setState({});
     }
 
     private _podsStore: PodsStore;

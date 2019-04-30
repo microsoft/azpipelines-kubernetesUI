@@ -3,7 +3,8 @@
     Licensed under the MIT license.
 */
 
-import { BaseComponent, css } from "@uifabric/utilities/lib";
+import { BaseComponent } from "@uifabric/utilities/lib";
+import { css } from "azure-devops-ui/Util";
 import { Card, CardContent, CustomCard } from "azure-devops-ui/Card";
 import { CustomHeader, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
 import { Link } from "azure-devops-ui/Link";
@@ -73,6 +74,43 @@ export class KubeZeroData extends BaseComponent<IKubeZeroDataProps> {
                 }
                 imageAltText={Resources.StartUsingKubeResourceText}
                 imagePath={KubeFactory.getImageLocation(KubeImage.zeroData) || ""}
+            />
+        );
+    }
+
+    public static getResourceDeletedErrorComponent(): JSX.Element {
+        return (
+            <ZeroData
+                className="k8s-resource-deleted-error"
+                primaryText={""}
+                secondaryText={
+                    <div>
+                        {Resources.KubernetesResourceDeletedHelpText}
+                        <Link
+                            href={HyperLinks.ResourceDeletedLink}
+                            target="_blank"
+                            rel="nofollow noopener"
+                        >
+                            {Resources.LearnMoreText}
+                        </Link>
+                    </div>
+                }
+                imageAltText={Resources.KubernetesResourceDeletedAltText}
+                imagePath={KubeFactory.getImageLocation(KubeImage.resourceDeleted) || ""}
+            />
+        );
+    }
+
+    public static getResourceAccessDeniedErrorComponent(): JSX.Element {
+        return (
+            <ZeroData
+                className="k8s-resource-access-denied-error"
+                primaryText={""}
+                secondaryText={
+                    <div>{Resources.KubernetesAuthValidationHelpText}</div>
+                }
+                imageAltText={Resources.KubernetesAuthValidationTitleText}
+                imagePath={KubeFactory.getImageLocation(KubeImage.resourceAccessDenied) || ""}
             />
         );
     }
