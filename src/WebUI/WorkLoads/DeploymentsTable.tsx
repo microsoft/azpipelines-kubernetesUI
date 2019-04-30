@@ -4,12 +4,12 @@
 */
 
 import { V1Deployment, V1DeploymentList, V1ObjectMeta, V1Pod, V1ReplicaSet, V1ReplicaSetList } from "@kubernetes/client-node";
-import { BaseComponent, format } from "@uifabric/utilities";
+import { BaseComponent } from "@uifabric/utilities";
 import { Ago } from "azure-devops-ui/Ago";
 import { CardContent, CustomCard } from "azure-devops-ui/Card";
 import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
-import { equals } from "azure-devops-ui/Core/Util/String";
+import { equals, format, localeFormat } from "azure-devops-ui/Core/Util/String";
 import { CustomHeader, HeaderDescription, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
 import { Link } from "azure-devops-ui/Link";
 import { ITableColumn, Table } from "azure-devops-ui/Table";
@@ -103,7 +103,7 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
             const key = format("workloads-d-t-{0}", index);
             const deploymentCard = (
                 <CustomCard
-                    className="deployment-replica-with-pod-list k8s-card-padding flex-grow bolt-card-no-vertical-padding"
+                    className="deployment-replica-with-pod-list k8s-card-padding bolt-table-card flex-grow bolt-card-no-vertical-padding"
                     key={key}
                 >
                     <CustomHeader>
@@ -268,19 +268,28 @@ export class DeploymentsTable extends BaseComponent<IDeploymentsTableProperties,
     private _renderImageCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IDeploymentReplicaSetItem>, deployment: IDeploymentReplicaSetItem): JSX.Element => {
         const textToRender: string = deployment.imageDisplayText || "";
         const imageId: string = deployment.imageId;
-        const hasImageDetails = StoreManager.GetStore<ImageDetailsStore>(ImageDetailsStore).hasImageDetails(imageId);
+        let imageDetailsUnavailableTooltipText = "";
+        const hasImageDetails: boolean | undefined = this._imageDetailsStore.hasImageDetails(imageId);
+        // If hasImageDetails is undefined, then image details promise has not resolved, so do not set imageDetailsUnavailable tooltip
+        if (hasImageDetails === false) {
+            imageDetailsUnavailableTooltipText = localeFormat("{0} | {1}",  deployment.imageTooltip || textToRender, Resources.ImageDetailsUnavailableText);
+        }
+        
         const itemToRender = hasImageDetails ?
             <Tooltip overflowOnly>
                 <Link
                     className="fontSizeM font-size-m text-ellipsis bolt-table-link"
                     rel={"noopener noreferrer"}
                     excludeTabStop
-                    onClick={() => this._onImageClick(imageId)}
+                    onClick={(e) => {
+                        e.preventDefault();
+                        this._onImageClick(imageId);
+                    }}
                 >
                     {textToRender}
                 </Link>
-            </Tooltip>
-            : defaultColumnRenderer(textToRender);
+            </Tooltip >
+            : defaultColumnRenderer(textToRender, "", imageDetailsUnavailableTooltipText);
 
         return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender, undefined, hasImageDetails ? "bolt-table-cell-content-with-link" : "");
     }

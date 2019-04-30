@@ -3,33 +3,33 @@
     Licensed under the MIT license.
 */
 
-import * as queryString from "query-string";
 import { V1Pod } from "@kubernetes/client-node";
 import { BaseComponent } from "@uifabric/utilities";
 import { MessageCard, MessageCardSeverity } from "azure-devops-ui/MessageCard";
 import { Page } from "azure-devops-ui/Page";
+import { Spinner } from "azure-devops-ui/Spinner";
 import { IStatusProps, Statuses } from "azure-devops-ui/Status";
 import { Tab, TabBar, TabSize } from "azure-devops-ui/Tabs";
 import { css } from "azure-devops-ui/Util";
 import { createBrowserHistory, History } from "history";
+import * as queryString from "query-string";
 import * as React from "react";
 import { IImageDetails } from "../../Contracts/Types";
 import { KubeSummary } from "../Common/KubeSummary";
 import { PageTopHeader } from "../Common/PageTopHeader";
-import { PodsRightPanelTabsKeys, PodsEvents } from "../Constants";
+import { PodsEvents, PodsRightPanelTabsKeys } from "../Constants";
+import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
+import { StoreManager } from "../FluxCommon/StoreManager";
 import { ImageDetails } from "../ImageDetails/ImageDetails";
 import * as Resources from "../Resources";
 import { IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
 import { PodLog } from "./PodLog";
 import { PodOverview } from "./PodOverview";
-import "./PodsRightPanel.scss";
-import { PodYaml } from "./PodYaml";
-import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { PodsActionsCreator } from "./PodsActionsCreator";
-import { StoreManager } from "../FluxCommon/StoreManager";
+import "./PodsRightPanel.scss";
 import { PodsStore } from "./PodsStore";
-import { Spinner } from "azure-devops-ui/Spinner";
+import { PodYaml } from "./PodYaml";
 
 export interface IPodRightPanelProps extends IVssComponentProperties {
     pod: V1Pod | undefined;
@@ -147,14 +147,12 @@ export class PodsRightPanel extends BaseComponent<IPodRightPanelProps, IPodsRigh
     }
 
     private _getHeader(): JSX.Element | null {
-        return this.state.pod ? (
-            <PageTopHeader
-                title={(this.state.pod.metadata && this.state.pod.metadata.name) || ""}
-                statusProps={this.state.podStatusProps}
-                statusTooltip={this.state.statusTooltip}
-                className={"pod-right-panel-header"}
-            />
-        ) : null;
+        return (<PageTopHeader
+            title={(this.state.pod!.metadata && this.state.pod!.metadata.name) || ""}
+            statusProps={this.state.podStatusProps}
+            statusTooltip={this.state.statusTooltip}
+            className={"pod-right-panel-header"}
+        />);
     }
 
     private _onSelectedTabChanged = (selectedTab: string): void => {

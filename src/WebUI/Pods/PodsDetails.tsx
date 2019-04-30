@@ -5,25 +5,27 @@
 
 import { V1Pod } from "@kubernetes/client-node";
 import { BaseComponent } from "@uifabric/utilities";
-import { SplitterElementPosition, Splitter } from "azure-devops-ui/Splitter";
 import { Spinner, SpinnerSize } from "azure-devops-ui/Spinner";
+import { Splitter, SplitterElementPosition } from "azure-devops-ui/Splitter";
+import { createBrowserHistory, History } from "history";
+import * as queryString from "query-string";
 import * as React from "react";
+import { IImageDetails } from "../../Contracts/Types";
+import { KubeSummary } from "../Common/KubeSummary";
+import { PodsEvents, PodsRightPanelTabsKeys, ImageDetailsEvents } from "../Constants";
+import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
+import { StoreManager } from "../FluxCommon/StoreManager";
+import { ImageDetails } from "../ImageDetails/ImageDetails";
 import * as Resources from "../Resources";
-import { IVssComponentProperties, IPodDetailsSelectionProperties } from "../Types";
+import { SelectionActionsCreator } from "../Selection/SelectionActionCreator";
+import { IPodDetailsSelectionProperties, IVssComponentProperties } from "../Types";
+import { Utils } from "../Utils";
+import { PodsActionsCreator } from "./PodsActionsCreator";
 import { PodsLeftPanel } from "./PodsLeftPanel";
 import { PodsRightPanel } from "./PodsRightPanel";
-import { KubeSummary } from "../Common/KubeSummary";
-import { IImageDetails } from "../../Contracts/Types";
-import { ImageDetails } from "../ImageDetails/ImageDetails";
 import { PodsStore } from "./PodsStore";
-import { StoreManager } from "../FluxCommon/StoreManager";
-import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
-import { PodsActionsCreator } from "./PodsActionsCreator";
-import { PodsEvents, PodsRightPanelTabsKeys } from "../Constants";
-import { Utils } from "../Utils";
-import { History, createBrowserHistory } from "history";
-import * as queryString from "query-string";
-import { SelectionActionsCreator } from "../Selection/SelectionActionCreator";
+import { ImageDetailsActionsCreator } from "../ImageDetails/ImageDetailsActionsCreator";
+import { ImageDetailsStore } from "../ImageDetails/ImageDetailsStore";
 
 export interface IPodsDetailsProperties extends IVssComponentProperties {
     parentUid: string;
@@ -40,6 +42,7 @@ export interface IPodsDetailsState {
     isLoading?: boolean;
     selectedPod: V1Pod | null | undefined;
     selectedImageDetails: IImageDetails | undefined;
+    imageList?: string[];
 }
 
 export class PodsDetails extends BaseComponent<IPodsDetailsProperties, IPodsDetailsState> {
@@ -67,6 +70,9 @@ export class PodsDetails extends BaseComponent<IPodsDetailsProperties, IPodsDeta
                 }]);
             }
         };
+
+        this._imageDetailsStore = StoreManager.GetStore<ImageDetailsStore>(ImageDetailsStore);
+        this._imageDetailsStore.addListener(ImageDetailsEvents.HasImageDetailsEvent, this._setHasImageDetails);
 
         this._podsStore = StoreManager.GetStore<PodsStore>(PodsStore);
         let parentKind: string | undefined = undefined, parentName: string | undefined = undefined, filteredPods: V1Pod[] | undefined = [], selectedPod: V1Pod | undefined = undefined;
@@ -116,6 +122,7 @@ export class PodsDetails extends BaseComponent<IPodsDetailsProperties, IPodsDeta
                 const fetchedPodList = props.serviceSelector ? podsStoreState.podListByLabel[props.serviceSelector] : podsStoreState.podsList;
                 if (fetchedPodList && fetchedPodList.items) {
                     const properties = getPodProperties(fetchedPodList.items);
+                    const imageList = Utils.getImageIdsForPods(properties.pods || []);
                     // Adding breadcrumb when parent object is fetched on pod view refresh
                     notifyViewChanged(properties.parentName, properties.parentKind);
                     this.setState({
@@ -123,14 +130,15 @@ export class PodsDetails extends BaseComponent<IPodsDetailsProperties, IPodsDeta
                         parentName: properties.parentName,
                         pods: properties.pods,
                         selectedPod: properties.selectedPod,
-                        isLoading: podsStoreState.isLoading
+                        isLoading: podsStoreState.isLoading,
+                        imageList: imageList
                     });
                 }
             };
 
             this._podsStore.addListener(storeEventName, podsFetchHandler);
             if (props.serviceSelector) {
-                podsActionCreator.getPods(KubeSummary.getKubeService(), props.serviceSelector);
+                podsActionCreator.getPods(KubeSummary.getKubeService(), props.serviceSelector, true);
             }
             else {
                 podsActionCreator.getPods(KubeSummary.getKubeService());
@@ -207,6 +215,21 @@ export class PodsDetails extends BaseComponent<IPodsDetailsProperties, IPodsDeta
         );
     }
 
+    public componentDidUpdate(prevProps: IPodsDetailsProperties, prevState: IPodsDetailsState) {
+        // Fetch hasImageDetailsData if we directly refresh and land on WorkloadDetails
+        const imageService = KubeSummary.getImageService();
+        if (imageService && this.state.imageList && this.state.imageList.length > 0) {
+            const hasImageDetails: boolean | undefined = this._imageDetailsStore.hasImageDetails(this.state.imageList[0]);
+            if (hasImageDetails === undefined) {
+                ActionsCreatorManager.GetActionCreator<ImageDetailsActionsCreator>(ImageDetailsActionsCreator).setHasImageDetails(imageService, this.state.imageList);
+            }
+        }
+    }
+
+    public componentWillUnmount(): void {
+        this._imageDetailsStore.removeListener(ImageDetailsEvents.HasImageDetailsEvent, this._setHasImageDetails);
+    }
+
     private _onPodSelectionChange = (event: React.SyntheticEvent<HTMLElement>, selectedPod: V1Pod, selectedView: string): void => {
         let routeValues: queryString.OutputParams = queryString.parse(this._history.location.search);
         routeValues["uid"] = selectedPod.metadata.uid;
@@ -250,7 +273,12 @@ export class PodsDetails extends BaseComponent<IPodsDetailsProperties, IPodsDeta
         });
     }
 
+    private _setHasImageDetails = (): void => {
+        this.setState({});
+    }
+
     private _initialFixedSize: number = 320;
     private _history: History;
     private _podsStore: PodsStore;
+    private _imageDetailsStore: ImageDetailsStore;
 }

@@ -3,12 +3,12 @@
     Licensed under the MIT license.
 */
 
-import { StoreBase } from "../FluxCommon/Store";
-import { ActionsHubManager } from "../FluxCommon/ActionsHubManager";
-import { V1ServiceList, V1PodList, V1Pod } from "@kubernetes/client-node";
-import { ServicesActions } from "./ServicesActions";
-import { PodsActions, IPodListWithLabel } from "../Pods/PodsActions";
+import { V1Pod, V1ServiceList } from "@kubernetes/client-node";
 import { ServicesEvents } from "../Constants";
+import { ActionsHubManager } from "../FluxCommon/ActionsHubManager";
+import { StoreBase } from "../FluxCommon/Store";
+import { IPodListWithLabel, PodsActions } from "../Pods/PodsActions";
+import { ServicesActions } from "./ServicesActions";
 
 export interface IServicesStoreState {
     serviceList?: V1ServiceList

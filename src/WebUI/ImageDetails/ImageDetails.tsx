@@ -3,28 +3,26 @@
     Licensed under the MIT license.
 */
 
-import { BaseComponent, css } from "@uifabric/utilities";
+import { BaseComponent } from "@uifabric/utilities";
 import { Ago } from "azure-devops-ui/Ago";
 import { CardContent, CustomCard } from "azure-devops-ui/Card";
+import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { format, localeFormat } from "azure-devops-ui/Core/Util/String";
-import * as Date_Utils from "azure-devops-ui/Utilities/Date";
-import { CustomHeader, HeaderIcon, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize, HeaderDescription } from "azure-devops-ui/Header";
-import { LabelGroup, WrappingBehavior } from "azure-devops-ui/Label";
+import { CustomHeader, HeaderDescription, HeaderIcon, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
 import { Page } from "azure-devops-ui/Page";
-import { ColumnFill, ITableColumn, SimpleTableCell as renderSimpleTableCell, Table, TableColumnStyle } from "azure-devops-ui/Table";
+import { ITableColumn, Table } from "azure-devops-ui/Table";
+import * as Date_Utils from "azure-devops-ui/Utilities/Date";
+import { AgoFormat } from "azure-devops-ui/Utilities/Date";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
 import { IImageDetails, IImageLayer } from "../../Contracts/Types";
-import { renderTableCell, defaultColumnRenderer } from "../Common/KubeCardWithTable";
+import { defaultColumnRenderer, renderTableCell } from "../Common/KubeCardWithTable";
+import { Tags } from "../Common/Tags";
 import * as Resources from "../Resources";
+import { getRunDetailsText } from "../RunDetails";
 import { IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
 import "./ImageDetails.scss";
-import { Tooltip } from "azure-devops-ui/TooltipEx";
-import { AgoFormat } from "azure-devops-ui/Utilities/Date";
-import { ObservableValue } from "azure-devops-ui/Core/Observable";
-import { Tags } from "../Common/Tags";
-import { getRunDetailsText } from "../RunDetails";
 
 export interface IImageDetailsProperties extends IVssComponentProperties {
     imageDetails: IImageDetails;
@@ -85,26 +83,6 @@ export class ImageDetails extends BaseComponent<IImageDetailsProperties, IImageD
 
     private _getImageDetails(): JSX.Element | null {
         const imageDetails = this.props.imageDetails;
-        const columns: ITableColumn<any>[] = [
-            {
-                id: "key",
-                name: "key",
-                width: new ObservableValue(150),
-                className: "image-details-key",
-                columnStyle: TableColumnStyle.Tertiary,
-                renderCell: ImageDetails._renderKeyCell
-            },
-            {
-                id: "value",
-                name: "value",
-                width: -100,
-                className: "image-details-value",
-                minWidth: 400,
-                renderCell: ImageDetails._renderValueCell
-            }
-        ];
-
-        const tableItems = this._getImageDetailsRowsData(imageDetails);
 
         return (
             <CustomCard className="image-details-card k8s-card-padding flex-grow bolt-card-no-vertical-padding">
@@ -117,23 +95,14 @@ export class ImageDetails extends BaseComponent<IImageDetailsProperties, IImageD
                         </HeaderTitleRow>
                     </HeaderTitleArea>
                 </CustomHeader>
-                <CardContent className="image-full-details-table" contentPadding={false}>
-                    <Table
-                        className="image-details-table"
-                        id={format("image-details-{0}", imageDetails.hash)}
-                        showHeader={false}
-                        showLines={false}
-                        singleClickActivation={false}
-                        itemProvider={tableItems}
-                        pageSize={tableItems.length}
-                        columns={columns}
-                    />
+                <CardContent className="image-full-details-table" contentPadding={true}>
+                    {this._getCardContent()}
                 </CardContent>
             </CustomCard>
         );
     }
 
-    private _getImageDetailsRowsData(imageDetails: IImageDetails): ArrayItemProvider<any> {
+    private _getImageDetailsRowsData(imageDetails: IImageDetails): any[] {
         let imageDetailsRows: any[] = [];
         const digest: string = imageDetails.hash || "";
         const imageType: string = imageDetails.imageType || "";
@@ -151,58 +120,46 @@ export class ImageDetails extends BaseComponent<IImageDetailsProperties, IImageD
         imageSize && imageDetailsRows.push({ key: Resources.ImageSizeText, value: imageSize });
         labels && labels.length > 0 && imageDetailsRows.push({ key: Resources.LabelsText, value: labels });
 
-        return new ArrayItemProvider<any>(imageDetailsRows);
+        return imageDetailsRows;
     }
 
-    private static _renderValueCell(
-        rowIndex: number,
-        columnIndex: number,
-        tableColumn: ITableColumn<any>,
-        tableItem: any): JSX.Element {
+    private static _renderValueCell = (tableItem: any) => {
         const { key, value } = tableItem;
-        let props: any = {};
-        const contentClassName = "image-o-v-col-content";
         switch (key) {
             case Resources.LabelsText:
             case Resources.TagsText:
-                props = {
-                    columnIndex: columnIndex,
-                    children:
-                    <Tags items={value} />,
-                    tableColumn: tableColumn,
-                    contentClassName: css(contentClassName, "image-labelgroups")
-                };
-
-                return renderSimpleTableCell(props);
+                return (
+                    <div className="text-ellipsis details-card-value-field-size">
+                        <Tags items={value} className="body-s" />
+                    </div>
+                );
 
             default:
-                const itemToRender = <span className="image-details-value-cell">{value}</span>;
-                return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender, undefined, contentClassName);
+                return defaultColumnRenderer(value, "details-card-value-field-size");
         }
     }
 
-    private static _renderKeyCell(
-        rowIndex: number,
-        columnIndex: number,
-        tableColumn: ITableColumn<any>,
-        tableItem: any): JSX.Element {
-        const { key } = tableItem;
-        const contentClassName = "image-o-k-col-content";
-
-        const itemToRender = (
-            <Tooltip text={key} overflowOnly>
-                <span className={css("text-ellipsis")}>{key}</span>
-            </Tooltip>
+    private _getCardContent = (): JSX.Element => {
+        const items = this._getImageDetailsRowsData(this.props.imageDetails);
+        return (
+            <div className="flex-column details-card-content">
+                {items.map((item, index) => (
+                    <div className="flex-row details-card-row-size body-m" key={index}>
+                        <div className="text-ellipsis secondary-text details-card-info-field-size">
+                            {item.key}
+                        </div>
+                        {ImageDetails._renderValueCell(item)}
+                    </div>))
+                }
+            </div>
         );
-
-        return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender, undefined, contentClassName);
     }
 
     private _getImageLayers(): JSX.Element | null {
         const imageDetails = this.props.imageDetails;
         const layerInfo = this._sortByCreatedDate(imageDetails.layerInfo);
         return (
-            <CustomCard className="image-layers-card k8s-card-padding flex-grow bolt-card-no-vertical-padding">
+            <CustomCard className="image-layers-card k8s-card-padding bolt-table-card flex-grow bolt-card-no-vertical-padding">
                 <CustomHeader>
                     <HeaderTitleArea>
                         <HeaderTitleRow>
@@ -231,7 +188,7 @@ export class ImageDetails extends BaseComponent<IImageDetailsProperties, IImageD
     }
 
 
-    private _sortByCreatedDate(layerInfo : IImageLayer[]): IImageLayer[] {
+    private _sortByCreatedDate(layerInfo: IImageLayer[]): IImageLayer[] {
         layerInfo.sort((a: IImageLayer, b: IImageLayer) => {
             // Most recent layer to be shown first
             return this.getTime(b.createdOn) - this.getTime(a.createdOn);
@@ -292,7 +249,7 @@ export class ImageDetails extends BaseComponent<IImageDetailsProperties, IImageD
     private static _renderLayersSizeCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IImageLayer>, imageLayer: IImageLayer): JSX.Element {
         // Currently size data is not present in imageLayer
         let textToRender = imageLayer.size;
-        if(!textToRender || textToRender.toUpperCase() === "0B"){
+        if (!textToRender || textToRender.toUpperCase() === "0B") {
             textToRender = "-";
         }
 

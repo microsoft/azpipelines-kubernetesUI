@@ -4,8 +4,8 @@
 */
 
 import { V1DaemonSet, V1Pod, V1ReplicaSet, V1StatefulSet } from "@kubernetes/client-node";
-import { BaseComponent, css } from "@uifabric/utilities";
-import { Button } from "azure-devops-ui/Button";
+import { BaseComponent } from "@uifabric/utilities";
+import { css } from "azure-devops-ui/Util";
 import { CardContent, CustomCard } from "azure-devops-ui/Card";
 import { ITableRow, TableColumnStyle } from "azure-devops-ui/Components/Table/Table.Props";
 import { format } from "azure-devops-ui/Core/Util/String";
@@ -14,15 +14,16 @@ import { Link } from "azure-devops-ui/Link";
 import { IStatusProps, Status, Statuses, StatusSize } from "azure-devops-ui/Status";
 import { ITableColumn, SimpleTableCell, Table, TwoLineTableCell } from "azure-devops-ui/Table";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
+import { Button } from "azure-devops-ui/Button";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
 import { SelectedItemKeys } from "../Constants";
-import * as Resources from "../Resources";
 import { SelectionActionsCreator } from "../Selection/SelectionActionCreator";
 import { IPodDetailsSelectionProperties, IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
 import "./KubeCardWithTable.scss";
 import { IResourceStatusProps, ResourceStatus } from "./ResourceStatus";
+import * as Resources from "../Resources";
 
 export interface ITableComponentProperties<T> extends IVssComponentProperties {
     className?: string;
@@ -296,6 +297,7 @@ export function renderExternalIpCell(rowIndex: number, columnIndex: number, tabl
                     </Button>}
             </div>
         );
+
         return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
     else {

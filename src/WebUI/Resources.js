@@ -69,6 +69,10 @@ define("Environments/Providers/Kubernetes/Resources", ["require", "exports"], fu
     exports.LearnMoreKubeResourceText = "Learn more about Kubernetes resource";
     exports.DeployKubeResourceText = "Use this resource to deploy workloads and services";
     exports.StartUsingKubeResourceText = "Start using resource!";
+    exports.KubernetesAuthValidationTitleText = "Validate to connect";
+    exports.KubernetesAuthValidationHelpText = "The service account mapped to this resource doesn't have the necessary permissions to read workloads and services.";
+    exports.KubernetesResourceDeletedAltText = "Unable to connect to the cluster and namespace";
+    exports.KubernetesResourceDeletedHelpText = "Unable to connect to the cluster and namespace chosen for this resource. ";
     exports.StartingUsingServiceText = "You can also deploy services and track them in here";
     exports.DeployServices = "Deploy services!";
     exports.DeployWorkloads = "Deploy workloads!";
@@ -95,4 +99,5 @@ define("Environments/Providers/Kubernetes/Resources", ["require", "exports"], fu
     exports.LoadingPodsSpinnerLabel = "Loading associated pods...";
     exports.LoadingServicesSpinnerLabel = "Loading services...";
     exports.CopyExternalIp = "Copy External IP to clipboard";
+    exports.ImageDetailsUnavailableText = "Image details available only for images built in Azure Pipelines";
 });

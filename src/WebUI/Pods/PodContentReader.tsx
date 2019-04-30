@@ -3,7 +3,7 @@
     Licensed under the MIT license.
 */
 
-import { BaseComponent, css } from "@uifabric/utilities";
+import { BaseComponent } from "@uifabric/utilities";
 import * as React from "react";
 import { getContentReaderComponent } from "../Common/KubeConsumer";
 import { IVssComponentProperties } from "../Types";

@@ -11,6 +11,7 @@ import { IPodRightPanelProps } from "./PodsRightPanel";
 import { V1Pod } from "@kubernetes/client-node";
 
 export interface IPodYamlProps extends IPodRightPanelProps {
+    // Overriding this to make sure we don't accept undefined
     pod: V1Pod;
 }
 

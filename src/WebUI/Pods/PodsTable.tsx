@@ -3,31 +3,30 @@
     Licensed under the MIT license.
 */
 
-import { V1Pod, V1OwnerReference } from "@kubernetes/client-node";
+import { V1OwnerReference, V1Pod } from "@kubernetes/client-node";
 import { BaseComponent } from "@uifabric/utilities";
-import { css } from "azure-devops-ui/Util";
 import { Ago } from "azure-devops-ui/Ago";
 import { CardContent, CustomCard } from "azure-devops-ui/Card";
 import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
+import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { localeFormat } from "azure-devops-ui/Core/Util/String";
 import { CustomHeader, HeaderDescription, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
 import { Link } from "azure-devops-ui/Link";
-import { ITableColumn, Table, renderSimpleCell } from "azure-devops-ui/Table";
+import { ITableColumn, renderSimpleCell, Table } from "azure-devops-ui/Table";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
+import { css } from "azure-devops-ui/Util";
+import { AgoFormat } from "azure-devops-ui/Utilities/Date";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
-import { defaultColumnRenderer, renderPodNameWithStatusTableCell, renderTableCell } from "../Common/KubeCardWithTable";
+import { renderPodNameWithStatusTableCell, renderTableCell } from "../Common/KubeCardWithTable";
 import { SelectedItemKeys } from "../Constants";
+import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { ActionsHubManager } from "../FluxCommon/ActionsHubManager";
 import * as Resources from "../Resources";
-import { SelectionActions, ISelectionPayload } from "../Selection/SelectionActions";
+import { SelectionActionsCreator } from "../Selection/SelectionActionCreator";
+import { ISelectionPayload, SelectionActions } from "../Selection/SelectionActions";
 import { IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
-import { AgoFormat } from "azure-devops-ui/Utilities/Date";
-import "./PodsTable.scss";
-import { ObservableValue } from "azure-devops-ui/Core/Observable";
-import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
-import { SelectionActionsCreator } from "../Selection/SelectionActionCreator";
 
 const podNameKey: string = "pl-name-key";
 const podWorkloadsKey: string = "pl-wrkld-key";
@@ -61,7 +60,7 @@ export class PodsTable extends BaseComponent<IPodsTableProperties> {
             });
 
             return (
-                <CustomCard className="pods-associated k8s-card-padding flex-grow bolt-card-no-vertical-padding">
+                <CustomCard className="pods-associated k8s-card-padding flex-grow bolt-table-card bolt-card-no-vertical-padding">
                     <CustomHeader>
                         <HeaderTitleArea>
                             <HeaderTitleRow>
@@ -113,7 +112,7 @@ export class PodsTable extends BaseComponent<IPodsTableProperties> {
                 renderCell: PodsTable._renderPodWorkload
             });
         }
-        
+
         columns.push({
             id: "podStatus",
             name: Resources.StatusText,
@@ -165,7 +164,10 @@ export class PodsTable extends BaseComponent<IPodsTableProperties> {
                             className="fontSizeM font-size-m text-ellipsis bolt-table-link"
                             rel={"noopener noreferrer"}
                             excludeTabStop
-                            onClick={() => PodsTable._onWorkloadClicked(pod, controllerOwner)}
+                            onClick={(e) => {
+                                e.preventDefault();
+                                PodsTable._onWorkloadClicked(pod, controllerOwner);
+                            }}
                         >
                             {textToRender}
                         </Link>)
