@@ -109,7 +109,7 @@ export class PodsLeftPanel extends BaseComponent<IPodsLeftPanelProperties> {
         }
     }
 
-    private _selection: IListSelection = new ListSelection();
+    private _selection: IListSelection = new ListSelection({ selectOnFocus: true });
     private _hasSelected: boolean = false;
     private _selectedRow: number = -1;
 }
