@@ -4,37 +4,30 @@
 */
 
 import { V1Pod } from "@kubernetes/client-node";
-
-import { Spinner, SpinnerSize } from "azure-devops-ui/Spinner";
-import { Splitter, SplitterElementPosition } from "azure-devops-ui/Splitter";
-import { DetailsPanel, MasterPanel, MasterPanelHeader } from "azure-devops-ui/MasterDetails";
-import {
-    BaseMasterDetailsContext,
-    IMasterDetailsContext,
-    IMasterDetailsContextLayer,
-    MasterDetailsContext
-} from "azure-devops-ui/MasterDetailsContext";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { localeFormat } from "azure-devops-ui/Core/Util/String";
+import { DetailsPanel, MasterPanel, MasterPanelHeader } from "azure-devops-ui/MasterDetails";
+import { BaseMasterDetailsContext, IMasterDetailsContext, IMasterDetailsContextLayer, MasterDetailsContext } from "azure-devops-ui/MasterDetailsContext";
+import { Spinner, SpinnerSize } from "azure-devops-ui/Spinner";
 import { createBrowserHistory, History } from "history";
 import * as queryString from "query-string";
 import * as React from "react";
 import { IImageDetails } from "../../Contracts/Types";
 import { KubeSummary } from "../Common/KubeSummary";
-import { PodsEvents, PodsRightPanelTabsKeys, ImageDetailsEvents } from "../Constants";
+import { ImageDetailsEvents, PodsEvents, PodsRightPanelTabsKeys } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
 import { ImageDetails } from "../ImageDetails/ImageDetails";
+import { ImageDetailsActionsCreator } from "../ImageDetails/ImageDetailsActionsCreator";
+import { ImageDetailsStore } from "../ImageDetails/ImageDetailsStore";
 import * as Resources from "../Resources";
 import { SelectionActionsCreator } from "../Selection/SelectionActionCreator";
-import { IPodDetailsSelectionProperties, IVssComponentProperties, IPodParentItem } from "../Types";
+import { IPodDetailsSelectionProperties, IPodParentItem, IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
 import { PodsActionsCreator } from "./PodsActionsCreator";
 import { PodsLeftPanel } from "./PodsLeftPanel";
 import { PodsRightPanel } from "./PodsRightPanel";
 import { PodsStore } from "./PodsStore";
-import { ImageDetailsActionsCreator } from "../ImageDetails/ImageDetailsActionsCreator";
-import { ImageDetailsStore } from "../ImageDetails/ImageDetailsStore";
 
 export interface IPodsDetailsProperties extends IVssComponentProperties {
     parentUid: string;
@@ -137,7 +130,7 @@ export class PodsDetails extends React.Component<IPodsDetailsProperties, IPodsDe
                     notifyViewChanged(properties.parentName, properties.parentKind);
                     const parentItem = {
                         name: properties.parentName || "",
-                        kind:properties. parentKind || ""
+                        kind: properties.parentKind || ""
                     };
                     this.setState({
                         parentKind: properties.parentKind,
@@ -184,24 +177,35 @@ export class PodsDetails extends React.Component<IPodsDetailsProperties, IPodsDe
         };
     }
 
-    private _getMasterDetailsContext(parent: IPodParentItem, selectedPod: V1Pod | undefined, pods: V1Pod[] | undefined): IMasterDetailsContextLayer<V1Pod, IPodParentItem> {
+    private _getMasterDetailsContext(
+        parent: IPodParentItem,
+        selectedPod: V1Pod | undefined,
+        pods: V1Pod[] | undefined
+    ): IMasterDetailsContextLayer<V1Pod, IPodParentItem> {
+        const subTitle = localeFormat(Resources.PodDetailsSubheader, parent.kind);
         return {
             key: "pod-details",
             masterPanelContent: {
-                renderContent: (parentItem, selectedPod) => (<PodsLeftPanel
-                    pods={pods || []}
-                    parentName={parentItem.name}
-                    parentKind={parentItem.kind}
-                    selectedPodName={selectedPod && selectedPod.value ? selectedPod.value.metadata.name : ""}
-                    onSelectionChange={this._onPodSelectionChange} />),
-                renderHeader: () => <MasterPanelHeader title={parent.name} subTitle={localeFormat(Resources.PodDetailsSubheader, parent.kind)} />,
+                renderContent: (parentItem, selectedPod) => (
+                    <PodsLeftPanel
+                        pods={pods || []}
+                        parentName={parentItem.name}
+                        parentKind={parentItem.kind}
+                        selectedPodName={selectedPod && selectedPod.value ? selectedPod.value.metadata.name : ""}
+                        onSelectionChange={this._onPodSelectionChange}
+                    />
+                ),
+                renderHeader: () => <MasterPanelHeader title={parent.name} subTitle={subTitle} />,
                 onBackButtonClick: this._onParentBackButtonClick
             },
             detailsContent: {
-                renderContent: (item: V1Pod) => <PodsRightPanel
-                    key={item.metadata.uid}
-                    pod={item}
-                    showImageDetails={this._showImageDetails} />
+                renderContent: (item: V1Pod) => (
+                    <PodsRightPanel
+                        key={item.metadata.uid}
+                        pod={item}
+                        showImageDetails={this._showImageDetails}
+                    />
+                )
             },
             selectedMasterItem: new ObservableValue<V1Pod>(selectedPod || {} as V1Pod),
             parentItem: parent
@@ -229,7 +233,7 @@ export class PodsDetails extends React.Component<IPodsDetailsProperties, IPodsDe
         return (selectedPod && this.state.masterDetailsContext ?
             <MasterDetailsContext.Provider value={this.state.masterDetailsContext}>
                 <div className="pod-details flex-row flex-grow scroll-hidden">
-                    <MasterPanel />
+                    <MasterPanel showOnSmallScreens={true} />
                     <DetailsPanel />
                 </div>
             </MasterDetailsContext.Provider>
@@ -306,7 +310,6 @@ export class PodsDetails extends React.Component<IPodsDetailsProperties, IPodsDe
         this.setState({});
     }
 
-    private _initialFixedSize: number = 320;
     private _history: History;
     private _podsStore: PodsStore;
     private _imageDetailsStore: ImageDetailsStore;
