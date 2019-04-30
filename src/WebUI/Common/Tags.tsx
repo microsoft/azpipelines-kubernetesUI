@@ -3,7 +3,7 @@
     Licensed under the MIT license.
 */
 import { IVssComponentProperties } from "../Types";
-import { BaseComponent } from "@uifabric/utilities";
+
 import { css } from "azure-devops-ui/Util";
 import React = require("react");
 import { Utils } from "../Utils";
@@ -15,7 +15,7 @@ export interface ITagsProperties extends IVssComponentProperties {
     items: { [key: string]: string };
 }
 
-export class Tags extends BaseComponent<ITagsProperties> {
+export class Tags extends React.Component<ITagsProperties> {
     darkColor: any;
     public render(): React.ReactNode {
         return (

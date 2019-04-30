@@ -4,7 +4,7 @@
 */
 
 import { V1DaemonSet, V1DaemonSetList, V1ObjectMeta, V1Pod, V1ReplicaSet, V1ReplicaSetList, V1StatefulSet, V1StatefulSetList } from "@kubernetes/client-node";
-import { BaseComponent } from "@uifabric/utilities";
+
 import { ConditionalChildren } from "azure-devops-ui/ConditionalChildren";
 import { ObservableArray, ObservableValue } from "azure-devops-ui/Core/Observable";
 import { localeFormat } from "azure-devops-ui/Core/Util/String";
@@ -133,7 +133,7 @@ export interface IKubeSummaryProps extends IVssComponentProperties {
     getContentReaderComponent?: (props?: any) => React.ReactNode;
 }
 
-export class KubeSummary extends BaseComponent<IKubeSummaryProps, IKubernetesContainerState> {
+export class KubeSummary extends React.Component<IKubeSummaryProps, IKubernetesContainerState> {
     constructor(props: IKubeSummaryProps) {
         super(props, {});
         KubeSummary._imageService = this.props.imageService;

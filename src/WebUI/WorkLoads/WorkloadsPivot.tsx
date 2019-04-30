@@ -4,7 +4,7 @@
 */
 
 import { V1PodList } from "@kubernetes/client-node";
-import { BaseComponent } from "@uifabric/utilities";
+
 import { css } from "azure-devops-ui/Util";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { format } from "azure-devops-ui/Core/Util/String";
@@ -40,7 +40,7 @@ export interface IWorkloadsPivotProps extends IVssComponentProperties {
     filterToggled: ObservableValue<boolean>;
 }
 
-export class WorkloadsPivot extends BaseComponent<IWorkloadsPivotProps, IWorkloadsPivotState> {
+export class WorkloadsPivot extends React.Component<IWorkloadsPivotProps, IWorkloadsPivotState> {
     constructor(props: IWorkloadsPivotProps) {
         super(props, {});
 

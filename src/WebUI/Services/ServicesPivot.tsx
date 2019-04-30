@@ -4,7 +4,7 @@
 */
 
 import { V1ServiceList } from "@kubernetes/client-node";
-import { BaseComponent } from "@uifabric/utilities";
+
 import { css } from "azure-devops-ui/Util";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { Filter, IFilterItemState, IFilterState } from "azure-devops-ui/Utilities/Filter";
@@ -35,7 +35,7 @@ export interface IServicesPivotProps extends IVssComponentProperties {
     filterToggled: ObservableValue<boolean>;
 }
 
-export class ServicesPivot extends BaseComponent<IServicesPivotProps, IServicesPivotState> {
+export class ServicesPivot extends React.Component<IServicesPivotProps, IServicesPivotState> {
     constructor(props: IServicesPivotProps) {
         super(props, {});
 

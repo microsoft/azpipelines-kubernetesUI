@@ -4,7 +4,7 @@
 */
 
 import { V1Service, V1ServiceList } from "@kubernetes/client-node";
-import { BaseComponent } from "@uifabric/utilities";
+
 import { Ago } from "azure-devops-ui/Ago";
 import { Card } from "azure-devops-ui/Card";
 import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
@@ -38,7 +38,7 @@ export interface IServicesTableState {
     hoverRowIndex: number;
 }
 
-export class ServicesTable extends BaseComponent<IServicesComponentProperties, IServicesTableState> {
+export class ServicesTable extends React.Component<IServicesComponentProperties, IServicesTableState> {
     constructor(props: IServicesComponentProperties) {
         super(props, {});
         this.state = {

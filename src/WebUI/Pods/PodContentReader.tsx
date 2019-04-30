@@ -3,7 +3,7 @@
     Licensed under the MIT license.
 */
 
-import { BaseComponent } from "@uifabric/utilities";
+
 import * as React from "react";
 import { getContentReaderComponent } from "../Common/KubeConsumer";
 import { IVssComponentProperties } from "../Types";
@@ -14,7 +14,7 @@ export interface IPodReaderProps extends IVssComponentProperties {
     contentClassName?: string;
 }
 
-export class PodContentReader extends BaseComponent<IPodReaderProps> {
+export class PodContentReader extends React.Component<IPodReaderProps> {
     public render(): React.ReactNode {
         return getContentReaderComponent({ ...this.props });
     }

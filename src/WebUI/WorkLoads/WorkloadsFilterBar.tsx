@@ -3,7 +3,7 @@
     Licensed under the MIT license.
 */
 
-import { BaseComponent } from "@uifabric/utilities";
+
 import * as React from "react";
 import * as Resources from "../Resources";
 import { IVssComponentProperties } from "../Types";
@@ -19,7 +19,7 @@ export interface IWorkloadsFilterBarProps extends IVssComponentProperties {
     filterToggled: ObservableValue<boolean>;
 }
 
-export class WorkloadsFilterBar extends BaseComponent<IWorkloadsFilterBarProps> {
+export class WorkloadsFilterBar extends React.Component<IWorkloadsFilterBarProps> {
     public render(): React.ReactNode {
         const items: IListBoxItem<{}>[] = [
             { id: KubeResourceType.Deployments.toString(), text: Resources.DeploymentsDetailsText },

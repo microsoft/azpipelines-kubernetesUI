@@ -4,7 +4,7 @@
 */
 
 import { V1DaemonSet, V1Pod, V1ReplicaSet, V1StatefulSet } from "@kubernetes/client-node";
-import { BaseComponent } from "@uifabric/utilities";
+
 import { css } from "azure-devops-ui/Util";
 import { CardContent, CustomCard } from "azure-devops-ui/Card";
 import { ITableRow, TableColumnStyle } from "azure-devops-ui/Components/Table/Table.Props";
@@ -37,7 +37,7 @@ export interface ITableComponentProperties<T> extends IVssComponentProperties {
     onItemSelected?: (event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>, selectedItem: any) => void;
 }
 
-export class KubeCardWithTable<T> extends BaseComponent<ITableComponentProperties<T>> {
+export class KubeCardWithTable<T> extends React.Component<ITableComponentProperties<T>> {
     public render(): React.ReactNode {
         return (
             <CustomCard className={css("flex-grow", "bolt-card-no-vertical-padding", this.props.className || "")}>

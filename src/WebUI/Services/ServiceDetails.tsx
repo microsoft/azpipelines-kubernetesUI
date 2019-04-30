@@ -4,7 +4,7 @@
 */
 
 import { V1Pod, V1Service } from "@kubernetes/client-node";
-import { BaseComponent } from "@uifabric/utilities";
+
 import { CardContent, CustomCard } from "azure-devops-ui/Card";
 import { CustomHeader, HeaderDescription, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
 import { Page } from "azure-devops-ui/Page";
@@ -51,7 +51,7 @@ export interface IServiceDetailsState {
 
 const LoadBalancerText: string = "LoadBalancer";
 
-export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, IServiceDetailsState> {
+export class ServiceDetails extends React.Component<IServiceDetailsProperties, IServiceDetailsState> {
     constructor(props: IServiceDetailsProperties) {
         super(props, {});
         this.state = {
