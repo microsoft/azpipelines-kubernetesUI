@@ -11,6 +11,8 @@ import * as React from "react";
 import { KubeFilterBar } from "../Common/KubeFilterBar";
 import * as Resources from "../Resources";
 import { IVssComponentProperties } from "../Types";
+import { IListBoxItem } from "azure-devops-ui/ListBox";
+import { IListSelection, ListSelection } from "azure-devops-ui/List";
 
 export interface IServiceFilterBarProps extends IVssComponentProperties {
     filter: Filter;
@@ -20,18 +22,23 @@ export interface IServiceFilterBarProps extends IVssComponentProperties {
 
 export class ServicesFilterBar extends BaseComponent<IServiceFilterBarProps> {
     public render(): React.ReactNode {
+        const svcTypes = this._generateSvcTypes();
+        let items: IListBoxItem<{}>[] = [];
+        for (const svc of svcTypes) {
+            let item = {
+                id: svc,
+                text: svc
+            };
+            items.push(item);
+        };
+
         return (
             <KubeFilterBar filter={this.props.filter}
                 pickListPlaceHolder={Resources.TypeText}
                 keywordPlaceHolder={Resources.ServiceText}
                 filterToggled={this.props.filterToggled}
-                pickListItemsFn={() => this._generateSvcTypes()}
-                listItemsFn={(item: any) => {
-                    return {
-                        key: item,
-                        name: item
-                    };
-                }}
+                selection={this._selection}
+                listItems={items}
                 className={this.props.className || ""}
                 addBottomPadding={true}
             />
@@ -48,4 +55,6 @@ export class ServicesFilterBar extends BaseComponent<IServiceFilterBarProps> {
 
         return svcTypes;
     }
+
+    private _selection: IListSelection = new ListSelection(true);
 }
