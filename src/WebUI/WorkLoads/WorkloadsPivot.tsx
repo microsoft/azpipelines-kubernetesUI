@@ -150,10 +150,11 @@ export class WorkloadsPivot extends BaseComponent<IWorkloadsPivotProps, IWorkloa
     }
 
     private _showComponent(resourceType: KubeResourceType): boolean {
-        const selections: KubeResourceType[] = this._getTypeFilterValue();
+        const selections: string[] = this._getTypeFilterValue();
         // if no filter selections are made, show all components
-        if (selections.length > 0) {
-            return selections.indexOf(resourceType) != -1;
+        if (selections.length > 0 && resourceType != undefined) {
+            const selection = resourceType.toString();
+            return selections.indexOf(selection) != -1;
         }
 
         return true;

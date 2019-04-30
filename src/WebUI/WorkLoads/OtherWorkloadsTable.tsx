@@ -41,7 +41,7 @@ const ageKey = "otherwrkld-age-key";
 
 export interface IOtherWorkloadsProperties extends IVssComponentProperties {
     nameFilter?: string;
-    typeFilter: KubeResourceType[];
+    typeFilter: string[];
 }
 
 export interface IOtherWorkloadsState {
@@ -356,7 +356,7 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
     }
 
     private _showType(type: KubeResourceType): boolean {
-        return (this.props.typeFilter.length == 0 || this.props.typeFilter.indexOf(type) >= 0);
+        return (this.props.typeFilter.length == 0 || (type != undefined && this.props.typeFilter.indexOf(type.toString()) >= 0));
     }
 
     private static _getImageText(spec: V1PodSpec): { imageDisplayText: string, imageTooltip?: string } {
