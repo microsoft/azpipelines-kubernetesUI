@@ -104,9 +104,6 @@ export class PodOverview extends BaseComponent<IPodOverviewProps> {
                     </div>
                 );
 
-            case Resources.ImageText:
-                return PodOverview._renderImageCell(tableItem);
-
             default:
                 return defaultColumnRenderer(value, "details-card-value-field-size", valueTooltipText);
         }
@@ -114,16 +111,29 @@ export class PodOverview extends BaseComponent<IPodOverviewProps> {
 
     private _getCardContent = (): JSX.Element => {
         const items = PodOverview._getPodDetails(this.props.pod, this.props.showImageDetails);
+        const rowClassNames = "flex-row details-card-row-size body-m";
+        const keyClassNames = "text-ellipsis secondary-text details-card-info-field-size";
         return (
             <div className="flex-column details-card-content">
-                {items.map((item, index) => (
-                    <div className={css(item.key === Resources.ImageText ? "pod-image-data" : "", "flex-row details-card-row-size body-m")} key={index}>
-                        <div className={css(item.key === Resources.ImageText ? "pod-image-key" : "", "text-ellipsis secondary-text details-card-info-field-size")}>
-                            {item.key}
-                        </div>
-                        {PodOverview._renderValueCell(item)}
-                    </div>))
-                }
+                {items.map((item, index) =>
+                    (item.key === Resources.ImageText)
+                        ? (
+                            <div className={css("pod-image-data", rowClassNames)} key={index}>
+                                <div className={css("pod-image-key", keyClassNames)}>
+                                    {item.key}
+                                </div>
+                                {PodOverview._renderImageCell(item)}
+                            </div>
+                        )
+                        : (
+                            <div className={rowClassNames} key={index}>
+                                <div className={keyClassNames}>
+                                    {item.key}
+                                </div>
+                                {PodOverview._renderValueCell(item)}
+                            </div>
+                        )
+                )}
             </div>
         );
     }

@@ -351,7 +351,8 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
                 return (
                     <div className="flex-column workload-tags-column-padding" key={index}>
                         {getColumnKey(key, "body-m")}
-                        <Tags className="workload-tags-column-size" items={value} />
+                        {/* temporary fix for the overflow fade */}
+                        <Tags className="overflow-fade workload-tags-column-size" items={value} />
                     </div>
                 );
 
