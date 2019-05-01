@@ -3,12 +3,11 @@
     Licensed under the MIT license.
 */
 
-import * as React from "react";
-
-import { css } from "azure-devops-ui/Util";
 import { IStatusProps, Status, StatusSize } from "azure-devops-ui/Status";
-import { IVssComponentProperties } from "../Types";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
+import { css } from "azure-devops-ui/Util";
+import * as React from "react";
+import { IVssComponentProperties } from "../Types";
 
 export interface IResourceStatusProps extends IVssComponentProperties {
     statusProps: IStatusProps | undefined;

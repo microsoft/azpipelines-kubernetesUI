@@ -4,10 +4,9 @@
 */
 
 import { V1PodList } from "@kubernetes/client-node";
-
-import { css } from "azure-devops-ui/Util";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { format } from "azure-devops-ui/Core/Util/String";
+import { css } from "azure-devops-ui/Util";
 import { Filter, IFilterItemState, IFilterState } from "azure-devops-ui/Utilities/Filter";
 import * as React from "react";
 import { KubeResourceType } from "../../Contracts/KubeServiceBase";

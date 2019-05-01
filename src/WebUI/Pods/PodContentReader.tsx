@@ -3,7 +3,6 @@
     Licensed under the MIT license.
 */
 
-
 import * as React from "react";
 import { getContentReaderComponent } from "../Common/KubeConsumer";
 import { IVssComponentProperties } from "../Types";

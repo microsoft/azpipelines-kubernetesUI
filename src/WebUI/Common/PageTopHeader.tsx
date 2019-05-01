@@ -3,12 +3,11 @@
     Licensed under the MIT license.
 */
 
-
 import { CustomHeader, HeaderIcon, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
 import { IStatusProps, Status, StatusSize } from "azure-devops-ui/Status";
+import { Tooltip } from "azure-devops-ui/TooltipEx";
 import * as React from "react";
 import { IVssComponentProperties } from "../Types";
-import { Tooltip } from "azure-devops-ui/TooltipEx";
 
 export interface IPageTopHeader extends IVssComponentProperties {
     title: string;

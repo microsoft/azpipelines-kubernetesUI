@@ -3,19 +3,18 @@
     Licensed under the MIT license.
 */
 
-
+import { ConditionalChildren } from "azure-devops-ui/ConditionalChildren";
+import { ObservableValue } from "azure-devops-ui/Core/Observable";
+import { localeFormat } from "azure-devops-ui/Core/Util/String";
+import { DropdownFilterBarItem } from "azure-devops-ui/Dropdown";
+import { FilterBar } from "azure-devops-ui/FilterBar";
+import { IListSelection } from "azure-devops-ui/List";
+import { IListBoxItem } from "azure-devops-ui/ListBox";
+import { KeywordFilterBarItem } from "azure-devops-ui/TextFilterBarItem";
+import { Filter } from "azure-devops-ui/Utilities/Filter";
 import * as React from "react";
 import * as Resources from "../Resources";
 import { IVssComponentProperties } from "../Types";
-import { FilterBar } from "azure-devops-ui/FilterBar";
-import { KeywordFilterBarItem } from "azure-devops-ui/TextFilterBarItem";
-import { DropdownFilterBarItem } from "azure-devops-ui/Dropdown";
-import { Filter } from "azure-devops-ui/Utilities/Filter";
-import { ObservableValue } from "azure-devops-ui/Core/Observable";
-import { ConditionalChildren } from "azure-devops-ui/ConditionalChildren";
-import { localeFormat } from "azure-devops-ui/Core/Util/String";
-import { IListBoxItem } from "azure-devops-ui/ListBox";
-import { IListSelection } from "azure-devops-ui/List";
 
 /* Including from office-ui-fabric-react to avoid direct dependency on office-ui-fabric-react */
 enum SelectionMode {

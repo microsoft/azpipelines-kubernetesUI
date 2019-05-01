@@ -3,12 +3,11 @@
     Licensed under the MIT license.
 */
 
-
+import { V1Pod } from "@kubernetes/client-node";
 import * as JsYaml from "js-yaml";
 import * as React from "react";
 import { PodContentReader } from "./PodContentReader";
 import { IPodRightPanelProps } from "./PodsRightPanel";
-import { V1Pod } from "@kubernetes/client-node";
 
 export interface IPodYamlProps extends IPodRightPanelProps {
     // Overriding this to make sure we don't accept undefined

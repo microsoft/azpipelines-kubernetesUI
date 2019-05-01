@@ -4,15 +4,14 @@
 */
 
 import { V1ServiceList } from "@kubernetes/client-node";
-
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
+import { IListSelection, ListSelection } from "azure-devops-ui/List";
+import { IListBoxItem } from "azure-devops-ui/ListBox";
 import { Filter } from "azure-devops-ui/Utilities/Filter";
 import * as React from "react";
 import { KubeFilterBar } from "../Common/KubeFilterBar";
 import * as Resources from "../Resources";
 import { IVssComponentProperties } from "../Types";
-import { IListBoxItem } from "azure-devops-ui/ListBox";
-import { IListSelection, ListSelection } from "azure-devops-ui/List";
 
 export interface IServiceFilterBarProps extends IVssComponentProperties {
     filter: Filter;

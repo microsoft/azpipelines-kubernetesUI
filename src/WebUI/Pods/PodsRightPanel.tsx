@@ -4,7 +4,6 @@
 */
 
 import { V1Pod } from "@kubernetes/client-node";
-
 import { MessageCard, MessageCardSeverity } from "azure-devops-ui/MessageCard";
 import { Page } from "azure-devops-ui/Page";
 import { Spinner } from "azure-devops-ui/Spinner";

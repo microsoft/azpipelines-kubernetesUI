@@ -3,16 +3,15 @@
     Licensed under the MIT license.
 */
 
-
+import { ObservableValue } from "azure-devops-ui/Core/Observable";
+import { IListSelection, ListSelection } from "azure-devops-ui/List";
+import { IListBoxItem } from "azure-devops-ui/ListBox";
+import { Filter } from "azure-devops-ui/Utilities/Filter";
 import * as React from "react";
+import { KubeResourceType } from "../../Contracts/KubeServiceBase";
+import { KubeFilterBar } from "../Common/KubeFilterBar";
 import * as Resources from "../Resources";
 import { IVssComponentProperties } from "../Types";
-import { Filter } from "azure-devops-ui/Utilities/Filter";
-import { IListBoxItem } from "azure-devops-ui/ListBox";
-import { KubeFilterBar } from "../Common/KubeFilterBar";
-import { ObservableValue } from "azure-devops-ui/Core/Observable";
-import { KubeResourceType } from "../../Contracts/KubeServiceBase";
-import { IListSelection, ListSelection } from "azure-devops-ui/List";
 
 export interface IWorkloadsFilterBarProps extends IVssComponentProperties {
     filter: Filter;

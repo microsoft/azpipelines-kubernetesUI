@@ -4,18 +4,15 @@
 */
 
 import { V1Pod } from "@kubernetes/client-node";
-
 import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
-import { Header, TitleSize } from "azure-devops-ui/Header";
-import { IListSelection, ListSelection, List, IListItemDetails, ListItem } from "azure-devops-ui/List";
+import { IListItemDetails, IListSelection, List, ListItem, ListSelection } from "azure-devops-ui/List";
+import { Status, StatusSize } from "azure-devops-ui/Status";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
-import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
-import { IStatusProps, Status, Statuses, StatusSize } from "azure-devops-ui/Status";
 import { css } from "azure-devops-ui/Util";
+import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import { createBrowserHistory } from "history";
 import * as queryString from "query-string";
 import * as React from "react";
-import * as Resources from "../Resources";
 import { IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
 import "./PodsLeftPanel.scss";
