@@ -4,8 +4,9 @@
 */
 
 import { V1ServiceList } from "@kubernetes/client-node";
-import { BaseComponent } from "@uifabric/utilities";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
+import { IListSelection, ListSelection } from "azure-devops-ui/List";
+import { IListBoxItem } from "azure-devops-ui/ListBox";
 import { Filter } from "azure-devops-ui/Utilities/Filter";
 import * as React from "react";
 import { KubeFilterBar } from "../Common/KubeFilterBar";
@@ -18,20 +19,25 @@ export interface IServiceFilterBarProps extends IVssComponentProperties {
     serviceList: V1ServiceList;
 }
 
-export class ServicesFilterBar extends BaseComponent<IServiceFilterBarProps> {
+export class ServicesFilterBar extends React.Component<IServiceFilterBarProps> {
     public render(): React.ReactNode {
+        const svcTypes = this._generateSvcTypes();
+        let items: IListBoxItem<{}>[] = [];
+        for (const svc of svcTypes) {
+            let item = {
+                id: svc,
+                text: svc
+            };
+            items.push(item);
+        };
+
         return (
             <KubeFilterBar filter={this.props.filter}
                 pickListPlaceHolder={Resources.TypeText}
                 keywordPlaceHolder={Resources.ServiceText}
                 filterToggled={this.props.filterToggled}
-                pickListItemsFn={() => this._generateSvcTypes()}
-                listItemsFn={(item: any) => {
-                    return {
-                        key: item,
-                        name: item
-                    };
-                }}
+                selection={this._selection}
+                listItems={items}
                 className={this.props.className || ""}
                 addBottomPadding={true}
             />
@@ -48,4 +54,6 @@ export class ServicesFilterBar extends BaseComponent<IServiceFilterBarProps> {
 
         return svcTypes;
     }
+
+    private _selection: IListSelection = new ListSelection(true);
 }

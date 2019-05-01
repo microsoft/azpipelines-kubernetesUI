@@ -3,11 +3,11 @@
     Licensed under the MIT license.
 */
 
+import { createBrowserHistory } from "history";
+import * as queryString from "query-string";
 import { ActionCreatorBase } from "../FluxCommon/Actions";
 import { ActionsHubManager } from "../FluxCommon/ActionsHubManager";
-import { createBrowserHistory, History } from "history";
-import * as queryString from "query-string";
-import { SelectionActions, ISelectionPayload } from "./SelectionActions";
+import { ISelectionPayload, SelectionActions } from "./SelectionActions";
 
 export class SelectionActionsCreator extends ActionCreatorBase {
 

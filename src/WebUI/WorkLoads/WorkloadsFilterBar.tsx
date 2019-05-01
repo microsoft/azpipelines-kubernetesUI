@@ -3,59 +3,41 @@
     Licensed under the MIT license.
 */
 
-import { BaseComponent } from "@uifabric/utilities";
+import { ObservableValue } from "azure-devops-ui/Core/Observable";
+import { IListSelection, ListSelection } from "azure-devops-ui/List";
+import { IListBoxItem } from "azure-devops-ui/ListBox";
+import { Filter } from "azure-devops-ui/Utilities/Filter";
 import * as React from "react";
+import { KubeResourceType } from "../../Contracts/KubeServiceBase";
+import { KubeFilterBar } from "../Common/KubeFilterBar";
 import * as Resources from "../Resources";
 import { IVssComponentProperties } from "../Types";
-import { Filter } from "azure-devops-ui/Utilities/Filter";
-import { KubeFilterBar } from "../Common/KubeFilterBar";
-import { ObservableValue } from "azure-devops-ui/Core/Observable";
-import { KubeResourceType } from "../../Contracts/KubeServiceBase";
 
 export interface IWorkloadsFilterBarProps extends IVssComponentProperties {
     filter: Filter;
     filterToggled: ObservableValue<boolean>;
 }
 
-export class WorkloadsFilterBar extends BaseComponent<IWorkloadsFilterBarProps> {
+export class WorkloadsFilterBar extends React.Component<IWorkloadsFilterBarProps> {
     public render(): React.ReactNode {
+        const items: IListBoxItem<{}>[] = [
+            { id: KubeResourceType.Deployments.toString(), text: Resources.DeploymentsDetailsText },
+            { id: KubeResourceType.ReplicaSets.toString(), text: Resources.ReplicaSetText },
+            { id: KubeResourceType.DaemonSets.toString(), text: Resources.DaemonSetText },
+            { id: KubeResourceType.StatefulSets.toString(), text: Resources.StatefulSetText }
+        ];
+
         return (<KubeFilterBar filter={this.props.filter}
             keywordPlaceHolder={Resources.WorkloadText.toLocaleLowerCase()} // lowercase to show in filter
             pickListPlaceHolder={Resources.KindText}
-            pickListItemsFn={this._pickListItems}
-            listItemsFn={this._listItems}
+            listItems={items}
             filterToggled={this.props.filterToggled}
             className={this.props.className || ""}
             addBottomPadding={true}
+            selection={this._selection}
         />);
     }
 
-    private _pickListItems = () => {
-        return [KubeResourceType.Deployments,
-        KubeResourceType.ReplicaSets,
-        KubeResourceType.DaemonSets,
-        KubeResourceType.StatefulSets];
-    };
+    private _selection: IListSelection = new ListSelection(true);
 
-    private _listItems = (item: any) => {
-        let name: string = "";
-        switch (item) {
-            case KubeResourceType.Deployments:
-                name = Resources.DeploymentsDetailsText;
-                break;
-            case KubeResourceType.ReplicaSets:
-                name = Resources.ReplicaSetText;
-                break;
-            case KubeResourceType.DaemonSets:
-                name = Resources.DaemonSetText;
-                break;
-            case KubeResourceType.StatefulSets:
-                name = Resources.StatefulSetText;
-                break;
-        };
-        return {
-            key: item.toString(),
-            name: name
-        };
-    };
 }

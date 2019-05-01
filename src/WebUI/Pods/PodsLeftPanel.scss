@@ -1,10 +1,23 @@
-// todo :: remove once we have backbutton feature
-.pod-left-panel-header .pod-left-panel-back-button {
-    cursor: pointer;
-    margin-right: 4px;
+@import "azure-devops-ui/_coreStyles.scss";
+
+.pods-left-panel-row:not(.first-row) .bolt-list-cell {
+    // This is required as we are doing a custom implementation of list row, and the border is not set by default
+    border-top: 1px solid $transblack-8;
 }
 
-// todo :: remove once we have master component
-.pod-left-panel-table-header {
-    padding-bottom: 8px;
+.pods-left-panel-row {
+    cursor: pointer;
+}
+
+.pod-text-status-container {
+    padding: 10px 0px;
+
+    .pod-noshrink {
+        // width is set in order to align the status icons vertically with the default back button in master panel header
+        width: 23px;
+    }
+
+    .pod-shrink {
+        min-width: 0px;
+    }
 }
