@@ -4,7 +4,6 @@
 */
 
 import { V1DaemonSet, V1Pod, V1PodSpec, V1ReplicaSet, V1StatefulSet } from "@kubernetes/client-node";
-import { BaseComponent } from "@uifabric/utilities";
 import { Ago } from "azure-devops-ui/Ago";
 import { CardContent, CustomCard } from "azure-devops-ui/Card";
 import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
@@ -18,7 +17,7 @@ import { Tooltip } from "azure-devops-ui/TooltipEx";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
 import { KubeResourceType } from "../../Contracts/KubeServiceBase";
-import { defaultColumnRenderer, renderPodsStatusTableCell, renderTableCell, onPodsColumnClicked } from "../Common/KubeCardWithTable";
+import { defaultColumnRenderer, onPodsColumnClicked, renderPodsStatusTableCell, renderTableCell } from "../Common/KubeCardWithTable";
 import { KubeSummary } from "../Common/KubeSummary";
 import { ImageDetailsEvents, SelectedItemKeys, WorkloadsEvents } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
@@ -41,7 +40,7 @@ const ageKey = "otherwrkld-age-key";
 
 export interface IOtherWorkloadsProperties extends IVssComponentProperties {
     nameFilter?: string;
-    typeFilter: KubeResourceType[];
+    typeFilter: string[];
 }
 
 export interface IOtherWorkloadsState {
@@ -51,7 +50,7 @@ export interface IOtherWorkloadsState {
     orphanPods: V1Pod[];
 }
 
-export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOtherWorkloadsState> {
+export class OtherWorkloads extends React.Component<IOtherWorkloadsProperties, IOtherWorkloadsState> {
     constructor(props: IOtherWorkloadsProperties) {
         super(props, {});
 
@@ -356,7 +355,7 @@ export class OtherWorkloads extends BaseComponent<IOtherWorkloadsProperties, IOt
     }
 
     private _showType(type: KubeResourceType): boolean {
-        return (this.props.typeFilter.length == 0 || this.props.typeFilter.indexOf(type) >= 0);
+        return (this.props.typeFilter.length == 0 || (type != undefined && this.props.typeFilter.indexOf(type.toString()) >= 0));
     }
 
     private static _getImageText(spec: V1PodSpec): { imageDisplayText: string, imageTooltip?: string } {

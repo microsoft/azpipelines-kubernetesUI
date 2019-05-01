@@ -3,14 +3,13 @@
     Licensed under the MIT license.
 */
 
-import { BaseComponent } from "@uifabric/utilities";
+import { V1Pod } from "@kubernetes/client-node";
 import * as Util_String from "azure-devops-ui/Core/Util/String";
 import * as React from "react";
 import { KubeSummary } from "../Common/KubeSummary";
 import * as Resources from "../Resources";
 import { PodContentReader } from "./PodContentReader";
 import { IPodRightPanelProps } from "./PodsRightPanel";
-import { V1Pod } from "@kubernetes/client-node";
 
 export interface IPodLogProps extends IPodRightPanelProps {
     // Overriding this to make sure we don't accept undefined
@@ -22,7 +21,7 @@ interface IPodLogState {
     uid: string;
 }
 
-export class PodLog extends BaseComponent<IPodLogProps, IPodLogState> {
+export class PodLog extends React.Component<IPodLogProps, IPodLogState> {
     constructor(props: IPodLogProps) {
         super(props, {});
         this.state = { logContent: Resources.LoadingText, uid: this.props.pod.metadata.uid };

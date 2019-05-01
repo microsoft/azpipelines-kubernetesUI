@@ -4,7 +4,6 @@
 */
 
 import { V1DaemonSet, V1DaemonSetList, V1LabelSelector, V1ObjectMeta, V1Pod, V1PodTemplateSpec, V1ReplicaSet, V1ReplicaSetList, V1StatefulSet, V1StatefulSetList } from "@kubernetes/client-node";
-import { BaseComponent } from "@uifabric/utilities";
 import { CardContent, CustomCard } from "azure-devops-ui/Card";
 import { localeFormat } from "azure-devops-ui/Core/Util/String";
 import { CustomHeader, HeaderDescription, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
@@ -68,7 +67,7 @@ export interface IWorkLoadDetailsItem {
     selector: V1LabelSelector | undefined;
 }
 
-export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, IWorkloadDetailsState> {
+export class WorkloadDetails extends React.Component<IWorkloadDetailsProperties, IWorkloadDetailsState> {
     constructor(props: IWorkloadDetailsProperties) {
         super(props, {});
         this._podsStore = StoreManager.GetStore<PodsStore>(PodsStore);
@@ -202,6 +201,7 @@ export class WorkloadDetails extends BaseComponent<IWorkloadDetailsProperties, I
         this._podsStore.removeChangedListener(this._onPodsUpdated);
         this._imageDetailsStore.removeListener(ImageDetailsEvents.HasImageDetailsEvent, this._setHasImageDetails);
     }
+
     private _getMainHeading(): JSX.Element | null {
         if (this.state.item) {
             const metadata = this.state.item.metadata;

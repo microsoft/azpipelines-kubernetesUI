@@ -1,7 +1,7 @@
 .kubernetes-container {
 
     // cards have margins
-    .k8s-card-padding+.k8s-card-padding {
+    .k8s-card-padding + .k8s-card-padding {
         margin-top: 16px;
     }
 

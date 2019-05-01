@@ -4,7 +4,6 @@
 */
 
 import { V1Pod } from "@kubernetes/client-node";
-import { BaseComponent } from "@uifabric/utilities";
 import { Ago } from "azure-devops-ui/Ago";
 import { CardContent, CustomCard } from "azure-devops-ui/Card";
 import { localeFormat } from "azure-devops-ui/Core/Util/String";
@@ -30,7 +29,7 @@ export interface IPodOverviewProps extends IPodRightPanelProps {
     showImageDetails?: (imageId: string) => void;
 }
 
-export class PodOverview extends BaseComponent<IPodOverviewProps> {
+export class PodOverview extends React.Component<IPodOverviewProps> {
     public render(): JSX.Element {
         const podDetails = PodOverview._getPodDetails(this.props.pod, this.props.showImageDetails);
         return (
