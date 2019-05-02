@@ -3,19 +3,18 @@
     Licensed under the MIT license.
 */
 
-import { BaseComponent } from "@uifabric/utilities";
+import { V1Pod } from "@kubernetes/client-node";
 import * as JsYaml from "js-yaml";
 import * as React from "react";
 import { PodContentReader } from "./PodContentReader";
 import { IPodRightPanelProps } from "./PodsRightPanel";
-import { V1Pod } from "@kubernetes/client-node";
 
 export interface IPodYamlProps extends IPodRightPanelProps {
     // Overriding this to make sure we don't accept undefined
     pod: V1Pod;
 }
 
-export class PodYaml extends BaseComponent<IPodYamlProps> {
+export class PodYaml extends React.Component<IPodYamlProps> {
     public render(): JSX.Element {
         return (
             <PodContentReader

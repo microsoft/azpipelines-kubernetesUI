@@ -4,10 +4,9 @@
 */
 
 import { V1PodList } from "@kubernetes/client-node";
-import { BaseComponent } from "@uifabric/utilities";
-import { css } from "azure-devops-ui/Util";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { format } from "azure-devops-ui/Core/Util/String";
+import { css } from "azure-devops-ui/Util";
 import { Filter, IFilterItemState, IFilterState } from "azure-devops-ui/Utilities/Filter";
 import * as React from "react";
 import { KubeResourceType } from "../../Contracts/KubeServiceBase";
@@ -40,7 +39,7 @@ export interface IWorkloadsPivotProps extends IVssComponentProperties {
     filterToggled: ObservableValue<boolean>;
 }
 
-export class WorkloadsPivot extends BaseComponent<IWorkloadsPivotProps, IWorkloadsPivotState> {
+export class WorkloadsPivot extends React.Component<IWorkloadsPivotProps, IWorkloadsPivotState> {
     constructor(props: IWorkloadsPivotProps) {
         super(props, {});
 
@@ -150,10 +149,11 @@ export class WorkloadsPivot extends BaseComponent<IWorkloadsPivotProps, IWorkloa
     }
 
     private _showComponent(resourceType: KubeResourceType): boolean {
-        const selections: KubeResourceType[] = this._getTypeFilterValue();
+        const selections: string[] = this._getTypeFilterValue();
         // if no filter selections are made, show all components
-        if (selections.length > 0) {
-            return selections.indexOf(resourceType) != -1;
+        if (selections.length > 0 && resourceType != undefined) {
+            const selection = resourceType.toString();
+            return selections.indexOf(selection) != -1;
         }
 
         return true;

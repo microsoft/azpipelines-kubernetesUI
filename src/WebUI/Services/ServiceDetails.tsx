@@ -4,7 +4,6 @@
 */
 
 import { V1Pod, V1Service } from "@kubernetes/client-node";
-import { BaseComponent } from "@uifabric/utilities";
 import { CardContent, CustomCard } from "azure-devops-ui/Card";
 import { CustomHeader, HeaderDescription, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
 import { Page } from "azure-devops-ui/Page";
@@ -16,7 +15,7 @@ import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import { createBrowserHistory } from "history";
 import * as queryString from "query-string";
 import * as React from "react";
-import { renderTableCell, renderExternalIpCell } from "../Common/KubeCardWithTable";
+import { renderExternalIpCell, renderTableCell } from "../Common/KubeCardWithTable";
 import { KubeSummary } from "../Common/KubeSummary";
 import { KubeZeroData } from "../Common/KubeZeroData";
 import { PageTopHeader } from "../Common/PageTopHeader";
@@ -51,7 +50,7 @@ export interface IServiceDetailsState {
 
 const LoadBalancerText: string = "LoadBalancer";
 
-export class ServiceDetails extends BaseComponent<IServiceDetailsProperties, IServiceDetailsState> {
+export class ServiceDetails extends React.Component<IServiceDetailsProperties, IServiceDetailsState> {
     constructor(props: IServiceDetailsProperties) {
         super(props, {});
         this.state = {

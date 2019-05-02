@@ -2,20 +2,20 @@
     Copyright (c) Microsoft Corporation. All rights reserved.
     Licensed under the MIT license.
 */
-import { IVssComponentProperties } from "../Types";
-import { BaseComponent } from "@uifabric/utilities";
-import { css } from "azure-devops-ui/Util";
-import React = require("react");
-import { Utils } from "../Utils";
+
 import { Pill, PillSize } from "azure-devops-ui/Pill";
-import { PillGroup, PillGroupOverflow  } from "azure-devops-ui/PillGroup";
+import { PillGroup, PillGroupOverflow } from "azure-devops-ui/PillGroup";
+import { css } from "azure-devops-ui/Util";
+import { IVssComponentProperties } from "../Types";
+import { Utils } from "../Utils";
 import "./Tags.scss";
+import React = require("react");
 
 export interface ITagsProperties extends IVssComponentProperties {
     items: { [key: string]: string };
 }
 
-export class Tags extends BaseComponent<ITagsProperties> {
+export class Tags extends React.Component<ITagsProperties> {
     darkColor: any;
     public render(): React.ReactNode {
         return (

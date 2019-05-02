@@ -4,11 +4,10 @@
 */
 
 import { V1ServiceList } from "@kubernetes/client-node";
-import { BaseComponent } from "@uifabric/utilities";
-import { css } from "azure-devops-ui/Util";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
-import { Filter, IFilterItemState, IFilterState } from "azure-devops-ui/Utilities/Filter";
 import { Spinner, SpinnerSize } from "azure-devops-ui/Spinner";
+import { css } from "azure-devops-ui/Util";
+import { Filter, IFilterItemState, IFilterState } from "azure-devops-ui/Utilities/Filter";
 import * as React from "react";
 import { NameKey, TypeKey } from "../Common/KubeFilterBar";
 import { KubeSummary } from "../Common/KubeSummary";
@@ -16,13 +15,13 @@ import { KubeZeroData } from "../Common/KubeZeroData";
 import { ServicesEvents } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
+import * as Resources from "../Resources";
 import { ServicesTable } from "../Services/ServicesTable";
 import { IVssComponentProperties } from "../Types";
 import { ServicesActionsCreator } from "./ServicesActionsCreator";
 import { ServicesFilterBar } from "./ServicesFilterBar";
-import { ServicesStore } from "./ServicesStore";
-import * as Resources from "../Resources";
 import "./ServicesPivot.scss";
+import { ServicesStore } from "./ServicesStore";
 
 export interface IServicesPivotState {
     serviceList?: V1ServiceList;
@@ -35,7 +34,7 @@ export interface IServicesPivotProps extends IVssComponentProperties {
     filterToggled: ObservableValue<boolean>;
 }
 
-export class ServicesPivot extends BaseComponent<IServicesPivotProps, IServicesPivotState> {
+export class ServicesPivot extends React.Component<IServicesPivotProps, IServicesPivotState> {
     constructor(props: IServicesPivotProps) {
         super(props, {});
 
