@@ -4,6 +4,10 @@
 
 .external-ip-cell .external-ip-copy-icon {
     padding: 2px;
-    vertical-align: sub;
+    vertical-align: bottom;
     cursor: pointer;
+
+    &.subtle {
+        padding: 2px;
+    }
 }

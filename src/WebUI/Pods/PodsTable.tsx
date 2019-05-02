@@ -49,14 +49,7 @@ export class PodsTable extends React.Component<IPodsTableProperties> {
         });
 
         if (filteredPods.length > 0) {
-            filteredPods.forEach(pod => {
-                const key = pod.status.message ? pod.status.reason : pod.status.phase;
-                if (key in this._statusCount) {
-                    this._statusCount[key] += 1;
-                } else {
-                    this._statusCount[key] = 1;
-                }
-            });
+            this._prepareSubTextData(filteredPods);
 
             return (
                 <CustomCard className="pods-associated k8s-card-padding flex-grow bolt-table-card bolt-card-no-vertical-padding">
@@ -91,6 +84,18 @@ export class PodsTable extends React.Component<IPodsTableProperties> {
         }
 
         return null;
+    }
+
+    private _prepareSubTextData(filteredPods: V1Pod[]): void {
+        this._statusCount = {};
+        filteredPods.forEach(pod => {
+            const key = pod.status.message ? pod.status.reason : pod.status.phase;
+            if (key in this._statusCount) {
+                this._statusCount[key] += 1;
+            } else {
+                this._statusCount[key] = 1;
+            }
+        });
     }
 
     private static _getColumns(showWorkloadColumn: boolean): ITableColumn<V1Pod>[] {
