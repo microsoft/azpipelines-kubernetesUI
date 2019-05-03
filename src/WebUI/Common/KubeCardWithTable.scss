@@ -2,12 +2,8 @@
     padding-left: 8px;
 }
 
-.external-ip-cell .external-ip-copy-icon {
+.external-ip-cell .external-ip-copy-icon.kube-text-copy.subtle {
     padding: 2px;
     vertical-align: bottom;
     cursor: pointer;
-
-    &.subtle {
-        padding: 2px;
-    }
 }

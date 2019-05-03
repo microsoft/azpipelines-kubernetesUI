@@ -284,7 +284,7 @@ export function renderExternalIpWithCopy(textToDisplay: string): JSX.Element {
                     tooltipProps={{ text: Resources.CopyExternalIp }}
                     ariaLabel={Resources.CopyExternalIp}
                     iconProps={{ iconName: "Copy" }}
-                    className="external-ip-copy-icon"
+                    className="external-ip-copy-icon kube-text-copy"
                     subtle={true}
                 />
             }
@@ -322,7 +322,7 @@ export function renderExternalIpCell(
                         tooltipProps={{ text: Resources.CopyExternalIp }}
                         ariaLabel={Resources.CopyExternalIp}
                         iconProps={{ iconName: "Copy" }}
-                        className="external-ip-copy-icon"
+                        className="external-ip-copy-icon kube-text-copy"
                         subtle={true}
                     />
                 }
