@@ -9,13 +9,11 @@ import { CustomHeader, HeaderDescription, HeaderTitle, HeaderTitleArea, HeaderTi
 import { Page } from "azure-devops-ui/Page";
 import { Spinner, SpinnerSize } from "azure-devops-ui/Spinner";
 import { Statuses } from "azure-devops-ui/Status";
-import { ITableColumn, renderSimpleCell, Table } from "azure-devops-ui/Table";
 import * as Date_Utils from "azure-devops-ui/Utilities/Date";
-import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import { createBrowserHistory } from "history";
 import * as queryString from "query-string";
 import * as React from "react";
-import { renderExternalIpCell, renderTableCell } from "../Common/KubeCardWithTable";
+import { defaultColumnRenderer, renderExternalIpWithCopy } from "../Common/KubeCardWithTable";
 import { KubeSummary } from "../Common/KubeSummary";
 import { KubeZeroData } from "../Common/KubeZeroData";
 import { PageTopHeader } from "../Common/PageTopHeader";
@@ -45,7 +43,6 @@ export interface IServiceDetailsState {
     service: IServiceItem | undefined;
     pods: Array<V1Pod>;
     arePodsLoading?: boolean;
-    hoverRowIndex: number;
 }
 
 const LoadBalancerText: string = "LoadBalancer";
@@ -56,8 +53,7 @@ export class ServiceDetails extends React.Component<IServiceDetailsProperties, I
         this.state = {
             service: props.service,
             pods: [],
-            arePodsLoading: true,
-            hoverRowIndex: -1
+            arePodsLoading: true
         };
 
         const notifyViewChanged = (service: V1Service) => {
@@ -135,11 +131,10 @@ export class ServiceDetails extends React.Component<IServiceDetailsProperties, I
     private _getServiceDetails(): JSX.Element | null {
         const item = this.state.service;
         if (item && item.service) {
-            const tableItems: IServiceItem[] = [ServiceDetails._getServiceDetailsObject(item)];
             const agoTime = Date_Utils.ago(new Date(item.creationTimestamp), Date_Utils.AgoFormat.Compact);
 
             return (
-                <CustomCard className="service-details-card k8s-card-padding bolt-table-card flex-grow bolt-card-no-vertical-padding">
+                <CustomCard className="service-details-card k8s-card-padding flex-grow bolt-card-no-vertical-padding">
                     <CustomHeader>
                         <HeaderTitleArea>
                             <HeaderTitleRow>
@@ -154,21 +149,77 @@ export class ServiceDetails extends React.Component<IServiceDetailsProperties, I
                             </HeaderDescription>
                         </HeaderTitleArea>
                     </CustomHeader>
-                    <CardContent className="service-full-details-table" contentPadding={false}>
-                        <Table
-                            id="service-full-details-table"
-                            showHeader={true}
-                            showLines={false}
-                            singleClickActivation={false}
-                            itemProvider={new ArrayItemProvider<IServiceItem>(tableItems)}
-                            columns={this._getColumns()}
-                        />
+                    <CardContent className="service-full-details-table">
+                        {this._getServiceDetailsCardContent(item)}
                     </CardContent>
                 </CustomCard >
             );
         }
 
         return null;
+    }
+
+    private _getServiceDetailsCardContent(item: IServiceItem): JSX.Element {
+        let serviceDetails: any[] = [];
+        serviceDetails.push({ key: Resources.TypeText, value: item.type });
+        serviceDetails.push({ key: Resources.ClusterIPText, value: item.clusterIP || "-" });
+        serviceDetails.push({ key: Resources.ExternalIPText, value: item.externalIP });
+        serviceDetails.push({ key: Resources.PortText, value: item.port });
+        serviceDetails.push({ key: Resources.SessionAffinityText, value: item.service && item.service.spec && item.service.spec.sessionAffinity || "" });
+        serviceDetails.push({ key: Resources.SelectorText, value: item.service ? item.service.spec.selector : {} });
+        serviceDetails.push({ key: Resources.LabelsText, value: item.service ? item.service.metadata.labels : {} });
+
+        return (
+            <div className="flex-row service-card-content">
+                {
+                    serviceDetails.map((data, index) => this._renderServiceCellContent(data, index))
+                }
+            </div>
+        );
+    }
+
+    private _renderServiceCellContent(data: any, index: number): JSX.Element | undefined {
+        const { key, value } = data;
+        let className = `flex-column body-m ${index > 0 ? "service-column-padding" : ""}`;
+        const getColumnKey = (keyText?: string, keyClassName?: string) => {
+            const computedCLassName = `secondary-text service-column-key-padding ${keyClassName || ""}`;
+            return <div className={computedCLassName}>{keyText}</div>;
+        };
+
+        switch (key) {
+            case Resources.TypeText:
+            case Resources.ClusterIPText:
+            case Resources.PortText:
+            case Resources.SessionAffinityText:
+                className = `${className} service-basic-column-size`;
+                return (
+                    <div className={className} key={index}>
+                        {getColumnKey(key)}
+                        {defaultColumnRenderer(value)}
+                    </div>
+                );
+
+            case Resources.ExternalIPText:
+                return (
+                    <div className="body-m service-column-padding" key={index}>
+                        {getColumnKey(key, "service-extip-column-size")}
+                        {renderExternalIpWithCopy(value)}
+                    </div>
+                );
+
+            case Resources.LabelsText:
+            case Resources.SelectorText:
+                return (
+                    <div className="flex-grow flex-column service-column-padding" key={index}>
+                        {getColumnKey(key, "body-m")}
+                        {/* temporary fix for the overflow fade */}
+                        <Tags className="overflow-fade service-tags-column-size" items={value} />
+                    </div>
+                );
+
+            default:
+                return undefined;
+        }
     }
 
     private _onPodsFetched = (): void => {
@@ -217,85 +268,6 @@ export class ServiceDetails extends React.Component<IServiceDetailsProperties, I
                 } as IPodDetailsSelectionProperties
             }
         );
-    }
-
-    private static _getServiceDetailsObject(item: IServiceItem): any {
-        return {
-            type: item.type,
-            clusterIP: item.clusterIP || "-",
-            externalIP: item.externalIP,
-            port: item.port,
-            sessionAffinity: item.service ? item.service.spec.sessionAffinity : "",
-            selector: item.service ? item.service.spec.selector : {},
-            labels: item.service ? item.service.metadata.labels : {}
-        };
-    }
-
-    private _getColumns = (): ITableColumn<IServiceItem>[] => {
-        const columns: ITableColumn<any>[] = [
-            {
-                id: "type",
-                name: Resources.TypeText,
-                width: -100,
-                minWidth: 104,
-                renderCell: renderSimpleCell
-            },
-            {
-                id: "clusterIP",
-                name: Resources.ClusterIPText,
-                width: -100,
-                minWidth: 104,
-                renderCell: renderSimpleCell
-            },
-            {
-                id: "externalIP",
-                name: Resources.ExternalIPText,
-                width: -100,
-                minWidth: 104,
-                renderCell: (rowIndex, columnIndex, tableColumn, item) => renderExternalIpCell(rowIndex, columnIndex, tableColumn, item, this._setHoverRowIndex, this.state.hoverRowIndex)
-            },
-            {
-                id: "port",
-                name: Resources.PortText,
-                width: -100,
-                minWidth: 104,
-                renderCell: renderSimpleCell
-            },
-            {
-                id: "sessionAffinity",
-                name: Resources.SessionAffinityText,
-                width: -100,
-                minWidth: 104,
-                renderCell: renderSimpleCell
-            },
-            {
-                id: "selector",
-                name: Resources.SelectorText,
-                width: -100,
-                minWidth: 120,
-                renderCell: this._renderTags
-            },
-            {
-                id: "labels",
-                name: Resources.LabelsText,
-                width: -100,
-                minWidth: 312,
-                renderCell: this._renderTags
-            }
-        ];
-
-        return columns;
-    }
-
-    private _renderTags(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, item: any): JSX.Element {
-        const itemToRender: React.ReactNode = <Tags items={item[tableColumn.id]} />;
-        return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
-    }
-
-    private _setHoverRowIndex = (hoverRowIndex: number): void => {
-        this.setState({
-            hoverRowIndex: hoverRowIndex
-        });
     }
 
     private _servicesStore: ServicesStore;

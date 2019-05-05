@@ -329,12 +329,19 @@ export class Utils {
     }
 
     public static copyToClipboard(text: string) {
+        // IE11 Compatible
+        if ((window as any).clipboardData) {
+            (window as any).clipboardData.setData("text", text);
+            return;
+        }
+
         const listener = (e: Event) => {
             const clipboardData = (<ClipboardEvent>e).clipboardData;
             if (clipboardData) {
                 clipboardData.setData("text/plain", text);
-                e.preventDefault();
             }
+
+            e.preventDefault();
         };
 
         // Add a listener to the copy event, and add it to the clipboard. Then remove the handler immediately, as it prevents default

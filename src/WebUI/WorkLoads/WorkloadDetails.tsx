@@ -296,11 +296,10 @@ export class WorkloadDetails extends React.Component<IWorkloadDetailsProperties,
 
     private _renderWorkloadCellContent(item: any, index: number): JSX.Element | undefined {
         const { key, value } = item;
-        const getColumnKey = (keyText?: string, keyClassName?: string) => (
-            <div className={css(keyClassName || "", "secondary-text workload-column-key-padding")}>
-                {keyText}
-            </div>
-        );
+        const getColumnKey = (keyText?: string, keyClassName?: string) => {
+            const computedCLassName = `secondary-text workload-column-key-padding ${keyClassName || ""}`;
+            return <div className={computedCLassName}>{keyText}</div>;
+        };
 
         switch (key) {
             case Resources.ImageText:

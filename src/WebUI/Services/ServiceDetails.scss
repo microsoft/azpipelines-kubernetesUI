@@ -1,3 +1,31 @@
-.service-details-card .service-full-details-table {
-    padding-bottom: 10px;
+.service-full-details-table {
+    padding-top: 8px;
+    padding-bottom: 20px;
+    width: 100%;
+    overflow-x: auto;
+}
+
+.service-column-key-padding {
+    padding-bottom: 4px;
+}
+
+.service-card-content {
+    width: 100%;
+
+    .service-column-padding {
+        margin-left: 24px;
+    }
+}
+
+.service-basic-column-size {
+    width: 104px;
+    min-width: 104px;
+}
+
+.service-extip-column-size {
+    width: 124px;
+}
+
+.service-tags-column-size {
+    min-width: 150px;
 }

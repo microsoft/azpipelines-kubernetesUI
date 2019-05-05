@@ -194,14 +194,14 @@ export function renderPodNameWithStatusTableCell(
                 render: (className?: string) => {
                     return (
                         <>
-                        {
-                            podStatusProps &&
-                            <Tooltip text={statusTooltip}>
-                                <div className="flex-row">
-                                    <Status {...podStatusProps} className="icon-large-margin" size={StatusSize.m} />
-                                </div>
-                            </Tooltip>
-                        }
+                            {
+                                podStatusProps &&
+                                <Tooltip text={statusTooltip}>
+                                    <div className="flex-row">
+                                        <Status {...podStatusProps} className="icon-large-margin" size={StatusSize.m} />
+                                    </div>
+                                </Tooltip>
+                            }
                         </>
                     );
                 }
@@ -271,19 +271,49 @@ export function onPodsColumnClicked(
     });
 }
 
-export function renderExternalIpCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<any>, item: any, hoverHandler: (hoverRowIndex: number) => void, hoverRowIndex: number): JSX.Element {
+export function renderExternalIpWithCopy(textToDisplay: string): JSX.Element {
+    return (
+        <div className="external-ip-cell">
+            {textToDisplay || "-"}
+            {
+                textToDisplay &&
+                <Button
+                    onClick={(e) => {
+                        Utils.copyToClipboard(textToDisplay);
+                    }}
+                    tooltipProps={{ text: Resources.CopyExternalIp }}
+                    ariaLabel={Resources.CopyExternalIp}
+                    iconProps={{ iconName: "Copy" }}
+                    className="external-ip-copy-icon kube-text-copy"
+                    subtle={true}
+                />
+            }
+        </div>
+    );
+}
+
+export function renderExternalIpCell(
+    rowIndex: number,
+    columnIndex: number,
+    tableColumn: ITableColumn<any>,
+    item: any,
+    hoverHandler: (hoverRowIndex: number) => void,
+    hoverRowIndex: number
+): JSX.Element {
     const textToRender = item.externalIP;
-    if (textToRender) {
-        const itemToRender = (
+    const itemToRender = !textToRender ? "-"
+        : (
             <div
                 className="external-ip-cell"
                 onMouseOver={() => hoverHandler(rowIndex)}
                 onMouseLeave={() => hoverHandler(-1)}
                 onFocus={() => hoverHandler(rowIndex)}
                 onBlur={() => hoverHandler(-1)}
-                tabIndex={0}>
+                tabIndex={0}
+            >
                 {textToRender}
-                {hoverRowIndex === rowIndex &&
+                {
+                    hoverRowIndex === rowIndex &&
                     <Button
                         onClick={(e) => {
                             Utils.copyToClipboard(textToRender);
@@ -292,14 +322,12 @@ export function renderExternalIpCell(rowIndex: number, columnIndex: number, tabl
                         tooltipProps={{ text: Resources.CopyExternalIp }}
                         ariaLabel={Resources.CopyExternalIp}
                         iconProps={{ iconName: "Copy" }}
-                        className="external-ip-copy-icon">
-                    </Button>}
+                        className="external-ip-copy-icon kube-text-copy"
+                        subtle={true}
+                    />
+                }
             </div>
         );
 
-        return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
-    }
-    else {
-        return renderTableCell(rowIndex, columnIndex, tableColumn, textToRender || "-");
-    }
+    return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
 }
