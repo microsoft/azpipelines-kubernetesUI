@@ -117,21 +117,26 @@ export class PodsDetails extends React.Component<IPodsDetailsProperties, IPodsDe
 
         if (!podsList || !podsList.items) {
             const podsActionCreator = ActionsCreatorManager.GetActionCreator<PodsActionsCreator>(PodsActionsCreator);
+            this._podsFetchEventName = props.serviceSelector ? PodsEvents.LabelledPodsFetchedEvent : PodsEvents.PodsFetchedEvent;
 
-            const storeEventName = props.serviceSelector ? PodsEvents.LabelledPodsFetchedEvent : PodsEvents.PodsFetchedEvent;
-            const podsFetchHandler = () => {
-                this._podsStore.removeListener(storeEventName, podsFetchHandler);
+            this._podsFetchHandler = () => {
+                this._removePodsFetchListener();
                 const podsStoreState = this._podsStore.getState();
-                const fetchedPodList = props.serviceSelector ? podsStoreState.podListByLabel[props.serviceSelector] : podsStoreState.podsList;
+                const fetchedPodList = props.serviceSelector
+                    ? podsStoreState.podListByLabel[props.serviceSelector]
+                    : podsStoreState.podsList;
+
                 if (fetchedPodList && fetchedPodList.items) {
                     const properties = getPodProperties(fetchedPodList.items);
                     const imageList = Utils.getImageIdsForPods(properties.pods || []);
-                    // Adding breadcrumb when parent object is fetched on pod view refresh
+                    // adding breadcrumb when parent object is fetched on pod view refresh
                     notifyViewChanged(properties.parentName, properties.parentKind);
                     const parentItem = {
                         name: properties.parentName || "",
                         kind: properties.parentKind || ""
                     };
+
+                    const handlerMasterDetailsContext = this._getMasterDetailsContext(parentItem, properties.selectedPod, properties.pods);
                     this.setState({
                         parentKind: properties.parentKind,
                         parentName: properties.parentName,
@@ -139,12 +144,14 @@ export class PodsDetails extends React.Component<IPodsDetailsProperties, IPodsDe
                         selectedPod: properties.selectedPod,
                         isLoading: podsStoreState.isLoading,
                         imageList: imageList,
-                        masterDetailsContext: new BaseMasterDetailsContext(this._getMasterDetailsContext(parentItem, properties.selectedPod, properties.pods), this._onParentBackButtonClick)
+                        masterDetailsContext: new BaseMasterDetailsContext(handlerMasterDetailsContext, this._onParentBackButtonClick)
                     });
                 }
             };
 
-            this._podsStore.addListener(storeEventName, podsFetchHandler);
+            this._podsStore.addListener(this._podsFetchEventName, this._podsFetchHandler);
+            this._podFetchEventActive = true;
+
             if (props.serviceSelector) {
                 podsActionCreator.getPods(KubeSummary.getKubeService(), props.serviceSelector, true);
             }
@@ -166,6 +173,8 @@ export class PodsDetails extends React.Component<IPodsDetailsProperties, IPodsDe
             name: parentName || "",
             kind: parentKind || ""
         };
+
+        const masterDerailsContext = this._getMasterDetailsContext(parentItem, selectedPod, filteredPods);
         this.state = {
             parentKind: parentKind,
             parentName: parentName,
@@ -173,7 +182,7 @@ export class PodsDetails extends React.Component<IPodsDetailsProperties, IPodsDe
             selectedPod: selectedPod,
             selectedImageDetails: undefined,
             isLoading: !podsList || !podsList.items,
-            masterDetailsContext: new BaseMasterDetailsContext(this._getMasterDetailsContext(parentItem, selectedPod, filteredPods), this._onParentBackButtonClick)
+            masterDetailsContext: new BaseMasterDetailsContext(masterDerailsContext, this._onParentBackButtonClick)
         };
     }
 
@@ -241,8 +250,8 @@ export class PodsDetails extends React.Component<IPodsDetailsProperties, IPodsDe
         );
     }
 
-    public componentDidUpdate(prevProps: IPodsDetailsProperties, prevState: IPodsDetailsState) {
-        // Fetch hasImageDetailsData if we directly refresh and land on WorkloadDetails
+    public componentDidUpdate(prevProps: IPodsDetailsProperties, prevState: IPodsDetailsState): void {
+        // fetch hasImageDetailsData if we directly refresh and land on WorkloadDetails
         const imageService = KubeSummary.getImageService();
         if (imageService && this.state.imageList && this.state.imageList.length > 0) {
             const hasImageDetails: boolean | undefined = this._imageDetailsStore.hasImageDetails(this.state.imageList[0]);
@@ -254,6 +263,14 @@ export class PodsDetails extends React.Component<IPodsDetailsProperties, IPodsDe
 
     public componentWillUnmount(): void {
         this._imageDetailsStore.removeListener(ImageDetailsEvents.HasImageDetailsEvent, this._setHasImageDetails);
+        this._removePodsFetchListener();
+    }
+
+    private _removePodsFetchListener(): void {
+        if (this._podFetchEventActive && this._podsFetchEventName && this._podsFetchHandler) {
+            this._podFetchEventActive = false;
+            this._podsStore.removeListener(this._podsFetchEventName, this._podsFetchHandler);
+        }
     }
 
     private _onPodSelectionChange = (event: React.SyntheticEvent<HTMLElement>, selectedPod: V1Pod, selectedView: string): void => {
@@ -312,5 +329,8 @@ export class PodsDetails extends React.Component<IPodsDetailsProperties, IPodsDe
 
     private _history: History;
     private _podsStore: PodsStore;
+    private _podsFetchEventName: string;
+    private _podsFetchHandler: () => void;
+    private _podFetchEventActive: boolean;
     private _imageDetailsStore: ImageDetailsStore;
 }
