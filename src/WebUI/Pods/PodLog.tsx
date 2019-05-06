@@ -9,7 +9,6 @@ import * as React from "react";
 import { KubeSummary } from "../Common/KubeSummary";
 import * as Resources from "../Resources";
 import { PodContentReader } from "./PodContentReader";
-import "./PodLog.scss";
 import { IPodRightPanelProps } from "./PodsRightPanel";
 
 export interface IPodLogProps extends IPodRightPanelProps {
