@@ -198,7 +198,7 @@ export class WorkloadDetails extends React.Component<IWorkloadDetailsProperties,
     }
 
     public componentWillUnmount(): void {
-        this._podsStore.removeChangedListener(this._onPodsUpdated);
+        this._podsStore.removeListener(PodsEvents.PodsFetchedEvent, this._onPodsUpdated);
         this._imageDetailsStore.removeListener(ImageDetailsEvents.HasImageDetailsEvent, this._setHasImageDetails);
     }
 

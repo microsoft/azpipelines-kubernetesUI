@@ -9,6 +9,7 @@ import * as React from "react";
 import { KubeSummary } from "../Common/KubeSummary";
 import * as Resources from "../Resources";
 import { PodContentReader } from "./PodContentReader";
+import "./PodLog.scss";
 import { IPodRightPanelProps } from "./PodsRightPanel";
 
 export interface IPodLogProps extends IPodRightPanelProps {
@@ -31,11 +32,13 @@ export class PodLog extends React.Component<IPodLogProps, IPodLogState> {
         return (
             <PodContentReader
                 key={this.state.uid}
-                className="pod-log"
-                contentClassName="pod-log-content"
+                className="k8s-pod-log"
+                contentClassName="k8s-pod-log-content"
                 options={{
                     theme: "vs-dark",
-                    language: "text/plain"
+                    language: "text/plain",
+                    wordWrap: "on",
+                    wrappingIndent: "same"
                 }}
                 text={this.state.logContent || ""}
             />
