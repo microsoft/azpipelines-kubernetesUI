@@ -31,11 +31,13 @@ export class PodLog extends React.Component<IPodLogProps, IPodLogState> {
         return (
             <PodContentReader
                 key={this.state.uid}
-                className="pod-log"
-                contentClassName="pod-log-content"
+                className="k8s-pod-log"
+                contentClassName="k8s-pod-log-content"
                 options={{
                     theme: "vs-dark",
-                    language: "text/plain"
+                    language: "text/plain",
+                    wordWrap: "on",
+                    wrappingIndent: "same"
                 }}
                 text={this.state.logContent || ""}
             />

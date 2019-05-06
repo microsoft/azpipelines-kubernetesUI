@@ -81,7 +81,11 @@ export class ContentReader extends React.Component<IReaderProps> {
 
     private _disposeEditor(): void {
         if (this._editor) {
-            this._editor.dispose();
+            try {
+                this._editor.dispose();
+            }
+            catch (e) { }
+
             this._editor = undefined;
         }
     }
