@@ -42,24 +42,7 @@ export class PodLog extends React.Component<IPodLogProps, IPodLogState> {
         );
     }
 
-    public componentWillUnmount(): void {
-        if (this._heightCssElement && document && document.head) {
-            document.head.removeChild(this._heightCssElement);
-            this._heightCssElement = undefined;
-        }
-    }
-
     public componentDidMount(): void {
-        if (!this._heightCssElement) {
-            this._heightCssElement = document.createElement("style");
-            this._heightCssElement.type = "text/css";
-            if (document && document.head) {
-                document.head.appendChild(this._heightCssElement);
-            }
-        }
-
-        this._heightCssElement.innerText = ".kubernetes-container .pod-overview-full-size { height: unset; min-height: 100%; }";
-
         const service = KubeSummary.getKubeService();
         const podName = this.props.pod.metadata.name;
         const spec = this.props.pod.spec || undefined;
@@ -79,6 +62,4 @@ export class PodLog extends React.Component<IPodLogProps, IPodLogState> {
             });
         });
     }
-
-    private _heightCssElement: HTMLStyleElement | undefined;
 }

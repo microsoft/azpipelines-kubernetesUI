@@ -209,7 +209,7 @@ export class PodsRightPanel extends React.Component<IPodRightPanelProps, IPodsRi
             return "";
         }
 
-        return css("full-size", hasMessageCard ? "pod-overview-error-height" : "pod-overview-full-size");
+        return css("full-size", hasMessageCard ? "pod-overview-error-height" : "pod-overview-content-full-size");
     }
 
     private _hideImageDetails = () => {
