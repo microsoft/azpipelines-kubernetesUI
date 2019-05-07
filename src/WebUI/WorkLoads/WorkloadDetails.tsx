@@ -72,6 +72,7 @@ export interface IWorkLoadDetailsItem {
 export class WorkloadDetails extends React.Component<IWorkloadDetailsProperties, IWorkloadDetailsState> {
     constructor(props: IWorkloadDetailsProperties) {
         super(props, {});
+        getTelemetryService().scenarioStart(Scenarios.WorkloadDetails);
         this._podsStore = StoreManager.GetStore<PodsStore>(PodsStore);
         this._imageDetailsStore = StoreManager.GetStore<ImageDetailsStore>(ImageDetailsStore);
 
@@ -154,7 +155,6 @@ export class WorkloadDetails extends React.Component<IWorkloadDetailsProperties,
             showImageDetails: false,
             selectedImageDetails: undefined
         };
-        getTelemetryService().scenarioStart(Scenarios.WorkloadDetails);
     }
 
     public render(): JSX.Element {
