@@ -22,7 +22,7 @@ import { ServicesActionsCreator } from "./ServicesActionsCreator";
 import { ServicesFilterBar } from "./ServicesFilterBar";
 import "./ServicesPivot.scss";
 import { ServicesStore } from "./ServicesStore";
-import { KubeFactory } from "../KubeFactory";
+import { getTelemetryService } from "../KubeFactory";
 
 export interface IServicesPivotState {
     serviceList?: V1ServiceList;
@@ -39,7 +39,7 @@ export class ServicesPivot extends React.Component<IServicesPivotProps, IService
     constructor(props: IServicesPivotProps) {
         super(props, {});
 
-        KubeFactory.telemetryService.scenarioStart(Scenarios.Services);
+        getTelemetryService().scenarioStart(Scenarios.Services);
 
         this._actionCreator = ActionsCreatorManager.GetActionCreator<ServicesActionsCreator>(ServicesActionsCreator);
         this._store = StoreManager.GetStore<ServicesStore>(ServicesStore);
@@ -121,7 +121,7 @@ export class ServicesPivot extends React.Component<IServicesPivotProps, IService
 
     private _markTTI = () => {
         if (!this._isTTIMarked) {
-            KubeFactory.telemetryService.scenarioEnd(Scenarios.Services);
+            getTelemetryService().scenarioEnd(Scenarios.Services);
         }
         this._isTTIMarked = true;
     }

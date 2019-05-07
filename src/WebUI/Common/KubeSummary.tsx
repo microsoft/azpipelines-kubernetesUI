@@ -592,7 +592,7 @@ export class KubeSummary extends React.Component<IKubeSummaryProps, IKubernetesC
     }
 
     private _initializeFactorySettings(): void {
-        KubeFactory.telemetryService = this.props.telemetryService || new DefaultTelemetryService();
+        KubeFactory.setTelemetryService(this.props.telemetryService);
         KubeFactory.getImageLocation = this.props.getImageLocation || KubeFactory.getImageLocation;
     }
 

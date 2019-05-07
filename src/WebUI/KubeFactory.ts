@@ -6,10 +6,23 @@ export class KubeFactory {
     }
 
     public static markTTI = (scenarioName: string, additionalProperties?: { [key: string]: any; } | undefined) => {
-        KubeFactory.telemetryService.markTimeToInteractive(scenarioName, additionalProperties);
+        getTelemetryService().markTimeToInteractive(scenarioName, additionalProperties);
     }
 
-    public static telemetryService: ITelemetryService;
+    public static setTelemetryService(telemetryService?: ITelemetryService){
+        if(telemetryService) {
+            KubeFactory.telemetryService = telemetryService;
+        }
+    }
+
+    public static getTelemetryService(): ITelemetryService {
+        if(!KubeFactory.telemetryService) {
+            KubeFactory.telemetryService = new DefaultTelemetryService();
+        }
+        return KubeFactory.telemetryService;
+    }
+
+    private static telemetryService?: ITelemetryService;
 
     private static _imageLocations: Map<KubeImage, string> = new Map([
         [KubeImage.zeroData, require("../img/zero-data.svg")],
@@ -18,6 +31,10 @@ export class KubeFactory {
         [KubeImage.resourceDeleted, require("../img/zero-data.svg")],
         [KubeImage.resourceAccessDenied, require("../img/zero-data.svg")],
     ]);
+}
+
+export function getTelemetryService(): ITelemetryService {
+    return KubeFactory.getTelemetryService();
 }
 
 export class DefaultTelemetryService implements ITelemetryService {

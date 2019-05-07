@@ -23,7 +23,7 @@ import { getRunDetailsText } from "../RunDetails";
 import { IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
 import "./ImageDetails.scss";
-import { KubeFactory } from "../KubeFactory";
+import { getTelemetryService } from "../KubeFactory";
 import { Scenarios } from "../Constants";
 
 export interface IImageDetailsProperties extends IVssComponentProperties {
@@ -39,15 +39,8 @@ export class ImageDetails extends React.Component<IImageDetailsProperties, IImag
     
     constructor(props: IImageDetailsProperties) {
         super(props);
-        KubeFactory.telemetryService.scenarioStart(Scenarios.ImageDetails);
+        getTelemetryService().scenarioStart(Scenarios.ImageDetails);
     }
-<<<<<<< HEAD
-    public componentDidMount(): void {
-        KubeFactory.telemetryService.scenarioEnd(Scenarios.ImageDetails);
-    }
-=======
-
->>>>>>> ec849db... Changing TTI calculation to let the child element mark when it is loaded completely. This enables capturing TTI for entire scenario rather than first component render
     public render(): JSX.Element {
         return (
             <Page className="image-details-content flex flex-grow">
@@ -61,7 +54,7 @@ export class ImageDetails extends React.Component<IImageDetailsProperties, IImag
     }
 
     public componentDidMount(): void {
-        KubeFactory.telemetryService.scenarioEnd(Scenarios.ImageDetails);
+        getTelemetryService().scenarioEnd(Scenarios.ImageDetails);
     }
 
     private _getMainHeading(): JSX.Element | null {

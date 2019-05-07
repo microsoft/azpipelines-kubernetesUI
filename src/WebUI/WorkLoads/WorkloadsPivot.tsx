@@ -27,7 +27,7 @@ import { OtherWorkloads } from "../Workloads/OtherWorkloadsTable";
 import { WorkloadsActionsCreator } from "./WorkloadsActionsCreator";
 import { WorkloadsFilterBar } from "./WorkloadsFilterBar";
 import { WorkloadsStore } from "./WorkloadsStore";
-import { KubeFactory } from "../KubeFactory";
+import { getTelemetryService } from "../KubeFactory";
 
 export interface IWorkloadsPivotState {
     workloadResourceSize: number;
@@ -63,7 +63,7 @@ export class WorkloadsPivot extends React.Component<IWorkloadsPivotProps, IWorkl
         this._workloadsActionCreator.getDeployments(KubeSummary.getKubeService());
         // fetch all pods in parent component as the podList is required in selected workload pods view
         this._podsActionCreator.getPods(KubeSummary.getKubeService());
-        KubeFactory.telemetryService.scenarioStart(Scenarios.Workloads);
+        getTelemetryService().scenarioStart(Scenarios.Workloads);
     }
 
     public render(): React.ReactNode {
@@ -106,7 +106,7 @@ export class WorkloadsPivot extends React.Component<IWorkloadsPivotProps, IWorkl
 
     private _markTTI = () => {
         if (!this._isTTIMarked) {
-            KubeFactory.telemetryService.scenarioEnd(Scenarios.Workloads);
+            getTelemetryService().scenarioEnd(Scenarios.Workloads);
         }
         this._isTTIMarked = true;
     }

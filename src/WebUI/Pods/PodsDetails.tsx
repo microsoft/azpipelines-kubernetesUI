@@ -28,7 +28,7 @@ import { PodsActionsCreator } from "./PodsActionsCreator";
 import { PodsLeftPanel } from "./PodsLeftPanel";
 import { PodsRightPanel } from "./PodsRightPanel";
 import { PodsStore } from "./PodsStore";
-import { KubeFactory } from "../KubeFactory";
+import { getTelemetryService } from "../KubeFactory";
 import { Scenarios } from "../Constants";
 
 export interface IPodsDetailsProperties extends IVssComponentProperties {
@@ -53,7 +53,7 @@ export interface IPodsDetailsState {
 export class PodsDetails extends React.Component<IPodsDetailsProperties, IPodsDetailsState> {
     constructor(props: IPodsDetailsProperties) {
         super(props);
-        KubeFactory.telemetryService.scenarioStart(Scenarios.PodsDetails);
+        getTelemetryService().scenarioStart(Scenarios.PodsDetails);
         this._history = createBrowserHistory();
 
         const notifyViewChanged = (parentName: string | undefined, parentKind: string | undefined) => {
@@ -333,7 +333,7 @@ export class PodsDetails extends React.Component<IPodsDetailsProperties, IPodsDe
 
     private _markTTI = (): void => {
         if(!this._isTTIMarked){
-            KubeFactory.telemetryService.scenarioEnd(Scenarios.PodsDetails);
+            getTelemetryService().scenarioEnd(Scenarios.PodsDetails);
         }
         this._isTTIMarked = true;
     }

@@ -42,7 +42,7 @@ import "./WorkloadDetails.scss";
 import { WorkloadsActionsCreator } from "./WorkloadsActionsCreator";
 import { WorkloadsStore } from "./WorkloadsStore";
 import { Scenarios } from "../Constants";
-import { KubeFactory } from "../KubeFactory";
+import { getTelemetryService } from "../KubeFactory";
 
 export interface IWorkloadDetailsProperties extends IVssComponentProperties {
     item?: V1ReplicaSet | V1DaemonSet | V1StatefulSet;
@@ -154,7 +154,7 @@ export class WorkloadDetails extends React.Component<IWorkloadDetailsProperties,
             showImageDetails: false,
             selectedImageDetails: undefined
         };
-        KubeFactory.telemetryService.scenarioStart(Scenarios.WorkloadDetails);
+        getTelemetryService().scenarioStart(Scenarios.WorkloadDetails);
     }
 
     public render(): JSX.Element {
@@ -248,7 +248,7 @@ export class WorkloadDetails extends React.Component<IWorkloadDetailsProperties,
 
     private _markTTI = () => {
         if (!this._isTTIMarked) {
-            KubeFactory.telemetryService.scenarioEnd(Scenarios.WorkloadDetails);
+            getTelemetryService().scenarioEnd(Scenarios.WorkloadDetails);
         }
         this._isTTIMarked = true;
     }

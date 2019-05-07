@@ -11,7 +11,7 @@ import * as Resources from "../Resources";
 import { PodContentReader } from "./PodContentReader";
 import { IPodRightPanelProps } from "./PodsRightPanel";
 import { Scenarios } from "../Constants";
-import { KubeFactory } from "../KubeFactory";
+import { getTelemetryService } from "../KubeFactory";
 
 export interface IPodLogProps extends IPodRightPanelProps {
     // Overriding this to make sure we don't accept undefined
@@ -27,7 +27,7 @@ export class PodLog extends React.Component<IPodLogProps, IPodLogState> {
     constructor(props: IPodLogProps) {
         super(props, {});
         this.state = { logContent: Resources.LoadingText, uid: this.props.pod.metadata.uid };
-        KubeFactory.telemetryService.scenarioStart(Scenarios.PodLogs);
+        getTelemetryService().scenarioStart(Scenarios.PodLogs);
     }
 
     public render(): JSX.Element {
@@ -58,7 +58,7 @@ export class PodLog extends React.Component<IPodLogProps, IPodLogState> {
                 uid: Util_String.newGuid(), // required to refresh the content
                 logContent: logContent || ""
             });
-            KubeFactory.telemetryService.scenarioEnd(Scenarios.PodLogs);
+            getTelemetryService().scenarioEnd(Scenarios.PodLogs);
         }).catch(error => {
             let errorMessage = error || "";
             errorMessage = (typeof errorMessage == "string") ? errorMessage : JSON.stringify(errorMessage);
@@ -66,7 +66,7 @@ export class PodLog extends React.Component<IPodLogProps, IPodLogState> {
                 uid: Util_String.newGuid(), // required to refresh the content
                 logContent: errorMessage
             });
-            KubeFactory.telemetryService.scenarioEnd(Scenarios.PodLogs);
+            getTelemetryService().scenarioEnd(Scenarios.PodLogs);
         });
     }
 }

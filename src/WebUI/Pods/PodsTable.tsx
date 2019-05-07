@@ -26,7 +26,7 @@ import { SelectionActionsCreator } from "../Selection/SelectionActionCreator";
 import { ISelectionPayload, SelectionActions } from "../Selection/SelectionActions";
 import { IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
-import { KubeFactory } from "../KubeFactory";
+import { getTelemetryService } from "../KubeFactory";
 
 const podNameKey: string = "pl-name-key";
 const podWorkloadsKey: string = "pl-wrkld-key";
@@ -47,7 +47,7 @@ export class PodsTable extends React.Component<IPodsTableProperties> {
     constructor(props: IPodsTableProperties){
         super(props);
         if(!this.props.markTTICallback){
-            KubeFactory.telemetryService.scenarioStart(Scenarios.PodsList);
+            getTelemetryService().scenarioStart(Scenarios.PodsList);
         }
     }
     
@@ -61,7 +61,7 @@ export class PodsTable extends React.Component<IPodsTableProperties> {
             this._prepareSubTextData(filteredPods);
 
             if(!this.props.markTTICallback) {
-                setTimeout(() => KubeFactory.telemetryService.scenarioEnd(Scenarios.PodsList), 0);
+                setTimeout(() => getTelemetryService().scenarioEnd(Scenarios.PodsList), 0);
             }
             return (
                 <CustomCard className="pods-associated k8s-card-padding flex-grow bolt-table-card bolt-card-no-vertical-padding">
@@ -96,10 +96,6 @@ export class PodsTable extends React.Component<IPodsTableProperties> {
         }
 
         return null;
-    }
-
-    public componentDidMount(): void {
-        KubeFactory.telemetryService.scenarioEnd(Scenarios.PodsList);
     }
 
     private _prepareSubTextData(filteredPods: V1Pod[]): void {
