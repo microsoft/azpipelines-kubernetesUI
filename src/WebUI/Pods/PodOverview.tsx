@@ -32,6 +32,9 @@ export interface IPodOverviewProps extends IPodRightPanelProps {
 export class PodOverview extends React.Component<IPodOverviewProps> {
     public render(): JSX.Element {
         const podDetails = PodOverview._getPodDetails(this.props.pod, this.props.showImageDetails);
+        if(this.props.markTTICallback){
+            setTimeout(this.props.markTTICallback, 0);
+        }
         return (
             <CustomCard className="pod-overview-card k8s-card-padding flex-grow bolt-card-no-vertical-padding">
                 <CustomHeader>

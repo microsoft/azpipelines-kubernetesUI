@@ -22,22 +22,18 @@ export class KubeFactory {
 
 export class DefaultTelemetryService implements ITelemetryService {
     public markTimeToInteractive(scenarioName: string, additionalProperties?: { [key: string]: any; } | undefined): void {
-        console.log("Scenario ready for interaction " + scenarioName);
-        console.log(additionalProperties);
+        console.log(`Scenario ready for interaction ${scenarioName}, properties:${JSON.stringify(additionalProperties||{})}`);
     }
 
     public onClickTelemetry(source: string, additionalProperties?: { [key: string]: any; }): void {
-        console.log("Item clicked " + source);
-        console.log(additionalProperties);
+        console.log(`Item clicked  ${source}, properties:${JSON.stringify(additionalProperties||{})}`);
     }
 
     scenarioStart(scenarioName: string, additionalProperties?: { [key: string]: any; }): void {
-        console.log("Scenario started " + scenarioName);
-        console.log(additionalProperties);
+        console.log(`Scenario started ${scenarioName}, properties:${JSON.stringify(additionalProperties||{})}`);
     }
 
     scenarioEnd(scenarioName: string, additionalProperties?: { [key: string]: any; }): void {
-        console.log("Scenario completed " + scenarioName);
-        console.log(additionalProperties);
+        console.log(`Scenario completed ${scenarioName}, properties:${JSON.stringify(additionalProperties||{})}`);
     }
 }

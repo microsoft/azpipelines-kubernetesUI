@@ -121,8 +121,11 @@ export class ServiceDetails extends React.Component<IServiceDetailsProperties, I
         this._servicesStore.removeListener(ServicesEvents.ServicePodsFetchedEvent, this._onPodsFetched);
     }
 
-    public componentDidMount(): void {
-        KubeFactory.telemetryService.scenarioEnd(Scenarios.ServiceDetails);
+    private _markTTI = () => {
+        if(!this._isTTIMarked){
+            KubeFactory.telemetryService.scenarioEnd(Scenarios.ServiceDetails);
+        }
+        this._isTTIMarked = true;
     }
 
     private _getMainHeading(): JSX.Element | null {
@@ -245,6 +248,7 @@ export class ServiceDetails extends React.Component<IServiceDetailsProperties, I
         }
 
         if (!this.state.pods || this.state.pods.length === 0) {
+            setTimeout(this._markTTI, 0);
             return KubeZeroData.getServiceAssociatedPodsZeroData();
         }
 
@@ -255,6 +259,7 @@ export class ServiceDetails extends React.Component<IServiceDetailsProperties, I
                 headingText={Resources.AssociatedPodsText}
                 onItemActivated={this._onSelectedPodInvoked}
                 showWorkloadColumn={true}
+                markTTICallback={this._markTTI}
             />
         );
     }
@@ -277,6 +282,7 @@ export class ServiceDetails extends React.Component<IServiceDetailsProperties, I
         );
     }
 
+    private _isTTIMarked: boolean = false;
     private _servicesStore: ServicesStore;
     private _podsActionsCreator: PodsActionsCreator;
 }

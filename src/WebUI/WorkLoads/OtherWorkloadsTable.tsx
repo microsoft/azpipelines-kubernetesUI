@@ -19,7 +19,7 @@ import * as React from "react";
 import { KubeResourceType } from "../../Contracts/KubeServiceBase";
 import { defaultColumnRenderer, onPodsColumnClicked, renderPodsStatusTableCell, renderTableCell } from "../Common/KubeCardWithTable";
 import { KubeSummary } from "../Common/KubeSummary";
-import { ImageDetailsEvents, SelectedItemKeys, WorkloadsEvents, Scenarios } from "../Constants";
+import { ImageDetailsEvents, SelectedItemKeys, WorkloadsEvents } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
 import { ImageDetailsActionsCreator } from "../ImageDetails/ImageDetailsActionsCreator";
@@ -32,7 +32,6 @@ import { ISetWorkloadTypeItem, IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
 import { WorkloadsActionsCreator } from "./WorkloadsActionsCreator";
 import { WorkloadsStore } from "./WorkloadsStore";
-import { KubeFactory } from "../KubeFactory";
 
 const setNameKey = "otherwrkld-name-key";
 const imageKey = "otherwrkld-image-key";
@@ -73,7 +72,6 @@ export class OtherWorkloads extends React.Component<IOtherWorkloadsProperties, I
         this._actionCreator.getReplicaSets(KubeSummary.getKubeService());
         this._actionCreator.getStatefulSets(KubeSummary.getKubeService());
         this._actionCreator.getDaemonSets(KubeSummary.getKubeService());
-        KubeFactory.telemetryService.scenarioStart(Scenarios.OtherWorkloads);
     }
 
     public render(): React.ReactNode {
@@ -81,6 +79,7 @@ export class OtherWorkloads extends React.Component<IOtherWorkloadsProperties, I
             return Utils.filterByName(set.name, this.props.nameFilter);
         });
 
+        this.props.markTTICallback && setTimeout(this.props.markTTICallback, 0);
         if (filteredSet.length > 0) {
             return (
                 <CustomCard className="workloads-other-content k8s-card-padding flex-grow bolt-table-card bolt-card-no-vertical-padding">
@@ -111,10 +110,6 @@ export class OtherWorkloads extends React.Component<IOtherWorkloadsProperties, I
         }
 
         return null;
-    }
-
-    public componentDidMount(): void {
-        KubeFactory.telemetryService.scenarioEnd(Scenarios.OtherWorkloads);
     }
 
     public componentWillUnmount(): void {

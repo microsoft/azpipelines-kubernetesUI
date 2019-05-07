@@ -77,10 +77,6 @@ export class WorkloadsPivot extends React.Component<IWorkloadsPivotProps, IWorkl
         );
     }
 
-    public componentDidMount(): void {
-        KubeFactory.telemetryService.scenarioEnd(Scenarios.Workloads);
-    }
-
     public componentWillUnmount(): void {
         this._workloadsStore.removeListener(WorkloadsEvents.WorkloadsFoundEvent, this._onDataFound);
         this._podsStore.removeListener(PodsEvents.PodsFetchedEvent, this._onPodsFetched);
@@ -108,6 +104,13 @@ export class WorkloadsPivot extends React.Component<IWorkloadsPivotProps, IWorkl
         }
     }
 
+    private _markTTI = () => {
+        if (!this._isTTIMarked) {
+            KubeFactory.telemetryService.scenarioEnd(Scenarios.Workloads);
+        }
+        this._isTTIMarked = true;
+    }
+
     private _getContent(): JSX.Element {
         return (this.state.workloadResourceSize === 0 ? this._getZeroData() :
             <>
@@ -131,6 +134,7 @@ export class WorkloadsPivot extends React.Component<IWorkloadsPivotProps, IWorkl
             key={format("sts-list-{0}", this.props.namespace || "")}
             nameFilter={this._getNameFilterValue()}
             typeFilter={this._getTypeFilterValue()}
+            markTTICallback={this._markTTI}
         />);
     }
 
@@ -138,6 +142,7 @@ export class WorkloadsPivot extends React.Component<IWorkloadsPivotProps, IWorkl
         return (<DeploymentsTable
             key={format("dc-{0}", this.props.namespace || "")}
             nameFilter={this._getNameFilterValue()}
+            markTTICallback={this._markTTI}
         />);
     }
 
@@ -169,6 +174,7 @@ export class WorkloadsPivot extends React.Component<IWorkloadsPivotProps, IWorkl
         return KubeZeroData.getWorkloadsZeroData();
     }
 
+    private _isTTIMarked :boolean = false;
     private _workloadsStore: WorkloadsStore;
     private _workloadsActionCreator: WorkloadsActionsCreator;
     private _podsActionCreator: PodsActionsCreator;

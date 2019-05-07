@@ -216,15 +216,13 @@ export class PodsDetails extends React.Component<IPodsDetailsProperties, IPodsDe
                         key={item.metadata.uid}
                         pod={item}
                         showImageDetails={this._showImageDetails}
+                        markTTICallback={this._markTTI}
                     />
                 )
             },
             selectedMasterItem: new ObservableValue<V1Pod>(selectedPod || {} as V1Pod),
             parentItem: parent
         };
-    }
-    public componentDidMount(): void {
-        KubeFactory.telemetryService.scenarioEnd(Scenarios.PodsDetails);
     }
 
     public render(): JSX.Element {
@@ -333,6 +331,14 @@ export class PodsDetails extends React.Component<IPodsDetailsProperties, IPodsDe
         this.setState({});
     }
 
+    private _markTTI = (): void => {
+        if(!this._isTTIMarked){
+            KubeFactory.telemetryService.scenarioEnd(Scenarios.PodsDetails);
+        }
+        this._isTTIMarked = true;
+    }
+
+    private _isTTIMarked: boolean = false;
     private _history: History;
     private _podsStore: PodsStore;
     private _podsFetchEventName: string;

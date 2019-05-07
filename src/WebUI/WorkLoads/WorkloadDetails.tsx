@@ -181,7 +181,6 @@ export class WorkloadDetails extends React.Component<IWorkloadDetailsProperties,
             const pods: V1Pod[] = (podList && podList.items || []).filter(pod => {
                 return Utils.isOwnerMatched(pod.metadata, this.state.item!.metadata.uid);
             });
-            KubeFactory.telemetryService.scenarioEnd(Scenarios.WorkloadDetails);
             this.setState({
                 pods: pods,
                 selectedPod: pods && pods.length > 0 ? pods[0] : null
@@ -247,6 +246,12 @@ export class WorkloadDetails extends React.Component<IWorkloadDetailsProperties,
         }
     }
 
+    private _markTTI = () => {
+        if (!this._isTTIMarked) {
+            KubeFactory.telemetryService.scenarioEnd(Scenarios.WorkloadDetails);
+        }
+        this._isTTIMarked = true;
+    }
     private _getWorkloadDetails(): JSX.Element | null {
         if (this.state.item) {
             const metadata = this.state.item.metadata;
@@ -368,6 +373,7 @@ export class WorkloadDetails extends React.Component<IWorkloadDetailsProperties,
         }
 
         if (this.state.pods.length === 0) {
+            setTimeout(()=> this._markTTI(), 0);
             return KubeZeroData.getWorkloadAssociatedPodsZeroData();
         }
 
@@ -377,6 +383,7 @@ export class WorkloadDetails extends React.Component<IWorkloadDetailsProperties,
                 podsToRender={this.state.pods}
                 headingText={Resources.PodsText}
                 onItemActivated={this._onSelectedPodInvoked}
+                markTTICallback={this._markTTI}
             />
         );
     }
@@ -400,6 +407,7 @@ export class WorkloadDetails extends React.Component<IWorkloadDetailsProperties,
         this.setState({});
     }
 
+    private _isTTIMarked: boolean = false;
     private _podsStore: PodsStore;
     private _workloadsStore: WorkloadsStore;
     private _imageDetailsStore: ImageDetailsStore;

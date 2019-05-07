@@ -97,6 +97,11 @@ export interface IVssComponentProperties extends IBaseProps {
     key?: string | number;
 
     /**
+     * Mark TTI callback for child components 
+     */
+    markTTICallback?: () => void;
+
+    /**
      * Any of the properties MAY be accessed as an IObservable.
      */
     [property: string]: IObservable<any> | any;

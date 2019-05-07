@@ -198,7 +198,7 @@ export class PodsRightPanel extends React.Component<IPodRightPanelProps, IPodsRi
                     // For OrphanPod, the imageDetails view show/hide state is controlled via Right panel itself,
                     // unlike other PodDetails views where the parent controls the show/hide of image details
                     const imageDetails = this.props.showImageDetails || this.state.showImageDetails;
-                    return <PodOverview {...componentProps} showImageDetails={imageDetails} />;
+                    return <PodOverview {...componentProps} showImageDetails={imageDetails} markTTICallback={this.props.markTTICallback} />;
             }
         }
     }

@@ -46,7 +46,9 @@ export class PodsTable extends React.Component<IPodsTableProperties> {
   
     constructor(props: IPodsTableProperties){
         super(props);
-        KubeFactory.telemetryService.scenarioStart(Scenarios.PodsList);
+        if(!this.props.markTTICallback){
+            KubeFactory.telemetryService.scenarioStart(Scenarios.PodsList);
+        }
     }
     
     public render(): React.ReactNode {
@@ -58,6 +60,9 @@ export class PodsTable extends React.Component<IPodsTableProperties> {
         if (filteredPods.length > 0) {
             this._prepareSubTextData(filteredPods);
 
+            if(!this.props.markTTICallback) {
+                setTimeout(() => KubeFactory.telemetryService.scenarioEnd(Scenarios.PodsList), 0);
+            }
             return (
                 <CustomCard className="pods-associated k8s-card-padding flex-grow bolt-table-card bolt-card-no-vertical-padding">
                     <CustomHeader>
@@ -240,5 +245,6 @@ export class PodsTable extends React.Component<IPodsTableProperties> {
         return subText;
     }
 
+    private _isTTIMarked: boolean = false;
     private _statusCount: { [key: string]: number } = {};
 }

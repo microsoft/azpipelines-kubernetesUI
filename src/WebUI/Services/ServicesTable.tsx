@@ -15,9 +15,8 @@ import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
 import { renderExternalIpCell, renderTableCell } from "../Common/KubeCardWithTable";
 import { KubeZeroData } from "../Common/KubeZeroData";
-import { SelectedItemKeys, Scenarios } from "../Constants";
+import { SelectedItemKeys } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
-import { KubeFactory } from "../KubeFactory";
 import * as Resources from "../Resources";
 import { SelectionActionsCreator } from "../Selection/SelectionActionCreator";
 import { ISelectionPayload } from "../Selection/SelectionActions";
@@ -44,13 +43,7 @@ export class ServicesTable extends React.Component<IServicesComponentProperties,
         this.state = {
             hoverRowIndex: -1
         };
-
-        KubeFactory.telemetryService.scenarioStart(Scenarios.Services);
         this._selectionActionCreator = ActionsCreatorManager.GetActionCreator<SelectionActionsCreator>(SelectionActionsCreator);
-    }
-
-    public componentDidMount() {
-        KubeFactory.telemetryService.scenarioEnd(Scenarios.Services);
     }
 
     public render(): React.ReactNode {
@@ -83,6 +76,9 @@ export class ServicesTable extends React.Component<IServicesComponentProperties,
         }
     }
 
+    public componentDidMount() {
+        this.props.markTTICallback && this.props.markTTICallback();
+    }
 
     private _openServiceItem = (event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>, selectedItem: IServiceItem) => {
         if (selectedItem) {

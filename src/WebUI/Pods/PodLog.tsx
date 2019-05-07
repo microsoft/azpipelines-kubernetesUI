@@ -66,6 +66,7 @@ export class PodLog extends React.Component<IPodLogProps, IPodLogState> {
                 uid: Util_String.newGuid(), // required to refresh the content
                 logContent: errorMessage
             });
+            KubeFactory.telemetryService.scenarioEnd(Scenarios.PodLogs);
         });
     }
 }

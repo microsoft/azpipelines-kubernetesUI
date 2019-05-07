@@ -56,11 +56,10 @@ export class DeploymentsTable extends React.Component<IDeploymentsTablePropertie
 
         this._store.addListener(WorkloadsEvents.ReplicaSetsFetchedEvent, this._onReplicaSetsFetched);
         this._imageDetailsStore.addListener(ImageDetailsEvents.HasImageDetailsEvent, this._setHasImageDetails);
-        KubeFactory.telemetryService.scenarioStart(Scenarios.Deployments);
     }
 
     public componentDidMount() {
-        KubeFactory.telemetryService.scenarioEnd(Scenarios.Deployments);
+        this.props.markTTICallback && this.props.markTTICallback();
     }
 
     public render(): React.ReactNode {
