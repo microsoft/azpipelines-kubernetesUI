@@ -174,7 +174,7 @@ export class PodsDetails extends React.Component<IPodsDetailsProperties, IPodsDe
             kind: parentKind || ""
         };
 
-        const masterDerailsContext = this._getMasterDetailsContext(parentItem, selectedPod, filteredPods);
+        const masterDetailsContext = this._getMasterDetailsContext(parentItem, selectedPod, filteredPods);
         this.state = {
             parentKind: parentKind,
             parentName: parentName,
@@ -182,7 +182,7 @@ export class PodsDetails extends React.Component<IPodsDetailsProperties, IPodsDe
             selectedPod: selectedPod,
             selectedImageDetails: undefined,
             isLoading: !podsList || !podsList.items,
-            masterDetailsContext: new BaseMasterDetailsContext(masterDerailsContext, this._onParentBackButtonClick)
+            masterDetailsContext: new BaseMasterDetailsContext(masterDetailsContext, this._onParentBackButtonClick)
         };
     }
 
