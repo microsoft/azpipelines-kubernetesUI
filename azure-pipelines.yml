@@ -13,7 +13,7 @@ jobs:
   timeoutInMinutes: 20
   cancelTimeoutInMinutes: 2
   pool:
-    name: 'Hosted'
+    name: 'Hosted macOS'
 
   steps:
   - task: NodeTool@0
