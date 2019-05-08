@@ -27,6 +27,7 @@ import { OtherWorkloads } from "../Workloads/OtherWorkloadsTable";
 import { WorkloadsActionsCreator } from "./WorkloadsActionsCreator";
 import { WorkloadsFilterBar } from "./WorkloadsFilterBar";
 import { WorkloadsStore } from "./WorkloadsStore";
+import "./WorkloadsPivot.scss";
 
 export interface IWorkloadsPivotState {
     workloadResourceSize: number;

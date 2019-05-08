@@ -23,6 +23,7 @@ import { getRunDetailsText } from "../RunDetails";
 import { IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
 import "./ImageDetails.scss";
+import { css } from "azure-devops-ui/Util";
 
 export interface IImageDetailsProperties extends IVssComponentProperties {
     imageDetails: IImageDetails;
@@ -141,10 +142,12 @@ export class ImageDetails extends React.Component<IImageDetailsProperties, IImag
 
     private _getCardContent = (): JSX.Element => {
         const items = this._getImageDetailsRowsData(this.props.imageDetails);
+        const rowClassNames = "flex-row details-card-row-size body-m";
         return (
             <div className="flex-column details-card-content">
                 {items.map((item, index) => (
-                    <div className="flex-row details-card-row-size body-m" key={index}>
+                     <div className={index === 0 ? css(rowClassNames, "first-row") : rowClassNames} key={index}>
+
                         <div className="text-ellipsis secondary-text details-card-info-field-size">
                             {item.key}
                         </div>
