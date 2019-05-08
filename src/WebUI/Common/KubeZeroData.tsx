@@ -10,9 +10,9 @@ import { css } from "azure-devops-ui/Util";
 import { ZeroData } from "azure-devops-ui/ZeroData";
 import * as React from "react";
 import { KubeImage } from "../../Contracts/Contracts";
+import * as Resources from "../../Resources";
 import { HyperLinks } from "../Constants";
 import { KubeFactory } from "../KubeFactory";
-import * as Resources from "../Resources";
 import { IVssComponentProperties } from "../Types";
 import "./KubeZeroData.scss";
 

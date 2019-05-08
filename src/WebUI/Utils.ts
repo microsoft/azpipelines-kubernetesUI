@@ -3,14 +3,13 @@
     Licensed under the MIT license.
 */
 
-import * as React from "react";
 import { V1ObjectMeta, V1Pod, V1PodSpec, V1PodStatus } from "@kubernetes/client-node";
 import { ObservableArray } from "azure-devops-ui/Core/Observable";
 import { format, localeFormat } from "azure-devops-ui/Core/Util/String";
 import { ILabelModel } from "azure-devops-ui/Label";
 import { IStatusProps, Statuses } from "azure-devops-ui/Status";
 import { PodPhase } from "../Contracts/Contracts";
-import * as Resources from "./Resources";
+import * as Resources from "../Resources";
 import { SelectedItemKeys } from "./Constants";
 
 const pipelineNameAnnotationKey: string = "azure-pipelines/pipeline";
@@ -21,7 +20,6 @@ const newPipelineRunUrlAnnotationKey: string = "azure-pipelines/runuri";
 const pipelineJobNameAnnotationKey: string = "azure-pipelines/jobName";
 const matchPatternForImageName = new RegExp(/\:\/\/(.+?)\@/);
 const matchPatternForDigest = new RegExp(/\@sha256\:(.+)/);
-const invalidCharPatternInNamespace = new RegExp(/[:.]/);
 
 export interface IMetadataAnnotationPipeline {
     runName: string | undefined;
@@ -290,7 +288,7 @@ export class Utils {
     }
 
     public static appendDefaultTagToImageName(imageName: string): string {
-        if(!/:/.test(imageName)) {
+        if (!/:/.test(imageName)) {
             imageName = format("{0}:latest", imageName);
         }
 

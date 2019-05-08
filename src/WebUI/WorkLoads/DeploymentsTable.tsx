@@ -6,15 +6,15 @@
 import { V1Deployment, V1DeploymentList, V1ObjectMeta, V1Pod, V1ReplicaSet, V1ReplicaSetList } from "@kubernetes/client-node";
 import { Ago } from "azure-devops-ui/Ago";
 import { CardContent, CustomCard } from "azure-devops-ui/Card";
-import { ITableRow } from "azure-devops-ui/Table";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { equals, format, localeFormat } from "azure-devops-ui/Core/Util/String";
 import { CustomHeader, HeaderDescription, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
 import { Link } from "azure-devops-ui/Link";
-import { ITableColumn, Table } from "azure-devops-ui/Table";
+import { ITableColumn, ITableRow, Table } from "azure-devops-ui/Table";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
+import * as Resources from "../../Resources";
 import { defaultColumnRenderer, onPodsColumnClicked, renderPodsStatusTableCell, renderTableCell } from "../Common/KubeCardWithTable";
 import { KubeSummary } from "../Common/KubeSummary";
 import { Tags } from "../Common/Tags";
@@ -23,7 +23,6 @@ import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
 import { ImageDetailsStore } from "../ImageDetails/ImageDetailsStore";
 import { PodsStore } from "../Pods/PodsStore";
-import * as Resources from "../Resources";
 import { SelectionActionsCreator } from "../Selection/SelectionActionCreator";
 import { ISelectionPayload } from "../Selection/SelectionActions";
 import { IDeploymentReplicaSetItem, IDeploymentReplicaSetMap, IVssComponentProperties } from "../Types";
@@ -268,9 +267,9 @@ export class DeploymentsTable extends React.Component<IDeploymentsTablePropertie
         const hasImageDetails: boolean | undefined = this._imageDetailsStore.hasImageDetails(imageId);
         // If hasImageDetails is undefined, then image details promise has not resolved, so do not set imageDetailsUnavailable tooltip
         if (hasImageDetails === false) {
-            imageDetailsUnavailableTooltipText = localeFormat("{0} | {1}",  deployment.imageTooltip || textToRender, Resources.ImageDetailsUnavailableText);
+            imageDetailsUnavailableTooltipText = localeFormat("{0} | {1}", deployment.imageTooltip || textToRender, Resources.ImageDetailsUnavailableText);
         }
-        
+
         const itemToRender = hasImageDetails ?
             <Tooltip overflowOnly>
                 <Link

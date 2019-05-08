@@ -6,17 +6,17 @@
 import { V1DaemonSet, V1Pod, V1PodSpec, V1ReplicaSet, V1StatefulSet } from "@kubernetes/client-node";
 import { Ago } from "azure-devops-ui/Ago";
 import { CardContent, CustomCard } from "azure-devops-ui/Card";
-import { ITableRow } from "azure-devops-ui/Table";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { equals, localeFormat } from "azure-devops-ui/Core/Util/String";
 import { CustomHeader, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
 import { Link } from "azure-devops-ui/Link";
 import { Statuses } from "azure-devops-ui/Status";
-import { ITableColumn, Table, TwoLineTableCell } from "azure-devops-ui/Table";
+import { ITableColumn, ITableRow, Table, TwoLineTableCell } from "azure-devops-ui/Table";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
 import { KubeResourceType } from "../../Contracts/KubeServiceBase";
+import * as Resources from "../../Resources";
 import { defaultColumnRenderer, onPodsColumnClicked, renderPodsStatusTableCell, renderTableCell } from "../Common/KubeCardWithTable";
 import { KubeSummary } from "../Common/KubeSummary";
 import { ImageDetailsEvents, SelectedItemKeys, WorkloadsEvents } from "../Constants";
@@ -25,7 +25,6 @@ import { StoreManager } from "../FluxCommon/StoreManager";
 import { ImageDetailsActionsCreator } from "../ImageDetails/ImageDetailsActionsCreator";
 import { ImageDetailsStore } from "../ImageDetails/ImageDetailsStore";
 import { PodsStore } from "../Pods/PodsStore";
-import * as Resources from "../Resources";
 import { SelectionActionsCreator } from "../Selection/SelectionActionCreator";
 import { ISelectionPayload } from "../Selection/SelectionActions";
 import { ISetWorkloadTypeItem, IVssComponentProperties } from "../Types";
@@ -224,9 +223,9 @@ export class OtherWorkloads extends React.Component<IOtherWorkloadsProperties, I
         const hasImageDetails: boolean | undefined = this._imageDetailsStore.hasImageDetails(imageId);
         // If hasImageDetails is undefined, then image details promise has not resolved, so do not set imageDetailsUnavailable tooltip
         if (hasImageDetails === false) {
-            imageDetailsUnavailableTooltipText = localeFormat("{0} | {1}",  workload.imageTooltip || imageText, Resources.ImageDetailsUnavailableText);
+            imageDetailsUnavailableTooltipText = localeFormat("{0} | {1}", workload.imageTooltip || imageText, Resources.ImageDetailsUnavailableText);
         }
-        
+
         const itemToRender = hasImageDetails ?
             <Tooltip overflowOnly={true}>
                 <Link
@@ -239,7 +238,7 @@ export class OtherWorkloads extends React.Component<IOtherWorkloadsProperties, I
                 >
                     {imageText}
                 </Link>
-            </Tooltip> 
+            </Tooltip>
             : defaultColumnRenderer(imageText, "", imageDetailsUnavailableTooltipText);
 
         return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender, undefined, "bolt-table-cell-content-with-link");

@@ -6,27 +6,26 @@
 import { V1OwnerReference, V1Pod } from "@kubernetes/client-node";
 import { Ago } from "azure-devops-ui/Ago";
 import { CardContent, CustomCard } from "azure-devops-ui/Card";
-import { ITableRow } from "azure-devops-ui/Table";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { localeFormat } from "azure-devops-ui/Core/Util/String";
 import { CustomHeader, HeaderDescription, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
 import { Link } from "azure-devops-ui/Link";
-import { ITableColumn, renderSimpleCell, Table } from "azure-devops-ui/Table";
+import { ITableColumn, ITableRow, renderSimpleCell, Table } from "azure-devops-ui/Table";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
 import { css } from "azure-devops-ui/Util";
 import { AgoFormat } from "azure-devops-ui/Utilities/Date";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
+import * as Resources from "../../Resources";
 import { renderPodNameWithStatusTableCell, renderTableCell } from "../Common/KubeCardWithTable";
-import { SelectedItemKeys, Scenarios } from "../Constants";
+import { Scenarios, SelectedItemKeys } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { ActionsHubManager } from "../FluxCommon/ActionsHubManager";
-import * as Resources from "../Resources";
+import { getTelemetryService } from "../KubeFactory";
 import { SelectionActionsCreator } from "../Selection/SelectionActionCreator";
 import { ISelectionPayload, SelectionActions } from "../Selection/SelectionActions";
 import { IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
-import { getTelemetryService } from "../KubeFactory";
 import "./PodsTable.scss";
 
 const podNameKey: string = "pl-name-key";
@@ -44,14 +43,14 @@ export interface IPodsTableProperties extends IVssComponentProperties {
 }
 
 export class PodsTable extends React.Component<IPodsTableProperties> {
-  
-    constructor(props: IPodsTableProperties){
+
+    constructor(props: IPodsTableProperties) {
         super(props);
-        if(!this.props.markTTICallback){
+        if (!this.props.markTTICallback) {
             getTelemetryService().scenarioStart(Scenarios.PodsList);
         }
     }
-    
+
     public render(): React.ReactNode {
         const showWorkloadColumn = this.props.showWorkloadColumn || false;
         const filteredPods: V1Pod[] = (this.props.podsToRender || []).filter((pod) => {
@@ -96,7 +95,7 @@ export class PodsTable extends React.Component<IPodsTableProperties> {
     }
 
     public componentDidMount() {
-        if(!this.props.markTTICallback) {
+        if (!this.props.markTTICallback) {
             getTelemetryService().scenarioEnd(Scenarios.PodsList);
         }
     }

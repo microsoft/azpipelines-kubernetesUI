@@ -13,16 +13,16 @@ import { Tooltip } from "azure-devops-ui/TooltipEx";
 import { css } from "azure-devops-ui/Util";
 import { AgoFormat } from "azure-devops-ui/Utilities/Date";
 import * as React from "react";
+import * as Resources from "../../Resources";
 import { defaultColumnRenderer } from "../Common/KubeCardWithTable";
 import { Tags } from "../Common/Tags";
+import { Scenarios } from "../Constants";
 import { StoreManager } from "../FluxCommon/StoreManager";
 import { ImageDetailsStore } from "../ImageDetails/ImageDetailsStore";
-import * as Resources from "../Resources";
 import { getRunDetailsText } from "../RunDetails";
 import { Utils } from "../Utils";
 import "./PodOverview.scss";
 import { IPodRightPanelProps } from "./PodsRightPanel";
-import { Scenarios } from "../Constants";
 
 export interface IPodOverviewProps extends IPodRightPanelProps {
     // Overriding this to make sure we don't accept undefined
@@ -36,7 +36,7 @@ export class PodOverview extends React.Component<IPodOverviewProps> {
         const scenarioPayload = {
             "scenario": Scenarios.PodOverview
         };
-        if(this.props.markTTICallback){
+        if (this.props.markTTICallback) {
             setTimeout(() => this.props.markTTICallback && this.props.markTTICallback(scenarioPayload), 0);
         }
         return (

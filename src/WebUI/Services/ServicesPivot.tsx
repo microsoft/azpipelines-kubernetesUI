@@ -9,20 +9,20 @@ import { Spinner, SpinnerSize } from "azure-devops-ui/Spinner";
 import { css } from "azure-devops-ui/Util";
 import { Filter, IFilterItemState, IFilterState } from "azure-devops-ui/Utilities/Filter";
 import * as React from "react";
+import * as Resources from "../../Resources";
 import { NameKey, TypeKey } from "../Common/KubeFilterBar";
 import { KubeSummary } from "../Common/KubeSummary";
 import { KubeZeroData } from "../Common/KubeZeroData";
-import { ServicesEvents, Scenarios } from "../Constants";
+import { Scenarios, ServicesEvents } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
-import * as Resources from "../Resources";
+import { getTelemetryService } from "../KubeFactory";
 import { ServicesTable } from "../Services/ServicesTable";
 import { IVssComponentProperties } from "../Types";
 import { ServicesActionsCreator } from "./ServicesActionsCreator";
 import { ServicesFilterBar } from "./ServicesFilterBar";
 import "./ServicesPivot.scss";
 import { ServicesStore } from "./ServicesStore";
-import { getTelemetryService } from "../KubeFactory";
 
 export interface IServicesPivotState {
     serviceList?: V1ServiceList;
@@ -126,7 +126,7 @@ export class ServicesPivot extends React.Component<IServicesPivotProps, IService
         this._isTTIMarked = true;
     }
 
-    private _isTTIMarked :boolean = false;
+    private _isTTIMarked: boolean = false;
     private _store: ServicesStore;
     private _actionCreator: ServicesActionsCreator;
 }

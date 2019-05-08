@@ -13,14 +13,15 @@ import { createBrowserHistory, History } from "history";
 import * as queryString from "query-string";
 import * as React from "react";
 import { IImageDetails } from "../../Contracts/Types";
+import * as Resources from "../../Resources";
 import { KubeSummary } from "../Common/KubeSummary";
-import { ImageDetailsEvents, PodsEvents, PodsRightPanelTabsKeys } from "../Constants";
+import { ImageDetailsEvents, PodsEvents, PodsRightPanelTabsKeys, Scenarios } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
 import { ImageDetails } from "../ImageDetails/ImageDetails";
 import { ImageDetailsActionsCreator } from "../ImageDetails/ImageDetailsActionsCreator";
 import { ImageDetailsStore } from "../ImageDetails/ImageDetailsStore";
-import * as Resources from "../Resources";
+import { getTelemetryService } from "../KubeFactory";
 import { SelectionActionsCreator } from "../Selection/SelectionActionCreator";
 import { IPodDetailsSelectionProperties, IPodParentItem, IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
@@ -28,8 +29,6 @@ import { PodsActionsCreator } from "./PodsActionsCreator";
 import { PodsLeftPanel } from "./PodsLeftPanel";
 import { PodsRightPanel } from "./PodsRightPanel";
 import { PodsStore } from "./PodsStore";
-import { getTelemetryService } from "../KubeFactory";
-import { Scenarios } from "../Constants";
 
 export interface IPodsDetailsProperties extends IVssComponentProperties {
     parentUid: string;
@@ -334,7 +333,7 @@ export class PodsDetails extends React.Component<IPodsDetailsProperties, IPodsDe
     }
 
     private _markTTI = (additionalProperties?: { [key: string]: any }): void => {
-        if(!this._isTTIMarked){
+        if (!this._isTTIMarked) {
             getTelemetryService().scenarioEnd(Scenarios.PodsDetails, additionalProperties);
             this._isTTIMarked = true;
             this._isScenarioOpen = false;
@@ -342,7 +341,7 @@ export class PodsDetails extends React.Component<IPodsDetailsProperties, IPodsDe
     }
 
     private _onRightPaneTabChange = (): void => {
-        if(this._isScenarioOpen) {
+        if (this._isScenarioOpen) {
             //close current scenario and reopen a new open
             getTelemetryService().scenarioEnd(Scenarios.PodsDetails);
         }

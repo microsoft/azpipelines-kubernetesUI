@@ -6,12 +6,11 @@
 import { V1Pod } from "@kubernetes/client-node";
 import * as Util_String from "azure-devops-ui/Core/Util/String";
 import * as React from "react";
+import * as Resources from "../../Resources";
 import { KubeSummary } from "../Common/KubeSummary";
-import * as Resources from "../Resources";
+import { Scenarios } from "../Constants";
 import { PodContentReader } from "./PodContentReader";
 import { IPodRightPanelProps } from "./PodsRightPanel";
-import { Scenarios } from "../Constants";
-import { getTelemetryService } from "../KubeFactory";
 
 export interface IPodLogProps extends IPodRightPanelProps {
     // Overriding this to make sure we don't accept undefined

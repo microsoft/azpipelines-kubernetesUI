@@ -14,13 +14,13 @@ import { createBrowserHistory, History } from "history";
 import * as queryString from "query-string";
 import * as React from "react";
 import { IImageDetails } from "../../Contracts/Types";
+import * as Resources from "../../Resources";
 import { KubeSummary } from "../Common/KubeSummary";
 import { PageTopHeader } from "../Common/PageTopHeader";
 import { PodsEvents, PodsRightPanelTabsKeys } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
 import { ImageDetails } from "../ImageDetails/ImageDetails";
-import * as Resources from "../Resources";
 import { IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
 import { PodLog } from "./PodLog";
@@ -191,10 +191,10 @@ export class PodsRightPanel extends React.Component<IPodRightPanelProps, IPodsRi
             const componentProps = { key: this.state.pod.metadata.uid, pod: this.state.pod };
             switch (this.state.selectedTab) {
                 case PodsRightPanelTabsKeys.PodsLogsKey:
-                    return <PodLog {...componentProps}  markTTICallback={this.props.markTTICallback}/>;
+                    return <PodLog {...componentProps} markTTICallback={this.props.markTTICallback} />;
 
                 case PodsRightPanelTabsKeys.PodsYamlKey:
-                    return <PodYaml {...componentProps}  markTTICallback={this.props.markTTICallback}/>;
+                    return <PodYaml {...componentProps} markTTICallback={this.props.markTTICallback} />;
 
                 default:
                     // For OrphanPod, the imageDetails view show/hide state is controlled via Right panel itself,

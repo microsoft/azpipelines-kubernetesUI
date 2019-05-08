@@ -9,8 +9,8 @@ import { IListBoxItem } from "azure-devops-ui/ListBox";
 import { Filter } from "azure-devops-ui/Utilities/Filter";
 import * as React from "react";
 import { KubeResourceType } from "../../Contracts/KubeServiceBase";
+import * as Resources from "../../Resources";
 import { KubeFilterBar } from "../Common/KubeFilterBar";
-import * as Resources from "../Resources";
 import { IVssComponentProperties } from "../Types";
 
 export interface IWorkloadsFilterBarProps extends IVssComponentProperties {

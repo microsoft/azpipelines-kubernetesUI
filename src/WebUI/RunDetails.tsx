@@ -1,9 +1,14 @@
-import * as React from "react";
-import { Utils, IMetadataAnnotationPipeline } from "./Utils";
 import { localeFormat } from "azure-devops-ui/Core/Util/String";
-import * as Resources from "./Resources";
 import { Link } from "azure-devops-ui/Link";
-import "./RunDetails.scss"
+/*
+    Copyright (c) Microsoft Corporation. All rights reserved.
+    Licensed under the MIT license.
+*/
+
+import * as React from "react";
+import * as Resources from "../Resources";
+import "./RunDetails.scss";
+import { IMetadataAnnotationPipeline, Utils } from "./Utils";
 
 export function getRunDetailsText(annotations?: { [key: string]: string }, jobAndPipelineDetails?: IMetadataAnnotationPipeline, createdAgo?: string): React.ReactNode {
     let pipelineDetails: IMetadataAnnotationPipeline = {} as IMetadataAnnotationPipeline;
