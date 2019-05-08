@@ -6,7 +6,7 @@
 import { V1DaemonSet, V1Pod, V1ReplicaSet, V1StatefulSet } from "@kubernetes/client-node";
 import { Button } from "azure-devops-ui/Button";
 import { CardContent, CustomCard } from "azure-devops-ui/Card";
-import { ITableRow, TableColumnStyle } from "azure-devops-ui/Components/Table/Table.Props";
+import { ITableRow, TableColumnStyle } from "azure-devops-ui/Table";
 import { format } from "azure-devops-ui/Core/Util/String";
 import { CustomHeader, HeaderDescription, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
 import { Link } from "azure-devops-ui/Link";

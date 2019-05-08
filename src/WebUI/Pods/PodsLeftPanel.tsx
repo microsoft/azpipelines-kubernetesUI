@@ -4,7 +4,7 @@
 */
 
 import { V1Pod } from "@kubernetes/client-node";
-import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
+import { ITableRow } from "azure-devops-ui/Table";
 import { IListItemDetails, IListSelection, List, ListItem, ListSelection } from "azure-devops-ui/List";
 import { Status, StatusSize } from "azure-devops-ui/Status";
 import { Tooltip } from "azure-devops-ui/TooltipEx";

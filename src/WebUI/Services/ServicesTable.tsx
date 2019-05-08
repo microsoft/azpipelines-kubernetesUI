@@ -6,7 +6,7 @@
 import { V1Service, V1ServiceList } from "@kubernetes/client-node";
 import { Ago } from "azure-devops-ui/Ago";
 import { Card } from "azure-devops-ui/Card";
-import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
+import { ITableRow } from "azure-devops-ui/Table";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { IStatusProps, Status, Statuses, StatusSize } from "azure-devops-ui/Status";
 import { ITableColumn, renderSimpleCell, Table, TwoLineTableCell } from "azure-devops-ui/Table";
