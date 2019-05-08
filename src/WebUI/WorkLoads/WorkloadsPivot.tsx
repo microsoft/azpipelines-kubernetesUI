@@ -44,7 +44,7 @@ export interface IWorkloadsPivotProps extends IVssComponentProperties {
 export class WorkloadsPivot extends React.Component<IWorkloadsPivotProps, IWorkloadsPivotState> {
     constructor(props: IWorkloadsPivotProps) {
         super(props, {});
-
+        getTelemetryService().scenarioStart(Scenarios.Workloads);
         this._workloadsStore = StoreManager.GetStore<WorkloadsStore>(WorkloadsStore);
         // initialize pods store as pods list will be required in workloadPodsView on item selection
         this._podsStore = StoreManager.GetStore<PodsStore>(PodsStore);
@@ -65,7 +65,6 @@ export class WorkloadsPivot extends React.Component<IWorkloadsPivotProps, IWorkl
         this._workloadsActionCreator.getDeployments(KubeSummary.getKubeService());
         // fetch all pods in parent component as the podList is required in selected workload pods view
         this._podsActionCreator.getPods(KubeSummary.getKubeService());
-        getTelemetryService().scenarioStart(Scenarios.Workloads);
     }
 
     public render(): React.ReactNode {

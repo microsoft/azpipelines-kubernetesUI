@@ -335,7 +335,6 @@ export class PodsDetails extends React.Component<IPodsDetailsProperties, IPodsDe
 
     private _markTTI = (additionalProperties?: { [key: string]: any }): void => {
         if(!this._isTTIMarked){
-            console.log("Got TTI Marker");
             getTelemetryService().scenarioEnd(Scenarios.PodsDetails, additionalProperties);
             this._isTTIMarked = true;
             this._isScenarioOpen = false;
@@ -343,14 +342,11 @@ export class PodsDetails extends React.Component<IPodsDetailsProperties, IPodsDe
     }
 
     private _onRightPaneTabChange = (): void => {
-        console.log("Tab change event");
         if(this._isScenarioOpen) {
-            console.log("closing existing scenario event");
             //close current scenario and reopen a new open
             getTelemetryService().scenarioEnd(Scenarios.PodsDetails);
         }
 
-        console.log("starting new scenario event");
         getTelemetryService().scenarioStart(Scenarios.PodsDetails);
         this._isScenarioOpen = true;
         this._isTTIMarked = false;

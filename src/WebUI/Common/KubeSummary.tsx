@@ -24,7 +24,7 @@ import { SelectedItemKeys, ServicesEvents, WorkloadsEvents } from "../Constants"
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
 import { ImageDetails } from "../ImageDetails/ImageDetails";
-import { DefaultTelemetryService, KubeFactory } from "../KubeFactory";
+import { KubeFactory } from "../KubeFactory";
 import { PodsDetails } from "../Pods/PodsDetails";
 import { PodsRightPanel } from "../Pods/PodsRightPanel";
 import { PodsStore } from "../Pods/PodsStore";

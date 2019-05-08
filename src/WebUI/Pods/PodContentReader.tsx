@@ -20,9 +20,8 @@ export class PodContentReader extends React.Component<IPodReaderProps> {
     }
 
     public componentDidMount() {
-        const scenarioPayload = {
+        this.props.markTTICallback && this.props.markTTICallback({
             "scenario": Scenarios.PodYaml
-        };
-        this.props.markTTICallback && this.props.markTTICallback(scenarioPayload);
+        });
     }
 }

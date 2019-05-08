@@ -37,7 +37,7 @@ export function getTelemetryService(): ITelemetryService {
     return KubeFactory.getTelemetryService();
 }
 
-export class DefaultTelemetryService implements ITelemetryService {
+class DefaultTelemetryService implements ITelemetryService {
     public markTimeToInteractive(scenarioName: string, additionalProperties?: { [key: string]: any; } | undefined): void {
         console.log(`Scenario ready for interaction ${scenarioName}, properties:${JSON.stringify(additionalProperties||{})}`);
     }

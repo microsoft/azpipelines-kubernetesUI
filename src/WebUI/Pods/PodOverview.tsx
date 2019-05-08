@@ -57,6 +57,12 @@ export class PodOverview extends React.Component<IPodOverviewProps> {
         );
     }
 
+    public componentDidMount() {
+        this.props.markTTICallback && this.props.markTTICallback({
+            "scenario": Scenarios.PodOverview
+        });
+    }
+
     private static _getPodDetails = (pod: V1Pod, showImageDetails?: (imageId: string) => void): any[] => {
         const createTime = pod.metadata.creationTimestamp ? new Date(pod.metadata.creationTimestamp) : new Date().getTime();
         const statusReason = pod.status.reason ? localeFormat(" | {0}", pod.status.reason) : "";

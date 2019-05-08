@@ -59,10 +59,6 @@ export class PodsTable extends React.Component<IPodsTableProperties> {
 
         if (filteredPods.length > 0) {
             this._prepareSubTextData(filteredPods);
-
-            if(!this.props.markTTICallback) {
-                setTimeout(() => getTelemetryService().scenarioEnd(Scenarios.PodsList), 0);
-            }
             return (
                 <CustomCard className="pods-associated k8s-card-padding flex-grow bolt-table-card bolt-card-no-vertical-padding">
                     <CustomHeader>
@@ -96,6 +92,12 @@ export class PodsTable extends React.Component<IPodsTableProperties> {
         }
 
         return null;
+    }
+
+    public componentDidMount() {
+        if(!this.props.markTTICallback) {
+            getTelemetryService().scenarioEnd(Scenarios.PodsList);
+        }
     }
 
     private _prepareSubTextData(filteredPods: V1Pod[]): void {
