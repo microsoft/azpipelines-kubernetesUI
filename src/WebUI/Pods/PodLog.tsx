@@ -27,7 +27,6 @@ export class PodLog extends React.Component<IPodLogProps, IPodLogState> {
     constructor(props: IPodLogProps) {
         super(props, {});
         this.state = { logContent: Resources.LoadingText, uid: this.props.pod.metadata.uid };
-        getTelemetryService().scenarioStart(Scenarios.PodLogs);
     }
 
     public render(): JSX.Element {
@@ -53,12 +52,15 @@ export class PodLog extends React.Component<IPodLogProps, IPodLogState> {
         const spec = this.props.pod.spec || undefined;
         const podContainerName = spec && spec.containers && spec.containers.length > 0 && spec.containers[0].name || "";
 
+        const scenarioPayload = {
+            "scenario": Scenarios.PodLogs
+        };
         service && service.getPodLog && service.getPodLog(podName, podContainerName).then(logContent => {
             this.setState({
                 uid: Util_String.newGuid(), // required to refresh the content
                 logContent: logContent || ""
             });
-            getTelemetryService().scenarioEnd(Scenarios.PodLogs);
+            this.props.markTTICallback && this.props.markTTICallback(scenarioPayload);
         }).catch(error => {
             let errorMessage = error || "";
             errorMessage = (typeof errorMessage == "string") ? errorMessage : JSON.stringify(errorMessage);
@@ -66,7 +68,7 @@ export class PodLog extends React.Component<IPodLogProps, IPodLogState> {
                 uid: Util_String.newGuid(), // required to refresh the content
                 logContent: errorMessage
             });
-            getTelemetryService().scenarioEnd(Scenarios.PodLogs);
+            this.props.markTTICallback && this.props.markTTICallback(scenarioPayload);
         });
     }
 }

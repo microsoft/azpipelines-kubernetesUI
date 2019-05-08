@@ -58,7 +58,9 @@ export namespace Scenarios{
     export const ImageDetails = "KubeSummary.ImageDetails";
     export const PodsDetails = "KubeSummary.PodsDetails";
     export const ServiceDetails = "KubeSummary.ServiceDetails";
+    export const PodOverview = "KubeSummary.PodOverview";
     export const PodLogs = "KubeSummary.PodLogs";
+    export const PodYaml = "KubeSummary.PodYaml";
     export const WorkloadDetails = "KubeSummary.WorkloadDetails";
     export const Workloads = "KubeSummary.Workloads";
 }

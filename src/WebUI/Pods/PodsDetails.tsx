@@ -54,6 +54,7 @@ export class PodsDetails extends React.Component<IPodsDetailsProperties, IPodsDe
     constructor(props: IPodsDetailsProperties) {
         super(props);
         getTelemetryService().scenarioStart(Scenarios.PodsDetails);
+        this._isScenarioOpen = true;
         this._history = createBrowserHistory();
 
         const notifyViewChanged = (parentName: string | undefined, parentKind: string | undefined) => {
@@ -217,6 +218,7 @@ export class PodsDetails extends React.Component<IPodsDetailsProperties, IPodsDe
                         pod={item}
                         showImageDetails={this._showImageDetails}
                         markTTICallback={this._markTTI}
+                        notifyTabChange={this._onRightPaneTabChange}
                     />
                 )
             },
@@ -331,13 +333,30 @@ export class PodsDetails extends React.Component<IPodsDetailsProperties, IPodsDe
         this.setState({});
     }
 
-    private _markTTI = (): void => {
+    private _markTTI = (additionalProperties?: { [key: string]: any }): void => {
         if(!this._isTTIMarked){
-            getTelemetryService().scenarioEnd(Scenarios.PodsDetails);
+            console.log("Got TTI Marker");
+            getTelemetryService().scenarioEnd(Scenarios.PodsDetails, additionalProperties);
+            this._isTTIMarked = true;
+            this._isScenarioOpen = false;
         }
-        this._isTTIMarked = true;
     }
 
+    private _onRightPaneTabChange = (): void => {
+        console.log("Tab change event");
+        if(this._isScenarioOpen) {
+            console.log("closing existing scenario event");
+            //close current scenario and reopen a new open
+            getTelemetryService().scenarioEnd(Scenarios.PodsDetails);
+        }
+
+        console.log("starting new scenario event");
+        getTelemetryService().scenarioStart(Scenarios.PodsDetails);
+        this._isScenarioOpen = true;
+        this._isTTIMarked = false;
+    }
+
+    private _isScenarioOpen: boolean = false;
     private _isTTIMarked: boolean = false;
     private _history: History;
     private _podsStore: PodsStore;

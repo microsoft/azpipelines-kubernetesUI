@@ -6,6 +6,7 @@
 import * as React from "react";
 import { getContentReaderComponent } from "../Common/KubeConsumer";
 import { IVssComponentProperties } from "../Types";
+import {Scenarios} from "../Constants";
 
 export interface IPodReaderProps extends IVssComponentProperties {
     text: string;
@@ -16,5 +17,12 @@ export interface IPodReaderProps extends IVssComponentProperties {
 export class PodContentReader extends React.Component<IPodReaderProps> {
     public render(): React.ReactNode {
         return getContentReaderComponent({ ...this.props });
+    }
+
+    public componentDidMount() {
+        const scenarioPayload = {
+            "scenario": Scenarios.PodYaml
+        };
+        this.props.markTTICallback && this.props.markTTICallback(scenarioPayload);
     }
 }
