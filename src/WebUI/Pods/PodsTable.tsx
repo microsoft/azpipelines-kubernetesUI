@@ -27,6 +27,7 @@ import { ISelectionPayload, SelectionActions } from "../Selection/SelectionActio
 import { IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
 import { getTelemetryService } from "../KubeFactory";
+import "./PodsTable.scss";
 
 const podNameKey: string = "pl-name-key";
 const podWorkloadsKey: string = "pl-wrkld-key";

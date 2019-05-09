@@ -28,6 +28,7 @@ import { WorkloadsActionsCreator } from "./WorkloadsActionsCreator";
 import { WorkloadsFilterBar } from "./WorkloadsFilterBar";
 import { WorkloadsStore } from "./WorkloadsStore";
 import { getTelemetryService } from "../KubeFactory";
+import "./WorkloadsPivot.scss";
 
 export interface IWorkloadsPivotState {
     workloadResourceSize: number;

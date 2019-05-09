@@ -19,7 +19,10 @@
         width: 100%;
 
         .details-card-row-size {
-            padding-top: 6px;
+            &:not(.first-row) {
+                padding-top: 6px;
+            }
+
             padding-bottom: 6px;
             position: relative;
 

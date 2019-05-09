@@ -130,7 +130,7 @@ export class PodOverview extends React.Component<IPodOverviewProps> {
                 {items.map((item, index) =>
                     (item.key === Resources.ImageText)
                         ? (
-                            <div className={css("pod-image-data", rowClassNames)} key={index}>
+                            <div className={index === 0 ? css("pod-image-data", rowClassNames, "first-row") : css("pod-image-data", rowClassNames)} key={index}>
                                 <div className={css("pod-image-key", keyClassNames)}>
                                     {item.key}
                                 </div>
@@ -138,7 +138,7 @@ export class PodOverview extends React.Component<IPodOverviewProps> {
                             </div>
                         )
                         : (
-                            <div className={rowClassNames} key={index}>
+                            <div className={index === 0 ? css(rowClassNames, "first-row") : rowClassNames} key={index}>
                                 <div className={keyClassNames}>
                                     {item.key}
                                 </div>
