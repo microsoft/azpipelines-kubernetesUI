@@ -92,7 +92,7 @@ export class PodOverview extends React.Component<IPodOverviewProps> {
     private static _getPodConditionsText(pod: V1Pod): string {
         let conditions: string[] = [];
         if (pod.status) {
-            conditions = (pod.status.conditions || []).map<string>(condition => localeFormat("{0}={1}", condition.type || "", condition.status || ""));
+            conditions = (pod.status.conditions || []).map(condition => localeFormat("{0}={1}", condition.type || "", condition.status || ""));
         }
 
         return conditions.join("; ") || "";
