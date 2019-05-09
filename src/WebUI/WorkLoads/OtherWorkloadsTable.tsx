@@ -69,7 +69,6 @@ export class OtherWorkloads extends React.Component<IOtherWorkloadsProperties, I
         this._store.addListener(WorkloadsEvents.WorkloadPodsFetchedEvent, this._onOrphanPodsFetched);
 
         this._imageDetailsStore.addListener(ImageDetailsEvents.HasImageDetailsEvent, this._setHasImageDetails);
-
         this._actionCreator.getReplicaSets(KubeSummary.getKubeService());
         this._actionCreator.getStatefulSets(KubeSummary.getKubeService());
         this._actionCreator.getDaemonSets(KubeSummary.getKubeService());
@@ -80,6 +79,7 @@ export class OtherWorkloads extends React.Component<IOtherWorkloadsProperties, I
             return Utils.filterByName(set.name, this.props.nameFilter);
         });
 
+        this.props.markTTICallback && setTimeout(this.props.markTTICallback, 0);
         if (filteredSet.length > 0) {
             return (
                 <CustomCard className="workloads-other-content k8s-card-padding flex-grow bolt-table-card bolt-card-no-vertical-padding">

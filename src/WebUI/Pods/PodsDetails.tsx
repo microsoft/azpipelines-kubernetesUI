@@ -28,6 +28,8 @@ import { PodsActionsCreator } from "./PodsActionsCreator";
 import { PodsLeftPanel } from "./PodsLeftPanel";
 import { PodsRightPanel } from "./PodsRightPanel";
 import { PodsStore } from "./PodsStore";
+import { getTelemetryService } from "../KubeFactory";
+import { Scenarios } from "../Constants";
 
 export interface IPodsDetailsProperties extends IVssComponentProperties {
     parentUid: string;
@@ -51,6 +53,8 @@ export interface IPodsDetailsState {
 export class PodsDetails extends React.Component<IPodsDetailsProperties, IPodsDetailsState> {
     constructor(props: IPodsDetailsProperties) {
         super(props);
+        getTelemetryService().scenarioStart(Scenarios.PodsDetails);
+        this._isScenarioOpen = true;
         this._history = createBrowserHistory();
 
         const notifyViewChanged = (parentName: string | undefined, parentKind: string | undefined) => {
@@ -213,6 +217,8 @@ export class PodsDetails extends React.Component<IPodsDetailsProperties, IPodsDe
                         key={item.metadata.uid}
                         pod={item}
                         showImageDetails={this._showImageDetails}
+                        markTTICallback={this._markTTI}
+                        notifyTabChange={this._onRightPaneTabChange}
                     />
                 )
             },
@@ -327,6 +333,27 @@ export class PodsDetails extends React.Component<IPodsDetailsProperties, IPodsDe
         this.setState({});
     }
 
+    private _markTTI = (additionalProperties?: { [key: string]: any }): void => {
+        if(!this._isTTIMarked){
+            getTelemetryService().scenarioEnd(Scenarios.PodsDetails, additionalProperties);
+            this._isTTIMarked = true;
+            this._isScenarioOpen = false;
+        }
+    }
+
+    private _onRightPaneTabChange = (): void => {
+        if(this._isScenarioOpen) {
+            //close current scenario and reopen a new open
+            getTelemetryService().scenarioEnd(Scenarios.PodsDetails);
+        }
+
+        getTelemetryService().scenarioStart(Scenarios.PodsDetails);
+        this._isScenarioOpen = true;
+        this._isTTIMarked = false;
+    }
+
+    private _isScenarioOpen: boolean = false;
+    private _isTTIMarked: boolean = false;
     private _history: History;
     private _podsStore: PodsStore;
     private _podsFetchEventName: string;

@@ -10,6 +10,8 @@ import { KubeSummary } from "../Common/KubeSummary";
 import * as Resources from "../Resources";
 import { PodContentReader } from "./PodContentReader";
 import { IPodRightPanelProps } from "./PodsRightPanel";
+import { Scenarios } from "../Constants";
+import { getTelemetryService } from "../KubeFactory";
 
 export interface IPodLogProps extends IPodRightPanelProps {
     // Overriding this to make sure we don't accept undefined
@@ -50,11 +52,15 @@ export class PodLog extends React.Component<IPodLogProps, IPodLogState> {
         const spec = this.props.pod.spec || undefined;
         const podContainerName = spec && spec.containers && spec.containers.length > 0 && spec.containers[0].name || "";
 
+        const scenarioPayload = {
+            "scenario": Scenarios.PodLogs
+        };
         service && service.getPodLog && service.getPodLog(podName, podContainerName).then(logContent => {
             this.setState({
                 uid: Util_String.newGuid(), // required to refresh the content
                 logContent: logContent || ""
             });
+            this.props.markTTICallback && this.props.markTTICallback(scenarioPayload);
         }).catch(error => {
             let errorMessage = error || "";
             errorMessage = (typeof errorMessage == "string") ? errorMessage : JSON.stringify(errorMessage);
@@ -62,6 +68,7 @@ export class PodLog extends React.Component<IPodLogProps, IPodLogState> {
                 uid: Util_String.newGuid(), // required to refresh the content
                 logContent: errorMessage
             });
+            this.props.markTTICallback && this.props.markTTICallback(scenarioPayload);
         });
     }
 }

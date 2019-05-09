@@ -41,6 +41,8 @@ import { Utils } from "../Utils";
 import "./WorkloadDetails.scss";
 import { WorkloadsActionsCreator } from "./WorkloadsActionsCreator";
 import { WorkloadsStore } from "./WorkloadsStore";
+import { Scenarios } from "../Constants";
+import { getTelemetryService } from "../KubeFactory";
 
 export interface IWorkloadDetailsProperties extends IVssComponentProperties {
     item?: V1ReplicaSet | V1DaemonSet | V1StatefulSet;
@@ -70,6 +72,7 @@ export interface IWorkLoadDetailsItem {
 export class WorkloadDetails extends React.Component<IWorkloadDetailsProperties, IWorkloadDetailsState> {
     constructor(props: IWorkloadDetailsProperties) {
         super(props, {});
+        getTelemetryService().scenarioStart(Scenarios.WorkloadDetails);
         this._podsStore = StoreManager.GetStore<PodsStore>(PodsStore);
         this._imageDetailsStore = StoreManager.GetStore<ImageDetailsStore>(ImageDetailsStore);
 
@@ -178,7 +181,6 @@ export class WorkloadDetails extends React.Component<IWorkloadDetailsProperties,
             const pods: V1Pod[] = (podList && podList.items || []).filter(pod => {
                 return Utils.isOwnerMatched(pod.metadata, this.state.item!.metadata.uid);
             });
-
             this.setState({
                 pods: pods,
                 selectedPod: pods && pods.length > 0 ? pods[0] : null
@@ -244,6 +246,12 @@ export class WorkloadDetails extends React.Component<IWorkloadDetailsProperties,
         }
     }
 
+    private _markTTI = () => {
+        if (!this._isTTIMarked) {
+            getTelemetryService().scenarioEnd(Scenarios.WorkloadDetails);
+        }
+        this._isTTIMarked = true;
+    }
     private _getWorkloadDetails(): JSX.Element | null {
         if (this.state.item) {
             const metadata = this.state.item.metadata;
@@ -365,6 +373,7 @@ export class WorkloadDetails extends React.Component<IWorkloadDetailsProperties,
         }
 
         if (this.state.pods.length === 0) {
+            setTimeout(()=> this._markTTI(), 0);
             return KubeZeroData.getWorkloadAssociatedPodsZeroData();
         }
 
@@ -374,6 +383,7 @@ export class WorkloadDetails extends React.Component<IWorkloadDetailsProperties,
                 podsToRender={this.state.pods}
                 headingText={Resources.PodsText}
                 onItemActivated={this._onSelectedPodInvoked}
+                markTTICallback={this._markTTI}
             />
         );
     }
@@ -397,6 +407,7 @@ export class WorkloadDetails extends React.Component<IWorkloadDetailsProperties,
         this.setState({});
     }
 
+    private _isTTIMarked: boolean = false;
     private _podsStore: PodsStore;
     private _workloadsStore: WorkloadsStore;
     private _imageDetailsStore: ImageDetailsStore;

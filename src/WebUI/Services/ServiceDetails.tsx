@@ -32,6 +32,8 @@ import "./ServiceDetails.scss";
 import { ServicesActionsCreator } from "./ServicesActionsCreator";
 import { ServicesStore } from "./ServicesStore";
 import { getServiceItems } from "./ServiceUtils";
+import { Scenarios } from "../Constants";
+import { getTelemetryService } from "../KubeFactory";
 
 export interface IServiceDetailsProperties extends IVssComponentProperties {
     service: IServiceItem | undefined;
@@ -56,6 +58,7 @@ export class ServiceDetails extends React.Component<IServiceDetailsProperties, I
             arePodsLoading: true
         };
 
+        getTelemetryService().scenarioStart(Scenarios.ServiceDetails);
         const notifyViewChanged = (service: V1Service) => {
             if (service.metadata && props.notifyViewChanged) {
                 const metadata = service.metadata;
@@ -116,6 +119,13 @@ export class ServiceDetails extends React.Component<IServiceDetailsProperties, I
 
     public componentWillUnmount(): void {
         this._servicesStore.removeListener(ServicesEvents.ServicePodsFetchedEvent, this._onPodsFetched);
+    }
+
+    private _markTTI = () => {
+        if(!this._isTTIMarked){
+            getTelemetryService().scenarioEnd(Scenarios.ServiceDetails);
+        }
+        this._isTTIMarked = true;
     }
 
     private _getMainHeading(): JSX.Element | null {
@@ -238,6 +248,7 @@ export class ServiceDetails extends React.Component<IServiceDetailsProperties, I
         }
 
         if (!this.state.pods || this.state.pods.length === 0) {
+            setTimeout(this._markTTI, 0);
             return KubeZeroData.getServiceAssociatedPodsZeroData();
         }
 
@@ -248,6 +259,7 @@ export class ServiceDetails extends React.Component<IServiceDetailsProperties, I
                 headingText={Resources.AssociatedPodsText}
                 onItemActivated={this._onSelectedPodInvoked}
                 showWorkloadColumn={true}
+                markTTICallback={this._markTTI}
             />
         );
     }
@@ -270,6 +282,7 @@ export class ServiceDetails extends React.Component<IServiceDetailsProperties, I
         );
     }
 
+    private _isTTIMarked: boolean = false;
     private _servicesStore: ServicesStore;
     private _podsActionsCreator: PodsActionsCreator;
 }

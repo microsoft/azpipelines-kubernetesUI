@@ -12,7 +12,7 @@ import * as React from "react";
 import { NameKey, TypeKey } from "../Common/KubeFilterBar";
 import { KubeSummary } from "../Common/KubeSummary";
 import { KubeZeroData } from "../Common/KubeZeroData";
-import { ServicesEvents } from "../Constants";
+import { ServicesEvents, Scenarios } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
 import * as Resources from "../Resources";
@@ -22,6 +22,7 @@ import { ServicesActionsCreator } from "./ServicesActionsCreator";
 import { ServicesFilterBar } from "./ServicesFilterBar";
 import "./ServicesPivot.scss";
 import { ServicesStore } from "./ServicesStore";
+import { getTelemetryService } from "../KubeFactory";
 
 export interface IServicesPivotState {
     serviceList?: V1ServiceList;
@@ -37,6 +38,8 @@ export interface IServicesPivotProps extends IVssComponentProperties {
 export class ServicesPivot extends React.Component<IServicesPivotProps, IServicesPivotState> {
     constructor(props: IServicesPivotProps) {
         super(props, {});
+
+        getTelemetryService().scenarioStart(Scenarios.Services);
 
         this._actionCreator = ActionsCreatorManager.GetActionCreator<ServicesActionsCreator>(ServicesActionsCreator);
         this._store = StoreManager.GetStore<ServicesStore>(ServicesStore);
@@ -85,6 +88,7 @@ export class ServicesPivot extends React.Component<IServicesPivotProps, IService
                 serviceList={this.state.serviceList || {} as V1ServiceList}
                 nameFilter={this._getNameFilterValue()}
                 typeSelections={this._getTypeFilterValue()}
+                markTTICallback={this._markTTI}
             />);
     }
 
@@ -111,9 +115,18 @@ export class ServicesPivot extends React.Component<IServicesPivotProps, IService
     }
 
     private _getZeroData(): JSX.Element {
+        setTimeout(this._markTTI, 0);
         return KubeZeroData.getServicesZeroData();
     }
 
+    private _markTTI = () => {
+        if (!this._isTTIMarked) {
+            getTelemetryService().scenarioEnd(Scenarios.Services);
+        }
+        this._isTTIMarked = true;
+    }
+
+    private _isTTIMarked :boolean = false;
     private _store: ServicesStore;
     private _actionCreator: ServicesActionsCreator;
 }

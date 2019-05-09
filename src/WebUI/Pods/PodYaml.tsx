@@ -21,6 +21,7 @@ export class PodYaml extends React.Component<IPodYamlProps> {
                 className="pod-yaml"
                 contentClassName="pod-yaml-content"
                 text={JsYaml.safeDump(this.props.pod)}
+                markTTICallback={this.props.markTTICallback}
             />
         );
     }

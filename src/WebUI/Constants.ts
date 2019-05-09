@@ -53,6 +53,14 @@ export namespace HyperLinks {
 }
 
 export namespace Scenarios{
-    const Prefix = "KubeSummary.";
-    export const Deployments = Prefix + "Deployments";
+    export const Services = "KubeSummary.ServicesList";
+    export const PodsList = "KubeSummary.PodsList";
+    export const ImageDetails = "KubeSummary.ImageDetails";
+    export const PodsDetails = "KubeSummary.PodsDetails";
+    export const ServiceDetails = "KubeSummary.ServiceDetails";
+    export const PodOverview = "KubeSummary.PodOverview";
+    export const PodLogs = "KubeSummary.PodLogs";
+    export const PodYaml = "KubeSummary.PodYaml";
+    export const WorkloadDetails = "KubeSummary.WorkloadDetails";
+    export const Workloads = "KubeSummary.Workloads";
 }

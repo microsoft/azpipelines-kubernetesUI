@@ -36,6 +36,7 @@ export interface IPodRightPanelProps extends IVssComponentProperties {
     podStatusProps?: IStatusProps;
     statusTooltip?: string;
     showImageDetails?: (imageId: string) => void;
+    notifyTabChange?: () => void;
 }
 
 export interface IPodsRightPanelState {
@@ -166,6 +167,7 @@ export class PodsRightPanel extends React.Component<IPodRightPanelProps, IPodsRi
         this.setState({
             selectedTab: selectedTab
         });
+        this.props.notifyTabChange && this.props.notifyTabChange();
     }
 
     private _getPageContent(): React.ReactNode {
@@ -189,16 +191,16 @@ export class PodsRightPanel extends React.Component<IPodRightPanelProps, IPodsRi
             const componentProps = { key: this.state.pod.metadata.uid, pod: this.state.pod };
             switch (this.state.selectedTab) {
                 case PodsRightPanelTabsKeys.PodsLogsKey:
-                    return <PodLog {...componentProps} />;
+                    return <PodLog {...componentProps}  markTTICallback={this.props.markTTICallback}/>;
 
                 case PodsRightPanelTabsKeys.PodsYamlKey:
-                    return <PodYaml {...componentProps} />;
+                    return <PodYaml {...componentProps}  markTTICallback={this.props.markTTICallback}/>;
 
                 default:
                     // For OrphanPod, the imageDetails view show/hide state is controlled via Right panel itself,
                     // unlike other PodDetails views where the parent controls the show/hide of image details
                     const imageDetails = this.props.showImageDetails || this.state.showImageDetails;
-                    return <PodOverview {...componentProps} showImageDetails={imageDetails} />;
+                    return <PodOverview {...componentProps} showImageDetails={imageDetails} markTTICallback={this.props.markTTICallback} />;
             }
         }
     }

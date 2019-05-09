@@ -43,7 +43,6 @@ export class ServicesTable extends React.Component<IServicesComponentProperties,
         this.state = {
             hoverRowIndex: -1
         };
-
         this._selectionActionCreator = ActionsCreatorManager.GetActionCreator<SelectionActionsCreator>(SelectionActionsCreator);
     }
 
@@ -77,6 +76,9 @@ export class ServicesTable extends React.Component<IServicesComponentProperties,
         }
     }
 
+    public componentDidMount() {
+        this.props.markTTICallback && this.props.markTTICallback();
+    }
 
     private _openServiceItem = (event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>, selectedItem: IServiceItem) => {
         if (selectedItem) {

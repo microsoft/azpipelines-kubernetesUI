@@ -24,7 +24,7 @@ import { SelectedItemKeys, ServicesEvents, WorkloadsEvents } from "../Constants"
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
 import { ImageDetails } from "../ImageDetails/ImageDetails";
-import { DefaultTelemetryService, KubeFactory } from "../KubeFactory";
+import { KubeFactory } from "../KubeFactory";
 import { PodsDetails } from "../Pods/PodsDetails";
 import { PodsRightPanel } from "../Pods/PodsRightPanel";
 import { PodsStore } from "../Pods/PodsStore";
@@ -96,7 +96,7 @@ export interface IKubeSummaryProps extends IVssComponentProperties {
     /**
      * Instance of ITelemetryService
      */
-    telemteryService?: ITelemetryService;
+    telemetryService?: ITelemetryService;
 
     /**
      * Callback to be invoked to go back from KubeSummary
@@ -592,8 +592,7 @@ export class KubeSummary extends React.Component<IKubeSummaryProps, IKubernetesC
     }
 
     private _initializeFactorySettings(): void {
-        KubeFactory.telemetryService = this.props.telemteryService || new DefaultTelemetryService();
-        KubeFactory.markTTI = this.props.markTTI || KubeFactory.markTTI;
+        KubeFactory.setTelemetryService(this.props.telemetryService);
         KubeFactory.getImageLocation = this.props.getImageLocation || KubeFactory.getImageLocation;
     }
 

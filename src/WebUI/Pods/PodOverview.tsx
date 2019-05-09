@@ -22,6 +22,7 @@ import { getRunDetailsText } from "../RunDetails";
 import { Utils } from "../Utils";
 import "./PodOverview.scss";
 import { IPodRightPanelProps } from "./PodsRightPanel";
+import { Scenarios } from "../Constants";
 
 export interface IPodOverviewProps extends IPodRightPanelProps {
     // Overriding this to make sure we don't accept undefined
@@ -32,6 +33,12 @@ export interface IPodOverviewProps extends IPodRightPanelProps {
 export class PodOverview extends React.Component<IPodOverviewProps> {
     public render(): JSX.Element {
         const podDetails = PodOverview._getPodDetails(this.props.pod, this.props.showImageDetails);
+        const scenarioPayload = {
+            "scenario": Scenarios.PodOverview
+        };
+        if(this.props.markTTICallback){
+            setTimeout(() => this.props.markTTICallback && this.props.markTTICallback(scenarioPayload), 0);
+        }
         return (
             <CustomCard className="pod-overview-card k8s-card-padding flex-grow bolt-card-no-vertical-padding">
                 <CustomHeader>
@@ -48,6 +55,12 @@ export class PodOverview extends React.Component<IPodOverviewProps> {
                 </CardContent>
             </CustomCard>
         );
+    }
+
+    public componentDidMount() {
+        this.props.markTTICallback && this.props.markTTICallback({
+            "scenario": Scenarios.PodOverview
+        });
     }
 
     private static _getPodDetails = (pod: V1Pod, showImageDetails?: (imageId: string) => void): any[] => {

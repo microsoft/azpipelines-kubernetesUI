@@ -5,11 +5,24 @@ export class KubeFactory {
         return KubeFactory._imageLocations.get(image) || KubeFactory._imageLocations.get(KubeImage.zeroData);
     }
 
-    public static markTTI = () => {
-        // Default implementation: Do nothing
+    public static markTTI = (scenarioName: string, additionalProperties?: { [key: string]: any; } | undefined) => {
+        getTelemetryService().markTimeToInteractive(scenarioName, additionalProperties);
     }
 
-    public static telemetryService: ITelemetryService;
+    public static setTelemetryService(telemetryService?: ITelemetryService){
+        if(telemetryService) {
+            KubeFactory.telemetryService = telemetryService;
+        }
+    }
+
+    public static getTelemetryService(): ITelemetryService {
+        if(!KubeFactory.telemetryService) {
+            KubeFactory.telemetryService = new DefaultTelemetryService();
+        }
+        return KubeFactory.telemetryService;
+    }
+
+    private static telemetryService?: ITelemetryService;
 
     private static _imageLocations: Map<KubeImage, string> = new Map([
         [KubeImage.zeroData, require("../img/zero-data.svg")],
@@ -20,19 +33,24 @@ export class KubeFactory {
     ]);
 }
 
-export class DefaultTelemetryService implements ITelemetryService {
+export function getTelemetryService(): ITelemetryService {
+    return KubeFactory.getTelemetryService();
+}
+
+class DefaultTelemetryService implements ITelemetryService {
+    public markTimeToInteractive(scenarioName: string, additionalProperties?: { [key: string]: any; } | undefined): void {
+        console.log(`Scenario ready for interaction ${scenarioName}, properties:${JSON.stringify(additionalProperties||{})}`);
+    }
+
     public onClickTelemetry(source: string, additionalProperties?: { [key: string]: any; }): void {
-        console.log("Item clicked " + source);
-        console.log(additionalProperties);
+        console.log(`Item clicked  ${source}, properties:${JSON.stringify(additionalProperties||{})}`);
     }
 
     scenarioStart(scenarioName: string, additionalProperties?: { [key: string]: any; }): void {
-        console.log("Scenario started " + scenarioName);
-        console.log(additionalProperties);
+        console.log(`Scenario started ${scenarioName}, properties:${JSON.stringify(additionalProperties||{})}`);
     }
 
     scenarioEnd(scenarioName: string, additionalProperties?: { [key: string]: any; }): void {
-        console.log("Scenario completed " + scenarioName);
-        console.log(additionalProperties);
+        console.log(`Scenario completed ${scenarioName}, properties:${JSON.stringify(additionalProperties||{})}`);
     }
 }

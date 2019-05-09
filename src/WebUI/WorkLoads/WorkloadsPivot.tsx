@@ -14,7 +14,7 @@ import { KubeZeroData } from "../Common//KubeZeroData";
 import { NameKey, TypeKey } from "../Common/KubeFilterBar";
 import { KubeSummary } from "../Common/KubeSummary";
 import "../Common/KubeSummary.scss";
-import { PodsEvents, WorkloadsEvents } from "../Constants";
+import { PodsEvents, WorkloadsEvents, Scenarios } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
 import { ImageDetailsActionsCreator } from "../ImageDetails/ImageDetailsActionsCreator";
@@ -27,11 +27,13 @@ import { OtherWorkloads } from "../Workloads/OtherWorkloadsTable";
 import { WorkloadsActionsCreator } from "./WorkloadsActionsCreator";
 import { WorkloadsFilterBar } from "./WorkloadsFilterBar";
 import { WorkloadsStore } from "./WorkloadsStore";
+import { getTelemetryService } from "../KubeFactory";
 import "./WorkloadsPivot.scss";
 
 export interface IWorkloadsPivotState {
     workloadResourceSize: number;
     imageList: string[];
+    totalNodesRendered: number;
 }
 
 export interface IWorkloadsPivotProps extends IVssComponentProperties {
@@ -43,7 +45,7 @@ export interface IWorkloadsPivotProps extends IVssComponentProperties {
 export class WorkloadsPivot extends React.Component<IWorkloadsPivotProps, IWorkloadsPivotState> {
     constructor(props: IWorkloadsPivotProps) {
         super(props, {});
-
+        getTelemetryService().scenarioStart(Scenarios.Workloads);
         this._workloadsStore = StoreManager.GetStore<WorkloadsStore>(WorkloadsStore);
         // initialize pods store as pods list will be required in workloadPodsView on item selection
         this._podsStore = StoreManager.GetStore<PodsStore>(PodsStore);
@@ -54,7 +56,8 @@ export class WorkloadsPivot extends React.Component<IWorkloadsPivotProps, IWorkl
 
         this.state = {
             workloadResourceSize: 0,
-            imageList: []
+            imageList: [],
+            totalNodesRendered: 0
         };
 
         this._podsStore.addListener(PodsEvents.PodsFetchedEvent, this._onPodsFetched);
@@ -84,6 +87,11 @@ export class WorkloadsPivot extends React.Component<IWorkloadsPivotProps, IWorkl
     public componentDidUpdate(prevProps: IWorkloadsPivotProps, prevState: IWorkloadsPivotState) {
         const imageService = KubeSummary.getImageService();
         imageService && (this.state.imageList.length > 0) && this._imageActionsCreator.setHasImageDetails(imageService, this.state.imageList);
+        const childNodes = this.props.children ? React.Children.count(this.props.children) : 0;
+        if (childNodes === this.state.totalNodesRendered && !this._isTTIMarked) {
+            getTelemetryService().scenarioEnd(Scenarios.Workloads);
+            this._isTTIMarked = true;
+        }
     }
 
     private _onPodsFetched = (): void => {
@@ -101,6 +109,13 @@ export class WorkloadsPivot extends React.Component<IWorkloadsPivotProps, IWorkl
         if (this.state.workloadResourceSize <= 0 && workloadSize > 0) {
             this.setState({ workloadResourceSize: workloadSize });
         }
+    }
+
+    private _notifyRender = () => {
+        const nodeCount = this.state.totalNodesRendered;
+        this.setState({
+            totalNodesRendered: nodeCount + 1
+        });
     }
 
     private _getContent(): JSX.Element {
@@ -126,6 +141,7 @@ export class WorkloadsPivot extends React.Component<IWorkloadsPivotProps, IWorkl
             key={format("sts-list-{0}", this.props.namespace || "")}
             nameFilter={this._getNameFilterValue()}
             typeFilter={this._getTypeFilterValue()}
+            markTTICallback={this._notifyRender}
         />);
     }
 
@@ -133,6 +149,7 @@ export class WorkloadsPivot extends React.Component<IWorkloadsPivotProps, IWorkl
         return (<DeploymentsTable
             key={format("dc-{0}", this.props.namespace || "")}
             nameFilter={this._getNameFilterValue()}
+            markTTICallback={this._notifyRender}
         />);
     }
 
@@ -164,6 +181,7 @@ export class WorkloadsPivot extends React.Component<IWorkloadsPivotProps, IWorkl
         return KubeZeroData.getWorkloadsZeroData();
     }
 
+    private _isTTIMarked :boolean = false;
     private _workloadsStore: WorkloadsStore;
     private _workloadsActionCreator: WorkloadsActionsCreator;
     private _podsActionCreator: PodsActionsCreator;
