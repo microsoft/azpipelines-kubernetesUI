@@ -286,8 +286,7 @@ export class Utils {
     }
 
     public static extractDisplayImageName(imageId: string): string {
-        let imageName = Utils.getImageResourceUrlParameter(imageId, matchPatternForImageName);
-        return Utils.appendDefaultTagToImageName(imageName);
+        return Utils.getImageResourceUrlParameter(imageId, matchPatternForImageName);
     }
 
     public static appendDefaultTagToImageName(imageName: string): string {
