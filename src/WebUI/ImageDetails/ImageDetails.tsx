@@ -142,7 +142,7 @@ export class ImageDetails extends React.Component<IImageDetailsProperties, IImag
             case Resources.TagsText:
                 return (
                     <div className="text-ellipsis details-card-value-field-size">
-                        <Tags items={value} className="body-s" />
+                        <Tags items={value} className="body-s" showOnlyValues={true} />
                     </div>
                 );
 
