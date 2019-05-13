@@ -145,7 +145,7 @@ export class ServiceDetails extends React.Component<IServiceDetailsProperties, I
 
             return (
                 <CustomCard className="service-details-card k8s-card-padding flex-grow bolt-card-no-vertical-padding">
-                    <CustomHeader>
+                    <CustomHeader className={"k8s-details-header"}>
                         <HeaderTitleArea>
                             <HeaderTitleRow>
                                 <HeaderTitle className="text-ellipsis" titleSize={TitleSize.Medium} >
