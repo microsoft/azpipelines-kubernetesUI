@@ -3,9 +3,9 @@
     Licensed under the MIT license.
 */
 
-import { ActionCreatorBase, Action } from "../FluxCommon/Actions";
-import { ActionsHubManager } from "../FluxCommon/ActionsHubManager";
 import { IKubeService } from "../../Contracts/Contracts";
+import { ActionCreatorBase } from "../FluxCommon/Actions";
+import { ActionsHubManager } from "../FluxCommon/ActionsHubManager";
 import { WorkloadsActions } from "./WorkloadsActions";
 
 export class WorkloadsActionsCreator extends ActionCreatorBase {

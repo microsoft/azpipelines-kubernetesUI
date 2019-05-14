@@ -3,11 +3,11 @@
     Licensed under the MIT license.
 */
 
-import { V1DaemonSetList, V1DeploymentList, V1Pod, V1PodList, V1ReplicaSetList, V1StatefulSetList } from "@kubernetes/client-node";
+import { V1DaemonSetList, V1DeploymentList, V1Pod, V1ReplicaSetList, V1StatefulSetList } from "@kubernetes/client-node";
 import { WorkloadsEvents } from "../Constants";
 import { ActionsHubManager } from "../FluxCommon/ActionsHubManager";
 import { StoreBase } from "../FluxCommon/Store";
-import { PodsActions, IPodsPayload } from "../Pods/PodsActions";
+import { IPodsPayload, PodsActions } from "../Pods/PodsActions";
 import { WorkloadsActions } from "./WorkloadsActions";
 
 export interface IWorkloadsStoreState {

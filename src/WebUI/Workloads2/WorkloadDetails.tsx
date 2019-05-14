@@ -371,7 +371,7 @@ export class WorkloadDetails extends React.Component<IWorkloadDetailsProperties,
         }
 
         if (this.state.pods.length === 0) {
-            setTimeout(()=> this._markTTI(), 0);
+            setTimeout(() => this._markTTI(), 0);
             return KubeZeroData.getWorkloadAssociatedPodsZeroData();
         }
 
