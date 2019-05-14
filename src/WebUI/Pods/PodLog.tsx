@@ -7,10 +7,10 @@ import { V1Pod } from "@kubernetes/client-node";
 import * as Util_String from "azure-devops-ui/Core/Util/String";
 import * as React from "react";
 import * as Resources from "../../Resources";
-import { KubeSummary } from "../Common/KubeSummary";
 import { Scenarios } from "../Constants";
+import { KubeFactory } from "../KubeFactory";
 import { PodContentReader } from "./PodContentReader";
-import { IPodRightPanelProps } from "./PodsRightPanel";
+import { IPodRightPanelProps } from "./Types";
 
 export interface IPodLogProps extends IPodRightPanelProps {
     // Overriding this to make sure we don't accept undefined
@@ -46,7 +46,7 @@ export class PodLog extends React.Component<IPodLogProps, IPodLogState> {
     }
 
     public componentDidMount(): void {
-        const service = KubeSummary.getKubeService();
+        const service = KubeFactory.getKubeService();
         const podName = this.props.pod.metadata.name;
         const spec = this.props.pod.spec || undefined;
         const podContainerName = spec && spec.containers && spec.containers.length > 0 && spec.containers[0].name || "";

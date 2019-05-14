@@ -16,8 +16,8 @@ import { Surface, SurfaceBackground } from "azure-devops-ui/Surface";
 import { Tab, TabBar } from "azure-devops-ui/Tabs";
 import { Filter, FILTER_CHANGE_EVENT, IFilterState } from "azure-devops-ui/Utilities/Filter";
 import { Action, createBrowserHistory, History, Location, UnregisterCallback } from "history";
-import * as queryString from "query-string";
 import * as React from "react";
+import * as queryString from "simple-query-string";
 import { IImageService, IKubeService, ITelemetryService, KubeImage, ResourceErrorType } from "../../Contracts/Contracts";
 import { IImageDetails } from "../../Contracts/Types";
 import * as Resources from "../../Resources";
@@ -135,11 +135,8 @@ export interface IKubeSummaryProps extends IVssComponentProperties {
 export class KubeSummary extends React.Component<IKubeSummaryProps, IKubernetesContainerState> {
     constructor(props: IKubeSummaryProps) {
         super(props, {});
-        KubeSummary._imageService = this.props.imageService;
-        KubeSummary._kubeservice = this.props.kubeService;
-        setContentReaderComponent(this.props.getContentReaderComponent);
-
         this._initializeFactorySettings();
+
         const workloadsFilter = new Filter();
         const servicesFilter = new Filter();
         workloadsFilter.subscribe(this._onWorkloadsFilterApplied, FILTER_CHANGE_EVENT);
@@ -149,7 +146,7 @@ export class KubeSummary extends React.Component<IKubeSummaryProps, IKubernetesC
         this._populateObjectFinder();
 
         this._historyService = createBrowserHistory();
-        const queryParams = queryString.parse(this._historyService.location.search)
+        const queryParams = queryString.parse(this._historyService.location.search);
 
         let selectedPivot = workloadsPivotItemKey;
 
@@ -187,13 +184,14 @@ export class KubeSummary extends React.Component<IKubeSummaryProps, IKubernetesC
         this._servicesStore.addListener(ServicesEvents.ServicesFoundEvent, this._onDataFound);
         this._selectionStore.addChangedListener(this._onSelectionStoreChanged);
 
+        const kubeService = KubeFactory.getKubeService();
         // fetch deployments in parent component
         // so we can show nameSpace in heading and namespace is obtained from deployment metadata
         // this data also helpful in deciding to show zero data or workloads
-        this._workloadsActionCreator.getDeployments(KubeSummary.getKubeService());
+        this._workloadsActionCreator.getDeployments(kubeService);
 
         if (selectedPivot === servicesPivotItemKey) {
-            ActionsCreatorManager.GetActionCreator<ServicesActionsCreator>(ServicesActionsCreator).getServices(KubeSummary.getKubeService());
+            ActionsCreatorManager.GetActionCreator<ServicesActionsCreator>(ServicesActionsCreator).getServices(kubeService);
         }
     }
 
@@ -231,15 +229,7 @@ export class KubeSummary extends React.Component<IKubeSummaryProps, IKubernetesC
         this._selectionStore.removeChangedListener(this._onSelectionStoreChanged);
     }
 
-    public static getImageService(): IImageService | undefined {
-        return KubeSummary._imageService;
-    }
-
-    public static getKubeService(): IKubeService {
-        return KubeSummary._kubeservice;
-    }
-
-    private _updateStateFromHistory = (routeValues: queryString.OutputParams): void => {
+    private _updateStateFromHistory = (routeValues: { [key: string]: any }): void => {
         if (routeValues["type"] && routeValues["uid"]) {
             const typeName: string = routeValues["type"] as string;
             const objectId: string = routeValues["uid"] as string;
@@ -261,8 +251,7 @@ export class KubeSummary extends React.Component<IKubeSummaryProps, IKubernetesC
     }
 
     private _onHistoryChanged = (location: Location, action: Action): void => {
-        let routeValues: queryString.OutputParams = queryString.parse(location.search);
-        this._updateStateFromHistory(routeValues);
+        this._updateStateFromHistory(queryString.parse(location.search));
     }
 
     private _setNamespaceOnDeploymentsFetched = (): void => {
@@ -415,7 +404,7 @@ export class KubeSummary extends React.Component<IKubeSummaryProps, IKubernetesC
     }
 
     private _selectTab(pivotItemKey: string): void {
-        let routeValues: queryString.OutputParams = queryString.parse(this._historyService.location.search);
+        let routeValues = { ...queryString.parse(this._historyService.location.search) };
         routeValues["view"] = pivotItemKey;
 
         this._historyService.replace({
@@ -453,6 +442,8 @@ export class KubeSummary extends React.Component<IKubeSummaryProps, IKubernetesC
                     return items.find(r => r.metadata.uid === selectionStoreState.itemUID);
                 }
             }
+
+            const kubeService = KubeFactory.getKubeService();
             switch (selectionStoreState.selectedItemType) {
                 case SelectedItemKeys.ReplicaSetKey:
                     const replicaSets = this._workloadsStore.getState().replicaSetList;
@@ -460,7 +451,7 @@ export class KubeSummary extends React.Component<IKubeSummaryProps, IKubernetesC
                         item = getMatchingItem(replicaSets.items);
                     }
                     if (!item) {
-                        invokedFunc = () => KubeSummary.getKubeService().getReplicaSets();
+                        invokedFunc = () => kubeService.getReplicaSets();
                     }
                     break;
                 case SelectedItemKeys.StatefulSetKey:
@@ -469,7 +460,7 @@ export class KubeSummary extends React.Component<IKubeSummaryProps, IKubernetesC
                         item = getMatchingItem(statefulSets.items);
                     }
                     if (!item) {
-                        invokedFunc = () => KubeSummary.getKubeService().getStatefulSets();
+                        invokedFunc = () => kubeService.getStatefulSets();
                     }
                     break;
                 case SelectedItemKeys.DaemonSetKey:
@@ -479,7 +470,7 @@ export class KubeSummary extends React.Component<IKubeSummaryProps, IKubernetesC
                     }
 
                     if (!item) {
-                        invokedFunc = () => KubeSummary.getKubeService().getDaemonSets();
+                        invokedFunc = () => kubeService.getDaemonSets();
                     }
                     break;
             }
@@ -592,6 +583,9 @@ export class KubeSummary extends React.Component<IKubeSummaryProps, IKubernetesC
     }
 
     private _initializeFactorySettings(): void {
+        KubeFactory.setImageService(this.props.imageService);
+        KubeFactory.setKubeService(this.props.kubeService);
+        setContentReaderComponent(this.props.getContentReaderComponent);
         KubeFactory.setTelemetryService(this.props.telemetryService);
         KubeFactory.getImageLocation = this.props.getImageLocation || KubeFactory.getImageLocation;
     }
@@ -606,6 +600,4 @@ export class KubeSummary extends React.Component<IKubeSummaryProps, IKubernetesC
     private _historyService: History;
     private _historyUnlisten: UnregisterCallback;
     private _selectionActionCreator: SelectionActionsCreator;
-    private static _imageService: IImageService | undefined;
-    private static _kubeservice: IKubeService;
 }

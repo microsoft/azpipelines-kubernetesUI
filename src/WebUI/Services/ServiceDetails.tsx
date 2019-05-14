@@ -11,18 +11,17 @@ import { Spinner, SpinnerSize } from "azure-devops-ui/Spinner";
 import { Statuses } from "azure-devops-ui/Status";
 import * as Date_Utils from "azure-devops-ui/Utilities/Date";
 import { createBrowserHistory } from "history";
-import * as queryString from "query-string";
 import * as React from "react";
+import * as queryString from "simple-query-string";
 import * as Resources from "../../Resources";
 import { defaultColumnRenderer, renderExternalIpWithCopy } from "../Common/KubeCardWithTable";
-import { KubeSummary } from "../Common/KubeSummary";
 import { KubeZeroData } from "../Common/KubeZeroData";
 import { PageTopHeader } from "../Common/PageTopHeader";
 import { Tags } from "../Common/Tags";
 import { Scenarios, SelectedItemKeys, ServicesEvents } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
-import { getTelemetryService } from "../KubeFactory";
+import { getTelemetryService, KubeFactory } from "../KubeFactory";
 import { PodsActionsCreator } from "../Pods/PodsActionsCreator";
 import { PodsTable } from "../Pods/PodsTable";
 import { getRunDetailsText } from "../RunDetails";
@@ -74,11 +73,11 @@ export class ServiceDetails extends React.Component<IServiceDetailsProperties, I
         const fetchServiceDetails = (svc: V1Service) => {
             // service currently only supports equals with "and" operator. The generator generates that condition.
             const labelSelector: string = Utils.generateEqualsConditionLabelSelector(svc && svc.spec && svc.spec.selector || {});
-            this._podsActionsCreator.getPods(KubeSummary.getKubeService(), labelSelector, true);
+            this._podsActionsCreator.getPods(KubeFactory.getKubeService(), labelSelector, true);
         };
 
         if (!props.service) {
-            ActionsCreatorManager.GetActionCreator<ServicesActionsCreator>(ServicesActionsCreator).getServices(KubeSummary.getKubeService());
+            ActionsCreatorManager.GetActionCreator<ServicesActionsCreator>(ServicesActionsCreator).getServices(KubeFactory.getKubeService());
             const getServicesHandler = () => {
                 this._servicesStore.removeListener(ServicesEvents.ServicesFetchedEvent, getServicesHandler);
                 const history = createBrowserHistory();

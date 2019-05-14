@@ -16,12 +16,12 @@ import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
 import * as Resources from "../../Resources";
 import { defaultColumnRenderer, onPodsColumnClicked, renderPodsStatusTableCell, renderTableCell } from "../Common/KubeCardWithTable";
-import { KubeSummary } from "../Common/KubeSummary";
 import { Tags } from "../Common/Tags";
 import { ImageDetailsEvents, SelectedItemKeys, WorkloadsEvents } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
 import { ImageDetailsStore } from "../ImageDetails/ImageDetailsStore";
+import { KubeFactory } from "../KubeFactory";
 import { PodsStore } from "../Pods/PodsStore";
 import { SelectionActionsCreator } from "../Selection/SelectionActionCreator";
 import { ISelectionPayload } from "../Selection/SelectionActions";
@@ -48,7 +48,7 @@ export class DeploymentsTable extends React.Component<IDeploymentsTablePropertie
         this._imageDetailsStore = StoreManager.GetStore<ImageDetailsStore>(ImageDetailsStore);
         this._store = StoreManager.GetStore<WorkloadsStore>(WorkloadsStore);
 
-        this._workloadsActionCreator.getReplicaSets(KubeSummary.getKubeService());
+        this._workloadsActionCreator.getReplicaSets(KubeFactory.getKubeService());
 
         this.state = { deploymentList: undefined, replicaSetList: undefined };
 
@@ -335,7 +335,7 @@ export class DeploymentsTable extends React.Component<IDeploymentsTablePropertie
     }
 
     private _onImageClick = (imageId: string): void => {
-        const imageService = KubeSummary.getImageService();
+        const imageService = KubeFactory.getImageService();
         imageService && imageService.getImageDetails(imageId).then(imageDetails => {
             if (imageDetails) {
                 const payload: ISelectionPayload = {

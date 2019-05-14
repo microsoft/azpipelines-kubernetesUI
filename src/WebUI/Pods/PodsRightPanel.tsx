@@ -11,17 +11,16 @@ import { IStatusProps, Statuses } from "azure-devops-ui/Status";
 import { Tab, TabBar, TabSize } from "azure-devops-ui/Tabs";
 import { css } from "azure-devops-ui/Util";
 import { createBrowserHistory, History } from "history";
-import * as queryString from "query-string";
 import * as React from "react";
+import * as queryString from "simple-query-string";
 import { IImageDetails } from "../../Contracts/Types";
 import * as Resources from "../../Resources";
-import { KubeSummary } from "../Common/KubeSummary";
 import { PageTopHeader } from "../Common/PageTopHeader";
 import { PodsEvents, PodsRightPanelTabsKeys } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
 import { ImageDetails } from "../ImageDetails/ImageDetails";
-import { IVssComponentProperties } from "../Types";
+import { KubeFactory } from "../KubeFactory";
 import { Utils } from "../Utils";
 import { PodLog } from "./PodLog";
 import { PodOverview } from "./PodOverview";
@@ -29,15 +28,7 @@ import { PodsActionsCreator } from "./PodsActionsCreator";
 import "./PodsRightPanel.scss";
 import { PodsStore } from "./PodsStore";
 import { PodYaml } from "./PodYaml";
-
-export interface IPodRightPanelProps extends IVssComponentProperties {
-    pod: V1Pod | undefined;
-    podUid?: string;
-    podStatusProps?: IStatusProps;
-    statusTooltip?: string;
-    showImageDetails?: (imageId: string) => void;
-    notifyTabChange?: () => void;
-}
+import { IPodRightPanelProps } from "./Types";
 
 export interface IPodsRightPanelState {
     pod: V1Pod | undefined;
@@ -58,7 +49,7 @@ export class PodsRightPanel extends React.Component<IPodRightPanelProps, IPodsRi
         let selectedPivot = PodsRightPanelTabsKeys.PodsDetailsKey;
 
         // If view is present, load corresponding tab
-        if (!!queryParams.view) {
+        if (queryParams && queryParams.view) {
             selectedPivot = queryParams.view as PodsRightPanelTabsKeys;
         }
 
@@ -84,7 +75,7 @@ export class PodsRightPanel extends React.Component<IPodRightPanelProps, IPodsRi
             };
 
             podsStore.addListener(PodsEvents.PodsFetchedEvent, onPodsFetched);
-            podsActionCreator.getPods(KubeSummary.getKubeService());
+            podsActionCreator.getPods(KubeFactory.getKubeService());
         }
 
         this.state = {
@@ -94,7 +85,7 @@ export class PodsRightPanel extends React.Component<IPodRightPanelProps, IPodsRi
             selectedTab: selectedPivot,
             selectedImageDetails: undefined,
             showImageDetails: (imageId: string) => {
-                const imageService = KubeSummary.getImageService();
+                const imageService = KubeFactory.getImageService();
                 imageService && imageService.getImageDetails(imageId).then(imageDetails => {
                     this.setState({
                         selectedImageDetails: imageDetails
@@ -156,7 +147,7 @@ export class PodsRightPanel extends React.Component<IPodRightPanelProps, IPodsRi
     }
 
     private _onSelectedTabChanged = (selectedTab: string): void => {
-        let routeValues: queryString.OutputParams = queryString.parse(this._historyService.location.search);
+        let routeValues = { ...queryString.parse(this._historyService.location.search) };
         routeValues["view"] = selectedTab;
 
         this._historyService.replace({

@@ -1,4 +1,22 @@
-import { KubeImage, ITelemetryService } from "../Contracts/Contracts";
+import { IImageService, IKubeService, ITelemetryService, KubeImage } from "../Contracts/Contracts";
+
+class DefaultTelemetryService implements ITelemetryService {
+    public markTimeToInteractive(scenarioName: string, additionalProperties?: { [key: string]: any; } | undefined): void {
+        console.log(`Scenario ready for interaction ${scenarioName}, properties:${JSON.stringify(additionalProperties || {})}`);
+    }
+
+    public onClickTelemetry(source: string, additionalProperties?: { [key: string]: any; }): void {
+        console.log(`Item clicked  ${source}, properties:${JSON.stringify(additionalProperties || {})}`);
+    }
+
+    scenarioStart(scenarioName: string, additionalProperties?: { [key: string]: any; }): void {
+        console.log(`Scenario started ${scenarioName}, properties:${JSON.stringify(additionalProperties || {})}`);
+    }
+
+    scenarioEnd(scenarioName: string, additionalProperties?: { [key: string]: any; }): void {
+        console.log(`Scenario completed ${scenarioName}, properties:${JSON.stringify(additionalProperties || {})}`);
+    }
+}
 
 export class KubeFactory {
     public static getImageLocation = (image: KubeImage): string | undefined => {
@@ -9,20 +27,36 @@ export class KubeFactory {
         getTelemetryService().markTimeToInteractive(scenarioName, additionalProperties);
     }
 
-    public static setTelemetryService(telemetryService?: ITelemetryService){
-        if(telemetryService) {
-            KubeFactory.telemetryService = telemetryService;
+    public static setTelemetryService(telemetryService?: ITelemetryService): void {
+        if (telemetryService) {
+            KubeFactory._telemetryService = telemetryService;
         }
     }
 
     public static getTelemetryService(): ITelemetryService {
-        if(!KubeFactory.telemetryService) {
-            KubeFactory.telemetryService = new DefaultTelemetryService();
+        if (!KubeFactory._telemetryService) {
+            KubeFactory._telemetryService = new DefaultTelemetryService();
         }
-        return KubeFactory.telemetryService;
+        return KubeFactory._telemetryService;
     }
 
-    private static telemetryService?: ITelemetryService;
+    public static setImageService(imageService: IImageService | undefined): void {
+        KubeFactory._imageService = imageService;
+    }
+
+    public static getImageService(): IImageService | undefined {
+        return KubeFactory._imageService;
+    }
+
+    public static setKubeService(kubeService: IKubeService): void {
+        KubeFactory._kubeService = kubeService;
+    }
+
+    public static getKubeService(): IKubeService {
+        return KubeFactory._kubeService;
+    }
+
+    private static _telemetryService?: ITelemetryService;
 
     private static _imageLocations: Map<KubeImage, string> = new Map([
         [KubeImage.zeroData, require("../img/zero-data.svg")],
@@ -31,26 +65,11 @@ export class KubeFactory {
         [KubeImage.resourceDeleted, require("../img/zero-data.svg")],
         [KubeImage.resourceAccessDenied, require("../img/zero-data.svg")],
     ]);
+
+    private static _imageService: IImageService | undefined;
+    private static _kubeService: IKubeService;
 }
 
 export function getTelemetryService(): ITelemetryService {
     return KubeFactory.getTelemetryService();
-}
-
-class DefaultTelemetryService implements ITelemetryService {
-    public markTimeToInteractive(scenarioName: string, additionalProperties?: { [key: string]: any; } | undefined): void {
-        console.log(`Scenario ready for interaction ${scenarioName}, properties:${JSON.stringify(additionalProperties||{})}`);
-    }
-
-    public onClickTelemetry(source: string, additionalProperties?: { [key: string]: any; }): void {
-        console.log(`Item clicked  ${source}, properties:${JSON.stringify(additionalProperties||{})}`);
-    }
-
-    scenarioStart(scenarioName: string, additionalProperties?: { [key: string]: any; }): void {
-        console.log(`Scenario started ${scenarioName}, properties:${JSON.stringify(additionalProperties||{})}`);
-    }
-
-    scenarioEnd(scenarioName: string, additionalProperties?: { [key: string]: any; }): void {
-        console.log(`Scenario completed ${scenarioName}, properties:${JSON.stringify(additionalProperties||{})}`);
-    }
 }

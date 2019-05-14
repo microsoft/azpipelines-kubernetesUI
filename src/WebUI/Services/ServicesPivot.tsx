@@ -11,12 +11,11 @@ import { Filter, IFilterItemState, IFilterState } from "azure-devops-ui/Utilitie
 import * as React from "react";
 import * as Resources from "../../Resources";
 import { NameKey, TypeKey } from "../Common/KubeFilterBar";
-import { KubeSummary } from "../Common/KubeSummary";
 import { KubeZeroData } from "../Common/KubeZeroData";
 import { Scenarios, ServicesEvents } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
-import { getTelemetryService } from "../KubeFactory";
+import { getTelemetryService, KubeFactory } from "../KubeFactory";
 import { ServicesTable } from "../Services/ServicesTable";
 import { IVssComponentProperties } from "../Types";
 import { ServicesActionsCreator } from "./ServicesActionsCreator";
@@ -50,7 +49,7 @@ export class ServicesPivot extends React.Component<IServicesPivotProps, IService
             isLoading: storeState.isLoading
         };
 
-        this._actionCreator.getServices(KubeSummary.getKubeService());
+        this._actionCreator.getServices(KubeFactory.getKubeService());
         this._store.addListener(ServicesEvents.ServicesFetchedEvent, this._onServicesFetched);
     }
 

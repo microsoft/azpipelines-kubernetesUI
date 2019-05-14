@@ -4,7 +4,7 @@
 */
 
 import { createBrowserHistory } from "history";
-import * as queryString from "query-string";
+import * as queryString from "simple-query-string";
 import { ActionCreatorBase } from "../FluxCommon/Actions";
 import { ActionsHubManager } from "../FluxCommon/ActionsHubManager";
 import { ISelectionPayload, SelectionActions } from "./SelectionActions";
@@ -23,7 +23,7 @@ export class SelectionActionsCreator extends ActionCreatorBase {
         // Create history service fresh here, because we need the fresh url location
         // Unlike components, action creators are not re initialized on view mount
         const historyService = createBrowserHistory();
-        let routeValues: queryString.OutputParams = queryString.parse(historyService.location.search);
+        let routeValues = { ...queryString.parse(historyService.location.search) };
         routeValues["type"] = payload.selectedItemType;
         routeValues["uid"] = payload.itemUID;
 

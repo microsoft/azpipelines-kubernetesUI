@@ -22,7 +22,7 @@ import { ImageDetailsStore } from "../ImageDetails/ImageDetailsStore";
 import { getRunDetailsText } from "../RunDetails";
 import { Utils } from "../Utils";
 import "./PodOverview.scss";
-import { IPodRightPanelProps } from "./PodsRightPanel";
+import { IPodRightPanelProps } from "./Types";
 
 export interface IPodOverviewProps extends IPodRightPanelProps {
     // Overriding this to make sure we don't accept undefined
