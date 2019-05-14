@@ -587,7 +587,7 @@ export class KubeSummary extends React.Component<IKubeSummaryProps, IKubernetesC
         KubeFactory.setKubeService(this.props.kubeService);
         setContentReaderComponent(this.props.getContentReaderComponent);
         KubeFactory.setTelemetryService(this.props.telemetryService);
-        KubeFactory.getImageLocation = this.props.getImageLocation || KubeFactory.getImageLocation;
+        KubeFactory.setImageLocation(this.props.getImageLocation);
     }
 
     private _selectedItemViewMap: { [selectedItemKey: string]: (selectedItem: any, selectedItemUid?: string, properties?: { [key: string]: any }) => JSX.Element | null } = {};
