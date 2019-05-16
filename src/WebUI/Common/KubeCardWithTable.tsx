@@ -180,33 +180,25 @@ export function renderPodNameWithStatusTableCell(
     contentClassName?: string
 ): JSX.Element {
     return podName ? (
-        <TwoLineTableCell
+        <SimpleTableCell
             key={format("row-{0}-col-{1}", rowIndex, columnIndex)}
             columnIndex={columnIndex}
             tableColumn={tableColumn}
-            line1={
+        >
+            <>
+                {
+                    podStatusProps &&
+                    <Tooltip text={statusTooltip}>
+                        <div className="flex-row">
+                            <Status {...podStatusProps} className="icon-large-margin" size={StatusSize.m} />
+                        </div>
+                    </Tooltip>
+                }
                 <Tooltip overflowOnly={true} text={podName}>
                     <div className={css("text-ellipsis", contentClassName)}>{podName}</div>
                 </Tooltip>
-            }
-            line2={null}
-            iconProps={{
-                render: (className?: string) => {
-                    return (
-                        <>
-                            {
-                                podStatusProps &&
-                                <Tooltip text={statusTooltip}>
-                                    <div className="flex-row">
-                                        <Status {...podStatusProps} className="icon-large-margin" size={StatusSize.m} />
-                                    </div>
-                                </Tooltip>
-                            }
-                        </>
-                    );
-                }
-            }}
-        />
+            </>
+        </SimpleTableCell>
     ) : renderTableCell(rowIndex, columnIndex, tableColumn, null);
 }
 
