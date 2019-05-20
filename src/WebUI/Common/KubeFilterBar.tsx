@@ -13,7 +13,7 @@ import { IListBoxItem } from "azure-devops-ui/ListBox";
 import { KeywordFilterBarItem } from "azure-devops-ui/TextFilterBarItem";
 import { Filter } from "azure-devops-ui/Utilities/Filter";
 import * as React from "react";
-import * as Resources from "../Resources";
+import * as Resources from "../../Resources";
 import { IVssComponentProperties } from "../Types";
 
 /* Including from office-ui-fabric-react to avoid direct dependency on office-ui-fabric-react */

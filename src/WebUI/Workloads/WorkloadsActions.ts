@@ -3,8 +3,8 @@
     Licensed under the MIT license.
 */
 
-import { ActionsHubBase, Action } from "../FluxCommon/Actions";
-import { V1DeploymentList, V1ReplicaSet, V1ReplicaSetList, V1DaemonSetList, V1StatefulSetList, V1PodList, V1Pod, V1DaemonSet, V1StatefulSet, V1PodTemplateSpec, V1ObjectMeta } from "@kubernetes/client-node";
+import { V1DaemonSetList, V1DeploymentList, V1PodList, V1ReplicaSetList, V1StatefulSetList } from "@kubernetes/client-node";
+import { Action, ActionsHubBase } from "../FluxCommon/Actions";
 
 export class WorkloadsActions extends ActionsHubBase {
     public static getKey(): string {

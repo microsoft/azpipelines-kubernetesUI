@@ -12,28 +12,27 @@ import { Page } from "azure-devops-ui/Page";
 import { Spinner, SpinnerSize } from "azure-devops-ui/Spinner";
 import { IStatusProps } from "azure-devops-ui/Status";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
-import { css } from "azure-devops-ui/Util";
 import * as Date_Utils from "azure-devops-ui/Utilities/Date";
 import { createBrowserHistory } from "history";
-import * as queryString from "query-string";
 import * as React from "react";
+import * as queryString from "simple-query-string";
 import { IKubeService } from "../../Contracts/Contracts";
 import { IImageDetails } from "../../Contracts/Types";
+import * as Resources from "../../Resources";
 import { defaultColumnRenderer } from "../Common/KubeCardWithTable";
-import { KubeSummary } from "../Common/KubeSummary";
 import { KubeZeroData } from "../Common/KubeZeroData";
 import { PageTopHeader } from "../Common/PageTopHeader";
 import { Tags } from "../Common/Tags";
-import { ImageDetailsEvents, PodsEvents, SelectedItemKeys, WorkloadsEvents } from "../Constants";
+import { ImageDetailsEvents, PodsEvents, Scenarios, SelectedItemKeys, WorkloadsEvents } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
 import { ImageDetails } from "../ImageDetails/ImageDetails";
 import { ImageDetailsActionsCreator } from "../ImageDetails/ImageDetailsActionsCreator";
 import { ImageDetailsStore } from "../ImageDetails/ImageDetailsStore";
+import { getTelemetryService, KubeFactory } from "../KubeFactory";
 import { PodsActionsCreator } from "../Pods/PodsActionsCreator";
 import { PodsStore } from "../Pods/PodsStore";
 import { PodsTable } from "../Pods/PodsTable";
-import * as Resources from "../Resources";
 import { getRunDetailsText } from "../RunDetails";
 import { SelectionActionsCreator } from "../Selection/SelectionActionCreator";
 import { IPodDetailsSelectionProperties, IVssComponentProperties } from "../Types";
@@ -41,8 +40,6 @@ import { Utils } from "../Utils";
 import "./WorkloadDetails.scss";
 import { WorkloadsActionsCreator } from "./WorkloadsActionsCreator";
 import { WorkloadsStore } from "./WorkloadsStore";
-import { Scenarios } from "../Constants";
-import { getTelemetryService } from "../KubeFactory";
 
 export interface IWorkloadDetailsProperties extends IVssComponentProperties {
     item?: V1ReplicaSet | V1DaemonSet | V1StatefulSet;
@@ -90,7 +87,7 @@ export class WorkloadDetails extends React.Component<IWorkloadDetailsProperties,
 
         let item = props.item;
         if (!props.item) {
-            const kubeService = KubeSummary.getKubeService();
+            const kubeService = KubeFactory.getKubeService();
             ActionsCreatorManager.GetActionCreator<PodsActionsCreator>(PodsActionsCreator).getPods(kubeService);
             const workloadsActionCreator = ActionsCreatorManager.GetActionCreator<WorkloadsActionsCreator>(WorkloadsActionsCreator);
 
@@ -127,7 +124,7 @@ export class WorkloadDetails extends React.Component<IWorkloadDetailsProperties,
                     }
 
                     return itemToReturn;
-                }
+                };
 
                 switch (queryParams.type) {
                     case SelectedItemKeys.ReplicaSetKey:
@@ -190,7 +187,7 @@ export class WorkloadDetails extends React.Component<IWorkloadDetailsProperties,
 
     public componentDidUpdate(prevProps: IWorkloadDetailsProperties, prevState: IWorkloadDetailsState) {
         // Fetch hasImageDetailsData if we directly refresh and land on WorkloadDetails
-        const imageService = KubeSummary.getImageService();
+        const imageService = KubeFactory.getImageService();
         if (imageService && this.state.imageList && this.state.imageList.length > 0) {
             const hasImageDetails: boolean | undefined = this._imageDetailsStore.hasImageDetails(this.state.imageList[0]);
             if (hasImageDetails === undefined) {
@@ -217,7 +214,7 @@ export class WorkloadDetails extends React.Component<IWorkloadDetailsProperties,
     }
 
     private _showImageDetails = (imageId: string) => {
-        const imageService = KubeSummary.getImageService();
+        const imageService = KubeFactory.getImageService();
         imageService && imageService.getImageDetails(imageId).then(imageDetails => {
             this.setState({
                 showImageDetails: true,
@@ -373,7 +370,7 @@ export class WorkloadDetails extends React.Component<IWorkloadDetailsProperties,
         }
 
         if (this.state.pods.length === 0) {
-            setTimeout(()=> this._markTTI(), 0);
+            setTimeout(() => this._markTTI(), 0);
             return KubeZeroData.getWorkloadAssociatedPodsZeroData();
         }
 

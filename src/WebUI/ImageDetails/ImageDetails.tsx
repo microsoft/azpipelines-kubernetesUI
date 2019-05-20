@@ -11,21 +11,21 @@ import { format, localeFormat } from "azure-devops-ui/Core/Util/String";
 import { CustomHeader, HeaderDescription, HeaderIcon, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
 import { Page } from "azure-devops-ui/Page";
 import { ITableColumn, Table } from "azure-devops-ui/Table";
+import { css } from "azure-devops-ui/Util";
 import * as Date_Utils from "azure-devops-ui/Utilities/Date";
 import { AgoFormat } from "azure-devops-ui/Utilities/Date";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
 import { IImageDetails, IImageLayer } from "../../Contracts/Types";
+import * as Resources from "../../Resources";
 import { defaultColumnRenderer, renderTableCell } from "../Common/KubeCardWithTable";
 import { Tags } from "../Common/Tags";
-import * as Resources from "../Resources";
+import { Scenarios } from "../Constants";
+import { getTelemetryService } from "../KubeFactory";
 import { getRunDetailsText } from "../RunDetails";
 import { IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
 import "./ImageDetails.scss";
-import { getTelemetryService } from "../KubeFactory";
-import { Scenarios } from "../Constants";
-import { css } from "azure-devops-ui/Util";
 
 export interface IImageDetailsProperties extends IVssComponentProperties {
     imageDetails: IImageDetails;
@@ -37,7 +37,7 @@ export interface IImageDetailsState {
 }
 
 export class ImageDetails extends React.Component<IImageDetailsProperties, IImageDetailsState> {
-    
+
     constructor(props: IImageDetailsProperties) {
         super(props);
         getTelemetryService().scenarioStart(Scenarios.ImageDetails);
@@ -157,7 +157,7 @@ export class ImageDetails extends React.Component<IImageDetailsProperties, IImag
         return (
             <div className="flex-column details-card-content">
                 {items.map((item, index) => (
-                     <div className={index === 0 ? css(rowClassNames, "first-row") : rowClassNames} key={index}>
+                    <div className={index === 0 ? css(rowClassNames, "first-row") : rowClassNames} key={index}>
 
                         <div className="text-ellipsis secondary-text details-card-info-field-size">
                             {item.key}

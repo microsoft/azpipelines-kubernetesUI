@@ -6,26 +6,25 @@
 import { V1DaemonSet, V1Pod, V1PodSpec, V1ReplicaSet, V1StatefulSet } from "@kubernetes/client-node";
 import { Ago } from "azure-devops-ui/Ago";
 import { CardContent, CustomCard } from "azure-devops-ui/Card";
-import { ITableRow } from "azure-devops-ui/Components/Table/Table.Props";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { equals, localeFormat } from "azure-devops-ui/Core/Util/String";
 import { CustomHeader, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
 import { Link } from "azure-devops-ui/Link";
 import { Statuses } from "azure-devops-ui/Status";
-import { ITableColumn, Table, TwoLineTableCell } from "azure-devops-ui/Table";
+import { ITableColumn, ITableRow, Table, TwoLineTableCell } from "azure-devops-ui/Table";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
 import { KubeResourceType } from "../../Contracts/KubeServiceBase";
+import * as Resources from "../../Resources";
 import { defaultColumnRenderer, onPodsColumnClicked, renderPodsStatusTableCell, renderTableCell } from "../Common/KubeCardWithTable";
-import { KubeSummary } from "../Common/KubeSummary";
 import { ImageDetailsEvents, SelectedItemKeys, WorkloadsEvents } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
 import { ImageDetailsActionsCreator } from "../ImageDetails/ImageDetailsActionsCreator";
 import { ImageDetailsStore } from "../ImageDetails/ImageDetailsStore";
+import { KubeFactory } from "../KubeFactory";
 import { PodsStore } from "../Pods/PodsStore";
-import * as Resources from "../Resources";
 import { SelectionActionsCreator } from "../Selection/SelectionActionCreator";
 import { ISelectionPayload } from "../Selection/SelectionActions";
 import { ISetWorkloadTypeItem, IVssComponentProperties } from "../Types";
@@ -69,9 +68,10 @@ export class OtherWorkloads extends React.Component<IOtherWorkloadsProperties, I
         this._store.addListener(WorkloadsEvents.WorkloadPodsFetchedEvent, this._onOrphanPodsFetched);
 
         this._imageDetailsStore.addListener(ImageDetailsEvents.HasImageDetailsEvent, this._setHasImageDetails);
-        this._actionCreator.getReplicaSets(KubeSummary.getKubeService());
-        this._actionCreator.getStatefulSets(KubeSummary.getKubeService());
-        this._actionCreator.getDaemonSets(KubeSummary.getKubeService());
+        const kubeService = KubeFactory.getKubeService();
+        this._actionCreator.getReplicaSets(kubeService);
+        this._actionCreator.getStatefulSets(kubeService);
+        this._actionCreator.getDaemonSets(kubeService);
     }
 
     public render(): React.ReactNode {
@@ -224,9 +224,9 @@ export class OtherWorkloads extends React.Component<IOtherWorkloadsProperties, I
         const hasImageDetails: boolean | undefined = this._imageDetailsStore.hasImageDetails(imageId);
         // If hasImageDetails is undefined, then image details promise has not resolved, so do not set imageDetailsUnavailable tooltip
         if (hasImageDetails === false) {
-            imageDetailsUnavailableTooltipText = localeFormat("{0} | {1}",  workload.imageTooltip || imageText, Resources.ImageDetailsUnavailableText);
+            imageDetailsUnavailableTooltipText = localeFormat("{0} | {1}", workload.imageTooltip || imageText, Resources.ImageDetailsUnavailableText);
         }
-        
+
         const itemToRender = hasImageDetails ?
             <Tooltip overflowOnly={true}>
                 <Link
@@ -239,7 +239,7 @@ export class OtherWorkloads extends React.Component<IOtherWorkloadsProperties, I
                 >
                     {imageText}
                 </Link>
-            </Tooltip> 
+            </Tooltip>
             : defaultColumnRenderer(imageText, "", imageDetailsUnavailableTooltipText);
 
         return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender, undefined, "bolt-table-cell-content-with-link");
@@ -379,7 +379,7 @@ export class OtherWorkloads extends React.Component<IOtherWorkloadsProperties, I
     }
 
     private _onImageClick = (imageId: string, itemUid: string = ""): void => {
-        const imageService = KubeSummary.getImageService();
+        const imageService = KubeFactory.getImageService();
         imageService && imageService.getImageDetails(imageId).then(imageDetails => {
             if (imageDetails) {
                 const payload: ISelectionPayload = {

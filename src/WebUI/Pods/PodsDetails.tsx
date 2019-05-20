@@ -10,17 +10,17 @@ import { DetailsPanel, MasterPanel, MasterPanelHeader } from "azure-devops-ui/Ma
 import { BaseMasterDetailsContext, IMasterDetailsContext, IMasterDetailsContextLayer, MasterDetailsContext } from "azure-devops-ui/MasterDetailsContext";
 import { Spinner, SpinnerSize } from "azure-devops-ui/Spinner";
 import { createBrowserHistory, History } from "history";
-import * as queryString from "query-string";
 import * as React from "react";
+import * as queryString from "simple-query-string";
 import { IImageDetails } from "../../Contracts/Types";
-import { KubeSummary } from "../Common/KubeSummary";
-import { ImageDetailsEvents, PodsEvents, PodsRightPanelTabsKeys } from "../Constants";
+import * as Resources from "../../Resources";
+import { ImageDetailsEvents, PodsEvents, PodsRightPanelTabsKeys, Scenarios } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
 import { ImageDetails } from "../ImageDetails/ImageDetails";
 import { ImageDetailsActionsCreator } from "../ImageDetails/ImageDetailsActionsCreator";
 import { ImageDetailsStore } from "../ImageDetails/ImageDetailsStore";
-import * as Resources from "../Resources";
+import { getTelemetryService, KubeFactory } from "../KubeFactory";
 import { SelectionActionsCreator } from "../Selection/SelectionActionCreator";
 import { IPodDetailsSelectionProperties, IPodParentItem, IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
@@ -28,8 +28,6 @@ import { PodsActionsCreator } from "./PodsActionsCreator";
 import { PodsLeftPanel } from "./PodsLeftPanel";
 import { PodsRightPanel } from "./PodsRightPanel";
 import { PodsStore } from "./PodsStore";
-import { getTelemetryService } from "../KubeFactory";
-import { Scenarios } from "../Constants";
 
 export interface IPodsDetailsProperties extends IVssComponentProperties {
     parentUid: string;
@@ -157,10 +155,10 @@ export class PodsDetails extends React.Component<IPodsDetailsProperties, IPodsDe
             this._podFetchEventActive = true;
 
             if (props.serviceSelector) {
-                podsActionCreator.getPods(KubeSummary.getKubeService(), props.serviceSelector, true);
+                podsActionCreator.getPods(KubeFactory.getKubeService(), props.serviceSelector, true);
             }
             else {
-                podsActionCreator.getPods(KubeSummary.getKubeService());
+                podsActionCreator.getPods(KubeFactory.getKubeService());
             }
         }
         else {
@@ -258,7 +256,7 @@ export class PodsDetails extends React.Component<IPodsDetailsProperties, IPodsDe
 
     public componentDidUpdate(prevProps: IPodsDetailsProperties, prevState: IPodsDetailsState): void {
         // fetch hasImageDetailsData if we directly refresh and land on WorkloadDetails
-        const imageService = KubeSummary.getImageService();
+        const imageService = KubeFactory.getImageService();
         if (imageService && this.state.imageList && this.state.imageList.length > 0) {
             const hasImageDetails: boolean | undefined = this._imageDetailsStore.hasImageDetails(this.state.imageList[0]);
             if (hasImageDetails === undefined) {
@@ -280,7 +278,7 @@ export class PodsDetails extends React.Component<IPodsDetailsProperties, IPodsDe
     }
 
     private _onPodSelectionChange = (event: React.SyntheticEvent<HTMLElement>, selectedPod: V1Pod, selectedView: string): void => {
-        let routeValues: queryString.OutputParams = queryString.parse(this._history.location.search);
+        let routeValues = { ...queryString.parse(this._history.location.search) };
         routeValues["uid"] = selectedPod.metadata.uid;
         routeValues["view"] = selectedView || PodsRightPanelTabsKeys.PodsDetailsKey;
 
@@ -315,7 +313,7 @@ export class PodsDetails extends React.Component<IPodsDetailsProperties, IPodsDe
 
     // ToDO:: Handle GetImageDetails via ImageStore to avoid multiple calls to API from UI
     private _showImageDetails = (imageId: string) => {
-        const imageService = KubeSummary.getImageService();
+        const imageService = KubeFactory.getImageService();
         imageService && imageService.getImageDetails(imageId).then(imageDetails => {
             this.setState({
                 selectedImageDetails: imageDetails
@@ -334,7 +332,7 @@ export class PodsDetails extends React.Component<IPodsDetailsProperties, IPodsDe
     }
 
     private _markTTI = (additionalProperties?: { [key: string]: any }): void => {
-        if(!this._isTTIMarked){
+        if (!this._isTTIMarked) {
             getTelemetryService().scenarioEnd(Scenarios.PodsDetails, additionalProperties);
             this._isTTIMarked = true;
             this._isScenarioOpen = false;
@@ -342,7 +340,7 @@ export class PodsDetails extends React.Component<IPodsDetailsProperties, IPodsDe
     }
 
     private _onRightPaneTabChange = (): void => {
-        if(this._isScenarioOpen) {
+        if (this._isScenarioOpen) {
             //close current scenario and reopen a new open
             getTelemetryService().scenarioEnd(Scenarios.PodsDetails);
         }
