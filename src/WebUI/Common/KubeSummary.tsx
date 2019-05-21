@@ -292,7 +292,7 @@ export class KubeSummary extends React.Component<IKubeSummaryProps, IKubernetesC
         };
 
         if (this.props.onTitleBackClick) {
-            headerProps.titleIconProps = { iconName: "Back", onClick: this.props.onTitleBackClick, className: "cursor-pointer" };
+            headerProps.backButtonProps = { subtle: true, iconProps: { iconName: "Back" }, onClick: this.props.onTitleBackClick, className: "cursor-pointer" };
         }
 
         return (
