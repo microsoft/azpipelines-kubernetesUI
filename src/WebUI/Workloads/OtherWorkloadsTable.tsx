@@ -209,10 +209,10 @@ export class OtherWorkloads extends React.Component<IOtherWorkloadsProperties, I
                 tableColumn={tableColumn}
                 line1={
                     <Tooltip overflowOnly={true} text={workload.name}>
-                        <span className="fontWeightSemiBold font-weight-semibold text-ellipsis">{workload.name}</span>
+                        <span className="body-m font-weight-semibold text-ellipsis">{workload.name}</span>
                     </Tooltip>
                 }
-                line2={<span className="fontSize font-size secondary-text text-ellipsis">{OtherWorkloads._getSetType(workload.kind)}</span>}
+                line2={<span className="body-s secondary-text text-ellipsis">{OtherWorkloads._getSetType(workload.kind)}</span>}
             />
         );
     }
@@ -230,7 +230,7 @@ export class OtherWorkloads extends React.Component<IOtherWorkloadsProperties, I
         const itemToRender = hasImageDetails ?
             <Tooltip overflowOnly={true}>
                 <Link
-                    className="fontSizeM font-size-m text-ellipsis bolt-table-link"
+                    className="body-m text-ellipsis bolt-table-link"
                     excludeTabStop={true}
                     onClick={(e) => {
                         e.preventDefault();
@@ -240,7 +240,7 @@ export class OtherWorkloads extends React.Component<IOtherWorkloadsProperties, I
                     {imageText}
                 </Link>
             </Tooltip>
-            : defaultColumnRenderer(imageText, "", imageDetailsUnavailableTooltipText);
+            : defaultColumnRenderer(imageText, "body-m", imageDetailsUnavailableTooltipText);
 
         return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender, undefined, "bolt-table-cell-content-with-link");
     }
@@ -259,7 +259,7 @@ export class OtherWorkloads extends React.Component<IOtherWorkloadsProperties, I
 
     private static _renderAgeCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<ISetWorkloadTypeItem>, statefulSet: ISetWorkloadTypeItem): JSX.Element {
         const creationTime = statefulSet.creationTimeStamp ? statefulSet.creationTimeStamp : new Date();
-        const itemToRender = <Ago date={new Date(creationTime)} />;
+        const itemToRender = <Ago className="body-m" date={new Date(creationTime)} />;
         return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 

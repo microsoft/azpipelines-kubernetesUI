@@ -140,7 +140,7 @@ export class ServicesTable extends React.Component<IServicesComponentProperties,
     }
 
     private _renderAgeCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, service: IServiceItem): JSX.Element => {
-        const itemToRender = <Ago date={new Date(service.creationTimestamp)} />;
+        const itemToRender = <Ago className="body-m" date={new Date(service.creationTimestamp)} />;
         return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
@@ -168,11 +168,11 @@ export class ServicesTable extends React.Component<IServicesComponentProperties,
                 tableColumn={tableColumn}
                 line1={
                     <Tooltip overflowOnly={true} text={service.package}>
-                        <div className="fontWeightSemiBold font-weight-semibold text-ellipsis">{service.package}</div>
+                        <div className="body-m font-weight-semibold text-ellipsis">{service.package}</div>
                     </Tooltip>
                 }
                 line2={
-                    <div className="fontSize font-size secondary-text text-ellipsis">{service.type}</div>
+                    <div className="body-s secondary-text text-ellipsis">{service.type}</div>
                 }
                 iconProps={{
                     render: (className?: string) => {

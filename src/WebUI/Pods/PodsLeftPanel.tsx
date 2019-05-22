@@ -33,7 +33,7 @@ export class PodsLeftPanel extends React.Component<IPodsLeftPanelProperties> {
                     itemProvider={new ArrayItemProvider<V1Pod>(this.props.pods)}
                     onSelect={this._onSelectionChange}
                     selection={this._selection}
-                    renderRow={PodsLeftPanel._renderListRow}
+                    renderRow={this._renderListRow}
                     width="100%"
                 />
                 : null
@@ -63,9 +63,10 @@ export class PodsLeftPanel extends React.Component<IPodsLeftPanelProperties> {
     }
 
 
-    private static _renderListRow = (index: number, pod: V1Pod, details: IListItemDetails<V1Pod>, key?: string): JSX.Element => {
+    private _renderListRow = (index: number, pod: V1Pod, details: IListItemDetails<V1Pod>, key?: string): JSX.Element => {
         const { statusProps, tooltip } = Utils.generatePodStatusProps(pod.status);
         const rowClassName = index === 0 ? css("pods-left-panel-row", "first-row") : "pods-left-panel-row";
+        const textClassName = css("primary-text text-ellipsis body-m", index === this._selectedRow ? "font-weight-semibold" : "");
 
         return (
             <ListItem className={rowClassName} key={key || "list-item" + index} index={index} details={details}>
@@ -81,7 +82,7 @@ export class PodsLeftPanel extends React.Component<IPodsLeftPanelProperties> {
                             </Tooltip>
                         }
                         <Tooltip overflowOnly={true} text={pod.metadata.name}>
-                            <div className="primary-text text-ellipsis">{pod.metadata.name}</div>
+                            <div className={textClassName}>{pod.metadata.name}</div>
                         </Tooltip>
                     </div>
                 </div>

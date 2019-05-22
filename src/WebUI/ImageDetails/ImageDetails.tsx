@@ -153,9 +153,9 @@ export class ImageDetails extends React.Component<IImageDetailsProperties, IImag
 
     private _getCardContent = (): JSX.Element => {
         const items = this._getImageDetailsRowsData(this.props.imageDetails);
-        const rowClassNames = "flex-row details-card-row-size body-m";
+        const rowClassNames = "flex-row details-card-row-size";
         return (
-            <div className="flex-column details-card-content">
+            <div className="flex-column details-card-content body-m">
                 {items.map((item, index) => (
                     <div className={index === 0 ? css(rowClassNames, "first-row") : rowClassNames} key={index}>
 
@@ -256,7 +256,7 @@ export class ImageDetails extends React.Component<IImageDetailsProperties, IImag
             textToRender = localeFormat("{0}: {1}", directive, layerArguments);
         }
 
-        const itemToRender = defaultColumnRenderer(textToRender);
+        const itemToRender = defaultColumnRenderer(textToRender, "body-m");
         return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
@@ -267,14 +267,14 @@ export class ImageDetails extends React.Component<IImageDetailsProperties, IImag
             textToRender = "-";
         }
 
-        const itemToRender = defaultColumnRenderer(textToRender);
+        const itemToRender = defaultColumnRenderer(textToRender, "body-m");
         return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
     private static _renderLayersAgeCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IImageLayer>, imageLayer: IImageLayer): JSX.Element {
         // Currently created data is not present in imageLayer
         const layerCreatedOn = imageLayer.createdOn ? new Date(imageLayer.createdOn) : new Date();
-        const itemToRender = <Ago date={layerCreatedOn} format={AgoFormat.Compact} />;
+        const itemToRender = <Ago className="body-m" date={layerCreatedOn} format={AgoFormat.Compact} />;
         return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 

@@ -168,7 +168,7 @@ export class PodsTable extends React.Component<IPodsTableProperties> {
 
     private static _renderPodNameCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod): JSX.Element {
         const { statusProps, tooltip } = Utils.generatePodStatusProps(pod.status);
-        return renderPodNameWithStatusTableCell(rowIndex, columnIndex, tableColumn, pod.metadata.name, statusProps, tooltip, "fontWeightSemiBold font-weight-semibold");
+        return renderPodNameWithStatusTableCell(rowIndex, columnIndex, tableColumn, pod.metadata.name, statusProps, tooltip, "body-m font-weight-semibold");
     }
 
     private static _renderPodWorkload(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod): JSX.Element {
@@ -220,7 +220,7 @@ export class PodsTable extends React.Component<IPodsTableProperties> {
 
     private static _renderPodAgeCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<V1Pod>, pod: V1Pod): JSX.Element {
         const itemToRender = pod.status && pod.status.startTime
-            ? <Ago date={new Date(pod.status.startTime)} format={AgoFormat.Extended} />
+            ? <Ago className="body-m" date={new Date(pod.status.startTime)} format={AgoFormat.Extended} />
             : null;
         return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }

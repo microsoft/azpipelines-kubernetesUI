@@ -112,10 +112,10 @@ export class WorkloadsPivot extends React.Component<IWorkloadsPivotProps, IWorkl
     }
 
     private _notifyRender = () => {
-        const nodeCount = this.state.totalNodesRendered;
-        this.setState({
-            totalNodesRendered: nodeCount + 1
-        });
+        // const nodeCount = this.state.totalNodesRendered;
+        // this.setState({
+        //     totalNodesRendered: nodeCount + 1
+        // });
     }
 
     private _getContent(): JSX.Element {
