@@ -50,7 +50,9 @@ export class Utils {
         let tags: string[] = [];
         if (items) {
             Object.keys(items).forEach((key: string) => {
-                tags.push(format("{0}={1}", key, items[key]));
+                // trim single/double quotes
+                const keyValue = (items[key] || "").trim().replace(/^("|')+/, "").replace(/("|')+$/, "");
+                tags.push(format("{0}={1}", key, keyValue));
             });
         }
 
