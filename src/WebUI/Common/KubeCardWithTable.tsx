@@ -213,7 +213,7 @@ export function renderPodsStatusTableCell(
     const content = (
         <>
             {podsStatusProps && <Status {...podsStatusProps} size={StatusSize.m} />}
-            <div className="k8s-pods-status-count">{podsCountString}</div>
+            <div className="k8s-pods-status-count body-m">{podsCountString}</div>
         </>
     );
 

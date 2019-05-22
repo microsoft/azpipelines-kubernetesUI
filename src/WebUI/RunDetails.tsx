@@ -1,10 +1,10 @@
-import { localeFormat } from "azure-devops-ui/Core/Util/String";
-import { Link } from "azure-devops-ui/Link";
 /*
     Copyright (c) Microsoft Corporation. All rights reserved.
     Licensed under the MIT license.
 */
 
+import { localeFormat } from "azure-devops-ui/Core/Util/String";
+import { Link } from "azure-devops-ui/Link";
 import * as React from "react";
 import * as Resources from "../Resources";
 import "./RunDetails.scss";

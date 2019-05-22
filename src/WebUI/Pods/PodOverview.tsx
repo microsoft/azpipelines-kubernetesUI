@@ -25,20 +25,15 @@ import "./PodOverview.scss";
 import { IPodRightPanelProps } from "./Types";
 
 export interface IPodOverviewProps extends IPodRightPanelProps {
-    // Overriding this to make sure we don't accept undefined
+    // overriding this to make sure we don't accept undefined
     pod: V1Pod;
     showImageDetails?: (imageId: string) => void;
 }
 
 export class PodOverview extends React.Component<IPodOverviewProps> {
     public render(): JSX.Element {
-        const podDetails = PodOverview._getPodDetails(this.props.pod, this.props.showImageDetails);
-        const scenarioPayload = {
-            "scenario": Scenarios.PodOverview
-        };
-        if (this.props.markTTICallback) {
-            setTimeout(() => this.props.markTTICallback && this.props.markTTICallback(scenarioPayload), 0);
-        }
+        this._markTTI();
+
         return (
             <CustomCard className="pod-overview-card k8s-card-padding flex-grow bolt-card-no-vertical-padding">
                 <CustomHeader>
@@ -57,10 +52,16 @@ export class PodOverview extends React.Component<IPodOverviewProps> {
         );
     }
 
-    public componentDidMount() {
-        this.props.markTTICallback && this.props.markTTICallback({
-            "scenario": Scenarios.PodOverview
-        });
+    public componentDidMount(): void {
+        this._markTTI();
+    }
+
+    private _markTTI(): void {
+        if (this.props.markTTICallback) {
+            this.props.markTTICallback({
+                "scenario": Scenarios.PodOverview
+            });
+        }
     }
 
     private static _getPodDetails = (pod: V1Pod, showImageDetails?: (imageId: string) => void): any[] => {
@@ -123,10 +124,10 @@ export class PodOverview extends React.Component<IPodOverviewProps> {
 
     private _getCardContent = (): JSX.Element => {
         const items = PodOverview._getPodDetails(this.props.pod, this.props.showImageDetails);
-        const rowClassNames = "flex-row details-card-row-size body-m";
+        const rowClassNames = "flex-row details-card-row-size";
         const keyClassNames = "text-ellipsis secondary-text details-card-info-field-size";
         return (
-            <div className="flex-column details-card-content">
+            <div className="flex-column details-card-content body-m">
                 {items.map((item, index) =>
                     (item.key === Resources.ImageText)
                         ? (
@@ -155,7 +156,7 @@ export class PodOverview extends React.Component<IPodOverviewProps> {
         const imageDetailsStore = StoreManager.GetStore<ImageDetailsStore>(ImageDetailsStore);
         let imageDetailsUnavailableTooltipText = "";
         const hasImageDetails: boolean | undefined = imageDetailsStore.hasImageDetails(imageId);
-        // If hasImageDetails is undefined, then image details promise has not resolved, so do not set imageDetailsUnavailable tooltip
+        // if hasImageDetails is undefined, then image details promise has not resolved, so do not set imageDetailsUnavailable tooltip
         if (hasImageDetails === false) {
             imageDetailsUnavailableTooltipText = localeFormat("{0} | {1}", valueTooltipText || value, Resources.ImageDetailsUnavailableText);
         }

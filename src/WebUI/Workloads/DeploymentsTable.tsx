@@ -246,7 +246,7 @@ export class DeploymentsTable extends React.Component<IDeploymentsTablePropertie
     }
 
     private static _renderReplicaSetNameCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IDeploymentReplicaSetItem>, deployment: IDeploymentReplicaSetItem): JSX.Element {
-        const itemToRender = defaultColumnRenderer(deployment.replicaSetName || "", "fontWeightSemiBold font-weight-semibold");
+        const itemToRender = defaultColumnRenderer(deployment.replicaSetName || "", "body-m font-weight-semibold");
         return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
@@ -273,7 +273,7 @@ export class DeploymentsTable extends React.Component<IDeploymentsTablePropertie
         const itemToRender = hasImageDetails ?
             <Tooltip overflowOnly>
                 <Link
-                    className="fontSizeM font-size-m text-ellipsis bolt-table-link"
+                    className="body-m text-ellipsis bolt-table-link"
                     rel={"noopener noreferrer"}
                     excludeTabStop
                     onClick={(e) => {
@@ -284,14 +284,14 @@ export class DeploymentsTable extends React.Component<IDeploymentsTablePropertie
                     {textToRender}
                 </Link>
             </Tooltip >
-            : defaultColumnRenderer(textToRender, "", imageDetailsUnavailableTooltipText);
+            : defaultColumnRenderer(textToRender, "body-m", imageDetailsUnavailableTooltipText);
 
         return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender, undefined, hasImageDetails ? "bolt-table-cell-content-with-link" : "");
     }
 
     private static _renderAgeCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IDeploymentReplicaSetItem>, deployment: IDeploymentReplicaSetItem): JSX.Element {
         const createdDate = deployment.creationTimeStamp ? deployment.creationTimeStamp : new Date();
-        const itemToRender = <Ago date={new Date(createdDate)} />;
+        const itemToRender = <Ago className="body-m" date={new Date(createdDate)} />;
         return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
