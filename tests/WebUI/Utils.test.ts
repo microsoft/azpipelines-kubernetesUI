@@ -49,7 +49,7 @@ describe("Utils isOwnerMatched Tests", () => {
     });
 });
 
-describe("Utils getPillTags Tests", () => {
+describe("Utils getPillTags count Tests", () => {
     const getPillTagsData = [
         [
             "zeroLabels",
@@ -78,5 +78,39 @@ describe("Utils getPillTags Tests", () => {
 
     it.each(getPillTagsData)("getPillTags checking for:: %s", (testName, items, labelCount) => {
         expect(Utils.getPillTags(items).length).toStrictEqual(labelCount);
+    });
+});
+
+describe("Utils getPillTags value check Tests", () => {
+    const getPillTagsData = [
+        [
+            "oneLabel value",
+            { "one": "oneLabel" },
+            ["one=oneLabel"]
+        ],
+        [
+            "twoLabels value",
+            {
+                "second": "secondLabel",
+                "one": "oneLabel"
+            },
+            ["second=secondLabel", "one=oneLabel"]
+        ],
+        [
+            "space with quotes value",
+            {
+                "second": "secondLabel\"     ",
+                "one": "      oneLabel",
+                "three": "      '\"three   \"  Label'\"            ",
+                "four": "\"fourLable\"",
+                "five": "'fiveLable'",
+                "six": "\"'sixLabel\"'"
+            },
+            ["second=secondLabel", "one=oneLabel", "three=three   \"  Label", "four=fourLable", "five=fiveLable", "six=sixLabel"]
+        ]
+    ];
+
+    it.each(getPillTagsData)("getPillTags checking for:: %s", (testName, items, output) => {
+        Utils.getPillTags(items).forEach((item, index) => { expect(item).toStrictEqual(output[index]); });
     });
 });
