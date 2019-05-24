@@ -53,7 +53,7 @@ const workloadsFilterToggled = new ObservableValue<boolean>(false);
 const servicesFilterToggled = new ObservableValue<boolean>(false);
 
 // todo: refactor filter properties to respective resource type components
-export interface IKubernetesContainerState {
+interface IKubernetesContainerState {
     namespace?: string;
     selectedPivotKey?: string;
     selectedItem?: V1ReplicaSet | V1DaemonSet | V1StatefulSet | V1Pod | IServiceItem | IImageDetails;
@@ -118,7 +118,7 @@ export interface IKubeSummaryProps extends IVssComponentProperties {
     * type of error when namespace or cluster deleted
     * or with given auth config we will not be able to reach to Kubernetes cluster.
     */
-    getResourceErrorType?: () => Promise<ResourceErrorType>;
+    getResourceErrorType?: () => Promise<ResourceErrorType> | ResourceErrorType;
 
     /*
     * UI to show when Resource has an error.
@@ -167,7 +167,7 @@ export class KubeSummary extends React.Component<IKubeSummaryProps, IKubernetesC
             resourceSize: 0,
             svcFilter: servicesFilter,
             workloadsFilter: workloadsFilter,
-            resourceErrorType: this.props.getResourceErrorType ? ResourceErrorType.NotInitialized : ResourceErrorType.None
+            resourceErrorType: this._getResourceErrorType()
         };
 
         this._servicesStore = StoreManager.GetStore<ServicesStore>(ServicesStore);
@@ -210,10 +210,6 @@ export class KubeSummary extends React.Component<IKubeSummaryProps, IKubernetesC
     }
 
     public componentDidMount(): void {
-        if (this.props.getResourceErrorType) {
-            this.props.getResourceErrorType().then(errorType => { this.setState({ resourceErrorType: errorType }); });
-        }
-
         // this needs to be called after the data is loaded so that we can decide which object is selected as per the URL
         setTimeout(() => {
             this._updateStateFromHistory(queryString.parse(this._historyService.location.search));
@@ -227,6 +223,25 @@ export class KubeSummary extends React.Component<IKubeSummaryProps, IKubernetesC
         this._workloadsStore.removeListener(WorkloadsEvents.WorkloadsFoundEvent, this._onDataFound);
         this._servicesStore.removeListener(ServicesEvents.ServicesFoundEvent, this._onDataFound);
         this._selectionStore.removeChangedListener(this._onSelectionStoreChanged);
+    }
+
+    private _getResourceErrorType(): ResourceErrorType {
+        if (!this.props.getResourceErrorType) {
+            return ResourceErrorType.None;
+        }
+
+        const resourceFn = this.props.getResourceErrorType();
+        const resourcePromise = (resourceFn as Promise<ResourceErrorType>);
+        if (resourcePromise && resourcePromise.then) {
+            setTimeout(() => {
+                // if the prop is promise, materialize the promise little later
+                resourcePromise.then(errorType => { this.setState({ resourceErrorType: errorType }); });
+            }, 0);
+
+            return ResourceErrorType.NotInitialized;
+        }
+
+        return (resourceFn as ResourceErrorType);
     }
 
     private _updateStateFromHistory = (routeValues: { [key: string]: any }): void => {
@@ -306,7 +321,6 @@ export class KubeSummary extends React.Component<IKubeSummaryProps, IKubernetesC
     private _getPageContent() {
         // show spinner till we know there are no error scenarios
         switch (this.state.resourceErrorType) {
-
             case ResourceErrorType.NotInitialized:
                 return <Spinner className={"flex flex-grow"} size={SpinnerSize.large} label={Resources.LoadingText} />;
             case ResourceErrorType.AccessDenied:
