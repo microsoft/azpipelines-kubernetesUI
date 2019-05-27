@@ -79,7 +79,6 @@ export class OtherWorkloads extends React.Component<IOtherWorkloadsProperties, I
             return Utils.filterByName(set.name, this.props.nameFilter);
         });
 
-        this.props.markTTICallback && setTimeout(this.props.markTTICallback, 0);
         if (filteredSet.length > 0) {
             return (
                 <CustomCard className="workloads-other-content k8s-card-padding flex-grow bolt-table-card bolt-card-no-vertical-padding">
@@ -124,14 +123,14 @@ export class OtherWorkloads extends React.Component<IOtherWorkloadsProperties, I
         const storeState = this._store.getState();
         this.setState({
             statefulSets: storeState.statefulSetList && storeState.statefulSetList.items || []
-        });
+        }, this._onMetadataFetch);
     }
 
     private _onDaemonSetsFetched = (): void => {
         const storeState = this._store.getState();
         this.setState({
             daemonSets: storeState.daemonSetList && storeState.daemonSetList.items || []
-        });
+        }, this._onMetadataFetch);
     }
 
     private _onReplicaSetsFetched = (): void => {
@@ -140,7 +139,7 @@ export class OtherWorkloads extends React.Component<IOtherWorkloadsProperties, I
         const standAloneReplicaSets = allReplicaSets.filter(set => set.metadata.ownerReferences.length === 0);
         this.setState({
             replicaSets: standAloneReplicaSets
-        })
+        }, this._onMetadataFetch)
     }
 
     private _onOrphanPodsFetched = (): void => {
@@ -148,11 +147,19 @@ export class OtherWorkloads extends React.Component<IOtherWorkloadsProperties, I
         const orphanPods = storeState.orphanPodsList || [];
         this.setState({
             orphanPods: orphanPods
-        });
+        }, this._onMetadataFetch);
     }
 
     private _setHasImageDetails = (): void => {
         this.setState({});
+    }
+
+    private _onMetadataFetch = (): void => {
+        this._metadataFetched++;
+        // since we fetch 4 kinds of workloads in this page
+        if(this._metadataFetched == 4) {
+            this.props.markTTICallback && this.props.markTTICallback({ "component": "other workloads table"});
+        }
     }
 
     private _showWorkloadDetails = (event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>, selectedItem: ISetWorkloadTypeItem) => {
@@ -399,4 +406,5 @@ export class OtherWorkloads extends React.Component<IOtherWorkloadsProperties, I
     private _imageActionsCreator: ImageDetailsActionsCreator;
     private _imageDetailsStore: ImageDetailsStore;
     private _imageList: string[] = [];
+    private _metadataFetched: number = 0;
 }

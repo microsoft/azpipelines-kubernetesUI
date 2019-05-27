@@ -32,7 +32,6 @@ import { WorkloadsStore } from "./WorkloadsStore";
 export interface IWorkloadsPivotState {
     workloadResourceSize: number;
     imageList: string[];
-    totalNodesRendered: number;
 }
 
 export interface IWorkloadsPivotProps extends IVssComponentProperties {
@@ -55,8 +54,7 @@ export class WorkloadsPivot extends React.Component<IWorkloadsPivotProps, IWorkl
 
         this.state = {
             workloadResourceSize: 0,
-            imageList: [],
-            totalNodesRendered: 0
+            imageList: []
         };
 
         this._podsStore.addListener(PodsEvents.PodsFetchedEvent, this._onPodsFetched);
@@ -87,8 +85,7 @@ export class WorkloadsPivot extends React.Component<IWorkloadsPivotProps, IWorkl
     public componentDidUpdate(prevProps: IWorkloadsPivotProps, prevState: IWorkloadsPivotState) {
         const imageService = KubeFactory.getImageService();
         imageService && (this.state.imageList.length > 0) && this._imageActionsCreator.setHasImageDetails(imageService, this.state.imageList);
-        const childNodes = this.props.children ? React.Children.count(this.props.children) : 0;
-        if (childNodes === this.state.totalNodesRendered && !this._isTTIMarked) {
+        if (this._childNodes === this._totalNodesRendered && !this._isTTIMarked) {
             getTelemetryService().scenarioEnd(Scenarios.Workloads);
             this._isTTIMarked = true;
         }
@@ -107,15 +104,18 @@ export class WorkloadsPivot extends React.Component<IWorkloadsPivotProps, IWorkl
     private _onDataFound = (): void => {
         const workloadSize = this._workloadsStore.getWorkloadSize();
         if (this.state.workloadResourceSize <= 0 && workloadSize > 0) {
-            this.setState({ workloadResourceSize: workloadSize });
+            this.setState({ workloadResourceSize: workloadSize }, () => {
+                // resettting counts upon workloads details load
+                this._childNodes = 0;
+                this._totalNodesRendered = 0;
+            });
         }
     }
 
-    private _notifyRender = () => {
-        // const nodeCount = this.state.totalNodesRendered;
-        // this.setState({
-        //     totalNodesRendered: nodeCount + 1
-        // });
+    private _notifyRender = (props?: { [key: string]: any }) => {
+        if(!this._isTTIMarked) {
+            this._totalNodesRendered++;
+        }
     }
 
     private _getContent(): JSX.Element {
@@ -137,6 +137,7 @@ export class WorkloadsPivot extends React.Component<IWorkloadsPivotProps, IWorkl
     }
 
     private _getOtherWorkloadsComponent(): JSX.Element {
+        this._childNodes++;
         return (<OtherWorkloads
             key={format("sts-list-{0}", this.props.namespace || "")}
             nameFilter={this._getNameFilterValue()}
@@ -146,6 +147,7 @@ export class WorkloadsPivot extends React.Component<IWorkloadsPivotProps, IWorkl
     }
 
     private _getDeployments(): JSX.Element {
+        this._childNodes++;
         return (<DeploymentsTable
             key={format("dc-{0}", this.props.namespace || "")}
             nameFilter={this._getNameFilterValue()}
@@ -181,6 +183,8 @@ export class WorkloadsPivot extends React.Component<IWorkloadsPivotProps, IWorkl
         return KubeZeroData.getWorkloadsZeroData();
     }
 
+    private _childNodes: number = 0;
+    private _totalNodesRendered: number = 0;
     private _isTTIMarked: boolean = false;
     private _workloadsStore: WorkloadsStore;
     private _workloadsActionCreator: WorkloadsActionsCreator;

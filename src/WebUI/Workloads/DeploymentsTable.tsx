@@ -56,9 +56,6 @@ export class DeploymentsTable extends React.Component<IDeploymentsTablePropertie
         this._imageDetailsStore.addListener(ImageDetailsEvents.HasImageDetailsEvent, this._setHasImageDetails);
     }
 
-    public componentDidMount() {
-        this.props.markTTICallback && this.props.markTTICallback();
-    }
 
     public render(): React.ReactNode {
         const deployments = this.state.deploymentList;
@@ -84,6 +81,8 @@ export class DeploymentsTable extends React.Component<IDeploymentsTablePropertie
         this.setState({
             deploymentList: storeState.deploymentList,
             replicaSetList: storeState.replicaSetList
+        }, () => {
+            this.props.markTTICallback && this.props.markTTICallback({ "component": "Deployment table"});
         });
     }
 
