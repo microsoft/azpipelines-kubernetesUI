@@ -18,6 +18,8 @@ import { Filter, FILTER_CHANGE_EVENT, IFilterState } from "azure-devops-ui/Utili
 import { Action, createBrowserHistory, History, Location, UnregisterCallback } from "history";
 import * as React from "react";
 import * as queryString from "simple-query-string";
+import { Link } from "VSSUI/Link";
+import { Tooltip } from "VSSUI/TooltipEx";
 import { IImageService, IKubeService, ITelemetryService, KubeImage, ResourceErrorType } from "../../Contracts/Contracts";
 import { IImageDetails } from "../../Contracts/Types";
 import * as Resources from "../../Resources";
@@ -97,6 +99,11 @@ export interface IKubeSummaryProps extends IVssComponentProperties {
      * Instance of ITelemetryService
      */
     telemetryService?: ITelemetryService;
+
+    /**
+     * URL to the cluster of the kubernetes object being displayed
+     */
+    clusterUrl?: string;
 
     /**
      * Callback to be invoked to go back from KubeSummary
@@ -300,9 +307,7 @@ export class KubeSummary extends React.Component<IKubeSummaryProps, IKubernetesC
             title: this.props.title,
             titleSize: TitleSize.Large,
             className: "content-main-heading",
-            description: this.props.clusterName
-                ? localeFormat(Resources.SummaryHeaderSubTextFormat, this.props.clusterName)
-                : localeFormat(Resources.NamespaceHeadingText, this.state.namespace || ""),
+            description: this._getHeaderDescription(),
             commandBarItems: cmdBarItemsFn && cmdBarItemsFn({ resourceErrorType: this.state.resourceErrorType })
         };
 
@@ -321,6 +326,7 @@ export class KubeSummary extends React.Component<IKubeSummaryProps, IKubernetesC
     private _getPageContent() {
         // show spinner till we know there are no error scenarios
         switch (this.state.resourceErrorType) {
+
             case ResourceErrorType.NotInitialized:
                 return <Spinner className={"flex flex-grow"} size={SpinnerSize.large} label={Resources.LoadingText} />;
             case ResourceErrorType.AccessDenied:
@@ -329,6 +335,18 @@ export class KubeSummary extends React.Component<IKubeSummaryProps, IKubernetesC
             default:
                 return this.state.resourceSize > 0 ? this._getMainPivot() : this._getZeroData();
         }
+    }
+
+    private _getHeaderDescription(): React.ReactNode {
+        return this.props.clusterName
+        ? this.props.clusterUrl ? 
+            <Link href={this.props.clusterUrl} >
+                {localeFormat(Resources.SummaryHeaderSubTextFormat, this.props.clusterName)}
+            </Link>
+          : <Tooltip  text={Resources.ClusterLinkHelpText}>
+                <div>{localeFormat(Resources.SummaryHeaderSubTextFormat, this.props.clusterName)}</div>
+            </Tooltip>
+        : localeFormat(Resources.NamespaceHeadingText, this.state.namespace || "");
     }
 
     private _getResourceErrorComponent(): React.ReactNode | JSX.Element | null | undefined {
