@@ -18,8 +18,8 @@ import { Filter, FILTER_CHANGE_EVENT, IFilterState } from "azure-devops-ui/Utili
 import { Action, createBrowserHistory, History, Location, UnregisterCallback } from "history";
 import * as React from "react";
 import * as queryString from "simple-query-string";
-import { Link } from "VSSUI/Link";
-import { Tooltip } from "VSSUI/TooltipEx";
+import { Link } from "azure-devops-ui/Link";
+import { Tooltip } from "azure-devops-ui/TooltipEx";
 import { IImageService, IKubeService, ITelemetryService, KubeImage, ResourceErrorType } from "../../Contracts/Contracts";
 import { IImageDetails } from "../../Contracts/Types";
 import * as Resources from "../../Resources";
