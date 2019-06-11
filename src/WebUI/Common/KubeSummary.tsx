@@ -331,40 +331,48 @@ export class KubeSummary extends React.Component<IKubeSummaryProps, IKubernetesC
         let namespaceIndexToSelect: number = availableNamespaces.findIndex(name => name === namespaceText);
         namespaceIndexToSelect = namespaceIndexToSelect < 0 ? 0 : namespaceIndexToSelect;
         this._namespaceSelection.select(namespaceIndexToSelect);
-        const namespaceComponent = availableNamespaces.length <= 0
-            ? <div>{namespaceText}</div>
-            : (
-                <Dropdown
-                    className="k8s-namespaces-dropdown"
-                    selection={this._namespaceSelection}
-                    items={availableNamespaces.map(name => { return { id: name, text: name } as IListBoxItem<any>; })}
-                    onSelect={(event, item) => {
-                        // update namespace in url, when namespace is changed
-                        const newNamespace: string = item && item.text || this.state.namespace || "";
-                        const routeValues = { ...queryString.parse(this._historyService.location.search), namespace: newNamespace };
-
-                        this._historyService.replace({
-                            pathname: this._historyService.location.pathname,
-                            search: queryString.stringify(routeValues)
-                        });
-
-                        // refresh the page
-                        this._historyService.go(0);
-                    }}
-                />
-            );
 
         // show cluster if available, and show namespace only if namespaces list is not available
         return (
             <div className="flex-column rhythm-vertical-8">
                 {
+                    /* show clustername always if it is available */
                     this.props.clusterName &&
                     <div>{localeFormat(Resources.SummaryHeaderSubTextFormat, this.props.clusterName)}</div>
                 }
-                <div className="flex-row flex-center rhythm-horizontal-8">
-                    <div>{Resources.NamespaceLabelText}</div>
-                    {namespaceComponent}
-                </div>
+                {
+                    /* show namespaces always if they are available */
+                    availableNamespaces.length > 0 &&
+                    <div className="flex-row flex-center rhythm-horizontal-8">
+                        <div>{Resources.NamespaceLabelText}</div>
+                        <Dropdown
+                            className="k8s-namespaces-dropdown"
+                            selection={this._namespaceSelection}
+                            items={availableNamespaces.map(name => { return { id: name, text: name } as IListBoxItem<any>; })}
+                            onSelect={(event, item) => {
+                                // update namespace in url, when namespace is changed
+                                const newNamespace: string = item && item.text || this.state.namespace || "";
+                                const routeValues = { ...queryString.parse(this._historyService.location.search), namespace: newNamespace };
+
+                                this._historyService.replace({
+                                    pathname: this._historyService.location.pathname,
+                                    search: queryString.stringify(routeValues)
+                                });
+
+                                // refresh the page
+                                this._historyService.go(0);
+                            }}
+                        />
+                    </div>
+                }
+                {
+                    /* show namespace only if clustername is not available or namespaces list not set */
+                    !this.props.clusterName && availableNamespaces.length <= 0 &&
+                    <div className="flex-row flex-center rhythm-horizontal-8">
+                        <div>{Resources.NamespaceLabelText}</div>
+                        <div>{namespaceText}</div>
+                    </div>
+                }
             </div>
         );
     }
