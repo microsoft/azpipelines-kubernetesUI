@@ -21,6 +21,8 @@ import { Filter, FILTER_CHANGE_EVENT, IFilterState } from "azure-devops-ui/Utili
 import { Action, createBrowserHistory, History, Location, UnregisterCallback } from "history";
 import * as React from "react";
 import * as queryString from "simple-query-string";
+import { Link } from "azure-devops-ui/Link";
+import { Tooltip } from "azure-devops-ui/TooltipEx";
 import { IImageService, IKubeService, ITelemetryService, KubeImage, ResourceErrorType } from "../../Contracts/Contracts";
 import { IImageDetails } from "../../Contracts/Types";
 import * as Resources from "../../Resources";
@@ -105,6 +107,11 @@ export interface IKubeSummaryProps extends IVssComponentProperties {
      * Instance of ITelemetryService
      */
     telemetryService?: ITelemetryService;
+
+    /**
+     * URL to the cluster of the kubernetes object being displayed
+     */
+    clusterUrl?: string;
 
     /**
      * Callback to be invoked to go back from KubeSummary
@@ -338,7 +345,13 @@ export class KubeSummary extends React.Component<IKubeSummaryProps, IKubernetesC
                 {
                     /* show clustername always if it is available */
                     this.props.clusterName &&
-                    <div>{localeFormat(Resources.SummaryHeaderSubTextFormat, this.props.clusterName)}</div>
+                        this.props.clusterUrl ?
+                        <Link href={this.props.clusterUrl} >
+                            {localeFormat(Resources.SummaryHeaderSubTextFormat, this.props.clusterName)}
+                        </Link>
+                        : <Tooltip text={Resources.ClusterLinkHelpText}>
+                            <div>{localeFormat(Resources.SummaryHeaderSubTextFormat, this.props.clusterName)}</div>
+                        </Tooltip>
                 }
                 {
                     /* show namespaces always if they are available */
@@ -380,6 +393,7 @@ export class KubeSummary extends React.Component<IKubeSummaryProps, IKubernetesC
     private _getPageContent() {
         // show spinner till we know there are no error scenarios
         switch (this.state.resourceErrorType) {
+
             case ResourceErrorType.NotInitialized:
                 return <Spinner className={"flex flex-grow"} size={SpinnerSize.large} label={Resources.LoadingText} />;
             case ResourceErrorType.AccessDenied:
