@@ -346,7 +346,10 @@ export class KubeSummary extends React.Component<IKubeSummaryProps, IKubernetesC
                     /* show clustername always if it is available */
                     this.props.clusterName &&
                         this.props.clusterUrl ?
-                        <Link href={this.props.clusterUrl} >
+                        <Link 
+                            href={this.props.clusterUrl} 
+                            target="_blank"
+                            rel="nofollow noopener">
                             {localeFormat(Resources.SummaryHeaderSubTextFormat, this.props.clusterName)}
                         </Link>
                         : <Tooltip text={Resources.ClusterLinkHelpText}>
