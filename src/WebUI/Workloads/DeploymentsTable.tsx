@@ -82,7 +82,7 @@ export class DeploymentsTable extends React.Component<IDeploymentsTablePropertie
             deploymentList: storeState.deploymentList,
             replicaSetList: storeState.replicaSetList
         }, () => {
-            this.props.markTTICallback && this.props.markTTICallback({ "component": "Deployment table"});
+            this.props.markTTICallback && this.props.markTTICallback({ "component": "DeploymentTable"});
         });
     }
 

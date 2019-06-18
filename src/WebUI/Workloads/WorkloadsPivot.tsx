@@ -85,10 +85,6 @@ export class WorkloadsPivot extends React.Component<IWorkloadsPivotProps, IWorkl
     public componentDidUpdate(prevProps: IWorkloadsPivotProps, prevState: IWorkloadsPivotState) {
         const imageService = KubeFactory.getImageService();
         imageService && (this.state.imageList.length > 0) && this._imageActionsCreator.setHasImageDetails(imageService, this.state.imageList);
-        if (this._childNodes === this._totalNodesRendered && !this._isTTIMarked) {
-            getTelemetryService().scenarioEnd(Scenarios.Workloads);
-            this._isTTIMarked = true;
-        }
     }
 
     private _onPodsFetched = (): void => {
@@ -105,16 +101,23 @@ export class WorkloadsPivot extends React.Component<IWorkloadsPivotProps, IWorkl
         const workloadSize = this._workloadsStore.getWorkloadSize();
         if (this.state.workloadResourceSize <= 0 && workloadSize > 0) {
             this.setState({ workloadResourceSize: workloadSize }, () => {
-                // resettting counts upon workloads details load
-                this._childNodes = 0;
-                this._totalNodesRendered = 0;
+                this._componentsInitialized = {
+                    "DeploymentTable": false,
+                    "OtherWorkloads": false
+                }
             });
         }
     }
 
-    private _notifyRender = (props?: { [key: string]: any }) => {
-        if(!this._isTTIMarked) {
-            this._totalNodesRendered++;
+    private _notifyRender = (props?: { [key: string]: string }) => {
+        if (!this._isTTIMarked && props && this._componentsInitialized) {
+            this._componentsInitialized[props["component"]] = true;
+            let initialized = true;
+            Object.keys(this._componentsInitialized).forEach(key => initialized = initialized && this._componentsInitialized[key])
+            if (initialized && !this._isTTIMarked) {
+                getTelemetryService().scenarioEnd(Scenarios.Workloads);
+                this._isTTIMarked = true;
+            }
         }
     }
 
@@ -137,7 +140,6 @@ export class WorkloadsPivot extends React.Component<IWorkloadsPivotProps, IWorkl
     }
 
     private _getOtherWorkloadsComponent(): JSX.Element {
-        this._childNodes++;
         return (<OtherWorkloads
             key={format("sts-list-{0}", this.props.namespace || "")}
             nameFilter={this._getNameFilterValue()}
@@ -147,7 +149,6 @@ export class WorkloadsPivot extends React.Component<IWorkloadsPivotProps, IWorkl
     }
 
     private _getDeployments(): JSX.Element {
-        this._childNodes++;
         return (<DeploymentsTable
             key={format("dc-{0}", this.props.namespace || "")}
             nameFilter={this._getNameFilterValue()}
@@ -183,12 +184,11 @@ export class WorkloadsPivot extends React.Component<IWorkloadsPivotProps, IWorkl
         return KubeZeroData.getWorkloadsZeroData();
     }
 
-    private _childNodes: number = 0;
-    private _totalNodesRendered: number = 0;
     private _isTTIMarked: boolean = false;
     private _workloadsStore: WorkloadsStore;
     private _workloadsActionCreator: WorkloadsActionsCreator;
     private _podsActionCreator: PodsActionsCreator;
     private _podsStore: PodsStore;
     private _imageActionsCreator: ImageDetailsActionsCreator;
+    private _componentsInitialized: { [key: string]: boolean};
 }

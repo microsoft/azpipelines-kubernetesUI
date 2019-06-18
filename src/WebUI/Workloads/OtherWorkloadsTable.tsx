@@ -123,14 +123,14 @@ export class OtherWorkloads extends React.Component<IOtherWorkloadsProperties, I
         const storeState = this._store.getState();
         this.setState({
             statefulSets: storeState.statefulSetList && storeState.statefulSetList.items || []
-        }, this._onMetadataFetch);
+        }, () => this._onMetadataFetch("statefulsets"));
     }
 
     private _onDaemonSetsFetched = (): void => {
         const storeState = this._store.getState();
         this.setState({
             daemonSets: storeState.daemonSetList && storeState.daemonSetList.items || []
-        }, this._onMetadataFetch);
+        }, () => this._onMetadataFetch("daemon"));
     }
 
     private _onReplicaSetsFetched = (): void => {
@@ -139,7 +139,7 @@ export class OtherWorkloads extends React.Component<IOtherWorkloadsProperties, I
         const standAloneReplicaSets = allReplicaSets.filter(set => set.metadata.ownerReferences.length === 0);
         this.setState({
             replicaSets: standAloneReplicaSets
-        }, this._onMetadataFetch)
+        }, () => this._onMetadataFetch("replicasets"))
     }
 
     private _onOrphanPodsFetched = (): void => {
@@ -147,18 +147,19 @@ export class OtherWorkloads extends React.Component<IOtherWorkloadsProperties, I
         const orphanPods = storeState.orphanPodsList || [];
         this.setState({
             orphanPods: orphanPods
-        }, this._onMetadataFetch);
+        }, () => this._onMetadataFetch("orphanpods"));
     }
 
     private _setHasImageDetails = (): void => {
         this.setState({});
     }
 
-    private _onMetadataFetch = (): void => {
-        this._metadataFetched++;
-        // since we fetch 4 kinds of workloads in this page
-        if(this._metadataFetched == 4) {
-            this.props.markTTICallback && this.props.markTTICallback({ "component": "other workloads table"});
+    private _onMetadataFetch = (key: string): void => {
+        this._metadataInitialized[key] = true;
+        let metaInitialized = true;
+        Object.keys(this._metadataInitialized).forEach(key => metaInitialized = metaInitialized && this._metadataInitialized[key]);
+        if(metaInitialized) {
+            this.props.markTTICallback && this.props.markTTICallback({ "component": "OtherWorkloads"});
         }
     }
 
@@ -406,5 +407,10 @@ export class OtherWorkloads extends React.Component<IOtherWorkloadsProperties, I
     private _imageActionsCreator: ImageDetailsActionsCreator;
     private _imageDetailsStore: ImageDetailsStore;
     private _imageList: string[] = [];
-    private _metadataFetched: number = 0;
+    private _metadataInitialized: { [key: string] : boolean} = {
+        "daemon": false,
+        "statefulsets": false,
+        "replicasets" : false,
+        "orphanpods": false
+    }
 }
