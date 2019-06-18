@@ -7,17 +7,22 @@ import { V1DaemonSet, V1DaemonSetList, V1ObjectMeta, V1Pod, V1ReplicaSet, V1Repl
 import { ConditionalChildren } from "azure-devops-ui/ConditionalChildren";
 import { ObservableArray, ObservableValue } from "azure-devops-ui/Core/Observable";
 import { localeFormat } from "azure-devops-ui/Core/Util/String";
+import { Dropdown } from "azure-devops-ui/Dropdown";
 import { Header, IHeaderProps, TitleSize } from "azure-devops-ui/Header";
 import { HeaderCommandBarWithFilter, IHeaderCommandBarItem } from "azure-devops-ui/HeaderCommandBar";
+import { IListBoxItem } from "azure-devops-ui/ListBox";
 import { Page } from "azure-devops-ui/Page";
 import { Spinner, SpinnerSize } from "azure-devops-ui/Spinner";
 import { IStatusProps } from "azure-devops-ui/Status";
 import { Surface, SurfaceBackground } from "azure-devops-ui/Surface";
 import { Tab, TabBar } from "azure-devops-ui/Tabs";
+import { DropdownSelection } from "azure-devops-ui/Utilities/DropdownSelection";
 import { Filter, FILTER_CHANGE_EVENT, IFilterState } from "azure-devops-ui/Utilities/Filter";
 import { Action, createBrowserHistory, History, Location, UnregisterCallback } from "history";
 import * as React from "react";
 import * as queryString from "simple-query-string";
+import { Link } from "azure-devops-ui/Link";
+import { Tooltip } from "azure-devops-ui/TooltipEx";
 import { IImageService, IKubeService, ITelemetryService, KubeImage, ResourceErrorType } from "../../Contracts/Contracts";
 import { IImageDetails } from "../../Contracts/Types";
 import * as Resources from "../../Resources";
@@ -89,6 +94,11 @@ export interface IKubeSummaryProps extends IVssComponentProperties {
     namespace?: string;
 
     /**
+     * Namespaces available for the cluster
+     */
+    namespaces?: string[];
+
+    /**
      * Cluster name of the kubernetes objects being displayed
      */
     clusterName?: string;
@@ -97,6 +107,11 @@ export interface IKubeSummaryProps extends IVssComponentProperties {
      * Instance of ITelemetryService
      */
     telemetryService?: ITelemetryService;
+
+    /**
+     * URL to the cluster of the kubernetes object being displayed
+     */
+    clusterUrl?: string;
 
     /**
      * Callback to be invoked to go back from KubeSummary
@@ -300,9 +315,7 @@ export class KubeSummary extends React.Component<IKubeSummaryProps, IKubernetesC
             title: this.props.title,
             titleSize: TitleSize.Large,
             className: "content-main-heading",
-            description: this.props.clusterName
-                ? localeFormat(Resources.SummaryHeaderSubTextFormat, this.props.clusterName)
-                : localeFormat(Resources.NamespaceHeadingText, this.state.namespace || ""),
+            description: this._getHeaderDescriptionComponent(),
             commandBarItems: cmdBarItemsFn && cmdBarItemsFn({ resourceErrorType: this.state.resourceErrorType })
         };
 
@@ -318,9 +331,69 @@ export class KubeSummary extends React.Component<IKubeSummaryProps, IKubernetesC
         );
     }
 
+    private _getHeaderDescriptionComponent(): JSX.Element {
+        const namespaceText = this.state.namespace || queryString.parse(this._historyService.location.search)["namespace"] as string || "";
+        // set dropdown value to the selected namespace
+        const availableNamespaces = this.props.namespaces || [];
+        let namespaceIndexToSelect: number = availableNamespaces.findIndex(name => name === namespaceText);
+        namespaceIndexToSelect = namespaceIndexToSelect < 0 ? 0 : namespaceIndexToSelect;
+        this._namespaceSelection.select(namespaceIndexToSelect);
+
+        // show cluster if available, and show namespace only if namespaces list is not available
+        return (
+            <div className="flex-column rhythm-vertical-8">
+                {
+                    /* show clustername always if it is available */
+                    this.props.clusterName &&
+                        this.props.clusterUrl ?
+                        <Link href={this.props.clusterUrl} >
+                            {localeFormat(Resources.SummaryHeaderSubTextFormat, this.props.clusterName)}
+                        </Link>
+                        : <Tooltip text={Resources.ClusterLinkHelpText}>
+                            <div>{localeFormat(Resources.SummaryHeaderSubTextFormat, this.props.clusterName)}</div>
+                        </Tooltip>
+                }
+                {
+                    /* show namespaces always if they are available */
+                    availableNamespaces.length > 0 &&
+                    <div className="flex-row flex-center rhythm-horizontal-8">
+                        <div>{Resources.NamespaceLabelText}</div>
+                        <Dropdown
+                            className="k8s-namespaces-dropdown"
+                            selection={this._namespaceSelection}
+                            items={availableNamespaces.map(name => { return { id: name, text: name } as IListBoxItem<any>; })}
+                            onSelect={(event, item) => {
+                                // update namespace in url, when namespace is changed
+                                const newNamespace: string = item && item.text || this.state.namespace || "";
+                                const routeValues = { ...queryString.parse(this._historyService.location.search), namespace: newNamespace };
+
+                                this._historyService.replace({
+                                    pathname: this._historyService.location.pathname,
+                                    search: queryString.stringify(routeValues)
+                                });
+
+                                // refresh the page
+                                this._historyService.go(0);
+                            }}
+                        />
+                    </div>
+                }
+                {
+                    /* show namespace only if clustername is not available or namespaces list not set */
+                    !this.props.clusterName && availableNamespaces.length <= 0 &&
+                    <div className="flex-row flex-center rhythm-horizontal-8">
+                        <div>{Resources.NamespaceLabelText}</div>
+                        <div>{namespaceText}</div>
+                    </div>
+                }
+            </div>
+        );
+    }
+
     private _getPageContent() {
         // show spinner till we know there are no error scenarios
         switch (this.state.resourceErrorType) {
+
             case ResourceErrorType.NotInitialized:
                 return <Spinner className={"flex flex-grow"} size={SpinnerSize.large} label={Resources.LoadingText} />;
             case ResourceErrorType.AccessDenied:
@@ -604,6 +677,7 @@ export class KubeSummary extends React.Component<IKubeSummaryProps, IKubernetesC
         KubeFactory.setImageLocation(this.props.getImageLocation);
     }
 
+    private _namespaceSelection: DropdownSelection = new DropdownSelection();
     private _selectedItemViewMap: { [selectedItemKey: string]: (selectedItem: any, selectedItemUid?: string, properties?: { [key: string]: any }) => JSX.Element | null } = {};
     private _objectFinder: { [selectedItemKey: string]: (name: string) => V1ReplicaSet | V1DaemonSet | V1StatefulSet | IServiceItem | undefined } = {};
     private _selectionStore: SelectionStore;
