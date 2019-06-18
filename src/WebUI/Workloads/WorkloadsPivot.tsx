@@ -111,7 +111,7 @@ export class WorkloadsPivot extends React.Component<IWorkloadsPivotProps, IWorkl
 
     private _notifyRender = (props?: { [key: string]: string }) => {
         if (!this._isTTIMarked && props && this._componentsInitialized) {
-            this._componentsInitialized[props["component"]] = true;
+            props["component"] ? this._componentsInitialized[props["component"]] = true : undefined;
             let initialized = true;
             Object.keys(this._componentsInitialized).forEach(key => initialized = initialized && this._componentsInitialized[key])
             if (initialized && !this._isTTIMarked) {
