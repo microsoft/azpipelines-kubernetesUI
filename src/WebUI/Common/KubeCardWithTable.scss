@@ -1,9 +1,16 @@
+@import "azure-devops-ui/_coreStyles.scss";
+
 .k8s-pods-status-count {
-    padding-left: 8px;
+    padding-left: $spacing-8;
 }
 
-.external-ip-cell .external-ip-copy-icon.kube-text-copy.subtle {
-    padding: 2px;
-    vertical-align: bottom;
-    cursor: pointer;
+.external-ip-cell {
+    .external-ip-cell-text {
+        padding-right: $spacing-4;
+    }
+    .external-ip-copy-icon.kube-text-copy.subtle {
+        padding: 2px;
+        vertical-align: bottom;
+        cursor: pointer;
+    }
 }

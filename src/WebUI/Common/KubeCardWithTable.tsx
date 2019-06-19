@@ -189,7 +189,7 @@ export function renderPodNameWithStatusTableCell(
                     podStatusProps &&
                     <Tooltip text={statusTooltip}>
                         <div className="flex-row">
-                            <Status {...podStatusProps} className="icon-large-margin" size={StatusSize.m} />
+                            <Status {...podStatusProps} ariaLabel={statusTooltip} className="icon-large-margin" size={StatusSize.m} />
                         </div>
                     </Tooltip>
                 }
@@ -226,6 +226,7 @@ export function renderPodsStatusTableCell(
                 onClick ? (
                     <Link
                         className={css(classNames, "bolt-table-link")}
+                        ariaLabel={tooltip}
                         rel={"noopener noreferrer"}
                         excludeTabStop
                         onClick={() => onClick()}
@@ -264,20 +265,23 @@ export function onPodsColumnClicked(
 
 export function renderExternalIpWithCopy(textToDisplay: string): JSX.Element {
     return (
-        <div className="external-ip-cell">
-            {textToDisplay || "-"}
+        <div className="external-ip-cell flex-row flex-center">
             {
-                textToDisplay &&
-                <Button
-                    onClick={(e) => {
-                        Utils.copyToClipboard(textToDisplay);
-                    }}
-                    tooltipProps={{ text: Resources.CopyExternalIp }}
-                    ariaLabel={Resources.CopyExternalIp}
-                    iconProps={{ iconName: "Copy" }}
-                    className="external-ip-copy-icon kube-text-copy"
-                    subtle={true}
-                />
+                textToDisplay ?
+                    <>
+                        <div className="external-ip-cell-text">{textToDisplay}</div>
+                        <Button
+                            onClick={(e) => {
+                                Utils.copyToClipboard(textToDisplay);
+                            }}
+                            tooltipProps={{ text: Resources.CopyExternalIp }}
+                            ariaLabel={Resources.CopyExternalIp}
+                            iconProps={{ iconName: "Copy" }}
+                            className="external-ip-copy-icon kube-text-copy"
+                            subtle={true}
+                        />
+                    </>
+                    : "-"
             }
         </div>
     );

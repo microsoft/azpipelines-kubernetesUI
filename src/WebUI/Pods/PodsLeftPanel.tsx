@@ -77,7 +77,7 @@ export class PodsLeftPanel extends React.Component<IPodsLeftPanelProperties> {
                             statusProps &&
                             <Tooltip text={tooltip}>
                                 <div className="flex-row">
-                                    <Status {...statusProps} className="icon-large-margin" size={StatusSize.m} />
+                                    <Status {...statusProps} ariaLabel={tooltip} className="icon-large-margin" size={StatusSize.m} />
                                 </div>
                             </Tooltip>
                         }
