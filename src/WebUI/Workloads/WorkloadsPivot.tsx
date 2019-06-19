@@ -32,7 +32,6 @@ import { WorkloadsStore } from "./WorkloadsStore";
 export interface IWorkloadsPivotState {
     workloadResourceSize: number;
     imageList: string[];
-    totalNodesRendered: number;
 }
 
 export interface IWorkloadsPivotProps extends IVssComponentProperties {
@@ -55,8 +54,7 @@ export class WorkloadsPivot extends React.Component<IWorkloadsPivotProps, IWorkl
 
         this.state = {
             workloadResourceSize: 0,
-            imageList: [],
-            totalNodesRendered: 0
+            imageList: []
         };
 
         this._podsStore.addListener(PodsEvents.PodsFetchedEvent, this._onPodsFetched);
@@ -87,11 +85,6 @@ export class WorkloadsPivot extends React.Component<IWorkloadsPivotProps, IWorkl
     public componentDidUpdate(prevProps: IWorkloadsPivotProps, prevState: IWorkloadsPivotState) {
         const imageService = KubeFactory.getImageService();
         imageService && (this.state.imageList.length > 0) && this._imageActionsCreator.setHasImageDetails(imageService, this.state.imageList);
-        const childNodes = this.props.children ? React.Children.count(this.props.children) : 0;
-        if (childNodes === this.state.totalNodesRendered && !this._isTTIMarked) {
-            getTelemetryService().scenarioEnd(Scenarios.Workloads);
-            this._isTTIMarked = true;
-        }
     }
 
     private _onPodsFetched = (): void => {
@@ -107,15 +100,25 @@ export class WorkloadsPivot extends React.Component<IWorkloadsPivotProps, IWorkl
     private _onDataFound = (): void => {
         const workloadSize = this._workloadsStore.getWorkloadSize();
         if (this.state.workloadResourceSize <= 0 && workloadSize > 0) {
-            this.setState({ workloadResourceSize: workloadSize });
+            this.setState({ workloadResourceSize: workloadSize }, () => {
+                this._componentsInitialized = {
+                    "DeploymentTable": false,
+                    "OtherWorkloads": false
+                }
+            });
         }
     }
 
-    private _notifyRender = () => {
-        // const nodeCount = this.state.totalNodesRendered;
-        // this.setState({
-        //     totalNodesRendered: nodeCount + 1
-        // });
+    private _notifyRender = (props?: { [key: string]: string }) => {
+        if (!this._isTTIMarked && props && this._componentsInitialized) {
+            props["component"] ? this._componentsInitialized[props["component"]] = true : undefined;
+            let initialized = true;
+            Object.keys(this._componentsInitialized).forEach(key => initialized = initialized && this._componentsInitialized[key])
+            if (initialized && !this._isTTIMarked) {
+                getTelemetryService().scenarioEnd(Scenarios.Workloads);
+                this._isTTIMarked = true;
+            }
+        }
     }
 
     private _getContent(): JSX.Element {
@@ -187,4 +190,5 @@ export class WorkloadsPivot extends React.Component<IWorkloadsPivotProps, IWorkl
     private _podsActionCreator: PodsActionsCreator;
     private _podsStore: PodsStore;
     private _imageActionsCreator: ImageDetailsActionsCreator;
+    private _componentsInitialized: { [key: string]: boolean};
 }
