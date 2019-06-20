@@ -100,7 +100,10 @@ export class OtherWorkloads extends React.Component<IOtherWorkloadsProperties, I
                             itemProvider={new ArrayItemProvider<ISetWorkloadTypeItem>(filteredSet)}
                             columns={this._getColumns()}
                             onActivate={(event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>) => {
-                                this._showWorkloadDetails(event, tableRow, filteredSet[tableRow.index]);
+                                // make sure all links have this classname
+                                if (!(event.target as HTMLElement).classList.contains(this._podsLinkClassName)) {
+                                    this._showWorkloadDetails(event, tableRow, filteredSet[tableRow.index]);
+                                }
                             }}
                         />
                     </CardContent>
@@ -262,7 +265,7 @@ export class OtherWorkloads extends React.Component<IOtherWorkloadsProperties, I
         let type = Utils.getKindFromItemTypeKey(workload.kind as SelectedItemKeys);
         const _onPodsClicked = (relevantPods && payload) ? (() => onPodsColumnClicked(relevantPods, payload, type, this._selectionActionCreator)) : undefined;
 
-        return renderPodsStatusTableCell(rowIndex, columnIndex, tableColumn, pods, statusProps, podsTooltip, _onPodsClicked);
+        return renderPodsStatusTableCell(rowIndex, columnIndex, tableColumn, pods, statusProps, podsTooltip, _onPodsClicked, this._podsLinkClassName);
     }
 
     private static _renderAgeCell(rowIndex: number, columnIndex: number, tableColumn: ITableColumn<ISetWorkloadTypeItem>, statefulSet: ISetWorkloadTypeItem): JSX.Element {
@@ -401,6 +404,7 @@ export class OtherWorkloads extends React.Component<IOtherWorkloadsProperties, I
         });
     }
 
+    private _podsLinkClassName = "owl-pods-link";
     private _store: WorkloadsStore;
     private _actionCreator: WorkloadsActionsCreator;
     private _selectionActionCreator: SelectionActionsCreator;
