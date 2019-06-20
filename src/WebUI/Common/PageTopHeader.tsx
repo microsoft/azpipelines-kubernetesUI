@@ -19,7 +19,7 @@ export class PageTopHeader extends React.Component<IPageTopHeader> {
     public render(): React.ReactNode {
         const { title } = this.props;
         return (
-            <CustomHeader>
+            <CustomHeader className={this.props.className}>
                 {this._getHeaderIcon()}
                 <HeaderTitleArea>
                     <HeaderTitleRow>

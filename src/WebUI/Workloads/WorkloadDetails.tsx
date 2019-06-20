@@ -207,7 +207,7 @@ export class WorkloadDetails extends React.Component<IWorkloadDetailsProperties,
             const { statusProps, podsTooltip } = this.props.getStatusProps(this.state.item);
 
             return !metadata ? null
-                : <PageTopHeader title={metadata.name} statusProps={statusProps} statusTooltip={podsTooltip} />;
+                : <PageTopHeader className="wl-header" title={metadata.name} statusProps={statusProps} statusTooltip={podsTooltip} />;
         }
 
         return null;
