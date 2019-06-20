@@ -122,7 +122,11 @@ export class DeploymentsTable extends React.Component<IDeploymentsTablePropertie
                             pageSize={items.length}
                             columns={this._getColumns()}
                             onActivate={(event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>) => {
-                                this._openDeploymentItem(event, tableRow, items[tableRow.index]);
+                                const eventTarget = event && event.target as HTMLElement;
+                                // make sure all links have this classname
+                                if (eventTarget && !eventTarget.classList.contains(this._podsLinkClassName)) {
+                                    this._openDeploymentItem(event, tableRow, items[tableRow.index]);
+                                }
                             }}
                         />
                     </CardContent>
@@ -256,7 +260,7 @@ export class DeploymentsTable extends React.Component<IDeploymentsTablePropertie
 
         const _onPodsClicked = (relevantPods && replicaSet) ? (() => onPodsColumnClicked(relevantPods, replicaSet, "ReplicaSet", this._selectionActionCreator)) : undefined;
 
-        return renderPodsStatusTableCell(rowIndex, columnIndex, tableColumn, deployment.pods, deployment.statusProps, deployment.podsTooltip, _onPodsClicked);
+        return renderPodsStatusTableCell(rowIndex, columnIndex, tableColumn, deployment.pods, deployment.statusProps, deployment.podsTooltip, _onPodsClicked, this._podsLinkClassName);
     }
 
     private _renderImageCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IDeploymentReplicaSetItem>, deployment: IDeploymentReplicaSetItem): JSX.Element => {
@@ -348,6 +352,7 @@ export class DeploymentsTable extends React.Component<IDeploymentsTablePropertie
         });
     }
 
+    private _podsLinkClassName = "d-pods-link";
     private _store: WorkloadsStore;
     private _workloadsActionCreator: WorkloadsActionsCreator;
     private _selectionActionCreator: SelectionActionsCreator;

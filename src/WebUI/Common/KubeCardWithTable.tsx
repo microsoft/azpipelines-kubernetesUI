@@ -208,7 +208,8 @@ export function renderPodsStatusTableCell(
     podsCountString?: string,
     podsStatusProps?: IStatusProps,
     tooltip?: string,
-    onClick?: () => void
+    onClick?: () => void,
+    linkClassName?: string
 ): JSX.Element {
     const content = (
         <>
@@ -219,13 +220,13 @@ export function renderPodsStatusTableCell(
 
     const classNames = "fontSizeM font-size-m flex-center flex-row text-ellipsis";
 
-    const itemToRender = podsCountString ? (
+    const itemToRender = !podsCountString ? null :
         // show tooltip always if specified, otherwise show only when element overflows
         <Tooltip text={tooltip || podsCountString || ""} overflowOnly={!tooltip}>
             {
                 onClick ? (
                     <Link
-                        className={css(classNames, "bolt-table-link")}
+                        className={css(classNames, "bolt-table-link", linkClassName || "")}
                         ariaLabel={tooltip}
                         rel={"noopener noreferrer"}
                         excludeTabStop
@@ -239,8 +240,7 @@ export function renderPodsStatusTableCell(
                     : (<span className={classNames}>
                         {content}
                     </span>)}
-        </Tooltip>
-    ) : null;
+        </Tooltip>;
 
     return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender, undefined, podsCountString ? "bolt-table-cell-content-with-link" : "");
 }
