@@ -122,8 +122,9 @@ export class DeploymentsTable extends React.Component<IDeploymentsTablePropertie
                             pageSize={items.length}
                             columns={this._getColumns()}
                             onActivate={(event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>) => {
+                                const eventTarget = event && event.target as HTMLElement;
                                 // make sure all links have this classname
-                                if (!(event.target as HTMLElement).classList.contains(this._podsLinkClassName)) {
+                                if (eventTarget && !eventTarget.classList.contains(this._podsLinkClassName)) {
                                     this._openDeploymentItem(event, tableRow, items[tableRow.index]);
                                 }
                             }}

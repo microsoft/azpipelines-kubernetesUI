@@ -100,8 +100,9 @@ export class OtherWorkloads extends React.Component<IOtherWorkloadsProperties, I
                             itemProvider={new ArrayItemProvider<ISetWorkloadTypeItem>(filteredSet)}
                             columns={this._getColumns()}
                             onActivate={(event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>) => {
+                                const eventTarget = event && event.target as HTMLElement;
                                 // make sure all links have this classname
-                                if (!(event.target as HTMLElement).classList.contains(this._podsLinkClassName)) {
+                                if (eventTarget && !eventTarget.classList.contains(this._podsLinkClassName)) {
                                     this._showWorkloadDetails(event, tableRow, filteredSet[tableRow.index]);
                                 }
                             }}
