@@ -179,7 +179,7 @@ export class ServicesTable extends React.Component<IServicesComponentProperties,
                         return (
                             <Tooltip text={tooltipText}>
                                 <div className="flex-row">
-                                    <Status {...statusProps} className="icon-large-margin" size={StatusSize.l} />
+                                    <Status {...statusProps} ariaLabel={tooltipText} className="icon-large-margin" size={StatusSize.l} />
                                 </div>
                             </Tooltip>
                         );

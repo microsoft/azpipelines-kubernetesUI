@@ -130,7 +130,7 @@ export class ServiceDetails extends React.Component<IServiceDetailsProperties, I
         const item = this.state.service;
         if (item) {
             const statusProps = item.type === LoadBalancerText && !item.externalIP ? Statuses.Running : Statuses.Success;
-            return <PageTopHeader title={item.package} statusProps={statusProps} />;
+            return <PageTopHeader className="s-details-header" title={item.package} statusProps={statusProps} />;
         }
 
         return null;

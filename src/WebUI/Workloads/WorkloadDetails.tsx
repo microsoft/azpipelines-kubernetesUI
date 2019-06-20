@@ -207,7 +207,7 @@ export class WorkloadDetails extends React.Component<IWorkloadDetailsProperties,
             const { statusProps, podsTooltip } = this.props.getStatusProps(this.state.item);
 
             return !metadata ? null
-                : <PageTopHeader title={metadata.name} statusProps={statusProps} statusTooltip={podsTooltip} />;
+                : <PageTopHeader className="wl-header" title={metadata.name} statusProps={statusProps} statusTooltip={podsTooltip} />;
         }
 
         return null;
@@ -394,7 +394,7 @@ export class WorkloadDetails extends React.Component<IWorkloadDetailsProperties,
                 selectedItemType: SelectedItemKeys.PodDetailsKey,
                 showSelectedItem: true,
                 properties: {
-                    parentUid: this.state.item!.metadata.uid,
+                    parentUid: (this.state.item && this.state.item.metadata.uid) || "",
                 } as IPodDetailsSelectionProperties
             }
         );

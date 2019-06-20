@@ -189,7 +189,7 @@ export function renderPodNameWithStatusTableCell(
                     podStatusProps &&
                     <Tooltip text={statusTooltip}>
                         <div className="flex-row">
-                            <Status {...podStatusProps} className="icon-large-margin" size={StatusSize.m} />
+                            <Status {...podStatusProps} ariaLabel={statusTooltip} className="icon-large-margin" size={StatusSize.m} />
                         </div>
                     </Tooltip>
                 }
@@ -226,9 +226,13 @@ export function renderPodsStatusTableCell(
                 onClick ? (
                     <Link
                         className={css(classNames, "bolt-table-link")}
+                        ariaLabel={tooltip}
                         rel={"noopener noreferrer"}
                         excludeTabStop
-                        onClick={() => onClick()}
+                        onClick={(e) => {
+                            onClick();
+                            e.preventDefault();
+                        }}
                     >
                         {content}
                     </Link>)
@@ -255,7 +259,7 @@ export function onPodsColumnClicked(
 
     selectionActionCreator.selectItem({
         item: selectedPod,
-        itemUID: selectedPod.metadata.uid,
+        itemUID: (selectedPod && selectedPod.metadata.uid) || item.metadata.uid,
         selectedItemType: itemKind === "Pod" ? SelectedItemKeys.OrphanPodKey : SelectedItemKeys.PodDetailsKey,
         showSelectedItem: true,
         properties: properties
@@ -264,13 +268,14 @@ export function onPodsColumnClicked(
 
 export function renderExternalIpWithCopy(textToDisplay: string): JSX.Element {
     return (
-        <div className="external-ip-cell">
-            {textToDisplay || "-"}
+        <div className="external-ip-cell flex-row flex-center">
+            <div className="external-ip-cell-text">{textToDisplay || "-"}</div>
             {
                 textToDisplay &&
                 <Button
                     onClick={(e) => {
                         Utils.copyToClipboard(textToDisplay);
+                        e.preventDefault();
                     }}
                     tooltipProps={{ text: Resources.CopyExternalIp }}
                     ariaLabel={Resources.CopyExternalIp}

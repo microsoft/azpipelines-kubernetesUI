@@ -3,8 +3,8 @@ import * as React from "react";
 import { ITableComponentProperties, KubeCardWithTable } from "../../../src/WebUI/Common/KubeCardWithTable";
 import { shallow } from "../../TestCore";
 
-describe("ListComponent component tests", () => {
-    it("Check header of the component", () => {
+describe("KubeCardWithTable component tests", () => {
+    it("Check header of the KubeCardWithTable component", () => {
         const props: ITableComponentProperties<any> = {
             headingText: "Heading",
             columns: [],
@@ -14,6 +14,6 @@ describe("ListComponent component tests", () => {
 
         const wrapper = shallow(<KubeCardWithTable {...props} />);
         const heading = wrapper.find("HeaderTitle");
-        expect(!!heading && heading.length > 0).toBeTruthy();
+        expect(heading && heading.length > 0).toBeTruthy();
     });
 });

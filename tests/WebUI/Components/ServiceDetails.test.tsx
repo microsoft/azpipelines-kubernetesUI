@@ -1,10 +1,10 @@
 import { V1Service } from "@kubernetes/client-node";
 import * as String_Utils from "azure-devops-ui/Core/Util/String";
+import { Statuses } from "azure-devops-ui/Status";
 import * as React from "react";
 import { ServiceDetails } from "../../../src/WebUI/Services/ServiceDetails";
 import { IServiceItem } from "../../../src/WebUI/Types";
-import { mount } from "../../TestCore";
-import { MockKubeService } from "../MockKubeService";
+import { mount, shallow } from "../../TestCore";
 
 describe("ServiceDetails component tests", () => {
 
@@ -62,52 +62,31 @@ describe("ServiceDetails component tests", () => {
         service: serviceObj as V1Service
     } as IServiceItem;
 
-    const kubeService = new MockKubeService();
-
-    /*
-    it("Check header of the component", () => {
+    it("Check header of the ServiceDetails component", () => {
         const wrapper = shallow(<ServiceDetails service={item} parentKind={"Service"} />);
-        const agoText = Date_Utils.ago(new Date(item.creationTimestamp), Date_Utils.AgoFormat.Compact);
-        const headingClass = ".service-main-content .content-main-heading";
+        const pageClass = ".service-details-page";
 
-        // check all header details
-        const headingContainer = wrapper.find(headingClass);
-        expect(!!headingContainer && headingContainer.length > 0).toBeTruthy();
+        const pageContainer = wrapper.find(pageClass);
+        expect(pageContainer && pageContainer.length > 0).toBeTruthy();
 
-        const heading = wrapper.find("ResourceStatus");
-        expect(!!heading && heading.length > 0).toBeTruthy();
-        //large status size
-        expect(heading.prop("statusSize")).toStrictEqual("24");
-
-        const renderedHeading = heading.dive();
-
-        const status = renderedHeading.find("Status");
-        expect(!!status && status.length > 0).toBeTruthy();
-        expect(status.prop("color")).toStrictEqual("success")
-
-        const pageTitle = renderedHeading.find("Header");
-        expect(!!pageTitle && pageTitle.length > 0).toBeTruthy();
-        expect(pageTitle.prop("title")).toStrictEqual(item.package);
+        const heading = wrapper.find("PageTopHeader");
+        expect(heading && heading.length > 0).toBeTruthy();
+        expect(heading.prop("title")).toStrictEqual(item.package);
+        expect(heading.prop("className")).toStrictEqual("s-details-header");
+        const statusProps = item.type === "LoadBalancer" && !item.externalIP ? Statuses.Running : Statuses.Success;
+        expect(heading.prop("statusProps")).toStrictEqual(statusProps);
     });
 
-    it("Check header when no service is available", () => {
-        const itemLocal = { ...item, service: null };
-        const wrapper = shallow(<ServiceDetails service={itemLocal} parentKind={"Service"} />);
-        const headingClass = ".service-main-content .content-main-heading";
-
-        // check header --> should exist
-        const header = wrapper.find(headingClass);
-        expect(!!header && header.length > 0).toBeTruthy();
-
-        // service details should not exist --> service property is not provided
-        const service = wrapper.find(".service-main-content .s-details");
-        expect(!service || service.length === 0).toBeTruthy();
-    });
-    */
-
-    it("Check service component after mount", () => {
+    it("Check service ServiceDetails component after mount", () => {
         const wrapper = mount(<ServiceDetails service={item} parentKind={"Service"} />);
+
+        const pageContent = wrapper.find(".service-details-page-content");
+        expect(pageContent && pageContent.length > 0).toBeTruthy();
+
         const sTableKeys = wrapper.find(".service-details-card");
-        expect(!!sTableKeys && sTableKeys.length > 0).toBeTruthy();
+        expect(sTableKeys && sTableKeys.length > 0).toBeTruthy();
+
+        const sDetails = wrapper.find(".service-full-details-table");
+        expect(sDetails && sDetails.length > 0).toBeTruthy();
     });
 });

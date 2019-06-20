@@ -17,9 +17,9 @@ export interface IPageTopHeader extends IVssComponentProperties {
 
 export class PageTopHeader extends React.Component<IPageTopHeader> {
     public render(): React.ReactNode {
-        const { title, statusProps } = this.props;
+        const { title } = this.props;
         return (
-            <CustomHeader>
+            <CustomHeader className={this.props.className}>
                 {this._getHeaderIcon()}
                 <HeaderTitleArea>
                     <HeaderTitleRow>
@@ -31,15 +31,18 @@ export class PageTopHeader extends React.Component<IPageTopHeader> {
     }
 
     private _getHeaderIcon(): JSX.Element | undefined {
-        const statusComponent = (statusProps, className) => <Status {...statusProps} className={className} size={StatusSize.l} />;
+        const statusComponent = (sProps, cName) => <Status {...sProps} className={cName} size={StatusSize.l} />;
+        let { statusTooltip, statusProps } = this.props;
+        statusTooltip = statusTooltip || "";
+        statusProps = statusProps ? { ...statusProps, ariaLabel: statusTooltip } : statusProps;
 
-        return this.props.statusProps &&
+        return statusProps &&
             <HeaderIcon
                 className="bolt-table-status-icon-large"
                 iconProps={{
                     render: (className?: string) =>
-                        <Tooltip text={this.props.statusTooltip || ""} showOnFocus={true} overflowOnly={!this.props.statusTooltip}>
-                            <div className="flex-row">{statusComponent(this.props.statusProps, className)}</div>
+                        <Tooltip text={statusTooltip} showOnFocus={true} overflowOnly={!statusTooltip}>
+                            <div className="flex-row">{statusComponent(statusProps, className)}</div>
                         </Tooltip>
                 }}
             />;
