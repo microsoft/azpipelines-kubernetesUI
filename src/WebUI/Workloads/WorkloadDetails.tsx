@@ -394,7 +394,7 @@ export class WorkloadDetails extends React.Component<IWorkloadDetailsProperties,
                 selectedItemType: SelectedItemKeys.PodDetailsKey,
                 showSelectedItem: true,
                 properties: {
-                    parentUid: this.state.item!.metadata.uid,
+                    parentUid: (this.state.item && this.state.item.metadata.uid) || "",
                 } as IPodDetailsSelectionProperties
             }
         );

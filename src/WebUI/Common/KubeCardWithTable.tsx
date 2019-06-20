@@ -229,7 +229,10 @@ export function renderPodsStatusTableCell(
                         ariaLabel={tooltip}
                         rel={"noopener noreferrer"}
                         excludeTabStop
-                        onClick={() => onClick()}
+                        onClick={(e) => {
+                            onClick();
+                            e.preventDefault();
+                        }}
                     >
                         {content}
                     </Link>)
@@ -256,7 +259,7 @@ export function onPodsColumnClicked(
 
     selectionActionCreator.selectItem({
         item: selectedPod,
-        itemUID: selectedPod.metadata.uid,
+        itemUID: (selectedPod && selectedPod.metadata.uid) || item.metadata.uid,
         selectedItemType: itemKind === "Pod" ? SelectedItemKeys.OrphanPodKey : SelectedItemKeys.PodDetailsKey,
         showSelectedItem: true,
         properties: properties
@@ -266,22 +269,20 @@ export function onPodsColumnClicked(
 export function renderExternalIpWithCopy(textToDisplay: string): JSX.Element {
     return (
         <div className="external-ip-cell flex-row flex-center">
+            <div className="external-ip-cell-text">{textToDisplay || "-"}</div>
             {
-                textToDisplay ?
-                    <>
-                        <div className="external-ip-cell-text">{textToDisplay}</div>
-                        <Button
-                            onClick={(e) => {
-                                Utils.copyToClipboard(textToDisplay);
-                            }}
-                            tooltipProps={{ text: Resources.CopyExternalIp }}
-                            ariaLabel={Resources.CopyExternalIp}
-                            iconProps={{ iconName: "Copy" }}
-                            className="external-ip-copy-icon kube-text-copy"
-                            subtle={true}
-                        />
-                    </>
-                    : "-"
+                textToDisplay &&
+                <Button
+                    onClick={(e) => {
+                        Utils.copyToClipboard(textToDisplay);
+                        e.preventDefault();
+                    }}
+                    tooltipProps={{ text: Resources.CopyExternalIp }}
+                    ariaLabel={Resources.CopyExternalIp}
+                    iconProps={{ iconName: "Copy" }}
+                    className="external-ip-copy-icon kube-text-copy"
+                    subtle={true}
+                />
             }
         </div>
     );
