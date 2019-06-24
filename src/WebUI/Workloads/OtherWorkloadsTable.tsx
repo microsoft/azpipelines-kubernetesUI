@@ -14,6 +14,7 @@ import { Statuses } from "azure-devops-ui/Status";
 import { ITableColumn, ITableRow, Table, TwoLineTableCell } from "azure-devops-ui/Table";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
+import { css } from "azure-devops-ui/Util";
 import * as React from "react";
 import { KubeResourceType } from "../../Contracts/KubeServiceBase";
 import * as Resources from "../../Resources";
@@ -103,7 +104,7 @@ export class OtherWorkloads extends React.Component<IOtherWorkloadsProperties, I
                             onActivate={(event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>) => {
                                 const eventTarget = event && event.target as HTMLElement;
                                 // make sure all links have this classname
-                                if (eventTarget && !eventTarget.classList.contains(this._podsLinkClassName)) {
+                                if (eventTarget && !eventTarget.classList.contains(this._podsLinkClassName) && !eventTarget.classList.contains(this._imageLinkClassName)) {
                                     this._showWorkloadDetails(event, tableRow, filteredSet[tableRow.index]);
                                 }
                             }}
@@ -243,7 +244,7 @@ export class OtherWorkloads extends React.Component<IOtherWorkloadsProperties, I
         const itemToRender = hasImageDetails ?
             <Tooltip overflowOnly={true}>
                 <Link
-                    className="body-m text-ellipsis bolt-table-link"
+                    className={css("body-m text-ellipsis bolt-table-link", this._imageLinkClassName)}
                     excludeTabStop={true}
                     onClick={(e) => {
                         e.preventDefault();
@@ -418,6 +419,7 @@ export class OtherWorkloads extends React.Component<IOtherWorkloadsProperties, I
     }
 
     private _podsLinkClassName = "owl-pods-link";
+    private _imageLinkClassName = "owl-image-link";
     private _store: WorkloadsStore;
     private _actionCreator: WorkloadsActionsCreator;
     private _selectionActionCreator: SelectionActionsCreator;
