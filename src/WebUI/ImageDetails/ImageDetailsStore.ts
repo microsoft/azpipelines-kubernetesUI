@@ -19,10 +19,12 @@ export class ImageDetailsStore extends StoreBase {
 
         this._actions = ActionsHubManager.GetActionsHub<ImageDetailsActions>(ImageDetailsActions);
         this._actions.setHasImageDetails.addListener(this._setHasImageDetailsData);
+        this._actions.setImageDetails.addListener(this._setImageDetailsData);
     }
 
     public disposeInternal(): void {
         this._actions.setHasImageDetails.removeListener(this._setHasImageDetailsData);
+        this._actions.setImageDetails.removeListener(this._setImageDetailsData);
     }
 
     public hasImageDetails(imageName: string): boolean | undefined {
@@ -33,10 +35,25 @@ export class ImageDetailsStore extends StoreBase {
         return undefined;
     }
 
+    public getImageDetails(imageName: string): IImageDetails | undefined {
+        if (this._imageDetails && this._imageDetails.hasOwnProperty(imageName)) {
+            return this._imageDetails[imageName];
+        }
+
+        return undefined;
+    }
+
     private _setHasImageDetailsData = (payload: { [key: string]: boolean } | undefined): void => {
         if (payload) {
             this._hasImageDetails = payload;
             this.emit(ImageDetailsEvents.HasImageDetailsEvent, this);
+        }
+    }
+
+    private _setImageDetailsData = (payload: IImageDetails): void => {
+        if (payload && payload.imageName) {
+            this._imageDetails[payload.imageName] = payload;
+            this.emit(ImageDetailsEvents.SetImageDetailsEvent, this);
         }
     }
 

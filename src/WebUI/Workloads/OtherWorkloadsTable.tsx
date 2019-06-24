@@ -31,6 +31,7 @@ import { ISetWorkloadTypeItem, IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
 import { WorkloadsActionsCreator } from "./WorkloadsActionsCreator";
 import { WorkloadsStore } from "./WorkloadsStore";
+import { IImageDetails } from "../../Contracts/Types";
 
 const setNameKey = "otherwrkld-name-key";
 const imageKey = "otherwrkld-image-key";
@@ -391,18 +392,29 @@ export class OtherWorkloads extends React.Component<IOtherWorkloadsProperties, I
     }
 
     private _onImageClick = (imageId: string, itemUid: string = ""): void => {
-        const imageService = KubeFactory.getImageService();
-        imageService && imageService.getImageDetails(imageId).then(imageDetails => {
-            if (imageDetails) {
-                const payload: ISelectionPayload = {
+        const showImageDetails = (imageDetails: IImageDetails): void => {
+            const payload: ISelectionPayload = {
                     item: imageDetails,
                     itemUID: itemUid,
                     showSelectedItem: true,
                     selectedItemType: SelectedItemKeys.ImageDetailsKey
                 };
                 this._selectionActionCreator.selectItem(payload);
-            }
-        });
+        }
+
+        let imageDetails: IImageDetails | undefined = this._imageDetailsStore.getImageDetails(imageId);
+        if (imageDetails) {
+            showImageDetails(imageDetails);
+        }
+        else {
+            const imageService = KubeFactory.getImageService();
+            imageService && imageService.getImageDetails(imageId).then(imageDetails => {
+                if (imageDetails) {
+                    ActionsCreatorManager.GetActionCreator<ImageDetailsActionsCreator>(ImageDetailsActionsCreator).setImageDetails(imageDetails);
+                    showImageDetails(imageDetails);
+                }
+            });
+        }
     }
 
     private _podsLinkClassName = "owl-pods-link";

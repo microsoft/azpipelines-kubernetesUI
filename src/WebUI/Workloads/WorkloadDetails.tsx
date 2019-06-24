@@ -214,13 +214,26 @@ export class WorkloadDetails extends React.Component<IWorkloadDetailsProperties,
     }
 
     private _showImageDetails = (imageId: string) => {
-        const imageService = KubeFactory.getImageService();
-        imageService && imageService.getImageDetails(imageId).then(imageDetails => {
+        const showImageDetails = (imageDetails: IImageDetails): void => {
             this.setState({
                 showImageDetails: true,
                 selectedImageDetails: imageDetails
             });
-        });
+        }
+
+        let imageDetails: IImageDetails | undefined = this._imageDetailsStore.getImageDetails(imageId);
+        if (imageDetails) {
+            showImageDetails(imageDetails);
+        }
+        else {
+            const imageService = KubeFactory.getImageService();
+            imageService && imageService.getImageDetails(imageId).then(imageDetails => {
+                if (imageDetails) {
+                    ActionsCreatorManager.GetActionCreator<ImageDetailsActionsCreator>(ImageDetailsActionsCreator).setImageDetails(imageDetails);
+                    showImageDetails(imageDetails);
+                }
+            });
+        }
     }
 
     private _hideImageDetails = () => {

@@ -30,6 +30,8 @@ import { Utils } from "../Utils";
 import "./DeploymentsTable.scss";
 import { WorkloadsActionsCreator } from "./WorkloadsActionsCreator";
 import { WorkloadsStore } from "./WorkloadsStore";
+import { ImageDetailsActionsCreator } from "../ImageDetails/ImageDetailsActionsCreator";
+import { IImageDetails } from "../../Contracts/Types";
 
 export interface IDeploymentsTableProperties extends IVssComponentProperties {
     nameFilter?: string;
@@ -338,18 +340,29 @@ export class DeploymentsTable extends React.Component<IDeploymentsTablePropertie
     }
 
     private _onImageClick = (imageId: string): void => {
-        const imageService = KubeFactory.getImageService();
-        imageService && imageService.getImageDetails(imageId).then(imageDetails => {
-            if (imageDetails) {
-                const payload: ISelectionPayload = {
-                    item: imageDetails,
-                    itemUID: "",
-                    showSelectedItem: true,
-                    selectedItemType: SelectedItemKeys.ImageDetailsKey
-                };
-                this._selectionActionCreator.selectItem(payload);
-            }
-        });
+        const showImageDetails = (imageDetails: IImageDetails): void => {
+            const payload: ISelectionPayload = {
+                item: imageDetails,
+                itemUID: "",
+                showSelectedItem: true,
+                selectedItemType: SelectedItemKeys.ImageDetailsKey
+            };
+            this._selectionActionCreator.selectItem(payload);
+        }
+
+        let imageDetails: IImageDetails | undefined = this._imageDetailsStore.getImageDetails(imageId);
+        if (imageDetails) {
+            showImageDetails(imageDetails);
+        }
+        else {
+            const imageService = KubeFactory.getImageService();
+            imageService && imageService.getImageDetails(imageId).then(imageDetails => {
+                if (imageDetails) {
+                    ActionsCreatorManager.GetActionCreator<ImageDetailsActionsCreator>(ImageDetailsActionsCreator).setImageDetails(imageDetails);
+                    showImageDetails(imageDetails);
+                }
+            });
+        }
     }
 
     private _podsLinkClassName = "d-pods-link";

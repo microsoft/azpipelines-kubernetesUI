@@ -20,6 +20,8 @@ import { PodsEvents, PodsRightPanelTabsKeys } from "../Constants";
 import { ActionsCreatorManager } from "../FluxCommon/ActionsCreatorManager";
 import { StoreManager } from "../FluxCommon/StoreManager";
 import { ImageDetails } from "../ImageDetails/ImageDetails";
+import { ImageDetailsActionsCreator } from "../ImageDetails/ImageDetailsActionsCreator";
+import { ImageDetailsStore } from "../ImageDetails/ImageDetailsStore";
 import { KubeFactory } from "../KubeFactory";
 import { Utils } from "../Utils";
 import { PodLog } from "./PodLog";
@@ -85,12 +87,25 @@ export class PodsRightPanel extends React.Component<IPodRightPanelProps, IPodsRi
             selectedTab: selectedPivot,
             selectedImageDetails: undefined,
             showImageDetails: (imageId: string) => {
-                const imageService = KubeFactory.getImageService();
-                imageService && imageService.getImageDetails(imageId).then(imageDetails => {
+                const showImageDetails = (imageDetails: IImageDetails): void => {
                     this.setState({
                         selectedImageDetails: imageDetails
                     });
-                });
+                }
+
+                let imageDetails: IImageDetails | undefined = StoreManager.GetStore<ImageDetailsStore>(ImageDetailsStore).getImageDetails(imageId);
+                if (imageDetails) {
+                    showImageDetails(imageDetails);
+                }
+                else {
+                    const imageService = KubeFactory.getImageService();
+                    imageService && imageService.getImageDetails(imageId).then(imageDetails => {
+                        if (imageDetails) {
+                            ActionsCreatorManager.GetActionCreator<ImageDetailsActionsCreator>(ImageDetailsActionsCreator).setImageDetails(imageDetails);
+                            showImageDetails(imageDetails);
+                        }
+                    });
+                }
             }
         };
     }

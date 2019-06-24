@@ -27,6 +27,10 @@ export class ImageDetailsActionsCreator extends ActionCreatorBase {
         });
     }
 
+    public setImageDetails(imageDetails: IImageDetails): void {
+        this._actions.setImageDetails.invoke(imageDetails);
+    }
+
     private _actions: ImageDetailsActions;
 }
 
