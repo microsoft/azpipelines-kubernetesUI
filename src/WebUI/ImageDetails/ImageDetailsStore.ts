@@ -28,19 +28,11 @@ export class ImageDetailsStore extends StoreBase {
     }
 
     public hasImageDetails(imageName: string): boolean | undefined {
-        if (this._hasImageDetails && this._hasImageDetails.hasOwnProperty(imageName)) {
-            return this._hasImageDetails[imageName];
-        }
-
-        return undefined;
+        return this._hasImageDetails[imageName];
     }
 
     public getImageDetails(imageName: string): IImageDetails | undefined {
-        if (this._imageDetails && this._imageDetails.hasOwnProperty(imageName)) {
-            return this._imageDetails[imageName];
-        }
-
-        return undefined;
+        return this._imageDetails[imageName];
     }
 
     private _setHasImageDetailsData = (payload: { [key: string]: boolean } | undefined): void => {

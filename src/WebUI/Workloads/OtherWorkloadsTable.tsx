@@ -401,21 +401,8 @@ export class OtherWorkloads extends React.Component<IOtherWorkloadsProperties, I
                     selectedItemType: SelectedItemKeys.ImageDetailsKey
                 };
                 this._selectionActionCreator.selectItem(payload);
-        }
-
-        let imageDetails: IImageDetails | undefined = this._imageDetailsStore.getImageDetails(imageId);
-        if (imageDetails) {
-            showImageDetails(imageDetails);
-        }
-        else {
-            const imageService = KubeFactory.getImageService();
-            imageService && imageService.getImageDetails(imageId).then(imageDetails => {
-                if (imageDetails) {
-                    ActionsCreatorManager.GetActionCreator<ImageDetailsActionsCreator>(ImageDetailsActionsCreator).setImageDetails(imageDetails);
-                    showImageDetails(imageDetails);
-                }
-            });
-        }
+        };
+        ActionsCreatorManager.GetActionCreator<ImageDetailsActionsCreator>(ImageDetailsActionsCreator).getImageDetails(imageId, showImageDetails);
     }
 
     private _podsLinkClassName = "owl-pods-link";

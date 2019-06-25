@@ -91,21 +91,8 @@ export class PodsRightPanel extends React.Component<IPodRightPanelProps, IPodsRi
                     this.setState({
                         selectedImageDetails: imageDetails
                     });
-                }
-
-                let imageDetails: IImageDetails | undefined = StoreManager.GetStore<ImageDetailsStore>(ImageDetailsStore).getImageDetails(imageId);
-                if (imageDetails) {
-                    showImageDetails(imageDetails);
-                }
-                else {
-                    const imageService = KubeFactory.getImageService();
-                    imageService && imageService.getImageDetails(imageId).then(imageDetails => {
-                        if (imageDetails) {
-                            ActionsCreatorManager.GetActionCreator<ImageDetailsActionsCreator>(ImageDetailsActionsCreator).setImageDetails(imageDetails);
-                            showImageDetails(imageDetails);
-                        }
-                    });
-                }
+                };
+                ActionsCreatorManager.GetActionCreator<ImageDetailsActionsCreator>(ImageDetailsActionsCreator).getImageDetails(imageId, showImageDetails);
             }
         };
     }
