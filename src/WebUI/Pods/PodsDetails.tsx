@@ -311,14 +311,13 @@ export class PodsDetails extends React.Component<IPodsDetailsProperties, IPodsDe
         return false;
     }
 
-    // ToDO:: Handle GetImageDetails via ImageStore to avoid multiple calls to API from UI
     private _showImageDetails = (imageId: string) => {
-        const imageService = KubeFactory.getImageService();
-        imageService && imageService.getImageDetails(imageId).then(imageDetails => {
+        const showImageDetails = (imageDetails: IImageDetails): void => {
             this.setState({
                 selectedImageDetails: imageDetails
             });
-        });
+        };
+        ActionsCreatorManager.GetActionCreator<ImageDetailsActionsCreator>(ImageDetailsActionsCreator).getImageDetails(imageId, showImageDetails);
     }
 
     private _hideImageDetails = () => {

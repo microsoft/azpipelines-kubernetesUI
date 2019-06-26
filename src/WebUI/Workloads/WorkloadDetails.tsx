@@ -214,13 +214,13 @@ export class WorkloadDetails extends React.Component<IWorkloadDetailsProperties,
     }
 
     private _showImageDetails = (imageId: string) => {
-        const imageService = KubeFactory.getImageService();
-        imageService && imageService.getImageDetails(imageId).then(imageDetails => {
+        const showImageDetails = (imageDetails: IImageDetails): void => {
             this.setState({
                 showImageDetails: true,
                 selectedImageDetails: imageDetails
             });
-        });
+        };
+        ActionsCreatorManager.GetActionCreator<ImageDetailsActionsCreator>(ImageDetailsActionsCreator).getImageDetails(imageId, showImageDetails);
     }
 
     private _hideImageDetails = () => {

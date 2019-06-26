@@ -13,6 +13,7 @@ import { Link } from "azure-devops-ui/Link";
 import { ITableColumn, ITableRow, Table } from "azure-devops-ui/Table";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
+import { css } from "azure-devops-ui/Util";
 import * as React from "react";
 import * as Resources from "../../Resources";
 import { defaultColumnRenderer, onPodsColumnClicked, renderPodsStatusTableCell, renderTableCell } from "../Common/KubeCardWithTable";
@@ -30,6 +31,8 @@ import { Utils } from "../Utils";
 import "./DeploymentsTable.scss";
 import { WorkloadsActionsCreator } from "./WorkloadsActionsCreator";
 import { WorkloadsStore } from "./WorkloadsStore";
+import { ImageDetailsActionsCreator } from "../ImageDetails/ImageDetailsActionsCreator";
+import { IImageDetails } from "../../Contracts/Types";
 
 export interface IDeploymentsTableProperties extends IVssComponentProperties {
     nameFilter?: string;
@@ -124,7 +127,7 @@ export class DeploymentsTable extends React.Component<IDeploymentsTablePropertie
                             onActivate={(event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>) => {
                                 const eventTarget = event && event.target as HTMLElement;
                                 // make sure all links have this classname
-                                if (eventTarget && !eventTarget.classList.contains(this._podsLinkClassName)) {
+                                if (eventTarget && !eventTarget.classList.contains(this._podsLinkClassName) && !eventTarget.classList.contains(this._imageLinkClassName)) {
                                     this._openDeploymentItem(event, tableRow, items[tableRow.index]);
                                 }
                             }}
@@ -276,7 +279,7 @@ export class DeploymentsTable extends React.Component<IDeploymentsTablePropertie
         const itemToRender = hasImageDetails ?
             <Tooltip overflowOnly>
                 <Link
-                    className="body-m text-ellipsis bolt-table-link"
+                    className={css("body-m text-ellipsis bolt-table-link", this._imageLinkClassName)}
                     rel={"noopener noreferrer"}
                     excludeTabStop
                     onClick={(e) => {
@@ -338,21 +341,20 @@ export class DeploymentsTable extends React.Component<IDeploymentsTablePropertie
     }
 
     private _onImageClick = (imageId: string): void => {
-        const imageService = KubeFactory.getImageService();
-        imageService && imageService.getImageDetails(imageId).then(imageDetails => {
-            if (imageDetails) {
-                const payload: ISelectionPayload = {
-                    item: imageDetails,
-                    itemUID: "",
-                    showSelectedItem: true,
-                    selectedItemType: SelectedItemKeys.ImageDetailsKey
-                };
-                this._selectionActionCreator.selectItem(payload);
-            }
-        });
+        const showImageDetails = (imageDetails: IImageDetails): void => {
+            const payload: ISelectionPayload = {
+                item: imageDetails,
+                itemUID: "",
+                showSelectedItem: true,
+                selectedItemType: SelectedItemKeys.ImageDetailsKey
+            };
+            this._selectionActionCreator.selectItem(payload);
+        };
+        ActionsCreatorManager.GetActionCreator<ImageDetailsActionsCreator>(ImageDetailsActionsCreator).getImageDetails(imageId, showImageDetails);
     }
 
     private _podsLinkClassName = "d-pods-link";
+    private _imageLinkClassName = "d-image-link";
     private _store: WorkloadsStore;
     private _workloadsActionCreator: WorkloadsActionsCreator;
     private _selectionActionCreator: SelectionActionsCreator;

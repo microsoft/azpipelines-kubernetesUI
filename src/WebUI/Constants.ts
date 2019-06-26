@@ -41,7 +41,7 @@ export namespace PodsEvents {
 
 export namespace ImageDetailsEvents {
     export const HasImageDetailsEvent: string = "HAS_IMAGE_DETAILS_EVENT";
-    export const GetImageDetailsEvent: string = "GET_IMAGE_DETAILS_EVENT";
+    export const SetImageDetailsEvent: string = "SET_IMAGE_DETAILS_EVENT";
 }
 
 export namespace HyperLinks {
