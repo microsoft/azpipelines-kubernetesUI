@@ -344,17 +344,7 @@ export class KubeSummary extends React.Component<IKubeSummaryProps, IKubernetesC
             <div className="flex-column rhythm-vertical-8">
                 {
                     /* show clustername always if it is available */
-                    this.props.clusterName &&
-                        this.props.clusterUrl ?
-                        <Link 
-                            href={this.props.clusterUrl} 
-                            target="_blank"
-                            rel="nofollow noopener">
-                            {localeFormat(Resources.SummaryHeaderSubTextFormat, this.props.clusterName)}
-                        </Link>
-                        : <Tooltip text={Resources.ClusterLinkHelpText}>
-                            <div>{localeFormat(Resources.SummaryHeaderSubTextFormat, this.props.clusterName)}</div>
-                        </Tooltip>
+                    this._getHeaderClusterNameComponent()
                 }
                 {
                     /* show namespaces always if they are available */
@@ -391,6 +381,24 @@ export class KubeSummary extends React.Component<IKubeSummaryProps, IKubernetesC
                 }
             </div>
         );
+    }
+
+    private _getHeaderClusterNameComponent(): JSX.Element | null {
+        // show clustername always if it is available
+        if (this.props.clusterName) {
+            return this.props.clusterUrl ?
+                <Link
+                    href={this.props.clusterUrl}
+                    target="_blank"
+                    rel="nofollow noopener">
+                    {localeFormat(Resources.SummaryHeaderSubTextFormat, this.props.clusterName)}
+                </Link>
+                : <Tooltip text={Resources.ClusterLinkHelpText}>
+                    <div>{localeFormat(Resources.SummaryHeaderSubTextFormat, this.props.clusterName)}</div>
+                </Tooltip>;
+        }
+
+        return null;
     }
 
     private _getPageContent() {
