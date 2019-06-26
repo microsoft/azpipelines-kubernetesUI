@@ -10,7 +10,7 @@ import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { equals, format, localeFormat } from "azure-devops-ui/Core/Util/String";
 import { CustomHeader, HeaderDescription, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
 import { Link } from "azure-devops-ui/Link";
-import { ITableColumn, ITableRow, Table } from "azure-devops-ui/Table";
+import { ITableColumn, ITableRow, Table, ITableProps } from "azure-devops-ui/Table";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import { css } from "azure-devops-ui/Util";
@@ -85,7 +85,7 @@ export class DeploymentsTable extends React.Component<IDeploymentsTablePropertie
             deploymentList: storeState.deploymentList,
             replicaSetList: storeState.replicaSetList
         }, () => {
-            this.props.markTTICallback && this.props.markTTICallback({ "component": "DeploymentTable"});
+            this.props.markTTICallback && this.props.markTTICallback({ "component": "DeploymentTable" });
         });
     }
 
@@ -98,6 +98,22 @@ export class DeploymentsTable extends React.Component<IDeploymentsTablePropertie
         DeploymentsTable._generateDeploymentReplicaSetMap(filteredDeployments, this.state.replicaSetList).forEach((entry, index) => {
             const items = DeploymentsTable._getDeploymentReplicaSetItems(entry.deployment, entry.replicaSets);
             const key = format("workloads-d-t-{0}", index);
+            const tableProps = {
+                id: key,
+                showHeader: true,
+                showLines: true,
+                singleClickActivation: true,
+                itemProvider: new ArrayItemProvider<IDeploymentReplicaSetItem>(items),
+                ariaLabel: entry.deployment.metadata.name,
+                columns: this._getColumns(),
+                onActivate: (event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>) => {
+                    const eventTarget = event && event.target as HTMLElement;
+                    // make sure all links have this classname
+                    if (eventTarget && !eventTarget.classList.contains(this._podsLinkClassName) && !eventTarget.classList.contains(this._imageLinkClassName)) {
+                        this._openDeploymentItem(event, tableRow, items[tableRow.index]);
+                    }
+                }
+            } as ITableProps<any>;
             const deploymentCard = (
                 <CustomCard
                     className="deployment-replica-with-pod-list k8s-card-padding bolt-table-card flex-grow bolt-card-no-vertical-padding"
@@ -117,20 +133,7 @@ export class DeploymentsTable extends React.Component<IDeploymentsTablePropertie
                     </CustomHeader>
                     <CardContent className="deployment-replicaset-table" contentPadding={false}>
                         <Table
-                            id={key}
-                            showHeader={true}
-                            showLines={true}
-                            singleClickActivation={true}
-                            itemProvider={new ArrayItemProvider<IDeploymentReplicaSetItem>(items)}
-                            pageSize={items.length}
-                            columns={this._getColumns()}
-                            onActivate={(event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>) => {
-                                const eventTarget = event && event.target as HTMLElement;
-                                // make sure all links have this classname
-                                if (eventTarget && !eventTarget.classList.contains(this._podsLinkClassName) && !eventTarget.classList.contains(this._imageLinkClassName)) {
-                                    this._openDeploymentItem(event, tableRow, items[tableRow.index]);
-                                }
-                            }}
+                            {...tableProps}
                         />
                     </CardContent>
                 </CustomCard>

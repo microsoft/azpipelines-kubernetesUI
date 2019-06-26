@@ -10,7 +10,7 @@ import { format } from "azure-devops-ui/Core/Util/String";
 import { CustomHeader, HeaderDescription, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
 import { Link } from "azure-devops-ui/Link";
 import { IStatusProps, Status, Statuses, StatusSize } from "azure-devops-ui/Status";
-import { ITableColumn, ITableRow, SimpleTableCell, Table, TableColumnStyle, TwoLineTableCell } from "azure-devops-ui/Table";
+import { ITableColumn, ITableRow, SimpleTableCell, Table, TableColumnStyle, TwoLineTableCell, ITableProps } from "azure-devops-ui/Table";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
 import { css } from "azure-devops-ui/Util";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
@@ -71,16 +71,21 @@ export class KubeCardWithTable<T> extends React.Component<ITableComponentPropert
     }
 
     private _getComponent(): JSX.Element {
+        const tableProps = {
+            className: "kube-list",
+            showHeader: !this.props.hideHeaders,
+            showLines: !this.props.hideLines,
+            singleClickActivation: !!this.props.onItemActivated,
+            itemProvider: new ArrayItemProvider<T>(this.props.items),
+            ariaLabel: this.props.headingText,
+            columns: this.props.columns,
+            onActivate: this._onItemActivated,
+            onSelect: this._onItemSelected
+        } as ITableProps<any>;
+
         return (
             <Table
-                className={"kube-list"}
-                itemProvider={new ArrayItemProvider<T>(this.props.items)}
-                columns={this.props.columns}
-                showHeader={!this.props.hideHeaders}
-                showLines={!this.props.hideLines}
-                singleClickActivation={!!this.props.onItemActivated}
-                onActivate={this._onItemActivated}
-                onSelect={this._onItemSelected}
+                {...tableProps}
             />
         );
     }

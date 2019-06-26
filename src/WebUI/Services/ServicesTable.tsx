@@ -8,7 +8,7 @@ import { Ago } from "azure-devops-ui/Ago";
 import { Card } from "azure-devops-ui/Card";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { IStatusProps, Status, Statuses, StatusSize } from "azure-devops-ui/Status";
-import { ITableColumn, ITableRow, renderSimpleCell, Table, TwoLineTableCell } from "azure-devops-ui/Table";
+import { ITableColumn, ITableRow, renderSimpleCell, Table, TwoLineTableCell, ITableProps } from "azure-devops-ui/Table";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import * as React from "react";
@@ -53,20 +53,23 @@ export class ServicesTable extends React.Component<IServicesComponentProperties,
 
         if (filteredSvc.length > 0) {
             const serviceItems = getServiceItems(filteredSvc);
+            const tableProps = {
+                id: "services-list-table",
+                showHeader: true,
+                showLines: true,
+                singleClickActivation: true,
+                itemProvider: new ArrayItemProvider<IServiceItem>(serviceItems),
+                ariaLabel: Resources.PivotServiceText,
+                columns: this._getColumns(),
+                onActivate: (event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>) => {
+                    this._openServiceItem(event, tableRow, serviceItems[tableRow.index]);
+                }
+            } as ITableProps<any>;
             return (
                 <Card className="services-list-card flex-grow bolt-table-card bolt-card-no-vertical-padding"
                     contentProps={{ contentPadding: false }}>
                     <Table
-                        id="services-list-table"
-                        showHeader={true}
-                        showLines={true}
-                        singleClickActivation={true}
-                        itemProvider={new ArrayItemProvider<IServiceItem>(serviceItems)}
-                        pageSize={filteredSvc.length}
-                        columns={this._getColumns()}
-                        onActivate={(event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>) => {
-                            this._openServiceItem(event, tableRow, serviceItems[tableRow.index]);
-                        }}
+                        {...tableProps}
                     />
                 </Card>
             );
