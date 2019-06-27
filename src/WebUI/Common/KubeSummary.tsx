@@ -232,6 +232,15 @@ export class KubeSummary extends React.Component<IKubeSummaryProps, IKubernetesC
         }, 100);
     }
 
+    public componentDidUpdate(prevProps: IKubeSummaryProps, prevState: IKubernetesContainerState) {
+        const workloadSize = this._workloadsStore.getWorkloadSize();
+        // When selected pivot is workloads but workloads do not exist, then fetch services.
+        if (this.state.resourceSize <= 0 && workloadSize <= 0 && this.state.selectedPivotKey === workloadsPivotItemKey) {
+            const kubeService = KubeFactory.getKubeService();
+            ActionsCreatorManager.GetActionCreator<ServicesActionsCreator>(ServicesActionsCreator).getServices(kubeService);
+        }
+    }
+
     public componentWillUnmount(): void {
         this._historyUnlisten();
         this._workloadsStore.removeListener(WorkloadsEvents.DeploymentsFetchedEvent, this._setNamespaceOnDeploymentsFetched);
