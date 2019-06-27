@@ -10,7 +10,7 @@ import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { localeFormat } from "azure-devops-ui/Core/Util/String";
 import { CustomHeader, HeaderDescription, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
 import { Link } from "azure-devops-ui/Link";
-import { ITableColumn, ITableRow, renderSimpleCell, Table } from "azure-devops-ui/Table";
+import { ITableColumn, ITableRow, renderSimpleCell, Table, ITableProps } from "azure-devops-ui/Table";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
 import { css } from "azure-devops-ui/Util";
 import { AgoFormat } from "azure-devops-ui/Utilities/Date";
@@ -59,6 +59,18 @@ export class PodsTable extends React.Component<IPodsTableProperties> {
 
         if (filteredPods.length > 0) {
             this._prepareSubTextData(filteredPods);
+            const tableProps = {
+                id: "pods-table",
+                showHeader: true,
+                showLines: true,
+                singleClickActivation: true,
+                itemProvider: new ArrayItemProvider<V1Pod>(filteredPods),
+                ariaLabel: this.props.headingText,
+                columns: PodsTable._getColumns(showWorkloadColumn),
+                onActivate: (event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>) => {
+                    this._showPodDetails(event, tableRow, filteredPods[tableRow.index]);
+                }
+            } as ITableProps<any>;
             return (
                 <CustomCard className="pods-associated k8s-card-padding flex-grow bolt-table-card bolt-card-no-vertical-padding">
                     <CustomHeader>
@@ -75,16 +87,7 @@ export class PodsTable extends React.Component<IPodsTableProperties> {
                     </CustomHeader>
                     <CardContent className={css(this.props.contentClassName || "", "pod-associated-table")} contentPadding={false}>
                         <Table
-                            id="pods-table"
-                            showHeader={true}
-                            showLines={true}
-                            columns={PodsTable._getColumns(showWorkloadColumn)}
-                            itemProvider={new ArrayItemProvider<V1Pod>(filteredPods)}
-                            pageSize={filteredPods.length}
-                            singleClickActivation={true}
-                            onActivate={(event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>) => {
-                                this._showPodDetails(event, tableRow, filteredPods[tableRow.index]);
-                            }}
+                            {...tableProps}
                         />
                     </CardContent>
                 </CustomCard>

@@ -11,7 +11,7 @@ import { equals, localeFormat } from "azure-devops-ui/Core/Util/String";
 import { CustomHeader, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
 import { Link } from "azure-devops-ui/Link";
 import { Statuses } from "azure-devops-ui/Status";
-import { ITableColumn, ITableRow, Table, TwoLineTableCell } from "azure-devops-ui/Table";
+import { ITableColumn, ITableRow, Table, TwoLineTableCell, ITableProps } from "azure-devops-ui/Table";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
 import { css } from "azure-devops-ui/Util";
@@ -81,6 +81,23 @@ export class OtherWorkloads extends React.Component<IOtherWorkloadsProperties, I
             return Utils.filterByName(set.name, this.props.nameFilter);
         });
 
+        const tableProps = {
+            id: "other-workloads-table",
+            showHeader: true,
+            showLines: true,
+            singleClickActivation: true,
+            itemProvider: new ArrayItemProvider<ISetWorkloadTypeItem>(filteredSet),
+            ariaLabel: Resources.OtherWorkloadsText,
+            columns: this._getColumns(),
+            onActivate: (event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>) => {
+                const eventTarget = event && event.target as HTMLElement;
+                // make sure all links have this classname
+                if (eventTarget && !eventTarget.classList.contains(this._podsLinkClassName) && !eventTarget.classList.contains(this._imageLinkClassName)) {
+                    this._showWorkloadDetails(event, tableRow, filteredSet[tableRow.index]);
+                }
+            }
+        } as ITableProps<any>;
+
         if (filteredSet.length > 0) {
             return (
                 <CustomCard className="workloads-other-content k8s-card-padding flex-grow bolt-table-card bolt-card-no-vertical-padding">
@@ -95,19 +112,7 @@ export class OtherWorkloads extends React.Component<IOtherWorkloadsProperties, I
                     </CustomHeader>
                     <CardContent className="workload-other-sets-table" contentPadding={false}>
                         <Table
-                            id="other-workloads-table"
-                            showHeader={true}
-                            showLines={true}
-                            singleClickActivation={true}
-                            itemProvider={new ArrayItemProvider<ISetWorkloadTypeItem>(filteredSet)}
-                            columns={this._getColumns()}
-                            onActivate={(event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>) => {
-                                const eventTarget = event && event.target as HTMLElement;
-                                // make sure all links have this classname
-                                if (eventTarget && !eventTarget.classList.contains(this._podsLinkClassName) && !eventTarget.classList.contains(this._imageLinkClassName)) {
-                                    this._showWorkloadDetails(event, tableRow, filteredSet[tableRow.index]);
-                                }
-                            }}
+                            {...tableProps}
                         />
                     </CardContent>
                 </CustomCard>
@@ -164,8 +169,8 @@ export class OtherWorkloads extends React.Component<IOtherWorkloadsProperties, I
         this._metadataInitialized[key] = true;
         let metaInitialized = true;
         Object.keys(this._metadataInitialized).forEach(key => metaInitialized = metaInitialized && this._metadataInitialized[key]);
-        if(metaInitialized) {
-            this.props.markTTICallback && this.props.markTTICallback({ "component": "OtherWorkloads"});
+        if (metaInitialized) {
+            this.props.markTTICallback && this.props.markTTICallback({ "component": "OtherWorkloads" });
         }
     }
 
@@ -395,12 +400,12 @@ export class OtherWorkloads extends React.Component<IOtherWorkloadsProperties, I
     private _onImageClick = (imageId: string, itemUid: string = ""): void => {
         const showImageDetails = (imageDetails: IImageDetails): void => {
             const payload: ISelectionPayload = {
-                    item: imageDetails,
-                    itemUID: itemUid,
-                    showSelectedItem: true,
-                    selectedItemType: SelectedItemKeys.ImageDetailsKey
-                };
-                this._selectionActionCreator.selectItem(payload);
+                item: imageDetails,
+                itemUID: itemUid,
+                showSelectedItem: true,
+                selectedItemType: SelectedItemKeys.ImageDetailsKey
+            };
+            this._selectionActionCreator.selectItem(payload);
         };
         ActionsCreatorManager.GetActionCreator<ImageDetailsActionsCreator>(ImageDetailsActionsCreator).getImageDetails(imageId, showImageDetails);
     }
@@ -413,10 +418,10 @@ export class OtherWorkloads extends React.Component<IOtherWorkloadsProperties, I
     private _imageActionsCreator: ImageDetailsActionsCreator;
     private _imageDetailsStore: ImageDetailsStore;
     private _imageList: string[] = [];
-    private _metadataInitialized: { [key: string] : boolean} = {
+    private _metadataInitialized: { [key: string]: boolean } = {
         "daemon": false,
         "statefulsets": false,
-        "replicasets" : false,
+        "replicasets": false,
         "orphanpods": false
     }
 }

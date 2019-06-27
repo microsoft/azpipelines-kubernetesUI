@@ -10,7 +10,7 @@ import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { format, localeFormat } from "azure-devops-ui/Core/Util/String";
 import { CustomHeader, HeaderDescription, HeaderIcon, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
 import { Page } from "azure-devops-ui/Page";
-import { ITableColumn, Table } from "azure-devops-ui/Table";
+import { ITableColumn, Table, ITableProps } from "azure-devops-ui/Table";
 import { css } from "azure-devops-ui/Util";
 import * as Date_Utils from "azure-devops-ui/Utilities/Date";
 import { AgoFormat } from "azure-devops-ui/Utilities/Date";
@@ -172,6 +172,15 @@ export class ImageDetails extends React.Component<IImageDetailsProperties, IImag
     private _getImageLayers(): JSX.Element | null {
         const imageDetails = this.props.imageDetails;
         const layerInfo = this._sortByCreatedDate(imageDetails.layerInfo);
+        const tableProps = {
+            id: "image-layers-table",
+            showHeader: true,
+            showLines: true,
+            singleClickActivation: false,
+            itemProvider: new ArrayItemProvider<IImageLayer>(layerInfo),
+            ariaLabel: Resources.LayersText,
+            columns: ImageDetails._getImageLayersColumns(),
+        } as ITableProps<any>;
         return (
             <CustomCard className="image-layers-card k8s-card-padding bolt-table-card flex-grow bolt-card-no-vertical-padding">
                 <CustomHeader>
@@ -185,12 +194,7 @@ export class ImageDetails extends React.Component<IImageDetailsProperties, IImag
                 </CustomHeader>
                 <CardContent className="image-layer-details" contentPadding={false}>
                     <Table
-                        id="image-layers-table"
-                        itemProvider={new ArrayItemProvider<IImageLayer>(layerInfo)}
-                        columns={ImageDetails._getImageLayersColumns()}
-                        showHeader={true}
-                        showLines={true}
-                        singleClickActivation={false}
+                        {...tableProps}
                     />
                 </CardContent>
             </CustomCard>
