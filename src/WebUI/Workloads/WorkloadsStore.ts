@@ -74,6 +74,9 @@ export class WorkloadsStore extends StoreBase {
         if (this._state.deploymentList && this._state.deploymentList.items && this._state.deploymentList.items.length > 0) {
             this.emit(WorkloadsEvents.WorkloadsFoundEvent, this);
         }
+        else {
+            this.emit(WorkloadsEvents.ZeroDeploymentsFoundEvent, this);
+        }
     }
 
     private _setReplicaSetsList = (replicaSetList: V1ReplicaSetList): void => {

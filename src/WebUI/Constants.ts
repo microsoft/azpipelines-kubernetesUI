@@ -25,13 +25,14 @@ export namespace WorkloadsEvents {
     export const DaemonSetsFetchedEvent: string = "DAEMON_SETS_FETCHED_EVENT";
     export const StatefulSetsFetchedEvent: string = "STATEFUL_SETS_FETCHED_EVENT";
     export const WorkloadPodsFetchedEvent: string = "WORKLOAD_PODS_FETCHED_EVENT";
-    export const WorkloadsFoundEvent: string = "ZERO_WORKLOADS_FOUND_EVENT";
+    export const WorkloadsFoundEvent: string = "NON_ZERO_WORKLOADS_FOUND_EVENT";
+    export const ZeroDeploymentsFoundEvent: string = "ZERO_DEPLOYMENTS_FOUND_EVENT";
 }
 
 export namespace ServicesEvents {
     export const ServicesFetchedEvent: string = "SERVICES_FETCHED_EVENT";
     export const ServicePodsFetchedEvent: string = "SERVICE_PODS_FETCHED_EVENT";
-    export const ServicesFoundEvent: string = "ZERO_SERVICES_FOUND_EVENT";
+    export const ServicesFoundEvent: string = "NON_ZERO_SERVICES_FOUND_EVENT";
 }
 
 export namespace PodsEvents {
