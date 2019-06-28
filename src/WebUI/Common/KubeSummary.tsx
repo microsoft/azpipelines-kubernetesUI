@@ -70,6 +70,7 @@ interface IKubernetesContainerState {
     workloadsFilter: Filter;
     svcFilter: Filter;
     resourceErrorType?: ResourceErrorType;
+    zeroDeploymentsFound?: boolean;
 }
 
 export interface IKubeSummaryProps extends IVssComponentProperties {
@@ -182,7 +183,8 @@ export class KubeSummary extends React.Component<IKubeSummaryProps, IKubernetesC
             resourceSize: 0,
             svcFilter: servicesFilter,
             workloadsFilter: workloadsFilter,
-            resourceErrorType: this._getResourceErrorType()
+            resourceErrorType: this._getResourceErrorType(),
+            zeroDeploymentsFound: false
         };
 
         this._servicesStore = StoreManager.GetStore<ServicesStore>(ServicesStore);
@@ -196,6 +198,7 @@ export class KubeSummary extends React.Component<IKubeSummaryProps, IKubernetesC
 
         this._workloadsStore.addListener(WorkloadsEvents.DeploymentsFetchedEvent, this._setNamespaceOnDeploymentsFetched);
         this._workloadsStore.addListener(WorkloadsEvents.WorkloadsFoundEvent, this._onDataFound);
+        this._workloadsStore.addListener(WorkloadsEvents.ZeroDeploymentsFoundEvent, this._onZeroDeploymentsFound);
         this._servicesStore.addListener(ServicesEvents.ServicesFoundEvent, this._onDataFound);
         this._selectionStore.addChangedListener(this._onSelectionStoreChanged);
 
@@ -232,12 +235,21 @@ export class KubeSummary extends React.Component<IKubeSummaryProps, IKubernetesC
         }, 100);
     }
 
+    public componentDidUpdate(prevProps: IKubeSummaryProps, prevState: IKubernetesContainerState) {
+        // When selected pivot is workloads but deployments do not exist, then fetch services.
+        if (this.state.resourceSize <= 0 && this.state.zeroDeploymentsFound && this.state.selectedPivotKey === workloadsPivotItemKey) {
+            const kubeService = KubeFactory.getKubeService();
+            ActionsCreatorManager.GetActionCreator<ServicesActionsCreator>(ServicesActionsCreator).getServices(kubeService);
+        }
+    }
+
     public componentWillUnmount(): void {
         this._historyUnlisten();
         this._workloadsStore.removeListener(WorkloadsEvents.DeploymentsFetchedEvent, this._setNamespaceOnDeploymentsFetched);
         this._workloadsStore.removeListener(WorkloadsEvents.WorkloadsFoundEvent, this._onDataFound);
         this._servicesStore.removeListener(ServicesEvents.ServicesFoundEvent, this._onDataFound);
         this._selectionStore.removeChangedListener(this._onSelectionStoreChanged);
+        this._workloadsStore.removeListener(WorkloadsEvents.ZeroDeploymentsFoundEvent, this._onZeroDeploymentsFound);
     }
 
     private _getResourceErrorType(): ResourceErrorType {
@@ -289,6 +301,10 @@ export class KubeSummary extends React.Component<IKubeSummaryProps, IKubernetesC
             const workloadStoreState = this._workloadsStore.getState();
             this.setState({ namespace: workloadStoreState.deploymentNamespace });
         }
+    }
+
+    private _onZeroDeploymentsFound = (): void => {
+        this.setState({ zeroDeploymentsFound: true });
     }
 
     private _onWorkloadsFilterApplied = (currentState: IFilterState) => {
@@ -444,18 +460,18 @@ export class KubeSummary extends React.Component<IKubeSummaryProps, IKubernetesC
         // must be short syntax or React.Fragment, do not use div here to include heading and content.
         return (
             <>
-                <TabBar
-                    selectedTabId={this.state.selectedPivotKey || workloadsPivotItemKey}
-                    onSelectedTabChanged={(key: string) => { this._selectTab(key); }}
-                    renderAdditionalContent={() => { return this._getFilterHeaderBar(); }}
-                    disableSticky={false}
-                >
-                    <Tab name={Resources.PivotWorkloadsText} id={workloadsPivotItemKey} />
-                    <Tab name={Resources.PivotServiceText} id={servicesPivotItemKey} />
-                </TabBar>
-                <div className="page-content page-content-top k8s-pivot-content">
-                    {tabContent}
-                </div>
+            <TabBar
+                selectedTabId={this.state.selectedPivotKey || workloadsPivotItemKey}
+                onSelectedTabChanged={(key: string) => { this._selectTab(key); }}
+                renderAdditionalContent={() => { return this._getFilterHeaderBar(); }}
+                disableSticky={false}
+            >
+                <Tab name={Resources.PivotWorkloadsText} id={workloadsPivotItemKey} />
+                <Tab name={Resources.PivotServiceText} id={servicesPivotItemKey} />
+            </TabBar>
+            <div className="page-content page-content-top k8s-pivot-content">
+                {tabContent}
+            </div>
             </>
         );
     }
@@ -666,12 +682,12 @@ export class KubeSummary extends React.Component<IKubeSummaryProps, IKubernetesC
     private _getFilterHeaderBar(): JSX.Element {
         return (
             <>
-                <ConditionalChildren renderChildren={!this.state.selectedPivotKey || this.state.selectedPivotKey === workloadsPivotItemKey}>
-                    <HeaderCommandBarWithFilter filter={this.state.workloadsFilter} filterToggled={workloadsFilterToggled} items={[]} />
-                </ConditionalChildren>
-                <ConditionalChildren renderChildren={this.state.selectedPivotKey === servicesPivotItemKey}>
-                    <HeaderCommandBarWithFilter filter={this.state.svcFilter} filterToggled={servicesFilterToggled} items={[]} />
-                </ConditionalChildren>
+            <ConditionalChildren renderChildren={!this.state.selectedPivotKey || this.state.selectedPivotKey === workloadsPivotItemKey}>
+                <HeaderCommandBarWithFilter filter={this.state.workloadsFilter} filterToggled={workloadsFilterToggled} items={[]} />
+            </ConditionalChildren>
+            <ConditionalChildren renderChildren={this.state.selectedPivotKey === servicesPivotItemKey}>
+                <HeaderCommandBarWithFilter filter={this.state.svcFilter} filterToggled={servicesFilterToggled} items={[]} />
+            </ConditionalChildren>
             </>
         );
     }
