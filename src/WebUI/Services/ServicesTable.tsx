@@ -33,15 +33,17 @@ export interface IServicesComponentProperties extends IVssComponentProperties {
 }
 
 export interface IServicesTableState {
-    hoverRowIndex: number;
+    copiedRowIndex: number;
 }
 
 export class ServicesTable extends React.Component<IServicesComponentProperties, IServicesTableState> {
     constructor(props: IServicesComponentProperties) {
         super(props, {});
+
         this.state = {
-            hoverRowIndex: -1
+            copiedRowIndex: -1
         };
+
         this._selectionActionCreator = ActionsCreatorManager.GetActionCreator<SelectionActionsCreator>(SelectionActionsCreator);
     }
 
@@ -52,7 +54,7 @@ export class ServicesTable extends React.Component<IServicesComponentProperties,
             });
 
         if (filteredSvc.length > 0) {
-            const serviceItems = getServiceItems(filteredSvc);
+            const serviceItems = getServiceItems(filteredSvc).map((item, index) => { item.externalIPTooltip = index === this.state.copiedRowIndex ? Resources.CopiedExternalIp : Resources.CopyExternalIp; return item });
             const tableProps = {
                 id: "services-list-table",
                 showHeader: true,
@@ -118,7 +120,7 @@ export class ServicesTable extends React.Component<IServicesComponentProperties,
             id: "externalIP",
             name: Resources.ExternalIPText,
             width: new ObservableValue(172),
-            renderCell: (rowIndex, columnIndex, tableColumn, service) => renderExternalIpCell(rowIndex, columnIndex, tableColumn, service, this._setHoverRowIndex, this.state.hoverRowIndex)
+            renderCell: (rowIndex, columnIndex, tableColumn, service) => renderExternalIpCell(rowIndex, columnIndex, tableColumn, service, this._setCopiedRowIndex)
         });
 
         columns.push({
@@ -147,9 +149,9 @@ export class ServicesTable extends React.Component<IServicesComponentProperties,
         return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
     }
 
-    private _setHoverRowIndex = (hoverRowIndex: number): void => {
+    private _setCopiedRowIndex = (copiedRowIndex: number): void => {
         this.setState({
-            hoverRowIndex: hoverRowIndex
+            copiedRowIndex: copiedRowIndex
         });
     }
 

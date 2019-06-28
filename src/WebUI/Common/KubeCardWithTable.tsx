@@ -10,7 +10,7 @@ import { format } from "azure-devops-ui/Core/Util/String";
 import { CustomHeader, HeaderDescription, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
 import { Link } from "azure-devops-ui/Link";
 import { IStatusProps, Status, Statuses, StatusSize } from "azure-devops-ui/Status";
-import { ITableColumn, ITableRow, SimpleTableCell, Table, TableColumnStyle, TwoLineTableCell, ITableProps } from "azure-devops-ui/Table";
+import { ITableColumn, ITableProps, ITableRow, SimpleTableCell, Table, TableColumnStyle, TwoLineTableCell } from "azure-devops-ui/Table";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
 import { css } from "azure-devops-ui/Util";
 import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
@@ -271,7 +271,7 @@ export function onPodsColumnClicked(
     });
 }
 
-export function renderExternalIpWithCopy(textToDisplay: string): JSX.Element {
+export function renderExternalIpWithCopy(textToDisplay: string, tooltipText?: string, onCopyCompleted?: (rowIndex: number) => void): JSX.Element {
     return (
         <div className="external-ip-cell flex-row flex-center">
             <div className="external-ip-cell-text">{textToDisplay || "-"}</div>
@@ -279,11 +279,14 @@ export function renderExternalIpWithCopy(textToDisplay: string): JSX.Element {
                 textToDisplay &&
                 <Button
                     onClick={(e) => {
-                        Utils.copyToClipboard(textToDisplay);
                         e.preventDefault();
+                        Utils.copyToClipboard(textToDisplay);
+                        onCopyCompleted && onCopyCompleted(0);
                     }}
-                    tooltipProps={{ text: Resources.CopyExternalIp }}
-                    ariaLabel={Resources.CopyExternalIp}
+                    onMouseLeave={() => onCopyCompleted && onCopyCompleted(-1)}
+                    onBlur={() => onCopyCompleted && onCopyCompleted(-1)}
+                    tooltipProps={{ text: tooltipText || Resources.CopyExternalIp }}
+                    ariaLabel={tooltipText || Resources.CopyExternalIp}
                     iconProps={{ iconName: "Copy" }}
                     className="external-ip-copy-icon kube-text-copy"
                     subtle={true}
@@ -298,37 +301,32 @@ export function renderExternalIpCell(
     columnIndex: number,
     tableColumn: ITableColumn<any>,
     item: any,
-    hoverHandler: (hoverRowIndex: number) => void,
-    hoverRowIndex: number
+    onCopyCompleted?: (rowIndex: number) => void
 ): JSX.Element {
     const textToRender = item.externalIP;
-    const itemToRender = !textToRender ? "-"
-        : (
-            <div
-                className="external-ip-cell"
-                onMouseOver={() => hoverHandler(rowIndex)}
-                onMouseLeave={() => hoverHandler(-1)}
-                onFocus={() => hoverHandler(rowIndex)}
-                onBlur={() => hoverHandler(-1)}
-                tabIndex={0}
-            >
-                {textToRender}
-                {
-                    hoverRowIndex === rowIndex &&
-                    <Button
-                        onClick={(e) => {
-                            Utils.copyToClipboard(textToRender);
-                            e.preventDefault();
-                        }}
-                        tooltipProps={{ text: Resources.CopyExternalIp }}
-                        ariaLabel={Resources.CopyExternalIp}
-                        iconProps={{ iconName: "Copy" }}
-                        className="external-ip-copy-icon kube-text-copy"
-                        subtle={true}
-                    />
-                }
-            </div>
-        );
+    const itemToRender = (
+        <div className="external-ip-cell flex-row flex-center">
+            <div className="external-ip-cell-text">{textToRender || "-"}</div>
+            {
+                textToRender &&
+                <Button
+                    onClick={(e) => {
+                        e.preventDefault();
+                        Utils.copyToClipboard(textToRender);
+                        onCopyCompleted && onCopyCompleted(rowIndex);
+                    }}
+                    onMouseLeave={() => onCopyCompleted && onCopyCompleted(-1)}
+                    onBlur={() => onCopyCompleted && onCopyCompleted(-1)}
+                    tooltipProps={{ text: item.externalIPTooltip || Resources.CopyExternalIp }}
+                    ariaLabel={item.externalIPTooltip || Resources.CopyExternalIp}
+                    excludeTabStop={true}
+                    iconProps={{ iconName: "Copy" }}
+                    className={"external-ip-copy-icon kube-text-copy bolt-table-cell-content-reveal"}
+                    subtle={true}
+                />
+            }
+        </div>
+    );
 
     return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender);
 }

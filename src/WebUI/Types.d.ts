@@ -50,6 +50,7 @@ export interface IServiceItem {
     pipeline: string;
     service?: V1Service;
     kind?: string;
+    externalIPTooltip?: string;
 }
 
 export interface IDeploymentReplicaSetMap {
