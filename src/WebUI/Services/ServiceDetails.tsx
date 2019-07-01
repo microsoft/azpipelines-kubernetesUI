@@ -43,6 +43,7 @@ export interface IServiceDetailsState {
     service: IServiceItem | undefined;
     pods: Array<V1Pod>;
     arePodsLoading?: boolean;
+    copyTooltipText?: string;
 }
 
 const LoadBalancerText: string = "LoadBalancer";
@@ -53,7 +54,8 @@ export class ServiceDetails extends React.Component<IServiceDetailsProperties, I
         this.state = {
             service: props.service,
             pods: [],
-            arePodsLoading: true
+            arePodsLoading: true,
+            copyTooltipText: Resources.CopyExternalIp
         };
 
         getTelemetryService().scenarioStart(Scenarios.ServiceDetails);
@@ -211,7 +213,7 @@ export class ServiceDetails extends React.Component<IServiceDetailsProperties, I
                 return (
                     <div className="body-m service-column-padding" key={index}>
                         {getColumnKey(key, "service-extip-column-size")}
-                        {renderExternalIpWithCopy(value)}
+                        {renderExternalIpWithCopy(value, this.state.copyTooltipText, this._setCopiedRowIndex)}
                     </div>
                 );
 
@@ -278,6 +280,12 @@ export class ServiceDetails extends React.Component<IServiceDetailsProperties, I
                 } as IPodDetailsSelectionProperties
             }
         );
+    }
+
+    private _setCopiedRowIndex = (copiedRowIndex: number): void => {
+        this.setState({
+            copyTooltipText: copiedRowIndex === 0 ? Resources.CopiedExternalIp : Resources.CopyExternalIp
+        });
     }
 
     private _isTTIMarked: boolean = false;

@@ -91,6 +91,7 @@ export const TagsText = "Tags";
 export const LoadingPodsSpinnerLabel = "Loading associated pods...";
 export const LoadingServicesSpinnerLabel = "Loading services...";
 export const CopyExternalIp = "Copy External IP to clipboard";
+export const CopiedExternalIp = "Copied!";
 export const ImageDetailsUnavailableText = "Image details available only for images built in Azure Pipelines";
 export const PodDetailsSubheader = "Pods in {0}";
 export const ClusterLinkHelpText = "Navigation to cluster details is only available for the Azure provider";
