@@ -9,6 +9,7 @@ import { ActionsHubManager } from "../FluxCommon/ActionsHubManager";
 import { StoreBase } from "../FluxCommon/Store";
 import { IPodsPayload, PodsActions } from "../Pods/PodsActions";
 import { WorkloadsActions } from "./WorkloadsActions";
+import { Utils } from "../Utils";
 
 export interface IWorkloadsStoreState {
     deploymentNamespace?: string;
@@ -60,17 +61,19 @@ export class WorkloadsStore extends StoreBase {
     }
 
     private _setDeploymentsList = (deploymentsList: V1DeploymentList): void => {
-        this._state.deploymentList = deploymentsList;
-        const deploymentItems = deploymentsList ? deploymentsList.items || [] : [];
-        for (const deployment of deploymentItems) {
-            if (deployment && deployment.metadata.namespace) {
-                this._state.deploymentNamespace = deployment.metadata.namespace;
-                break;
+        const _stateItems = this._state.deploymentList ? this._state.deploymentList.items : [];
+        const _deploymentItems = deploymentsList ? deploymentsList.items : [];
+        if (!Utils.isDeepEquals(_stateItems, _deploymentItems)) {
+            this._state.deploymentList = deploymentsList;
+            const deploymentItems = deploymentsList ? deploymentsList.items || [] : [];
+            for (const deployment of deploymentItems) {
+                if (deployment && deployment.metadata.namespace) {
+                    this._state.deploymentNamespace = deployment.metadata.namespace;
+                    break;
+                }
             }
         }
-
         this.emit(WorkloadsEvents.DeploymentsFetchedEvent, this);
-
         if (this._state.deploymentList && this._state.deploymentList.items && this._state.deploymentList.items.length > 0) {
             this.emit(WorkloadsEvents.WorkloadsFoundEvent, this);
         }
@@ -80,7 +83,11 @@ export class WorkloadsStore extends StoreBase {
     }
 
     private _setReplicaSetsList = (replicaSetList: V1ReplicaSetList): void => {
-        this._state.replicaSetList = replicaSetList;
+        const _stateItems = this._state.replicaSetList ? this._state.replicaSetList.items : [];
+        const _replicaItems = replicaSetList ? replicaSetList.items : [];
+        if (!Utils.isDeepEquals(_stateItems, _replicaItems)) {
+            this._state.replicaSetList = replicaSetList;
+        }
         this.emit(WorkloadsEvents.ReplicaSetsFetchedEvent, this);
         if (this._state.replicaSetList && this._state.replicaSetList.items && this._state.replicaSetList.items.length > 0) {
             this.emit(WorkloadsEvents.WorkloadsFoundEvent, this);
@@ -88,7 +95,11 @@ export class WorkloadsStore extends StoreBase {
     }
 
     private _setDaemonSetsList = (daemonSetList: V1DaemonSetList): void => {
-        this._state.daemonSetList = daemonSetList;
+        const _stateItems = this._state.daemonSetList ? this._state.daemonSetList.items : [];
+        const _daemonSetItems = daemonSetList ? daemonSetList.items : [];
+        if (!Utils.isDeepEquals(_stateItems, _daemonSetItems)) {
+            this._state.daemonSetList = daemonSetList;
+        }
         this.emit(WorkloadsEvents.DaemonSetsFetchedEvent, this);
         if (this._state.daemonSetList && this._state.daemonSetList.items && this._state.daemonSetList.items.length > 0) {
             this.emit(WorkloadsEvents.WorkloadsFoundEvent, this);
@@ -96,7 +107,11 @@ export class WorkloadsStore extends StoreBase {
     }
 
     private _setStatefulsetsList = (statefulSetList: V1StatefulSetList): void => {
-        this._state.statefulSetList = statefulSetList;
+        const _stateItems = this._state.statefulSetList ? this._state.statefulSetList.items : [];
+        const _stateFulSetItems = statefulSetList ? statefulSetList.items : [];
+        if (!Utils.isDeepEquals(_stateItems, _stateFulSetItems)) {
+            this._state.statefulSetList = statefulSetList;
+        }
         this.emit(WorkloadsEvents.StatefulSetsFetchedEvent, this);
         if (this._state.statefulSetList && this._state.statefulSetList.items && this._state.statefulSetList.items.length > 0) {
             this.emit(WorkloadsEvents.WorkloadsFoundEvent, this);
@@ -110,10 +125,10 @@ export class WorkloadsStore extends StoreBase {
                 orphanPods.push(pod);
             }
         });
-
-        this._state.orphanPodsList = orphanPods;
+        if (!Utils.isDeepEquals(this._state.orphanPodsList || [], orphanPods)) {
+            this._state.orphanPodsList = orphanPods;
+        }
         this.emit(WorkloadsEvents.WorkloadPodsFetchedEvent, this);
-
         if (this._state.orphanPodsList && this._state.orphanPodsList.length > 0) {
             this.emit(WorkloadsEvents.WorkloadsFoundEvent, this);
         }

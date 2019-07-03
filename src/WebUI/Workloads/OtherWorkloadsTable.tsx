@@ -122,6 +122,13 @@ export class OtherWorkloads extends React.Component<IOtherWorkloadsProperties, I
         return null;
     }
 
+    public shouldComponentUpdate(): boolean {
+        //holding off multiple renders for each set fetch
+        let metaInitialized = true;
+        Object.keys(this._metadataInitialized).forEach(key => metaInitialized = metaInitialized && this._metadataInitialized[key]);
+        return metaInitialized;
+    }
+
     public componentWillUnmount(): void {
         this._imageDetailsStore.removeListener(ImageDetailsEvents.HasImageDetailsEvent, this._setHasImageDetails);
         this._store.removeListener(WorkloadsEvents.DaemonSetsFetchedEvent, this._onDaemonSetsFetched);
@@ -132,33 +139,47 @@ export class OtherWorkloads extends React.Component<IOtherWorkloadsProperties, I
 
     private _onStatefulSetsFetched = (): void => {
         const storeState = this._store.getState();
-        this.setState({
-            statefulSets: storeState.statefulSetList && storeState.statefulSetList.items || []
-        }, () => this._onMetadataFetch("statefulsets"));
+        const statefulSets = storeState.statefulSetList && storeState.statefulSetList.items || [];
+        if (statefulSets.length > 0) {
+            this.setState({
+                statefulSets: storeState.statefulSetList && storeState.statefulSetList.items || []
+            });
+        }
+        this._onMetadataFetch("statefulsets");
     }
 
     private _onDaemonSetsFetched = (): void => {
         const storeState = this._store.getState();
-        this.setState({
-            daemonSets: storeState.daemonSetList && storeState.daemonSetList.items || []
-        }, () => this._onMetadataFetch("daemon"));
+        const daemonSets = storeState.daemonSetList && storeState.daemonSetList.items || [];
+        if (daemonSets.length > 0) {
+            this.setState({
+                daemonSets: storeState.daemonSetList && storeState.daemonSetList.items || []
+            });
+        }
+        this._onMetadataFetch("daemon");
     }
 
     private _onReplicaSetsFetched = (): void => {
         const storeState = this._store.getState();
         const allReplicaSets = storeState.replicaSetList && storeState.replicaSetList.items || [];
         const standAloneReplicaSets = allReplicaSets.filter(set => set.metadata.ownerReferences.length === 0);
-        this.setState({
-            replicaSets: standAloneReplicaSets
-        }, () => this._onMetadataFetch("replicasets"))
+        if (standAloneReplicaSets.length > 0) {
+            this.setState({
+                replicaSets: standAloneReplicaSets
+            });
+        }
+        this._onMetadataFetch("replicasets");
     }
 
     private _onOrphanPodsFetched = (): void => {
         const storeState = this._store.getState();
         const orphanPods = storeState.orphanPodsList || [];
-        this.setState({
-            orphanPods: orphanPods
-        }, () => this._onMetadataFetch("orphanpods"));
+        if (orphanPods.length > 0) {
+            this.setState({
+                orphanPods: orphanPods
+            });
+        }
+        this._onMetadataFetch("orphanpods");
     }
 
     private _setHasImageDetails = (): void => {

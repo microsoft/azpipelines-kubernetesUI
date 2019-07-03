@@ -11,6 +11,9 @@ interface IBaseProps<T = any> {
     componentRef?: (ref: T | null) => (void | T);
 }
 
+
+export type K8sObject = V1DaemonSet | V1StatefulSet | V1ReplicaSet | V1Pod | V1Deployment;
+
 export interface IKubernetesSummary {
     namespace?: string;
     podList?: V1PodList;
