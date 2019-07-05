@@ -16,6 +16,7 @@ import { Spinner, SpinnerSize } from "azure-devops-ui/Spinner";
 import { IStatusProps } from "azure-devops-ui/Status";
 import { Surface, SurfaceBackground } from "azure-devops-ui/Surface";
 import { Tab, TabBar } from "azure-devops-ui/Tabs";
+import { css } from "azure-devops-ui/Util";
 import { DropdownSelection } from "azure-devops-ui/Utilities/DropdownSelection";
 import { Filter, FILTER_CHANGE_EVENT, IFilterState } from "azure-devops-ui/Utilities/Filter";
 import { Action, createBrowserHistory, History, Location, UnregisterCallback } from "history";
@@ -357,7 +358,7 @@ export class KubeSummary extends React.Component<IKubeSummaryProps, IKubernetesC
 
         // show cluster if available, and show namespace only if namespaces list is not available
         return (
-            <div className="flex-column rhythm-vertical-8">
+            <div className={css("flex-column rhythm-vertical-8", this.props.clusterUrl && "cluster-link")}>
                 {
                     /* show clustername always if it is available */
                     this._getHeaderClusterNameComponent()
