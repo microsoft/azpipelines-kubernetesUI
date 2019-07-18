@@ -19,6 +19,8 @@ You can also host the UI outside of Azure DevOps. Refer to the [azpipelines-kube
 
 ![Cluster workloads page UI](docs/WorkloadsPivot.png)
 
+![Cluster services page UI](docs/ServicesPivot.png)
+
 ## Prerequisites: Node and Npm
    
 **Windows and Mac OSX**: Download and install node from [nodejs.org](http://nodejs.org/)
