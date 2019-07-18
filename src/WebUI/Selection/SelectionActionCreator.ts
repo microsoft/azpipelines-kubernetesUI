@@ -40,13 +40,15 @@ export class SelectionActionsCreator extends ActionCreatorBase {
                 if (!!value && typeof value !== "object" && typeof value !== "function") {
                     routeValues[k] = value;
                 }
-
-                // We will send undefined or empty for values that we want deleted from the url
-                if (!value) {
-                    delete routeValues[k];
-                }
             });
         }
+
+        Object.keys(routeValues).forEach(k => {
+            // delete the properties which has empty value
+            if (!routeValues[k]) {
+                delete routeValues[k];
+            }
+        });
 
         historyService.push({
             pathname: historyService.location.pathname,
