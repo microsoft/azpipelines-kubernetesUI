@@ -17,7 +17,7 @@ This Web UI will be integrated into Azure DevOps as an extension and will be ava
 
 You can also host the UI outside of Azure DevOps. Refer to the [azpipelines-kubernetesUI-WebApp](https://github.com/Microsoft/azpipelines-kubernetesUI-WebApp) repository as a working reference on how to host the Kubernetes UI in a stand-alone web app. It also has a custom implementation of `IKubeService` to fetch the required Kubernets objects.
 
-![image](https://user-images.githubusercontent.com/26214977/58565868-236dc580-824d-11e9-9119-b8f28b3d22bd.png)
+![Cluster workloads page UI](docs/WorkloadsPivot.png)
 
 ## Prerequisites: Node and Npm
    
