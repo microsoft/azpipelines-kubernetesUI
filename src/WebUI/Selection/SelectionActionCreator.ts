@@ -35,18 +35,21 @@ export class SelectionActionsCreator extends ActionCreatorBase {
         // So, our design should be careful in handling those
         if (payload.properties) {
             // Add all the non-object, non-function and defined values to the url route. This will be read by the view loading itself
-            Object.keys(payload.properties).forEach(k => {
-                const value = payload.properties![k];
-                if (!!value && typeof value !== "object" && typeof value !== "function") {
-                    routeValues[k] = value;
+            Object.keys(payload.properties).forEach(pk => {
+                let pValue = payload.properties![pk];
+                if (pValue !== undefined && pValue !== null) {
+                    pValue = (typeof pValue !== "object" && typeof pValue !== "function") ? pValue : "";
+                    routeValues[pk] = pValue;
                 }
             });
         }
 
-        Object.keys(routeValues).forEach(k => {
-            // delete the properties which has empty value
-            if (!routeValues[k]) {
-                delete routeValues[k];
+        Object.keys(routeValues).forEach(rk => {
+            const paramValue = routeValues[rk];
+            // delete the properties which has no value
+            if (paramValue === undefined || paramValue === null || paramValue === "") {
+                // do not delete keys with value: 0 or false
+                delete routeValues[rk];
             }
         });
 
