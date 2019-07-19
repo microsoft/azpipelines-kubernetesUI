@@ -358,7 +358,7 @@ export class KubeSummary extends React.Component<IKubeSummaryProps, IKubernetesC
 
         // show cluster if available, and show namespace only if namespaces list is not available
         return (
-            <div className={css("flex-column rhythm-vertical-8", this.props.clusterUrl && "cluster-link")}>
+            <div className={css("flex-column rhythm-vertical-8", "cluster-link")}>
                 {
                     /* show clustername always if it is available */
                     this._getHeaderClusterNameComponent()
@@ -404,12 +404,14 @@ export class KubeSummary extends React.Component<IKubeSummaryProps, IKubernetesC
         // show clustername always if it is available
         if (this.props.clusterName) {
             return this.props.clusterUrl ?
-                <Link
-                    href={this.props.clusterUrl}
-                    target="_blank"
-                    rel="nofollow noopener">
-                    {localeFormat(Resources.SummaryHeaderSubTextFormat, this.props.clusterName)}
-                </Link>
+                <span>
+                    <Link
+                        href={this.props.clusterUrl}
+                        target="_blank"
+                        rel="nofollow noopener">
+                        {localeFormat(Resources.SummaryHeaderSubTextFormat, this.props.clusterName)}
+                    </Link>
+                </span>
                 : <Tooltip text={Resources.ClusterLinkHelpText}>
                     <div>{localeFormat(Resources.SummaryHeaderSubTextFormat, this.props.clusterName)}</div>
                 </Tooltip>;
