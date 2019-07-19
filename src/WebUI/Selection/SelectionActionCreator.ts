@@ -36,10 +36,12 @@ export class SelectionActionsCreator extends ActionCreatorBase {
         if (payload.properties) {
             // Add all the non-object, non-function and defined values to the url route. This will be read by the view loading itself
             Object.keys(payload.properties).forEach(pk => {
-                let pValue = payload.properties![pk];
-                if (pValue !== undefined && pValue !== null) {
-                    pValue = (typeof pValue !== "object" && typeof pValue !== "function") ? pValue : "";
+                const pValue = payload.properties![pk];
+                if (pValue !== undefined && pValue !== null && typeof pValue !== "object" && typeof pValue !== "function" && pValue !== "") {
                     routeValues[pk] = pValue;
+                }
+                else {
+                    delete routeValues[pk];
                 }
             });
         }
