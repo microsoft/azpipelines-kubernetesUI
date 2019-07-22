@@ -45,10 +45,7 @@ export interface IOtherWorkloadsProperties extends IVssComponentProperties {
 }
 
 export interface IOtherWorkloadsState {
-    statefulSets: V1StatefulSet[];
-    daemonSets: V1DaemonSet[];
-    replicaSets: V1ReplicaSet[];
-    orphanPods: V1Pod[];
+    isIntialized: boolean;
 }
 
 export class OtherWorkloads extends React.Component<IOtherWorkloadsProperties, IOtherWorkloadsState> {
@@ -62,7 +59,7 @@ export class OtherWorkloads extends React.Component<IOtherWorkloadsProperties, I
         this._selectionActionCreator = ActionsCreatorManager.GetActionCreator<SelectionActionsCreator>(SelectionActionsCreator);
         this._imageActionsCreator = ActionsCreatorManager.GetActionCreator<ImageDetailsActionsCreator>(ImageDetailsActionsCreator);
 
-        this.state = { statefulSets: [], daemonSets: [], replicaSets: [], orphanPods: [] };
+        this.state = { isIntialized: false };
 
         this._store.addListener(WorkloadsEvents.ReplicaSetsFetchedEvent, this._onReplicaSetsFetched);
         this._store.addListener(WorkloadsEvents.StatefulSetsFetchedEvent, this._onStatefulSetsFetched);
@@ -138,24 +135,10 @@ export class OtherWorkloads extends React.Component<IOtherWorkloadsProperties, I
     }
 
     private _onStatefulSetsFetched = (): void => {
-        const storeState = this._store.getState();
-        const statefulSets = storeState.statefulSetList && storeState.statefulSetList.items || [];
-        if (statefulSets.length > 0) {
-            this.setState({
-                statefulSets: storeState.statefulSetList && storeState.statefulSetList.items || []
-            });
-        }
         this._onMetadataFetch("statefulsets");
     }
 
     private _onDaemonSetsFetched = (): void => {
-        const storeState = this._store.getState();
-        const daemonSets = storeState.daemonSetList && storeState.daemonSetList.items || [];
-        if (daemonSets.length > 0) {
-            this.setState({
-                daemonSets: storeState.daemonSetList && storeState.daemonSetList.items || []
-            });
-        }
         this._onMetadataFetch("daemon");
     }
 
@@ -163,22 +146,10 @@ export class OtherWorkloads extends React.Component<IOtherWorkloadsProperties, I
         const storeState = this._store.getState();
         const allReplicaSets = storeState.replicaSetList && storeState.replicaSetList.items || [];
         const standAloneReplicaSets = allReplicaSets.filter(set => set.metadata.ownerReferences.length === 0);
-        if (standAloneReplicaSets.length > 0) {
-            this.setState({
-                replicaSets: standAloneReplicaSets
-            });
-        }
         this._onMetadataFetch("replicasets");
     }
 
     private _onOrphanPodsFetched = (): void => {
-        const storeState = this._store.getState();
-        const orphanPods = storeState.orphanPodsList || [];
-        if (orphanPods.length > 0) {
-            this.setState({
-                orphanPods: orphanPods
-            });
-        }
         this._onMetadataFetch("orphanpods");
     }
 
@@ -192,6 +163,9 @@ export class OtherWorkloads extends React.Component<IOtherWorkloadsProperties, I
         Object.keys(this._metadataInitialized).forEach(key => metaInitialized = metaInitialized && this._metadataInitialized[key]);
         if (metaInitialized) {
             this.props.markTTICallback && this.props.markTTICallback({ "component": "OtherWorkloads" });
+            this.setState({
+                isIntialized: true
+            })
         }
     }
 
@@ -306,7 +280,8 @@ export class OtherWorkloads extends React.Component<IOtherWorkloadsProperties, I
     private _generateRenderData(): ISetWorkloadTypeItem[] {
         let data: ISetWorkloadTypeItem[] = [];
         let imageId: string = "";
-        this._showType(KubeResourceType.StatefulSets) && this.state.statefulSets.forEach(set => {
+        let storeState = this._store.getState();
+        this._showType(KubeResourceType.StatefulSets) && (storeState.statefulSetList? storeState.statefulSetList.items : []).forEach(set => {
             imageId = this._getImageId(set.spec.template.spec, set.metadata.uid);
             if (imageId && (this._imageList.length <= 0 || this._imageList.findIndex(img => equals(img, imageId, true)) < 0)) {
                 this._imageList.push(imageId);
@@ -325,7 +300,7 @@ export class OtherWorkloads extends React.Component<IOtherWorkloadsProperties, I
             });
         });
 
-        this._showType(KubeResourceType.DaemonSets) && this.state.daemonSets.forEach(set => {
+        this._showType(KubeResourceType.DaemonSets) && (storeState.daemonSetList? storeState.daemonSetList.items : []).forEach(set => {
             imageId = this._getImageId(set.spec.template.spec, set.metadata.uid);
             if (imageId && (this._imageList.length <= 0 || this._imageList.findIndex(img => equals(img, imageId, true)) < 0)) {
                 this._imageList.push(imageId);
@@ -344,7 +319,10 @@ export class OtherWorkloads extends React.Component<IOtherWorkloadsProperties, I
             });
         });
 
-        this._showType(KubeResourceType.ReplicaSets) && this.state.replicaSets.forEach(set => {
+        const allReplicaSets = storeState.replicaSetList && storeState.replicaSetList.items || [];
+        const standAloneReplicaSets = allReplicaSets.filter(set => set.metadata.ownerReferences.length === 0);
+
+        this._showType(KubeResourceType.ReplicaSets) && standAloneReplicaSets.forEach(set => {
             imageId = this._getImageId(set.spec.template.spec, set.metadata.uid);
             if (imageId && (this._imageList.length <= 0 || this._imageList.findIndex(img => equals(img, imageId, true)) < 0)) {
                 this._imageList.push(imageId);
@@ -363,7 +341,7 @@ export class OtherWorkloads extends React.Component<IOtherWorkloadsProperties, I
             });
         });
 
-        this._showType(KubeResourceType.Pods) && this.state.orphanPods.forEach(pod => {
+        this._showType(KubeResourceType.Pods) && (storeState.orphanPodsList || []).forEach(pod => {
             imageId = Utils.getImageIdsForPods([pod])[0] || "";
             if (imageId && (this._imageList.length <= 0 || this._imageList.findIndex(img => equals(img, imageId, true)) < 0)) {
                 this._imageList.push(imageId);
