@@ -119,13 +119,6 @@ export class OtherWorkloads extends React.Component<IOtherWorkloadsProperties, I
         return null;
     }
 
-    public shouldComponentUpdate(): boolean {
-        //holding off multiple renders for each set fetch
-        let metaInitialized = true;
-        Object.keys(this._metadataInitialized).forEach(key => metaInitialized = metaInitialized && this._metadataInitialized[key]);
-        return metaInitialized;
-    }
-
     public componentWillUnmount(): void {
         this._imageDetailsStore.removeListener(ImageDetailsEvents.HasImageDetailsEvent, this._setHasImageDetails);
         this._store.removeListener(WorkloadsEvents.DaemonSetsFetchedEvent, this._onDaemonSetsFetched);
