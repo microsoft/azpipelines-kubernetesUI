@@ -17,6 +17,7 @@ export const PodsText = "Pods";
 export const PodText = "Pod";
 export const PortText = "Port";
 export const NamespaceLabelText = "Namespace:";
+export const NamespaceWithValueText = "Namespace: {0}";
 export const PivotServiceText = "Services";
 export const PivotWorkloadsText = "Workloads";
 export const PodIP = "IP";
