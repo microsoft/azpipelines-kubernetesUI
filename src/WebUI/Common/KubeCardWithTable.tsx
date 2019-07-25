@@ -247,7 +247,7 @@ export function renderPodsStatusTableCell(
                     </span>)}
         </Tooltip>;
 
-    return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender, undefined, podsCountString ? "bolt-table-cell-content-with-link" : "");
+    return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender, undefined, podsCountString && onClick ? "bolt-table-cell-content-with-link" : "");
 }
 
 export function onPodsColumnClicked(

@@ -261,7 +261,7 @@ export class OtherWorkloads extends React.Component<IOtherWorkloadsProperties, I
             </Tooltip>
             : defaultColumnRenderer(imageText, "body-m", imageDetailsUnavailableTooltipText);
 
-        return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender, undefined, "bolt-table-cell-content-with-link");
+        return renderTableCell(rowIndex, columnIndex, tableColumn, itemToRender, undefined, hasImageDetails ? "bolt-table-cell-content-with-link" : "");
     }
 
     private _renderPodsCountCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<ISetWorkloadTypeItem>, workload: ISetWorkloadTypeItem): JSX.Element => {

@@ -390,9 +390,8 @@ export class KubeSummary extends React.Component<IKubeSummaryProps, IKubernetesC
                 {
                     /* show namespace only if clustername is not available or namespaces list not set */
                     !this.props.clusterName && availableNamespaces.length <= 0 &&
-                    <div className="flex-row flex-center rhythm-horizontal-8">
-                        <div>{Resources.NamespaceLabelText}</div>
-                        <div>{namespaceText}</div>
+                    <div className="rhythm-horizontal-8">
+                        <span>{localeFormat(Resources.NamespaceWithValueText, namespaceText)}</span>
                     </div>
                 }
             </div>
