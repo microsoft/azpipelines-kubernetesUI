@@ -358,7 +358,7 @@ export class KubeSummary extends React.Component<IKubeSummaryProps, IKubernetesC
 
         // show cluster if available, and show namespace only if namespaces list is not available
         return (
-            <div className={css("flex-column rhythm-vertical-8", "cluster-link")}>
+            <div className={css("flex-column rhythm-vertical-8", this._doesHeaderNeedMargin() ? "k8s-user-action-margin" : "")}>
                 {
                     /* show clustername always if it is available */
                     this._getHeaderClusterNameComponent()
@@ -398,6 +398,13 @@ export class KubeSummary extends React.Component<IKubeSummaryProps, IKubernetesC
                 }
             </div>
         );
+    }
+
+    private _doesHeaderNeedMargin(): boolean {
+        // need margin if cluster has link or namespaces dropdown is shown
+        // otherwise focus selection is not visible properly when keyboard is used
+        const availableNamespaces = this.props.namespaces || [];
+        return !!this.props.clusterUrl || availableNamespaces.length > 0;
     }
 
     private _getHeaderClusterNameComponent(): JSX.Element | null {
