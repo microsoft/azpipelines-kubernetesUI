@@ -118,8 +118,20 @@ describe("Utils getPillTags value check Tests", () => {
 describe("Utils isDeepEquals Tests", () => {
     const isDeepEquals = [
         [
+            "null lists check",
+            null,
+            null,
+            true
+        ],
+        [
             "empty lists check",
             [],
+            [],
+            true
+        ],
+        [
+            "null and empty lists should be treated the same",
+            null,
             [],
             true
         ],
@@ -136,11 +148,24 @@ describe("Utils isDeepEquals Tests", () => {
             true
         ],
         [
-            "multi entry base list and compare list. no match",
+            "base list and compare list. no match",
             [{ metadata: { uid: "0d1b96e1-64fa-11e9-92f5-963df0536256" }}],
             [{ metadata: { uid: "0d1b96e1-64fa-11e9-92f5-963df0543586" }}],
             false
+        ],
+        [
+            "multi entry base list and compare list. data matches",
+            [{ metadata: { uid: "0d1b96e1-64fa-11e9-92f5-963df0536256" }}, { metadata: { uid: "0d1b96e1-64fa-11e9-92f5-963df0543586" }}],
+            [{ metadata: { uid: "0d1b96e1-64fa-11e9-92f5-963df0543586" }}, { metadata: { uid: "0d1b96e1-64fa-11e9-92f5-963df0536256" }}],
+            true
+        ],
+        [
+            "multi entry base list and compare list. data does not match",
+            [{ metadata: { uid: "0d1b96e1-64fa-11e9-92f5-963df0536839" }}, { metadata: { uid: "0d1b96e1-64fa-11e9-92f5-963df0544689" }}],
+            [{ metadata: { uid: "0d1b96e1-64fa-11e9-92f5-963df0543586" }}, { metadata: { uid: "0d1b96e1-64fa-11e9-92f5-963df0536256" }}],
+            false
         ]
+        
     ];
 
     it.each(isDeepEquals)("isDeepEquals checking for:: %s", (testName, baseObject, compareObject, expectedResult) => {

@@ -68,7 +68,7 @@ export class WorkloadsStore extends StoreBase {
             this._state.deploymentList = deploymentsList;
             const deploymentItems = deploymentsList ? deploymentsList.items || [] : [];
             for (const deployment of deploymentItems) {
-                if (deployment && deployment.metadata.namespace) {
+                if (deployment && deployment.metadata && deployment.metadata.namespace) {
                     this._state.deploymentNamespace = deployment.metadata.namespace;
                     break;
                 }
