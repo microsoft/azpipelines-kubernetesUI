@@ -16,6 +16,7 @@ import { Spinner, SpinnerSize } from "azure-devops-ui/Spinner";
 import { IStatusProps } from "azure-devops-ui/Status";
 import { Surface, SurfaceBackground } from "azure-devops-ui/Surface";
 import { Tab, TabBar } from "azure-devops-ui/Tabs";
+import { css } from "azure-devops-ui/Util";
 import { DropdownSelection } from "azure-devops-ui/Utilities/DropdownSelection";
 import { Filter, FILTER_CHANGE_EVENT, IFilterState } from "azure-devops-ui/Utilities/Filter";
 import { Action, createBrowserHistory, History, Location, UnregisterCallback } from "history";
@@ -357,7 +358,7 @@ export class KubeSummary extends React.Component<IKubeSummaryProps, IKubernetesC
 
         // show cluster if available, and show namespace only if namespaces list is not available
         return (
-            <div className="flex-column rhythm-vertical-8">
+            <div className={css("flex-column rhythm-vertical-8", this._doesHeaderNeedMargin() ? "k8s-user-action-margin" : "")}>
                 {
                     /* show clustername always if it is available */
                     this._getHeaderClusterNameComponent()
@@ -398,16 +399,25 @@ export class KubeSummary extends React.Component<IKubeSummaryProps, IKubernetesC
         );
     }
 
+    private _doesHeaderNeedMargin(): boolean {
+        // need margin if cluster has link or namespaces dropdown is shown
+        // otherwise focus selection is not visible properly when keyboard is used
+        const availableNamespaces = this.props.namespaces || [];
+        return !!this.props.clusterUrl || availableNamespaces.length > 0;
+    }
+
     private _getHeaderClusterNameComponent(): JSX.Element | null {
         // show clustername always if it is available
         if (this.props.clusterName) {
             return this.props.clusterUrl ?
-                <Link
-                    href={this.props.clusterUrl}
-                    target="_blank"
-                    rel="nofollow noopener">
-                    {localeFormat(Resources.SummaryHeaderSubTextFormat, this.props.clusterName)}
-                </Link>
+                <span>
+                    <Link
+                        href={this.props.clusterUrl}
+                        target="_blank"
+                        rel="nofollow noopener">
+                        {localeFormat(Resources.SummaryHeaderSubTextFormat, this.props.clusterName)}
+                    </Link>
+                </span>
                 : <Tooltip text={Resources.ClusterLinkHelpText}>
                     <div>{localeFormat(Resources.SummaryHeaderSubTextFormat, this.props.clusterName)}</div>
                 </Tooltip>;
