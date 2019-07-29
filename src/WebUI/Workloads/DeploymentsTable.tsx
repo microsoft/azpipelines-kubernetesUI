@@ -38,12 +38,7 @@ export interface IDeploymentsTableProperties extends IVssComponentProperties {
     nameFilter?: string;
 }
 
-export interface IDeploymentsTableState {
-    deploymentList?: V1DeploymentList;
-    replicaSetList?: V1ReplicaSetList;
-}
-
-export class DeploymentsTable extends React.Component<IDeploymentsTableProperties, IDeploymentsTableState> {
+export class DeploymentsTable extends React.Component<IDeploymentsTableProperties> {
     constructor(props: IDeploymentsTableProperties) {
         super(props, {});
         this._workloadsActionCreator = ActionsCreatorManager.GetActionCreator<WorkloadsActionsCreator>(WorkloadsActionsCreator);
@@ -52,8 +47,6 @@ export class DeploymentsTable extends React.Component<IDeploymentsTablePropertie
         this._store = StoreManager.GetStore<WorkloadsStore>(WorkloadsStore);
 
         this._workloadsActionCreator.getReplicaSets(KubeFactory.getKubeService());
-
-        this.state = { deploymentList: undefined, replicaSetList: undefined };
 
         this._store.addListener(WorkloadsEvents.ReplicaSetsFetchedEvent, this._onReplicaSetsFetched);
         this._imageDetailsStore.addListener(ImageDetailsEvents.HasImageDetailsEvent, this._setHasImageDetails);

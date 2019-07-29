@@ -351,10 +351,12 @@ export class Utils {
     }
 
     public static isDeepEquals( baseObject: K8sObject[] , compareObject: K8sObject[] ): boolean {
+        const baseObj  = baseObject || [];
+        const compareObj = compareObject || [];
         let isDeepEquals = false;
-        if( baseObject.length === compareObject.length ) {
-           const baseObjectUids =  baseObject.map( obj => obj.metadata.uid);
-           const compareObjectUids = compareObject.map( obj => obj.metadata.uid);
+        if( baseObj.length === compareObj.length ) {
+           const baseObjectUids =  baseObj.map( obj => obj.metadata.uid);
+           const compareObjectUids = compareObj.map( obj => obj.metadata.uid);
            isDeepEquals = true;
            for(const uid  of compareObjectUids) {
                if (baseObjectUids.indexOf(uid) < 0) {

@@ -273,7 +273,7 @@ export class OtherWorkloads extends React.Component<IOtherWorkloadsProperties, I
     private _generateRenderData(): ISetWorkloadTypeItem[] {
         let data: ISetWorkloadTypeItem[] = [];
         let imageId: string = "";
-        let storeState = this._store.getState();
+        const storeState = this._store.getState();
         this._showType(KubeResourceType.StatefulSets) && (storeState.statefulSetList? storeState.statefulSetList.items : []).forEach(set => {
             imageId = this._getImageId(set.spec.template.spec, set.metadata.uid);
             if (imageId && (this._imageList.length <= 0 || this._imageList.findIndex(img => equals(img, imageId, true)) < 0)) {

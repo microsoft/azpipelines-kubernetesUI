@@ -250,6 +250,12 @@ export class KubeSummary extends React.Component<IKubeSummaryProps, IKubernetesC
         this._servicesStore.removeListener(ServicesEvents.ServicesFoundEvent, this._onDataFound);
         this._selectionStore.removeChangedListener(this._onSelectionStoreChanged);
         this._workloadsStore.removeListener(WorkloadsEvents.ZeroDeploymentsFoundEvent, this._onZeroDeploymentsFound);
+
+        // Deleting stores when unmounting kube summary page
+        StoreManager.DeleteStore<ServicesStore>(ServicesStore);
+        StoreManager.DeleteStore<SelectionStore>(SelectionStore);
+        StoreManager.DeleteStore<WorkloadsStore>(WorkloadsStore);
+        StoreManager.DeleteStore<PodsStore>(PodsStore);
     }
 
     private _getResourceErrorType(): ResourceErrorType {
