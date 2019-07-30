@@ -73,6 +73,7 @@ export class KubeCardWithTable<T> extends React.Component<ITableComponentPropert
     private _getComponent(): JSX.Element {
         const tableProps = {
             className: "kube-list",
+            role: "table",
             showHeader: !this.props.hideHeaders,
             showLines: !this.props.hideLines,
             singleClickActivation: !!this.props.onItemActivated,

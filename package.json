@@ -37,7 +37,7 @@
     "_bundles"
   ],
   "dependencies": {
-    "azure-devops-ui": "^1.152.2",
+    "azure-devops-ui": "^1.155.0",
     "history": "^4.9.0",
     "js-yaml": "3.13.1",
     "monaco-editor": "0.16.2",

@@ -83,6 +83,7 @@ export class OtherWorkloads extends React.Component<IOtherWorkloadsProperties, I
 
         const tableProps = {
             id: "other-workloads-table",
+            role: "table",
             showHeader: true,
             showLines: true,
             singleClickActivation: true,
@@ -92,7 +93,9 @@ export class OtherWorkloads extends React.Component<IOtherWorkloadsProperties, I
             onActivate: (event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>) => {
                 const eventTarget = event && event.target as HTMLElement;
                 // make sure all links have this classname
-                if (eventTarget && !eventTarget.classList.contains(this._podsLinkClassName) && !eventTarget.classList.contains(this._imageLinkClassName)) {
+                if (eventTarget
+                    && !eventTarget.classList.contains(this._podsLinkClassName)
+                    && !eventTarget.classList.contains(this._imageLinkClassName)) {
                     this._showWorkloadDetails(event, tableRow, filteredSet[tableRow.index]);
                 }
             }

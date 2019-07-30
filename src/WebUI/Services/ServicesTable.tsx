@@ -54,9 +54,13 @@ export class ServicesTable extends React.Component<IServicesComponentProperties,
             });
 
         if (filteredSvc.length > 0) {
-            const serviceItems = getServiceItems(filteredSvc).map((item, index) => { item.externalIPTooltip = index === this.state.copiedRowIndex ? Resources.CopiedExternalIp : Resources.CopyExternalIp; return item });
+            const serviceItems = getServiceItems(filteredSvc).map((item, index) => {
+                item.externalIPTooltip = index === this.state.copiedRowIndex ? Resources.CopiedExternalIp : Resources.CopyExternalIp;
+                return item;
+            });
             const tableProps = {
                 id: "services-list-table",
+                role: "table",
                 showHeader: true,
                 showLines: true,
                 singleClickActivation: true,
@@ -80,7 +84,7 @@ export class ServicesTable extends React.Component<IServicesComponentProperties,
         }
     }
 
-    public componentDidMount() {
+    public componentDidMount(): void {
         this.props.markTTICallback && this.props.markTTICallback();
     }
 
@@ -159,9 +163,9 @@ export class ServicesTable extends React.Component<IServicesComponentProperties,
         let statusProps: IStatusProps = Statuses.Success;
         let tooltipText: string = "";
         if (service.type === loadBalancerKey) {
-            tooltipText = Resources.ExternalIPAllocated;
+            tooltipText = Resources.SucceededText;
             if (!service.externalIP) {
-                tooltipText = Resources.ExternalIPAllocPending;
+                tooltipText = Resources.InProgressText;
                 statusProps = Statuses.Running;
             }
         }

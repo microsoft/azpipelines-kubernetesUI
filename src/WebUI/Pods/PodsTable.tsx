@@ -61,6 +61,7 @@ export class PodsTable extends React.Component<IPodsTableProperties> {
             this._prepareSubTextData(filteredPods);
             const tableProps = {
                 id: "pods-table",
+                role: "table",
                 showHeader: true,
                 showLines: true,
                 singleClickActivation: true,
@@ -97,7 +98,7 @@ export class PodsTable extends React.Component<IPodsTableProperties> {
         return null;
     }
 
-    public componentDidMount() {
+    public componentDidMount(): void {
         if (!this.props.markTTICallback) {
             getTelemetryService().scenarioEnd(Scenarios.PodsList);
         }
