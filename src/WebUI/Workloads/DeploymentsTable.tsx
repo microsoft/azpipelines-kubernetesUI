@@ -100,6 +100,7 @@ export class DeploymentsTable extends React.Component<IDeploymentsTablePropertie
             const key = format("workloads-d-t-{0}", index);
             const tableProps = {
                 id: key,
+                role: "table",
                 showHeader: true,
                 showLines: true,
                 singleClickActivation: true,
@@ -109,7 +110,9 @@ export class DeploymentsTable extends React.Component<IDeploymentsTablePropertie
                 onActivate: (event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>) => {
                     const eventTarget = event && event.target as HTMLElement;
                     // make sure all links have this classname
-                    if (eventTarget && !eventTarget.classList.contains(this._podsLinkClassName) && !eventTarget.classList.contains(this._imageLinkClassName)) {
+                    if (eventTarget
+                        && !eventTarget.classList.contains(this._podsLinkClassName)
+                        && !eventTarget.classList.contains(this._imageLinkClassName)) {
                         this._openDeploymentItem(event, tableRow, items[tableRow.index]);
                     }
                 }

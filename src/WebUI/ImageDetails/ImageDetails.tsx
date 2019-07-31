@@ -174,6 +174,7 @@ export class ImageDetails extends React.Component<IImageDetailsProperties, IImag
         const layerInfo = this._sortByCreatedDate(imageDetails.layerInfo);
         const tableProps = {
             id: "image-layers-table",
+            role: "table",
             showHeader: true,
             showLines: true,
             singleClickActivation: false,
