@@ -6,7 +6,6 @@
 export interface IImageDetails {
     imageName: string;
     imageUri: string;
-    hash: string;
     baseImageName: string;
     distance?: number;
     imageType: string;

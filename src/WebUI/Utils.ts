@@ -252,12 +252,20 @@ export class Utils {
         return "";
     }
 
+    public static getDigestFromImageResourceUrl(imageId: string): string {
+        if (imageId) {
+            return Utils.getImageResourceUrlParameter(imageId, matchPatternForDigest);
+        }
+
+        return "";
+    }
+
     public static getImageResourceUrl(imageId: string): string {
         const sha256Text = "@sha256:";
         const separator = "://";
         let indexOfSeparator = imageId.indexOf(separator);
         let image = indexOfSeparator >= 0 ? imageId.substr(indexOfSeparator + separator.length) : imageId;
-        const digest = Utils.getImageResourceUrlParameter(imageId, matchPatternForDigest);
+        const digest = Utils.getDigestFromImageResourceUrl(imageId);
 
         // This match pattern is copied over from DockerV2 task to maintain parity between image Urls
         let match = image.match(/^(?:([^\/]+)\/)?(?:([^\/]+)\/)?([^@:\/]+)(?:[@:](.+))?$/);
