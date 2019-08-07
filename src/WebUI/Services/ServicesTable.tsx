@@ -7,6 +7,7 @@ import { V1Service, V1ServiceList } from "@kubernetes/client-node";
 import { Ago } from "azure-devops-ui/Ago";
 import { Card } from "azure-devops-ui/Card";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
+import * as Utils_Accessibility from "azure-devops-ui/Core/Util/Accessibility";
 import { IStatusProps, Status, Statuses, StatusSize } from "azure-devops-ui/Status";
 import { ITableColumn, ITableRow, renderSimpleCell, Table, TwoLineTableCell, ITableProps } from "azure-devops-ui/Table";
 import { Tooltip } from "azure-devops-ui/TooltipEx";
@@ -156,6 +157,8 @@ export class ServicesTable extends React.Component<IServicesComponentProperties,
     private _setCopiedRowIndex = (copiedRowIndex: number): void => {
         this.setState({
             copiedRowIndex: copiedRowIndex
+        }, () => {
+            copiedRowIndex !== -1 && Utils_Accessibility.announce(Resources.CopiedExternalIp);
         });
     }
 

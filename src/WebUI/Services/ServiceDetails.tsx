@@ -5,6 +5,7 @@
 
 import { V1Pod, V1Service } from "@kubernetes/client-node";
 import { CardContent, CustomCard } from "azure-devops-ui/Card";
+import * as Utils_Accessibility from "azure-devops-ui/Core/Util/Accessibility";
 import { CustomHeader, HeaderDescription, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
 import { Page } from "azure-devops-ui/Page";
 import { Spinner, SpinnerSize } from "azure-devops-ui/Spinner";
@@ -285,6 +286,8 @@ export class ServiceDetails extends React.Component<IServiceDetailsProperties, I
     private _setCopiedRowIndex = (copiedRowIndex: number): void => {
         this.setState({
             copyTooltipText: copiedRowIndex === 0 ? Resources.CopiedExternalIp : Resources.CopyExternalIp
+        }, () => {
+            copiedRowIndex === 0 && Utils_Accessibility.announce(Resources.CopiedExternalIp);
         });
     }
 
