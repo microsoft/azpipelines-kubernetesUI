@@ -116,7 +116,7 @@ export class ImageDetails extends React.Component<IImageDetailsProperties, IImag
 
     private _getImageDetailsRowsData(imageDetails: IImageDetails): any[] {
         let imageDetailsRows: any[] = [];
-        const digest: string = imageDetails.hash || "";
+        const digest: string = Utils.getDigestFromImageResourceUrl(imageDetails.imageUri);
         const imageType: string = imageDetails.imageType || "";
         const mediaType: string = imageDetails.mediaType || "";
         const registryName: string = this._getRegistryName();

@@ -10,7 +10,6 @@ describe("ImageDetailsActionsCreator getImageDetails Tests", () => {
     const mockImageDetails: IImageDetails = {
         imageName: "https://k8s.gcr.io/coredns@sha2563e2be1cec87aca0b74b7668bbe8c02964a95a402e45ceb51b2252629d608d03a",
         imageUri: "https://k8s.gcr.io/coredns@sha2563e2be1cec87aca0b74b7668bbe8c02964a95a402e45ceb51b2252629d608d03a",
-        hash: "294f0bb6fe38fe0ab9b7ac8c6db39c2054ba038a6fe53a7cafbc20829d54a424",
         baseImageName: "k8s.gcr.io/coredns23",
         imageType: "",
         mediaType: "",
