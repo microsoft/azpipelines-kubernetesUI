@@ -1,0 +1,14 @@
+@import "azure-devops-ui/_coreStyles.scss";
+
+.k8s-monaco-reader-default {
+  /* Override the default Monaco themed line number colors to meet A11y 4.5:1 contrast requirements.
+    'vs' change from teal #4191AD (3.6:1) to light gray #737373 (4.7:1) (Same as Code hub).
+    'vs-dark' change from dark gray #5A5A5A (2.4:1) to light gray #A19F9D (6.3:1). */
+  .monaco-editor.vs .line-numbers {
+    color: $secondary-text;
+  }
+
+  .monaco-editor.vs-dark .line-numbers {
+    color: $neutral-60;
+  }
+}
