@@ -8,6 +8,8 @@ import { CustomCard } from "azure-devops-ui/Components/Card/CustomCard";
 import { css } from "azure-devops-ui/Util";
 import * as React from "react";
 
+import "./ContentReader.scss";
+
 // basic editor functionality
 import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
 // languages supported in editor
@@ -32,8 +34,8 @@ export class ContentReader extends React.Component<IReaderProps> {
                 <CardContent className={css(this.props.contentClassName || "", "k8s-reader-content")} contentPadding={false}>
                     <div className="k8s-reader-outer" style={{ width: "100%", position: "relative" }}>
                         <div
-                            id="k8s-monaco-reader"
-                            className="reader-inner flex-row flex-center absolute-fill"
+                            id="k8s-monaco-reader-default"
+                            className="k8s-monaco-reader-default reader-inner flex-row flex-center absolute-fill"
                             ref={this._createEditor}
                         />
                     </div>
