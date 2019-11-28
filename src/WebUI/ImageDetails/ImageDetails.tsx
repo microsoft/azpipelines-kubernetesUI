@@ -21,11 +21,12 @@ import * as Resources from "../../Resources";
 import { defaultColumnRenderer, renderTableCell } from "../Common/KubeCardWithTable";
 import { Tags } from "../Common/Tags";
 import { Scenarios } from "../Constants";
-import { getTelemetryService } from "../KubeFactory";
+import { getTelemetryService, KubeFactory } from "../KubeFactory";
 import { getRunDetailsText } from "../RunDetails";
 import { IVssComponentProperties } from "../Types";
 import { Utils } from "../Utils";
 import "./ImageDetails.scss";
+import { Button } from "azure-devops-ui/Button";
 
 export interface IImageDetailsProperties extends IVssComponentProperties {
     imageDetails: IImageDetails;
@@ -89,8 +90,48 @@ export class ImageDetails extends React.Component<IImageDetailsProperties, IImag
                         {jobName}
                     </HeaderDescription>
                 </HeaderTitleArea>
+                <Button
+                    className="image-details-export-button"
+                    text={Resources.ImageDetailsExportText}
+                    tooltipProps={{ text: Resources.ImageDetailsExportTooltip }}
+                    onClick={() => {
+                        this._downloadImageProvenance(imageDetails.imageName);
+                    }}
+                />
             </CustomHeader>
         );
+    }
+
+     private _downloadImageProvenance(imageName: string): void {
+        const imageService = KubeFactory.getImageService();
+        imageService && imageService.getImageProvenances([imageName]).then(imageProvenances => {
+            if (imageProvenances && imageProvenances.length > 0) {
+                const imageProvenance = JSON.stringify(imageProvenances[0]);
+                const exportedFileName = imageName.concat(".json");
+                this._saveToFile(imageProvenance, exportedFileName);
+            }
+        });
+    }
+
+    private _saveToFile(str: string, fileName: string): void {
+        const file = new Blob([str], { type: "application/json" });
+
+        //needed for IE10
+        if (window.navigator && window.navigator.msSaveBlob) {
+            window.navigator.msSaveBlob(file, fileName);
+        }
+        else {
+            // refer to the link http://stackoverflow.com/questions/31214677/download-a-reactjs-object-as-a-file for details
+            // There is a package react-file-download (https://www.npmjs.com/package/react-file-download), but we do not have this 
+            // downloaded in our repo.
+            //
+            // So we are using this approach as has been answered in the stack overflow thread mentioned above
+            const a = document.createElement("a");
+            document.body.appendChild(a);
+            a.href = URL.createObjectURL(file);
+            a.setAttribute("download", fileName);
+            a.click();
+        }
     }
 
     private _getImageDetails(): JSX.Element | null {

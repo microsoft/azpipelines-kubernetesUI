@@ -96,3 +96,5 @@ export const CopiedExternalIp = "Copied!";
 export const ImageDetailsUnavailableText = "Image details available only for images built in Azure Pipelines";
 export const PodDetailsSubheader = "Pods in {0}";
 export const ClusterLinkHelpText = "Navigation to cluster details is only available for the Azure provider";
+export const ImageDetailsExportText = "Export image details";
+export const ImageDetailsExportTooltip = "Download details associated with this image to a local file."

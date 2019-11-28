@@ -11,4 +11,8 @@ export class MockImageService implements IImageService {
     public getImageDetails(imageName: string): Promise<IImageDetails | undefined> {
         return Promise.resolve({} as IImageDetails);
     }
+
+    public getImageProvenances(imageNames: string[]): Promise<any> {
+        return Promise.resolve({});
+    }
 }

@@ -34,6 +34,8 @@ export interface IImageService {
     hasImageDetails(listImages: Array<string>): Promise<any>;
 
     getImageDetails(imageName: string): Promise<IImageDetails | undefined>;
+
+    getImageProvenances(imageNames: string[]): Promise<any>;
 }
 
 export interface ITelemetryService {
