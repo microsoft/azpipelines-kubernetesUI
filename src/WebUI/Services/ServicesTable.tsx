@@ -7,6 +7,7 @@ import { V1Service, V1ServiceList } from "@kubernetes/client-node";
 import { Ago } from "azure-devops-ui/Ago";
 import { Card } from "azure-devops-ui/Card";
 import { ObservableValue } from "azure-devops-ui/Core/Observable";
+import { ScreenBreakpoints } from "azure-devops-ui/Core/Util/Screen";
 import * as Utils_Accessibility from "azure-devops-ui/Core/Util/Accessibility";
 import { IStatusProps, Status, Statuses, StatusSize } from "azure-devops-ui/Status";
 import { ITableColumn, ITableRow, renderSimpleCell, Table, TwoLineTableCell, ITableProps } from "azure-devops-ui/Table";
@@ -67,7 +68,21 @@ export class ServicesTable extends React.Component<IServicesComponentProperties,
                 singleClickActivation: true,
                 itemProvider: new ArrayItemProvider<IServiceItem>(serviceItems),
                 ariaLabel: Resources.PivotServiceText,
-                columns: this._getColumns(),
+                columns: this._columns,
+                tableBreakpoints: [
+                    {
+                        breakpoint: ScreenBreakpoints.xsmall,
+                        columnWidths: [-100, 0, 0, 0, 0]
+                    },
+                    {
+                        breakpoint: ScreenBreakpoints.small,
+                        columnWidths: [-100, 0, 175, 200, 0]
+                    },
+                    {
+                        breakpoint: ScreenBreakpoints.medium,
+                        columnWidths: [-70, 100, 100, 100, -40]
+                    }
+                ],
                 onActivate: (event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>) => {
                     this._openServiceItem(event, tableRow, serviceItems[tableRow.index]);
                 }
@@ -100,49 +115,6 @@ export class ServicesTable extends React.Component<IServicesComponentProperties,
 
             this._selectionActionCreator.selectItem(payload);
         }
-    }
-
-    private _getColumns = (): ITableColumn<IServiceItem>[] => {
-        let columns: ITableColumn<any>[] = [];
-
-        // negative widths are interpreted as percentages.
-        // since we want the table columns to occupy full available width, setting width - 100 which is equivalent to 100 %
-        columns.push({
-            id: "package",
-            name: Resources.NameText,
-            width: -70,
-            renderCell: this._renderPackageKeyCell
-        });
-
-        columns.push({
-            id: "clusterIP",
-            name: Resources.ClusterIPText,
-            width: -15,
-            renderCell: renderSimpleCell
-        });
-
-        columns.push({
-            id: "externalIP",
-            name: Resources.ExternalIPText,
-            width: new ObservableValue(172),
-            renderCell: (rowIndex, columnIndex, tableColumn, service) => renderExternalIpCell(rowIndex, columnIndex, tableColumn, service, this._setCopiedRowIndex)
-        });
-
-        columns.push({
-            id: "port",
-            name: Resources.PortText,
-            width: new ObservableValue(200),
-            renderCell: renderSimpleCell
-        });
-
-        columns.push({
-            id: "creationTimestamp",
-            name: Resources.AgeText,
-            width: -15,
-            renderCell: this._renderAgeCell
-        });
-
-        return columns;
     }
 
     private _renderPackageKeyCell = (rowIndex: number, columnIndex: number, tableColumn: ITableColumn<IServiceItem>, service: IServiceItem): JSX.Element => {
@@ -207,6 +179,42 @@ export class ServicesTable extends React.Component<IServicesComponentProperties,
 
         return nameMatches && typeMatches;
     }
+
+    private _columns = [
+        // negative widths are interpreted as percentages.
+        // since we want the table columns to occupy full available width, setting width - 100 which is equivalent to 100 %
+        {
+            id: "package",
+            name: Resources.NameText,
+            width: new ObservableValue(-70),
+            renderCell: this._renderPackageKeyCell
+
+        },
+        {
+            id: "clusterIP",
+            name: Resources.ClusterIPText,
+            width: new ObservableValue(-15),
+            renderCell: renderSimpleCell
+        },
+        {
+            id: "externalIP",
+            name: Resources.ExternalIPText,
+            width: new ObservableValue(172),
+            renderCell: (rowIndex, columnIndex, tableColumn, service) => renderExternalIpCell(rowIndex, columnIndex, tableColumn, service, this._setCopiedRowIndex)
+        },
+        {
+            id: "port",
+            name: Resources.PortText,
+            width: new ObservableValue(200),
+            renderCell: renderSimpleCell
+        },
+        {
+            id: "creationTimestamp",
+            name: Resources.AgeText,
+            width: new ObservableValue(-15),
+            renderCell: this._renderAgeCell
+        }
+    ];
 
     private _selectionActionCreator: SelectionActionsCreator;
 }
