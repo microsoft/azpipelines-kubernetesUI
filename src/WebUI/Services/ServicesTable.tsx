@@ -69,20 +69,16 @@ export class ServicesTable extends React.Component<IServicesComponentProperties,
                 itemProvider: new ArrayItemProvider<IServiceItem>(serviceItems),
                 ariaLabel: Resources.PivotServiceText,
                 columns: this._columns,
-                tableBreakpoints: [
-                    {
-                        breakpoint: ScreenBreakpoints.xsmall,
-                        columnWidths: [-100, 0, 0, 0, 0]
-                    },
-                    {
-                        breakpoint: ScreenBreakpoints.small,
-                        columnWidths: [-100, 0, 175, 200, 0]
-                    },
-                    {
-                        breakpoint: ScreenBreakpoints.medium,
-                        columnWidths: [-70, 100, 100, 100, -40]
-                    }
-                ],
+                tableBreakpoints: [{
+                    breakpoint: ScreenBreakpoints.xsmall,
+                    columnWidths: [-100, 0, 0, 0, 0]
+                }, {
+                    breakpoint: ScreenBreakpoints.small,
+                    columnWidths: [-100, 0, 175, 200, 0]
+                }, {
+                    breakpoint: ScreenBreakpoints.medium,
+                    columnWidths: [-70, 100, 100, 100, -40]
+                }],
                 onActivate: (event: React.SyntheticEvent<HTMLElement>, tableRow: ITableRow<any>) => {
                     this._openServiceItem(event, tableRow, serviceItems[tableRow.index]);
                 }
