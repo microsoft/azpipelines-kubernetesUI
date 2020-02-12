@@ -11,6 +11,7 @@ import { IStatusProps, Statuses } from "azure-devops-ui/Status";
 import { PodPhase } from "../Contracts/Contracts";
 import * as Resources from "../Resources";
 import { SelectedItemKeys } from "./Constants";
+import { K8sObject } from "./Types";
 
 const pipelineNameAnnotationKey: string = "azure-pipelines/pipeline";
 const pipelineRunIdAnnotationKey: string = "azure-pipelines/execution";
@@ -355,5 +356,23 @@ export class Utils {
         document.addEventListener("copy", listener);
         document.execCommand("copy");
         document.removeEventListener("copy", listener);
+    }
+
+    public static isDeepEquals( baseObject: K8sObject[] , compareObject: K8sObject[] ): boolean {
+        const baseObj  = baseObject || [];
+        const compareObj = compareObject || [];
+        let isDeepEquals = false;
+        if( baseObj.length === compareObj.length ) {
+           const baseObjectUids =  baseObj.map( obj => obj.metadata.uid);
+           const compareObjectUids = compareObj.map( obj => obj.metadata.uid);
+           isDeepEquals = true;
+           for(const uid  of compareObjectUids) {
+               if (baseObjectUids.indexOf(uid) < 0) {
+                  isDeepEquals = false;
+                  break;
+               }
+           }
+        }
+        return isDeepEquals;
     }
 }

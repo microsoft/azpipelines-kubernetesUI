@@ -38,12 +38,7 @@ export interface IDeploymentsTableProperties extends IVssComponentProperties {
     nameFilter?: string;
 }
 
-export interface IDeploymentsTableState {
-    deploymentList?: V1DeploymentList;
-    replicaSetList?: V1ReplicaSetList;
-}
-
-export class DeploymentsTable extends React.Component<IDeploymentsTableProperties, IDeploymentsTableState> {
+export class DeploymentsTable extends React.Component<IDeploymentsTableProperties> {
     constructor(props: IDeploymentsTableProperties) {
         super(props, {});
         this._workloadsActionCreator = ActionsCreatorManager.GetActionCreator<WorkloadsActionsCreator>(WorkloadsActionsCreator);
@@ -53,15 +48,13 @@ export class DeploymentsTable extends React.Component<IDeploymentsTablePropertie
 
         this._workloadsActionCreator.getReplicaSets(KubeFactory.getKubeService());
 
-        this.state = { deploymentList: undefined, replicaSetList: undefined };
-
         this._store.addListener(WorkloadsEvents.ReplicaSetsFetchedEvent, this._onReplicaSetsFetched);
         this._imageDetailsStore.addListener(ImageDetailsEvents.HasImageDetailsEvent, this._setHasImageDetails);
     }
 
 
     public render(): React.ReactNode {
-        const deployments = this.state.deploymentList;
+        const deployments = this._store.getState().deploymentList;
         const filteredDeployments: V1Deployment[] = (deployments && deployments.items || []).filter((deployment) => {
             return Utils.filterByName(deployment.metadata.name, this.props.nameFilter);
         });
@@ -78,15 +71,8 @@ export class DeploymentsTable extends React.Component<IDeploymentsTablePropertie
         this._imageDetailsStore.removeListener(ImageDetailsEvents.HasImageDetailsEvent, this._setHasImageDetails);
     }
 
-    // deployments have already been populated in store by KubeSummary parent component
     private _onReplicaSetsFetched = (): void => {
-        const storeState = this._store.getState();
-        this.setState({
-            deploymentList: storeState.deploymentList,
-            replicaSetList: storeState.replicaSetList
-        }, () => {
-            this.props.markTTICallback && this.props.markTTICallback({ "component": "DeploymentTable" });
-        });
+        this.props.markTTICallback && this.props.markTTICallback({ "component": "DeploymentTable" });
     }
 
     private _setHasImageDetails = (): void => {
@@ -95,7 +81,7 @@ export class DeploymentsTable extends React.Component<IDeploymentsTablePropertie
 
     private _getDeploymentListView(filteredDeployments: V1Deployment[]) {
         let renderList: JSX.Element[] = [];
-        DeploymentsTable._generateDeploymentReplicaSetMap(filteredDeployments, this.state.replicaSetList).forEach((entry, index) => {
+        DeploymentsTable._generateDeploymentReplicaSetMap(filteredDeployments, this._store.getState().replicaSetList).forEach((entry, index) => {
             const items = DeploymentsTable._getDeploymentReplicaSetItems(entry.deployment, entry.replicaSets);
             const key = format("workloads-d-t-{0}", index);
             const tableProps = {
@@ -335,7 +321,7 @@ export class DeploymentsTable extends React.Component<IDeploymentsTablePropertie
         // have one selection store, raise action to send selectedItem, in the store
         if (selectedItem && selectedItem.replicaSetId) {
             const selectedItemReplicaSetUId: string = selectedItem.replicaSetId.toLowerCase();
-            const replicas = this.state.replicaSetList;
+            const replicas = this._store.getState().replicaSetList;
             const filteredReplicas = (replicas && replicas.items || []).filter(r => {
                 return r.metadata.uid.toLowerCase() === selectedItemReplicaSetUId;
             });

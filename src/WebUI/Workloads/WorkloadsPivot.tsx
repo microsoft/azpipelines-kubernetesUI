@@ -91,9 +91,11 @@ export class WorkloadsPivot extends React.Component<IWorkloadsPivotProps, IWorkl
         const podlist: V1PodList | undefined = this._podsStore.getState().podsList;
         if (podlist && podlist.items && podlist.items.length > 0) {
             const imageList = Utils.getImageIdsForPods(podlist.items);
-            this.setState({
-                imageList: imageList
-            });
+            if (imageList && imageList.length > 0) {
+                this.setState({
+                    imageList: imageList
+                });
+            }
         }
     }
 
