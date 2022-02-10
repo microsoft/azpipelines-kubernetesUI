@@ -67,7 +67,7 @@
     "glob": "^7.1.4",
     "jest": "^24.8.0",
     "jest-junit": "^6.4.0",
-    "node-sass": "^4.11.0",
+    "node-sass": "^7.0.0",
     "recursive-copy": "^2.0.10",
     "rimraf": "^2.6.3",
     "sass-loader": "~7.1.0",
